@@ -69,7 +69,7 @@ const Dashboard = () => {
                         </div>
 
                         <div className="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg p-4">
-                            <h3 className="text-lg font-semibold text-slate-800">Total Anual</h3>
+                            <h3 className="text-lg font-semibold text-slate-800">Total Mensual</h3>
                             <p className="text-2xl font-bold text-slate-800">$2,38,485</p>
                             <span className="text-red-500 text-sm">-14%</span>
                         </div>
@@ -93,6 +93,9 @@ const Dashboard = () => {
                             <div className="relative overflow-x-auto bg-white shadow-sm border border-slate-200 rounded-lg">
                                 <div className="p-4">
                                     <h4 className="text-lg font-semibold text-slate-800">Facturas Recientes</h4>
+                                    <a href="#" className="font-medium text-blue-600 hover:underline">
+                                        See All Customers
+                                    </a>
                                     <p className="text-sm text-slate-500">Puedes ver el estado de las Facturas</p>
                                 </div>
                                 <table className="w-full text-sm text-left text-gray-500">

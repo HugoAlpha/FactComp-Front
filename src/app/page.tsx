@@ -20,7 +20,7 @@ const Login = () => {
         text: 'Bienvenido a Alpha E-Facturación',
         confirmButtonColor: '#181143',
       }).then(() => {
-        router.push('/dashard');
+        router.push('/dashboard');
       });
     } else {
       Swal.fire({
