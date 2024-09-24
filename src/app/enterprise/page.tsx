@@ -1,8 +1,29 @@
+"use client";
+import React, { useState } from 'react';
 import { FaEdit, FaTrashAlt } from 'react-icons/fa';
 import Sidebar from '@/components/commons/sidebar';
 import Header from '@/components/commons/header';
+import CreateEditEnterpriseModal from '@/components/layouts/modalCreateEnterprise';
 
 const EnterpriseList = () => {
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedEnterprise, setSelectedEnterprise] = useState(null);
+
+    const openModal = () => {
+        setSelectedEnterprise(null); // Limpiar la empresa seleccionada para agregar una nueva
+        setIsModalOpen(true);
+    };
+
+    const closeModal = () => {
+        setIsModalOpen(false);
+    };
+
+    const handleSaveEnterprise = (enterprise) => {
+        // Aquí puedes manejar la lógica de guardar la empresa
+        console.log('Empresa guardada:', enterprise);
+        closeModal(); // Cerrar el modal después de guardar
+    };
+
     return (
         <div className="flex min-h-screen">
             {/* Sidebar */}
@@ -18,7 +39,10 @@ const EnterpriseList = () => {
 
                     {/* Botón para agregar empresa */}
                     <div className="flex justify-end mb-4">
-                        <button className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 text-lg">
+                        <button
+                            onClick={openModal}
+                            className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 text-lg"
+                        >
                             Agregar Empresa
                         </button>
                     </div>
@@ -79,6 +103,14 @@ const EnterpriseList = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Modal para agregar/editar empresa */}
+            <CreateEditEnterpriseModal
+                isOpen={isModalOpen}
+                onClose={closeModal}
+                enterprise={selectedEnterprise || { id: 0, nit: '', nombreEmpresa: '', sucursales: '', direccion: '', zona: '', telefono: '', ciudad: '', modalidad: '', logo: '' }}
+                onSave={handleSaveEnterprise}
+            />
         </div>
     );
 };
