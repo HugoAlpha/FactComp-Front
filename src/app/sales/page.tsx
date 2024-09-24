@@ -78,11 +78,11 @@ const Sales = () => {
     };
 
     return (
-        <div className="flex p-6 space-x-6 h-screen">
+        <div className="bg-white flex p-6 space-x-6 h-screen">
             {/* Productos Seleccionados */}
-            <div className="w-1/3 overflow-y-auto" style={{ maxHeight: '90vh' }}>
+            <div className="text-black w-1/3 overflow-y-auto" style={{ maxHeight: '90vh' }}>
                 <h2 className="text-xl font-bold mb-4">Productos Seleccionados</h2>
-                <table className="min-w-full bg-white">
+                <table className="min-w-full bg-white ">
                     <thead>
                         <tr>
                             <th className="px-4 py-2">Producto</th>
@@ -143,7 +143,7 @@ const Sales = () => {
             </div>
 
             {/* Agregar Productos */}
-            <div className="w-2/3 overflow-y-auto" style={{ maxHeight: '90vh' }}>
+            <div className="text-black w-2/3 overflow-y-auto" style={{ maxHeight: '90vh' }}>
                 <h2 className="text-xl font-bold mb-4">Agregar Productos</h2>
                 {/* Barra de búsqueda */}
                 <input

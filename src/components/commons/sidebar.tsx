@@ -1,11 +1,10 @@
 "use client";
-import { FaFileInvoice, FaTools, FaUser, FaSignOutAlt, FaChevronDown, FaBars } from 'react-icons/fa';
+import { FaFileInvoice, FaUser, FaSignOutAlt, FaChevronDown, FaBars, FaHome } from 'react-icons/fa';
 import { useState } from 'react';
 import Image from 'next/image';
 
 const Sidebar = () => {
     const [isDocumentosOpen, setIsDocumentosOpen] = useState(false);
-    const [isServiciosOpen, setIsServiciosOpen] = useState(false);
     const [isInvolucradosOpen, setIsInvolucradosOpen] = useState(false);
     const [isPuntosOpen, setIsPuntosOpen] = useState(false);
     const [isCertificacionOpen, setIsCertificacionOpen] = useState(false);
@@ -18,8 +17,8 @@ const Sidebar = () => {
     };
 
     return (
-        <div className="flex min-h-screen">
-            {/* Botón para abrir/cerrar el sidebar */}
+        <div className="flex min-h-screen ">
+            
             <div className="md:hidden">
                 <button onClick={toggleSidebar} className="p-4 text-white bg-gray-800">
                     <FaBars />
@@ -42,6 +41,15 @@ const Sidebar = () => {
                     </div>
 
                     <ul className="space-y-2">
+                        
+                        <li>
+                    
+                            <a href="dashboard" className="block p-2 hover:bg-gray-700 rounded-lg">
+                                <span className="flex items-center">
+                                    <FaHome className="mr-2" /> Inicio
+                                </span>
+                            </a>
+                        </li>
                         {/* Documentos */}
                         <li>
                             <button
@@ -69,61 +77,33 @@ const Sidebar = () => {
                             )}
                         </li>
 
-                        {/* Servicios */}
-                        <li>
-                            <button
-                                onClick={() => setIsServiciosOpen(!isServiciosOpen)}
-                                className="flex items-center justify-between w-full p-2 text-left hover:bg-gray-700 rounded-lg"
-                            >
-                                <span className="flex items-center">
-                                    <FaTools className="mr-2" /> Servicios
-                                </span>
-                                <FaChevronDown className={`${isServiciosOpen ? 'transform rotate-180' : ''}`} />
-                            </button>
-                            {isServiciosOpen && (
-                                <ul className="ml-4 space-y-2">
-                                    <li>
-                                        <a href="products" className="block p-2 pl-4 hover:bg-gray-700 rounded-lg">
-                                            Productos
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a href="#" className="block p-2 pl-4 hover:bg-gray-700 rounded-lg">
-                                            Submenú 2
-                                        </a>
-                                    </li>
-                                </ul>
-                            )}
-                        </li>
-
-                        {/* Involucrados */}
                         <li>
                             <button
                                 onClick={() => setIsInvolucradosOpen(!isInvolucradosOpen)}
                                 className="flex items-center justify-between w-full p-2 text-left hover:bg-gray-700 rounded-lg"
                             >
                                 <span className="flex items-center">
-                                    <FaUser className="mr-2" /> Involucrados
+                                    <FaUser className="mr-2" /> Gestion post
                                 </span>
                                 <FaChevronDown className={`${isInvolucradosOpen ? 'transform rotate-180' : ''}`} />
                             </button>
                             {isInvolucradosOpen && (
                                 <ul className="ml-4 space-y-2">
                                     <li>
-                                        <a href="#" className="block p-2 pl-4 hover:bg-gray-700 rounded-lg">
-                                            Submenú 1
+                                        <a href="clientList" className="block p-2 pl-4 hover:bg-gray-700 rounded-lg">
+                                            Clientes
                                         </a>
                                     </li>
                                     <li>
-                                        <a href="#" className="block p-2 pl-4 hover:bg-gray-700 rounded-lg">
-                                            Submenú 2
+                                        <a href="products" className="block p-2 pl-4 hover:bg-gray-700 rounded-lg">
+                                            Productos
                                         </a>
                                     </li>
                                 </ul>
                             )}
                         </li>
 
-                        {/* Puntos */}
+                        
                         <li>
                             <button
                                 onClick={() => setIsPuntosOpen(!isPuntosOpen)}
@@ -137,20 +117,20 @@ const Sidebar = () => {
                             {isPuntosOpen && (
                                 <ul className="ml-4 space-y-2">
                                     <li>
-                                        <a href="#" className="block p-2 pl-4 hover:bg-gray-700 rounded-lg">
-                                            Submenú 1
+                                        <a href="puntoVenta" className="block p-2 pl-4 hover:bg-gray-700 rounded-lg">
+                                            Puntos de venta
                                         </a>
                                     </li>
                                     <li>
-                                        <a href="#" className="block p-2 pl-4 hover:bg-gray-700 rounded-lg">
-                                            Submenú 2
+                                        <a href="branches" className="block p-2 pl-4 hover:bg-gray-700 rounded-lg">
+                                            Sucursales
                                         </a>
                                     </li>
                                 </ul>
                             )}
                         </li>
 
-                        {/* Certificación */}
+                        
                         <li>
                             <button
                                 onClick={() => setIsCertificacionOpen(!isCertificacionOpen)}
@@ -204,27 +184,27 @@ const Sidebar = () => {
                             )}
                         </li>
 
-                        {/* Report */}
+                    
                         <li>
                             <button
                                 onClick={() => setIsReportOpen(!isReportOpen)}
                                 className="flex items-center justify-between w-full p-2 text-left hover:bg-gray-700 rounded-lg"
                             >
                                 <span className="flex items-center">
-                                    <FaFileInvoice className="mr-2" /> Report
+                                    <FaFileInvoice className="mr-2" /> Configuracion SIAT
                                 </span>
                                 <FaChevronDown className={`${isReportOpen ? 'transform rotate-180' : ''}`} />
                             </button>
                             {isReportOpen && (
                                 <ul className="ml-4 space-y-2">
                                     <li>
-                                        <a href="#" className="block p-2 pl-4 hover:bg-gray-700 rounded-lg">
-                                            Submenú 1
+                                        <a href="activities" className="block p-2 pl-4 hover:bg-gray-700 rounded-lg">
+                                            Actividades
                                         </a>
                                     </li>
                                     <li>
                                         <a href="#" className="block p-2 pl-4 hover:bg-gray-700 rounded-lg">
-                                            Submenú 2
+                                            Leyendas
                                         </a>
                                     </li>
                                 </ul>
@@ -232,7 +212,6 @@ const Sidebar = () => {
                         </li>
                     </ul>
 
-                    {/* Botón de Logout */}
                     <div className="absolute bottom-4 left-4">
                         <button className="flex items-center text-white hover:bg-gray-700 p-2 rounded-lg">
                             <FaSignOutAlt className="mr-2" /> Logout
