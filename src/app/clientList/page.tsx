@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import Sidebar from '@/components/commons/sidebar';
 import Header from '@/components/commons/header';
 import { FaEdit, FaTrashAlt, FaPlus } from 'react-icons/fa';
-import Swal from 'sweetalert';
+import Swal from 'sweetalert2';
 import CreateEditClientModal from '@/components/layouts/modalCreateEditClient';
 
 interface Customer {
@@ -55,7 +55,7 @@ const ClientList = () => {
 
     const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFilter(e.target.value);
-        setCurrentPage(1); 
+        setCurrentPage(1);
     };
 
     const filteredCustomers = customers.filter((customer) =>

@@ -1,5 +1,5 @@
 "use client";
-import { FaFileInvoice, FaUser, FaSignOutAlt, FaChevronDown, FaBars, FaHome } from 'react-icons/fa';
+import { FaFileInvoice, FaUser, FaSignOutAlt, FaChevronDown, FaBars, FaHome, FaUsers, FaBuilding } from 'react-icons/fa';
 import { useState } from 'react';
 import Image from 'next/image';
 
@@ -18,7 +18,7 @@ const Sidebar = () => {
 
     return (
         <div className="flex min-h-screen ">
-            
+
             <div className="md:hidden">
                 <button onClick={toggleSidebar} className="p-4 text-white bg-gray-800">
                     <FaBars />
@@ -41,9 +41,9 @@ const Sidebar = () => {
                     </div>
 
                     <ul className="space-y-2">
-                        
+
                         <li>
-                    
+
                             <a href="dashboard" className="block p-2 hover:bg-gray-700 rounded-lg">
                                 <span className="flex items-center">
                                     <FaHome className="mr-2" /> Inicio
@@ -103,7 +103,7 @@ const Sidebar = () => {
                             )}
                         </li>
 
-                        
+
                         <li>
                             <button
                                 onClick={() => setIsPuntosOpen(!isPuntosOpen)}
@@ -130,7 +130,7 @@ const Sidebar = () => {
                             )}
                         </li>
 
-                        
+
                         <li>
                             <button
                                 onClick={() => setIsCertificacionOpen(!isCertificacionOpen)}
@@ -184,7 +184,7 @@ const Sidebar = () => {
                             )}
                         </li>
 
-                    
+
                         <li>
                             <button
                                 onClick={() => setIsReportOpen(!isReportOpen)}
@@ -209,6 +209,22 @@ const Sidebar = () => {
                                     </li>
                                 </ul>
                             )}
+                        </li>
+
+                        <li>
+                            <a href="/users" className="flex items-center justify-between w-full p-2 text-left hover:bg-gray-700 rounded-lg">
+                                <span className="flex items-center">
+                                    <FaUsers className="mr-2" /> Usuarios
+                                </span>
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="/enterprise" className="flex items-center justify-between w-full p-2 text-left hover:bg-gray-700 rounded-lg">
+                                <span className="flex items-center">
+                                    <FaBuilding className="mr-2" /> Empresa
+                                </span>
+                            </a>
                         </li>
                     </ul>
 

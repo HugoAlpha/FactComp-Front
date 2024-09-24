@@ -50,14 +50,14 @@ const ModalVerifySale = ({ isOpen, onClose, products, total }) => {
                             <FaMoneyBill className="mr-2" /> Efectivo
                         </button>
                         <button
-                            onClick={() => setPaymentMethod('Banco')}
-                            className={`flex items-center p-2 border rounded ${paymentMethod === 'Banco' ? 'bg-green-200' : 'bg-gray-100'}`}
+                            onClick={() => setPaymentMethod('Tarjeta')}
+                            className={`flex items-center p-2 border rounded ${paymentMethod === 'Tarjeta' ? 'bg-green-200' : 'bg-gray-100'}`}
                         >
                             <FaCreditCard className="mr-2" /> Tarjeta
                         </button>
                         <button
-                            onClick={() => setPaymentMethod('Cuenta Cliente')}
-                            className={`flex items-center p-2 border rounded ${paymentMethod === 'Cuenta Cliente' ? 'bg-green-200' : 'bg-gray-100'}`}
+                            onClick={() => setPaymentMethod('QR')}
+                            className={`flex items-center p-2 border rounded ${paymentMethod === 'QR' ? 'bg-green-200' : 'bg-gray-100'}`}
                         >
                             <FaQrcode className="mr-2" /> QR
                         </button>

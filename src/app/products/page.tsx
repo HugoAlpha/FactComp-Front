@@ -1,5 +1,5 @@
 import { FaTrashAlt, FaEdit } from 'react-icons/fa';
-import Sidebar from '@/components/commons/sidebar'; // Importar el Sidebar
+import Sidebar from '@/components/commons/sidebar';
 import Header from '@/components/commons/header';
 
 const ProductList = () => {
