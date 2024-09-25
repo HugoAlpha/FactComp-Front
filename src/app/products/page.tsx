@@ -1,20 +1,36 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaTrashAlt, FaEdit } from 'react-icons/fa';
 import Sidebar from '@/components/commons/sidebar';
 import Header from '@/components/commons/header';
+import { PATH_URL_BACKEND } from "@/utils/constants";
+import ModalCreateProduct from '@/components/layouts/modalCreateProduct';
 
 const ProductList = () => {
-    const products = [
-        { id: 1, name: 'ARDUINO IV AZUL', cost: '20 Bs.', discount: '0.5%', quantity: 1, total: '20 Bs.', image: '/images/imac.png' },
-        { id: 2, name: 'ARDUINO IV AZUL', cost: '20 Bs.', discount: '0.5%', quantity: 1, total: '20 Bs.', image: '/images/ipad-11.png' },
-        { id: 3, name: 'ARDUINO IV AZUL', cost: '20 Bs.', discount: '0.5%', quantity: 1, total: '20 Bs.', image: '/images/iphone-12.png' },
-    ];
-
+    const [products, setProducts] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 10;
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const response = await fetch(`${PATH_URL_BACKEND}/item/obtener-items`);
+                const data = await response.json();
+                setProducts(data);
+            } catch (error) {
+                console.error('Error al obtener los productos:', error);
+            }
+        };
+
+        fetchProducts();
+    }, []);
+
     const totalPages = Math.ceil(products.length / rowsPerPage);
-    const paginatedProducts = products.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+    const paginatedProducts = products.slice(
+        (currentPage - 1) * rowsPerPage,
+        currentPage * rowsPerPage
+    );
 
     const handlePrevPage = () => {
         if (currentPage > 1) {
@@ -46,6 +62,14 @@ const ProductList = () => {
         return pageNumbers;
     };
 
+    const handleOpenModal = () => {
+        setIsModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+    };
+
     return (
         <div className="flex min-h-screen">
             {/* Sidebar */}
@@ -61,7 +85,10 @@ const ProductList = () => {
 
                     {/* Botón para agregar producto */}
                     <div className="flex justify-end mb-4">
-                        <button className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 text-lg">
+                        <button
+                            className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 text-lg"
+                            onClick={handleOpenModal}
+                        >
                             Agregar Producto
                         </button>
                     </div>
@@ -71,27 +98,22 @@ const ProductList = () => {
                         <thead>
                             <tr className="bg-gray-100">
                                 <th className="px-4 py-2 border text-left font-semibold text-gray-700">Descripción</th>
-                                <th className="px-4 py-2 border text-left font-semibold text-gray-700">Costo c/u</th>
-                                <th className="px-4 py-2 border text-left font-semibold text-gray-700">Descuento</th>
-                                <th className="px-4 py-2 border text-left font-semibold text-gray-700">Cantidad</th>
-                                <th className="px-4 py-2 border text-left font-semibold text-gray-700">Total</th>
+                                <th className="px-4 py-2 border text-left font-semibold text-gray-700">Precio Unitario</th>
+                                <th className="px-4 py-2 border text-left font-semibold text-gray-700">Código Producto SIN</th>
                                 <th className="px-4 py-2 border text-left font-semibold text-gray-700">Operación</th>
                             </tr>
                         </thead>
                         <tbody>
                             {paginatedProducts.map((product) => (
                                 <tr key={product.id} className="border-b">
-                                    <td className="px-4 py-4 flex items-center space-x-4">
-                                        <img src={product.image} alt={product.name} className="w-16 h-16 rounded-md object-cover" />
+                                    <td className="px-4 py-4">
                                         <div>
-                                            <p className="font-bold text-gray-800">{product.name}</p>
-                                            <p className="text-sm text-gray-600">Descripción uno</p>
+                                            <p className="font-bold text-gray-800">{product.descripcion}</p>
+                                            <p className="text-sm text-gray-600">Código: {product.codigo}</p>
                                         </div>
                                     </td>
-                                    <td className="px-4 py-4 text-gray-800">{product.cost}</td>
-                                    <td className="px-4 py-4 text-gray-800">{product.discount}</td>
-                                    <td className="px-4 py-4 text-gray-800">{product.quantity}</td>
-                                    <td className="px-4 py-4 text-gray-800">{product.total}</td>
+                                    <td className="border px-4 py-4 text-gray-800">{product.precioUnitario} Bs.</td>
+                                    <td className="border px-4 py-4 text-gray-800">{product.codigoProductoSin}</td>
                                     <td className="px-4 py-4 flex space-x-2">
                                         {/* Iconos de Borrar y Editar */}
                                         <button className="text-red-500 hover:text-red-700">
@@ -141,6 +163,13 @@ const ProductList = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Modal para crear producto */}
+            <ModalCreateProduct
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                onProductCreated={(newProduct) => setProducts([...products, newProduct])}
+            />
         </div>
     );
 };
