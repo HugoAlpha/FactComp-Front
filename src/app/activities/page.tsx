@@ -1,7 +1,4 @@
 "use client";
-
-"use client";
-
 import React, { useState, useEffect } from 'react';
 import Header from "@/components/commons/header";
 import Sidebar from "@/components/commons/sidebar";
@@ -11,16 +8,16 @@ interface Actividad {
     codigoProductoServicio: string;
     descripcion: string;
     codigoActividadNandina: string;
-    estado: string; 
+    estado: string;
 }
 
 const Activities: React.FC = () => {
-    const [actividades, setActividades] = useState<Actividad[]>([]); 
-    const [selectedActividades, setSelectedActividades] = useState<number[]>([]); 
-    const [estadoFiltro, setEstadoFiltro] = useState<string>('Todos'); 
-    const [filteredActividades, setFilteredActividades] = useState<Actividad[]>([]); 
-    const [rowsPerPage, setRowsPerPage] = useState<number>(5); 
-    const [currentPage, setCurrentPage] = useState<number>(1); 
+    const [actividades, setActividades] = useState<Actividad[]>([]);
+    const [selectedActividades, setSelectedActividades] = useState<number[]>([]);
+    const [estadoFiltro, setEstadoFiltro] = useState<string>('Todos');
+    const [filteredActividades, setFilteredActividades] = useState<Actividad[]>([]);
+    const [rowsPerPage, setRowsPerPage] = useState<number>(5);
+    const [currentPage, setCurrentPage] = useState<number>(1);
 
     useEffect(() => {
         const data: Actividad[] = [
@@ -35,12 +32,10 @@ const Activities: React.FC = () => {
     useEffect(() => {
         let filtered = actividades;
 
-        
         if (estadoFiltro !== 'Todos') {
             filtered = filtered.filter((actividad) => actividad.estado === estadoFiltro);
         }
 
-        
         if (selectedActividades.length > 0) {
             filtered = filtered.filter((actividad) =>
                 selectedActividades.includes(actividad.id)
@@ -61,6 +56,24 @@ const Activities: React.FC = () => {
         setSelectedActividades((prev) =>
             prev.includes(id) ? prev.filter((actId) => actId !== id) : [...prev, id]
         );
+    };
+
+    const getPageNumbers = () => {
+        const pageNumbers = [];
+        const maxVisiblePages = 4;
+
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+        if (endPage - startPage + 1 < maxVisiblePages) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            pageNumbers.push(i);
+        }
+
+        return pageNumbers;
     };
 
     return (
@@ -86,7 +99,6 @@ const Activities: React.FC = () => {
                         </select>
                     </div>
 
-                    
                     <div className="mb-4">
                         <label className="mr-2 text-black">Seleccionar Actividades:</label>
                         <div className="border p-2 text-black">
@@ -104,7 +116,6 @@ const Activities: React.FC = () => {
                         </div>
                     </div>
 
-                    
                     <div className="mb-4">
                         <label className="mr-2 text-black">Filas por página:</label>
                         <select
@@ -118,7 +129,6 @@ const Activities: React.FC = () => {
                         </select>
                     </div>
 
-                    
                     <table className="table-auto w-full text-black">
                         <thead>
                             <tr>
@@ -142,23 +152,39 @@ const Activities: React.FC = () => {
                         </tbody>
                     </table>
 
-                    
-                    <div className="flex justify-between mt-4">
+                    {/* Paginación */}
+                    <div className="flex space-x-1 justify-center mt-6">
                         <button
                             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                             disabled={currentPage === 1}
-                            className="bg-green-700 text-white px-4 py-2 rounded disabled:opacity-50"
+                            className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
                         >
-                            Anterior
+                            Prev
                         </button>
-                        <span className="self-center text-black">{`Página ${currentPage} de ${totalPages}`}</span>
+
+                        {getPageNumbers().map((page) => (
+                            <button
+                                key={page}
+                                onClick={() => setCurrentPage(page)}
+                                className={`min-w-9 rounded-full border py-2 px-3.5 text-center text-sm transition-all shadow-sm ${page === currentPage ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-800 hover:text-white hover:border-slate-800'} focus:bg-slate-800 focus:text-white active:border-slate-800 active:bg-slate-800`}
+                            >
+                                {page}
+                            </button>
+                        ))}
+
                         <button
                             onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                             disabled={currentPage === totalPages}
-                            className="bg-green-700 text-white px-4 py-2 rounded disabled:opacity-50"
+                            className="min-w-9 rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
                         >
-                            Siguiente
+                            Next
                         </button>
+                    </div>
+
+                    <div className="flex space-x-1 justify-center mt-2">
+                        <span className="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">
+                            Mostrando página <span className="font-semibold text-gray-900 dark:text-white">{currentPage}</span> de <span className="font-semibold text-gray-900 dark:text-white">{totalPages}</span>
+                        </span>
                     </div>
                 </div>
             </div>

@@ -13,11 +13,41 @@ const UserList = () => {
     ]);
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
 
-
+    // Filtrar usuarios
     const filteredUsers = users.filter(user =>
         user.fullname.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    // Calcular número total de páginas
+    const totalPages = Math.ceil(filteredUsers.length / rowsPerPage);
+
+    // Obtener los usuarios paginados
+    const paginatedUsers = filteredUsers.slice(
+        (currentPage - 1) * rowsPerPage,
+        currentPage * rowsPerPage
+    );
+
+    // Función para obtener los números de página visibles
+    const getPageNumbers = () => {
+        const pageNumbers = [];
+        const maxVisiblePages = 4;
+
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+        if (endPage - startPage + 1 < maxVisiblePages) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            pageNumbers.push(i);
+        }
+
+        return pageNumbers;
+    };
 
     return (
         <div className="flex min-h-screen">
@@ -68,13 +98,13 @@ const UserList = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredUsers.map((user) => (
+                            {paginatedUsers.map((user) => (
                                 <tr key={user.id} className="border-b">
-                                    <td className="px-4 py-4 text-gray-800">{user.username}</td>
-                                    <td className="px-4 py-4 text-gray-800">{user.fullname}</td>
-                                    <td className="px-4 py-4 text-gray-800">{user.companyId}</td>
-                                    <td className="px-4 py-4 text-gray-800">{user.branch}</td>
-                                    <td className="px-4 py-4 flex space-x-2">
+                                    <td className="border px-4 py-4 text-gray-800">{user.username}</td>
+                                    <td className="border px-4 py-4 text-gray-800">{user.fullname}</td>
+                                    <td className="border px-4 py-4 text-gray-800">{user.companyId}</td>
+                                    <td className="border px-4 py-4 text-gray-800">{user.branch}</td>
+                                    <td className="border px-4 py-4 flex space-x-2">
                                         {/* Iconos de Borrar y Editar */}
                                         <button className="text-red-500 hover:text-red-700">
                                             <FaTrashAlt />
@@ -89,14 +119,38 @@ const UserList = () => {
                     </table>
 
                     {/* Paginación */}
-                    <div className="mt-4 flex justify-between">
-                        <button className="text-gray-600">Previous</button>
-                        <div className="space-x-2">
-                            <button className="bg-gray-300 text-gray-800 py-1 px-3 rounded">1</button>
-                            <button className="bg-gray-300 text-gray-800 py-1 px-3 rounded">2</button>
-                            <button className="bg-gray-300 text-gray-800 py-1 px-3 rounded">3</button>
-                        </div>
-                        <button className="text-gray-600">Next</button>
+                    <div className="flex space-x-1 justify-center mt-6">
+                        <button
+                            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                            disabled={currentPage === 1}
+                            className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+                        >
+                            Prev
+                        </button>
+
+                        {getPageNumbers().map((page) => (
+                            <button
+                                key={page}
+                                onClick={() => setCurrentPage(page)}
+                                className={`min-w-9 rounded-full border py-2 px-3.5 text-center text-sm transition-all shadow-sm ${page === currentPage ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-800 hover:text-white hover:border-slate-800'} focus:bg-slate-800 focus:text-white active:border-slate-800 active:bg-slate-800`}
+                            >
+                                {page}
+                            </button>
+                        ))}
+
+                        <button
+                            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                            disabled={currentPage === totalPages}
+                            className="min-w-9 rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+                        >
+                            Next
+                        </button>
+                    </div>
+
+                    <div className="flex space-x-1 justify-center mt-2">
+                        <span className="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">
+                            Mostrando página <span className="font-semibold text-gray-900 dark:text-white">{currentPage}</span> de <span className="font-semibold text-gray-900 dark:text-white">{totalPages}</span>
+                        </span>
                     </div>
                 </div>
             </div>

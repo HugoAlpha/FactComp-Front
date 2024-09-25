@@ -8,6 +8,37 @@ import CreateEditEnterpriseModal from '@/components/layouts/modalCreateEnterpris
 const EnterpriseList = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedEnterprise, setSelectedEnterprise] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+
+    const enterprises = [
+        { id: 1, nit: '123456789', nombreEmpresa: 'Empresa XYZ', sucursales: '3', direccion: 'Calle Falsa 123', zona: 'Zona Norte', telefono: '+591 12345678', ciudad: 'La Paz', modalidad: 'Presencial', logo: '/img/logo-empresa.jpg' },
+    ];
+
+    const totalPages = Math.ceil(enterprises.length / rowsPerPage);
+
+    const paginatedEnterprises = enterprises.slice(
+        (currentPage - 1) * rowsPerPage,
+        currentPage * rowsPerPage
+    );
+
+    const getPageNumbers = () => {
+        const pageNumbers = [];
+        const maxVisiblePages = 4;
+
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+        if (endPage - startPage + 1 < maxVisiblePages) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            pageNumbers.push(i);
+        }
+
+        return pageNumbers;
+    };
 
     const openModal = () => {
         setSelectedEnterprise(null);
@@ -64,41 +95,66 @@ const EnterpriseList = () => {
                             </tr>
                         </thead>
                         <tbody>
-                            {/* Fila de empresa de ejemplo */}
-                            <tr className="border-b">
-                                <td className="px-4 py-4">1</td>
-                                <td className="px-4 py-4">123456789</td>
-                                <td className="px-4 py-4">Empresa XYZ</td>
-                                <td className="px-4 py-4">3</td>
-                                <td className="px-4 py-4">Calle Falsa 123</td>
-                                <td className="px-4 py-4">Zona Norte</td>
-                                <td className="px-4 py-4">+591 12345678</td>
-                                <td className="px-4 py-4">La Paz</td>
-                                <td className="px-4 py-4">Presencial</td>
-                                <td className="px-4 py-4">
-                                    <img src="/img/logo-empresa.jpg" alt="Logo Empresa" className="w-16 h-16 object-cover rounded-md" />
-                                </td>
-                                <td className="px-4 py-4 flex space-x-2">
-                                    <button className="text-blue-500 hover:text-blue-700">
-                                        <FaEdit />
-                                    </button>
-                                    <button className="text-red-500 hover:text-red-700">
-                                        <FaTrashAlt />
-                                    </button>
-                                </td>
-                            </tr>
+                            {paginatedEnterprises.map((enterprise) => (
+                                <tr key={enterprise.id} className="border-b">
+                                    <td className="border px-4 py-4">{enterprise.id}</td>
+                                    <td className="border px-4 py-4">{enterprise.nit}</td>
+                                    <td className="border px-4 py-4">{enterprise.nombreEmpresa}</td>
+                                    <td className="border px-4 py-4">{enterprise.sucursales}</td>
+                                    <td className="border px-4 py-4">{enterprise.direccion}</td>
+                                    <td className="border px-4 py-4">{enterprise.zona}</td>
+                                    <td className="border px-4 py-4">{enterprise.telefono}</td>
+                                    <td className="border px-4 py-4">{enterprise.ciudad}</td>
+                                    <td className="border px-4 py-4">{enterprise.modalidad}</td>
+                                    <td className="border px-4 py-4">
+                                        <img src={enterprise.logo} alt="Logo Empresa" className="w-16 h-16 object-cover rounded-md" />
+                                    </td>
+                                    <td className="px-4 py-4 flex space-x-2">
+                                        <button className="text-blue-500 hover:text-blue-700">
+                                            <FaEdit />
+                                        </button>
+                                        <button className="text-red-500 hover:text-red-700">
+                                            <FaTrashAlt />
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
                         </tbody>
                     </table>
 
                     {/* Paginación */}
-                    <div className="mt-4 flex justify-between">
-                        <button className="text-gray-600">Previous</button>
-                        <div className="space-x-2">
-                            <button className="bg-gray-300 text-gray-800 py-1 px-3 rounded">1</button>
-                            <button className="bg-gray-300 text-gray-800 py-1 px-3 rounded">2</button>
-                            <button className="bg-gray-300 text-gray-800 py-1 px-3 rounded">3</button>
-                        </div>
-                        <button className="text-gray-600">Next</button>
+                    <div className="flex space-x-1 justify-center mt-6">
+                        <button
+                            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                            disabled={currentPage === 1}
+                            className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+                        >
+                            Prev
+                        </button>
+
+                        {getPageNumbers().map((page) => (
+                            <button
+                                key={page}
+                                onClick={() => setCurrentPage(page)}
+                                className={`min-w-9 rounded-full border py-2 px-3.5 text-center text-sm transition-all shadow-sm ${page === currentPage ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-800 hover:text-white hover:border-slate-800'} focus:bg-slate-800 focus:text-white active:border-slate-800 active:bg-slate-800`}
+                            >
+                                {page}
+                            </button>
+                        ))}
+
+                        <button
+                            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                            disabled={currentPage === totalPages}
+                            className="min-w-9 rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+                        >
+                            Next
+                        </button>
+                    </div>
+
+                    <div className="flex space-x-1 justify-center mt-2">
+                        <span className="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">
+                            Mostrando página <span className="font-semibold text-gray-900 dark:text-white">{currentPage}</span> de <span className="font-semibold text-gray-900 dark:text-white">{totalPages}</span>
+                        </span>
                     </div>
                 </div>
             </div>

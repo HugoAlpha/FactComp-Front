@@ -1,0 +1,1 @@
+export const PATH_URL_BACKEND = "http://10.1.4.65:8087";

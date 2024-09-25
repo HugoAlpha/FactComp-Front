@@ -15,14 +15,13 @@ interface Branch {
 
 const Branches: React.FC = () => {
     const [branches, setBranches] = useState<Branch[]>([]);
-    const [searchTerm, setSearchTerm] = useState<string>(''); 
-    const [filteredBranches, setFilteredBranches] = useState<Branch[]>([]); 
-    const [rowsPerPage, setRowsPerPage] = useState<number>(5); 
-    const [currentPage, setCurrentPage] = useState<number>(1); 
-    const [selectedCity, setSelectedCity] = useState<string>(''); 
+    const [searchTerm, setSearchTerm] = useState<string>('');
+    const [filteredBranches, setFilteredBranches] = useState<Branch[]>([]);
+    const [rowsPerPage, setRowsPerPage] = useState<number>(5);
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [selectedCity, setSelectedCity] = useState<string>('');
 
     useEffect(() => {
-        
         const data: Branch[] = [
             { idSucursales: 1, descripcion: 'Sucursal Principal', ciudad: 'Ciudad A', empresa: 'Empresa X', estado: 'Activo' },
             { idSucursales: 2, descripcion: 'Sucursal Secundaria', ciudad: 'Ciudad B', empresa: 'Empresa Y', estado: 'Inactivo' },
@@ -34,7 +33,6 @@ const Branches: React.FC = () => {
     useEffect(() => {
         let filtered = branches;
 
-        
         if (searchTerm) {
             filtered = filtered.filter((branch) =>
                 branch.descripcion.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -43,13 +41,12 @@ const Branches: React.FC = () => {
             );
         }
 
-        
         if (selectedCity) {
             filtered = filtered.filter((branch) => branch.ciudad === selectedCity);
         }
 
         setFilteredBranches(filtered);
-        setCurrentPage(1); 
+        setCurrentPage(1);
     }, [searchTerm, selectedCity, branches]);
 
     const totalPages = Math.ceil(filteredBranches.length / rowsPerPage);
@@ -61,12 +58,30 @@ const Branches: React.FC = () => {
     const handleEditBranch = (id: number) => {
         console.log(`Editar sucursal con id: ${id}`);
     };
-    
+
     const handleDeleteBranch = (id: number) => {
         const confirmDelete = window.confirm("¿Estás seguro de que deseas eliminar esta sucursal?");
         if (confirmDelete) {
             console.log(`Eliminar sucursal con id: ${id}`);
         }
+    };
+
+    const getPageNumbers = () => {
+        const pageNumbers = [];
+        const maxVisiblePages = 4;
+
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+        if (endPage - startPage + 1 < maxVisiblePages) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            pageNumbers.push(i);
+        }
+
+        return pageNumbers;
     };
 
     return (
@@ -115,9 +130,9 @@ const Branches: React.FC = () => {
                         </select>
                     </div>
 
-                    <table className="table-auto w-full text-black">
+                    <table className="min-w-full bg-white border border-gray-300 text-black">
                         <thead>
-                            <tr>
+                            <tr className="bg-gray-100">
                                 <th className="border px-4 py-2 text-black">ID Sucursal</th>
                                 <th className="border px-4 py-2 text-black">Descripción</th>
                                 <th className="border px-4 py-2 text-black">Ciudad</th>
@@ -128,7 +143,7 @@ const Branches: React.FC = () => {
                         </thead>
                         <tbody>
                             {paginatedBranches.map((branch) => (
-                                <tr key={branch.idSucursales}>
+                                <tr key={branch.idSucursales} className="border-b">
                                     <td className="border px-4 py-2">{branch.idSucursales}</td>
                                     <td className="border px-4 py-2">{branch.descripcion}</td>
                                     <td className="border px-4 py-2">{branch.ciudad}</td>
@@ -154,24 +169,39 @@ const Branches: React.FC = () => {
                     </table>
 
                     {/* Paginación */}
-                    <div className="flex justify-between mt-4">
+                    <div className="flex space-x-1 justify-center mt-6">
                         <button
                             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                             disabled={currentPage === 1}
-                            className="bg-green-700 text-white px-4 py-2 rounded disabled:opacity-50"
+                            className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
                         >
-                            Anterior
+                            Prev
                         </button>
-                        <span className="self-center text-black">{`Página ${currentPage} de ${totalPages}`}</span>
+
+                        {getPageNumbers().map((page) => (
+                            <button
+                                key={page}
+                                onClick={() => setCurrentPage(page)}
+                                className={`min-w-9 rounded-full border py-2 px-3.5 text-center text-sm transition-all shadow-sm ${page === currentPage ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-800 hover:text-white hover:border-slate-800'} focus:bg-slate-800 focus:text-white active:border-slate-800 active:bg-slate-800`}
+                            >
+                                {page}
+                            </button>
+                        ))}
+
                         <button
                             onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                             disabled={currentPage === totalPages}
-                            className="bg-green-700 text-white px-4 py-2 rounded disabled:opacity-50"
+                            className="min-w-9 rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
                         >
-                            Siguiente
+                            Next
                         </button>
                     </div>
 
+                    <div className="flex space-x-1 justify-center mt-2">
+                        <span className="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">
+                            Mostrando página <span className="font-semibold text-gray-900 dark:text-white">{currentPage}</span> de <span className="font-semibold text-gray-900 dark:text-white">{totalPages}</span>
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
