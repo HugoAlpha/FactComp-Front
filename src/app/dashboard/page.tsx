@@ -201,7 +201,7 @@ const Dashboard = () => {
                                 <div className="flex justify-center space-x-4">
                                     {/* Botón para nueva venta */}
                                     <a
-                                        href="#"
+                                        href="/sales"
                                         className="text-white bg-[#1B263B] hover:bg-primary-800 focus:ring-4 focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-primary-600 dark:hover:bg-[#2C3E50] focus:outline-none dark:focus:ring-primary-800"
                                     >
                                         Iniciar una nueva Venta

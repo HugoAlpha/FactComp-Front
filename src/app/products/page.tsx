@@ -39,7 +39,7 @@ const ProductList = () => {
                             {/* Producto 1 */}
                             <tr className="border-b">
                                 <td className="px-4 py-4 flex items-center space-x-4">
-                                    <img src="/img/product1.jpg" alt="Producto 1" className="w-16 h-16 rounded-md object-cover" />
+                                    <img src="/images/imac.png" alt="Producto 1" className="w-16 h-16 rounded-md object-cover" />
                                     <div>
                                         <p className="font-bold text-gray-800">ARDUINO IV AZUL</p>
                                         <p className="text-sm text-gray-600">Descripción uno</p>
@@ -63,7 +63,7 @@ const ProductList = () => {
                             {/* Producto 2 */}
                             <tr className="border-b">
                                 <td className="px-4 py-4 flex items-center space-x-4">
-                                    <img src="/img/product2.jpg" alt="Producto 2" className="w-16 h-16 rounded-md object-cover" />
+                                    <img src="/images/ipad-11.png" alt="Producto 2" className="w-16 h-16 rounded-md object-cover" />
                                     <div>
                                         <p className="font-bold text-gray-800">ARDUINO IV AZUL</p>
                                         <p className="text-sm text-gray-600">Descripción uno</p>
@@ -87,7 +87,7 @@ const ProductList = () => {
                             {/* Producto 3 */}
                             <tr className="border-b">
                                 <td className="px-4 py-4 flex items-center space-x-4">
-                                    <img src="/img/product3.jpg" alt="Producto 3" className="w-16 h-16 rounded-md object-cover" />
+                                    <img src="/images/iphone-12.png" alt="Producto 3" className="w-16 h-16 rounded-md object-cover" />
                                     <div>
                                         <p className="font-bold text-gray-800">ARDUINO IV AZUL</p>
                                         <p className="text-sm text-gray-600">Descripción uno</p>

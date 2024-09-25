@@ -10,7 +10,7 @@ const EnterpriseList = () => {
     const [selectedEnterprise, setSelectedEnterprise] = useState(null);
 
     const openModal = () => {
-        setSelectedEnterprise(null); // Limpiar la empresa seleccionada para agregar una nueva
+        setSelectedEnterprise(null);
         setIsModalOpen(true);
     };
 
@@ -19,9 +19,8 @@ const EnterpriseList = () => {
     };
 
     const handleSaveEnterprise = (enterprise) => {
-        // Aquí puedes manejar la lógica de guardar la empresa
         console.log('Empresa guardada:', enterprise);
-        closeModal(); // Cerrar el modal después de guardar
+        closeModal();
     };
 
     return (

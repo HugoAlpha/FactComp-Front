@@ -3,12 +3,11 @@ import React, { useState } from 'react';
 import Swal from 'sweetalert2';
 import { FaMoneyBill, FaCreditCard, FaQrcode } from 'react-icons/fa';
 
-const ModalVerifySale = ({ isOpen, onClose, products, total }) => {
+const ModalVerifySale = ({ isOpen, onClose, products, total, onSuccess }) => {
     const [paymentMethod, setPaymentMethod] = useState('Efectivo');
     const [paymentAmount, setPaymentAmount] = useState('');
     const [selectedClient, setSelectedClient] = useState('');
     const [changeNeeded, setChangeNeeded] = useState(false);
-
     const clients = ['Cliente 1', 'Cliente 2', 'Cliente 3'];
 
     const handleValidate = () => {
@@ -21,14 +20,16 @@ const ModalVerifySale = ({ isOpen, onClose, products, total }) => {
             return;
         }
 
-        // Simulate sale confirmation
+        // Simular la venta exitosa
         Swal.fire({
             icon: 'success',
             title: 'Venta Realizada',
             text: 'La venta ha sido procesada con éxito.',
         }).then(() => {
-            // Redirect to dashboard (simulated)
-            window.location.href = '/dashboard';
+            onSuccess({
+                client: selectedClient,
+                total: paymentAmount || total,
+            });
         });
     };
 
