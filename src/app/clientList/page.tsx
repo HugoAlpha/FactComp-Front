@@ -1,57 +1,52 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Sidebar from '@/components/commons/sidebar';
 import Header from '@/components/commons/header';
 import { FaEdit, FaTrashAlt, FaPlus } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import CreateEditClientModal from '@/components/layouts/modalCreateEditClient';
+import { PATH_URL_BACKEND } from '@/utils/constants';
 
 interface Customer {
     id: number;
-    razonSocial: string;
-    nroDocumento: string;
-    complemento: string;
-    tipoDocumento: string;
-    telefono: string;
-    correo: string;
+    nombreRazonSocial: string;
+    codigoTipoDocumentoIdentidad: number;
+    numeroDocumento: string;
+    complemento: string | null;
+    codigoCliente: string;
+    email: string;
 }
 
-const initialCustomers: Customer[] = [
-    {
-        id: 1,
-        razonSocial: 'Empresa ABC',
-        nroDocumento: '12345678',
-        complemento: 'A',
-        tipoDocumento: 'CI',
-        telefono: '555-1234',
-        correo: 'abc@empresa.com',
-    },
-    {
-        id: 2,
-        razonSocial: 'Empresa XYZ',
-        nroDocumento: '87654321',
-        complemento: 'B',
-        tipoDocumento: 'NIT',
-        telefono: '555-5678',
-        correo: 'xyz@empresa.com',
-    },
-];
-
 const ClientList = () => {
-    const [customers, setCustomers] = useState<Customer[]>(initialCustomers);
+    const [customers, setCustomers] = useState<Customer[]>([]);
     const [filter, setFilter] = useState<string>('');
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [currentCustomer, setCurrentCustomer] = useState<Customer>({
         id: 0,
-        razonSocial: '',
-        nroDocumento: '',
+        nombreRazonSocial: '',
+        codigoTipoDocumentoIdentidad: 0,
+        numeroDocumento: '',
         complemento: '',
-        tipoDocumento: '',
-        telefono: '',
-        correo: '',
+        codigoCliente: '',
+        email: '',
     });
-    const [rowsPerPage, setRowsPerPage] = useState<number>(5);
+    const [rowsPerPage, setRowsPerPage] = useState<number>(10);
     const [currentPage, setCurrentPage] = useState<number>(1);
+
+    useEffect(() => {
+        const fetchCustomers = async () => {
+            try {
+                const response = await fetch(`${PATH_URL_BACKEND}/api/clientes`);
+                const data = await response.json();
+                setCustomers(data);
+            } catch (error) {
+                console.error('Error fetching customers:', error);
+                Swal.fire('Error', 'Error al obtener los clientes', 'error');
+            }
+        };
+
+        fetchCustomers();
+    }, []);
 
     const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFilter(e.target.value);
@@ -60,8 +55,7 @@ const ClientList = () => {
 
     const filteredCustomers = customers.filter((customer) =>
         Object.values(customer)
-            .slice(1, -1)
-            .some((field) => field.toLowerCase().includes(filter.toLowerCase()))
+            .some((field) => field && field.toString().toLowerCase().includes(filter.toLowerCase()))
     );
 
     const totalPages = Math.ceil(filteredCustomers.length / rowsPerPage);
@@ -79,16 +73,17 @@ const ClientList = () => {
     };
 
     const handleDeleteCustomer = (id: number) => {
-        Swal({
+        Swal.fire({
             title: '¿Estás seguro?',
             text: 'No podrás revertir esto',
             icon: 'warning',
-            buttons: ['Cancelar', 'Eliminar'],
-            dangerMode: true,
-        }).then((willDelete) => {
-            if (willDelete) {
+            showCancelButton: true,
+            confirmButtonText: 'Eliminar',
+            cancelButtonText: 'Cancelar',
+        }).then((result) => {
+            if (result.isConfirmed) {
                 setCustomers(customers.filter((c) => c.id !== id));
-                Swal('Eliminado!', 'El cliente ha sido eliminado.', 'success');
+                Swal.fire('Eliminado!', 'El cliente ha sido eliminado.', 'success');
             }
         });
     };
@@ -98,21 +93,21 @@ const ClientList = () => {
             setCustomers(
                 customers.map((c) => (c.id === customer.id ? { ...customer } : c))
             );
-            Swal('¡Actualizado!', 'El cliente ha sido actualizado.', 'success');
+            Swal.fire('¡Actualizado!', 'El cliente ha sido actualizado.', 'success');
         } else {
             const newId = customers.length > 0 ? Math.max(...customers.map(c => c.id)) + 1 : 1;
             setCustomers([...customers, { ...customer, id: newId }]);
-            Swal('¡Agregado!', 'El cliente ha sido agregado exitosamente.', 'success');
+            Swal.fire('¡Agregado!', 'El cliente ha sido agregado exitosamente.', 'success');
         }
         setIsModalOpen(false);
         setCurrentCustomer({
             id: 0,
-            razonSocial: '',
-            nroDocumento: '',
+            nombreRazonSocial: '',
+            codigoTipoDocumentoIdentidad: 0,
+            numeroDocumento: '',
             complemento: '',
-            tipoDocumento: '',
-            telefono: '',
-            correo: '',
+            codigoCliente: '',
+            email: '',
         });
         setCurrentPage(1);
     };
@@ -156,12 +151,12 @@ const ClientList = () => {
                             onClick={() => {
                                 setCurrentCustomer({
                                     id: 0,
-                                    razonSocial: '',
-                                    nroDocumento: '',
+                                    nombreRazonSocial: '',
+                                    codigoTipoDocumentoIdentidad: 0,
+                                    numeroDocumento: '',
                                     complemento: '',
-                                    tipoDocumento: '',
-                                    telefono: '',
-                                    correo: '',
+                                    codigoCliente: '',
+                                    email: '',
                                 });
                                 setIsModalOpen(true);
                             }}
@@ -187,24 +182,22 @@ const ClientList = () => {
                     <table className="min-w-full bg-white border border-gray-300">
                         <thead>
                             <tr className="bg-gray-100">
-                                <th className="border px-4 py-2 text-black">Razón Social</th>
+                                <th className="border px-4 py-2 text-black">Nombre / Razón Social</th>
                                 <th className="border px-4 py-2 text-black">Número Documento</th>
                                 <th className="border px-4 py-2 text-black">Complemento</th>
-                                <th className="border px-4 py-2 text-black">Tipo Documento</th>
-                                <th className="border px-4 py-2 text-black">Teléfono</th>
-                                <th className="border px-4 py-2 text-black">Correo</th>
+                                <th className="border px-4 py-2 text-black">Código Cliente</th>
+                                <th className="border px-4 py-2 text-black">Correo Electrónico</th>
                                 <th className="border px-4 py-2 text-black">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
                             {paginatedCustomers.map((customer) => (
                                 <tr key={customer.id} className="border-b">
-                                    <td className="border px-4 py-2">{customer.razonSocial}</td>
-                                    <td className="border px-4 py-2">{customer.nroDocumento}</td>
+                                    <td className="border px-4 py-2">{customer.nombreRazonSocial}</td>
+                                    <td className="border px-4 py-2">{customer.numeroDocumento}</td>
                                     <td className="border px-4 py-2">{customer.complemento}</td>
-                                    <td className="border px-4 py-2">{customer.tipoDocumento}</td>
-                                    <td className="border px-4 py-2">{customer.telefono}</td>
-                                    <td className="border px-4 py-2">{customer.correo}</td>
+                                    <td className="border px-4 py-2">{customer.codigoCliente}</td>
+                                    <td className="border px-4 py-2">{customer.email}</td>
                                     <td className="border px-4 py-2">
                                         <button
                                             onClick={() => handleEditCustomer(customer.id)}
