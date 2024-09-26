@@ -183,7 +183,7 @@ const ClientList = () => {
                         <div className="overflow-x-auto">
                             <table className="min-w-full bg-white border border-gray-300">
                                 <thead>
-                                    <tr className="bg-gray-100">
+                                    <tr className="bg-firstColor">
                                         <th className="border px-4 py-2 text-black">Nombre / Razón Social</th>
                                         <th className="border px-4 py-2 text-black">Número Documento</th>
                                         <th className="border px-4 py-2 text-black">Complemento</th>

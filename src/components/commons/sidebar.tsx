@@ -74,7 +74,7 @@ const Sidebar = () => {
                 </button>
             </div>
 
-            <aside className={`bg-gray-800 text-white min-h-screen fixed md:relative z-10 transition-all duration-300
+            <aside className={`bg-firstColor text-white min-h-screen fixed md:relative z-10 transition-all duration-300
                 ${isSidebarOpen ? 'w-64' : 'w-0 md:w-64'}`}>
                 <div className="p-4 flex flex-col h-full">
                     <div className="mb-6">
@@ -89,7 +89,7 @@ const Sidebar = () => {
                     <nav className="flex-grow">
                         <ul className="space-y-2">
                             <li>
-                                <a href="dashboard" className="block p-2 hover:bg-gray-700 rounded-lg">
+                                <a href="dashboard" className="block p-2 font-bold hover:bg-gray-700 rounded-lg">
                                     <span className="flex items-center">
                                         <FaHome className="mr-2" /> Inicio
                                     </span>
@@ -97,7 +97,7 @@ const Sidebar = () => {
                             </li>
 
                             <li>
-                                <a href="sales" className="block p-2 hover:bg-gray-700 rounded-lg">
+                                <a href="sales" className="block p-2 font-bold hover:bg-gray-700 rounded-lg">
                                     <span className="flex items-center">
                                         <MdOutlinePointOfSale className="mr-2" /> Nueva Venta
                                     </span>
@@ -108,7 +108,7 @@ const Sidebar = () => {
                                 <li key={index}>
                                     <button
                                         onClick={() => toggleMenu(item.name)}
-                                        className="flex items-center justify-between w-full p-2 text-left hover:bg-gray-700 rounded-lg"
+                                        className="flex items-center justify-between w-full p-2 text-left font-bold hover:bg-gray-700 rounded-lg"
                                     >
                                         <span className="flex items-center">
                                             {item.icon}
@@ -131,7 +131,7 @@ const Sidebar = () => {
                             ))}
 
                             <li>
-                                <a href="/users" className="block p-2 hover:bg-gray-700 rounded-lg">
+                                <a href="/users" className="block p-2 font-bold hover:bg-gray-700 rounded-lg">
                                     <span className="flex items-center">
                                         <FaUsers className="mr-2" /> Usuarios
                                     </span>
@@ -139,7 +139,7 @@ const Sidebar = () => {
                             </li>
 
                             <li>
-                                <a href="/enterprise" className="block p-2 hover:bg-gray-700 rounded-lg">
+                                <a href="/enterprise" className="block p-2 font-bold hover:bg-gray-700 rounded-lg">
                                     <span className="flex items-center">
                                         <FaBuilding className="mr-2" /> Empresa
                                     </span>
@@ -149,7 +149,7 @@ const Sidebar = () => {
                     </nav>
 
                     <div className="mt-auto">
-                        <button className="flex items-center text-white hover:bg-gray-700 p-2 rounded-lg w-full">
+                        <button className="flex items-center text-white font-bold hover:bg-gray-700 p-2 rounded-lg w-full">
                             <FaSignOutAlt className="mr-2" /> Logout
                         </button>
                     </div>

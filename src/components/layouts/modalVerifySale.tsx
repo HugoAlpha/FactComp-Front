@@ -20,7 +20,6 @@ const ModalVerifySale = ({ isOpen, onClose, products, total, onSuccess }) => {
             return;
         }
 
-        // Simular la venta exitosa
         Swal.fire({
             icon: 'success',
             title: 'Venta Realizada',
@@ -46,19 +45,19 @@ const ModalVerifySale = ({ isOpen, onClose, products, total, onSuccess }) => {
                     <div className="flex space-x-4">
                         <button
                             onClick={() => setPaymentMethod('Efectivo')}
-                            className={`flex items-center p-2 border rounded ${paymentMethod === 'Efectivo' ? 'bg-green-200' : 'bg-gray-100'}`}
+                            className={`flex items-center p-2 border rounded ${paymentMethod === 'Efectivo' ? 'bg-fifthColor' : 'bg-gray-100'}`}
                         >
                             <FaMoneyBill className="mr-2" /> Efectivo
                         </button>
                         <button
                             onClick={() => setPaymentMethod('Tarjeta')}
-                            className={`flex items-center p-2 border rounded ${paymentMethod === 'Tarjeta' ? 'bg-green-200' : 'bg-gray-100'}`}
+                            className={`flex items-center p-2 border rounded ${paymentMethod === 'Tarjeta' ? 'bg-fifthColor' : 'bg-gray-100'}`}
                         >
                             <FaCreditCard className="mr-2" /> Tarjeta
                         </button>
                         <button
                             onClick={() => setPaymentMethod('QR')}
-                            className={`flex items-center p-2 border rounded ${paymentMethod === 'QR' ? 'bg-green-200' : 'bg-gray-100'}`}
+                            className={`flex items-center p-2 border rounded ${paymentMethod === 'QR' ? 'bg-fifthColor' : 'bg-gray-100'}`}
                         >
                             <FaQrcode className="mr-2" /> QR
                         </button>
@@ -108,13 +107,13 @@ const ModalVerifySale = ({ isOpen, onClose, products, total, onSuccess }) => {
                 {/* Action Buttons */}
                 <div className="flex justify-end space-x-4">
                     <button
-                        className="bg-gray-300 px-4 py-2 rounded"
+                        className="px-6 py-2 bg-sixthColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400 mr-2"
                         onClick={onClose}
                     >
                         Cancelar
                     </button>
                     <button
-                        className="bg-purple-500 text-white px-4 py-2 rounded"
+                        className="px-6 py-2 bg-thirdColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400 ml-2"
                         onClick={handleValidate}
                     >
                         Validar
