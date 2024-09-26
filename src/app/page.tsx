@@ -103,8 +103,6 @@ const Login = () => {
               Ingresar
             </button>
           </form>
-
-          <p className="text-center mt-6 text-lg text-gray-500">o continúa con</p>
           <div className="flex justify-center space-x-6 mt-6">
             <button className="text-gray-500 text-3xl">
               <i className="fab fa-facebook"></i>

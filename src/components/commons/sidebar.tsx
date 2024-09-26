@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { FaFileInvoice, FaUser, FaSignOutAlt, FaChevronDown, FaBars, FaHome, FaUsers, FaBuilding } from 'react-icons/fa';
+import { MdOutlinePointOfSale } from "react-icons/md";
 
 const Sidebar = () => {
     const [openMenus, setOpenMenus] = useState({});
@@ -24,7 +25,7 @@ const Sidebar = () => {
             ]
         },
         {
-            name: 'Gestion post',
+            name: 'Gestion POS',
             icon: <FaUser />,
             subItems: [
                 { name: 'Clientes', href: 'clientList' },
@@ -95,6 +96,14 @@ const Sidebar = () => {
                                 </a>
                             </li>
 
+                            <li>
+                                <a href="sales" className="block p-2 hover:bg-gray-700 rounded-lg">
+                                    <span className="flex items-center">
+                                        <MdOutlinePointOfSale className="mr-2" /> Nueva Venta
+                                    </span>
+                                </a>
+                            </li>
+
                             {menuItems.map((item, index) => (
                                 <li key={index}>
                                     <button
@@ -137,7 +146,7 @@ const Sidebar = () => {
                                 </a>
                             </li>
                         </ul>
-                    </nav>    
+                    </nav>
 
                     <div className="mt-auto">
                         <button className="flex items-center text-white hover:bg-gray-700 p-2 rounded-lg w-full">

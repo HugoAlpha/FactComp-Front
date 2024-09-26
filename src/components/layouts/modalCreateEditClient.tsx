@@ -22,7 +22,7 @@ interface CustomerModalProps {
 const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, customer, onSave }) => {
     const [formData, setFormData] = useState<Customer>({ ...customer, codigoTipoDocumentoIdentidad: 0 });
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
-    const [tipoDocumento, setTipoDocumento] = useState<string>(customer.codigoTipoDocumentoIdentidad === 0 ? "NIT" : "CI");
+    const [tipoDocumento, setTipoDocumento] = useState<string>(customer.codigoTipoDocumentoIdentidad === 0 ? 'NIT' : 'CI');
 
     useEffect(() => {
         setFormData(customer);
@@ -39,7 +39,6 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
         const selectedTipo = e.target.value;
         setTipoDocumento(selectedTipo);
 
-        // Ajustar el valor de codigoTipoDocumentoIdentidad en función del tipo seleccionado
         const codigoTipoDocumentoIdentidad = selectedTipo === 'NIT' ? 0 : 1;
         setFormData((prevData) => ({ ...prevData, codigoTipoDocumentoIdentidad }));
     };
@@ -69,45 +68,117 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
             <div className="bg-white rounded shadow-lg w-500">
-                <div className="bg-green-700 text-white text-lg font-semibold p-4 rounded-t">
-                    {customer.id ? 'Edición de Cliente' : 'Agregación de Cliente'}
+                <div className="bg-white text-black text-2xl font-semibold p-4 rounded-t">
+                    {customer.id ? 'Edición de Cliente' : 'Agregar nuevo Cliente'}
                 </div>
                 <div className="p-6 m-6">
-                    <div className="grid grid-cols-1 gap-6 text-black">
-                        <div className="grid grid-cols-2 gap-6">
-                            {renderInputField("nombreRazonSocial", "Razón Social", formData.nombreRazonSocial, handleInputChange, <FaUser />, errors.nombreRazonSocial)}
-                            {renderInputField("numeroDocumento", "Número Documento", formData.numeroDocumento, handleInputChange, <FaIdCard />, errors.numeroDocumento)}
+                    <form className="grid md:grid-cols-2 gap-6">
+                        {/* Razón Social */}
+                        <div className="relative z-0 w-full mb-5 group">
+                            <input
+                                type="text"
+                                name="nombreRazonSocial"
+                                value={formData.nombreRazonSocial}
+                                onChange={handleInputChange}
+                                className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                                placeholder=" "
+                                required
+                            />
+                            <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                                Razón Social
+                            </label>
+                            {errors.nombreRazonSocial && <span className="text-red-500 text-sm">{errors.nombreRazonSocial}</span>}
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
-                            {renderInputField("complemento", "Complemento", formData.complemento, handleInputChange, <FaFileAlt />, errors.complemento)}
 
-                            {/* Dropdown para seleccionar tipo de documento */}
-                            <div className="mb-4">
-                                <label className="block text-gray-700 font-semibold mb-1">Tipo Documento</label>
-                                <div className="flex items-center border rounded">
-                                    <span className="p-2 text-gray-600"><FaFileAlt /></span>
-                                    <select
-                                        value={tipoDocumento}
-                                        onChange={handleTipoDocumentoChange}
-                                        className="w-full p-2 border-0 rounded focus:ring-0"
-                                    >
-                                        <option value="NIT">NIT</option>
-                                        <option value="CI">CI</option>
-                                    </select>
-                                </div>
-                            </div>
+                        {/* Correo Electrónico */}
+                        <div className="relative z-0 w-full mb-5 group">
+                            <input
+                                type="text"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleInputChange}
+                                className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                                placeholder=" "
+                                required
+                            />
+                            <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                                Correo Electrónico
+                            </label>
+                            {errors.email && <span className="text-red-500 text-sm">{errors.email}</span>}
                         </div>
-                        <div className="grid grid-cols-2 gap-6">
-                            {renderInputField("codigoCliente", "Código Cliente", formData.codigoCliente, handleInputChange, <FaFileAlt />, errors.codigoCliente)}
-                            {renderInputField("email", "Correo Electrónico", formData.email, handleInputChange, <FaEnvelope />, errors.email)}
+
+                        {/* Número Documento */}
+                        <div className="relative z-0 w-full mb-5 group">
+                            <input
+                                type="text"
+                                name="numeroDocumento"
+                                value={formData.numeroDocumento}
+                                onChange={handleInputChange}
+                                className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                                placeholder=" "
+                                required
+                            />
+                            <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                                Número Documento
+                            </label>
+                            {errors.numeroDocumento && <span className="text-red-500 text-sm">{errors.numeroDocumento}</span>}
                         </div>
-                    </div>
+
+                        {/* Tipo Documento */}
+                        <div className="relative z-0 w-full mb-5 group">
+                            <select
+                                value={tipoDocumento}
+                                onChange={handleTipoDocumentoChange}
+                                className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                                required
+                            >
+                                <option value="NIT">NIT</option>
+                                <option value="CI">CI</option>
+                            </select>
+                            <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                                Tipo Documento
+                            </label>
+                        </div>
+
+                        {/* Complemento */}
+                        <div className="relative z-0 w-full mb-5 group">
+                            <input
+                                type="text"
+                                name="complemento"
+                                value={formData.complemento}
+                                onChange={handleInputChange}
+                                className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                                placeholder=" "
+                            />
+                            <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                                Complemento
+                            </label>
+                            {errors.complemento && <span className="text-red-500 text-sm">{errors.complemento}</span>}
+                        </div>
+
+                        {/* Código Cliente */}
+                        <div className="relative z-0 w-full mb-5 group">
+                            <input
+                                type="text"
+                                name="codigoCliente"
+                                value={formData.codigoCliente}
+                                onChange={handleInputChange}
+                                className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                                placeholder=" "
+                                required
+                            />
+                            <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                                Código Cliente
+                            </label>
+                            {errors.codigoCliente && <span className="text-red-500 text-sm">{errors.codigoCliente}</span>}
+                        </div>
+                    </form>
 
                     <div className="flex justify-end mt-6">
-                        <button onClick={onClose} className="bg-red-500 text-white px-4 py-2 rounded mr-2">
+                        <button onClick={onClose} className="px-6 py-2 bg-sixthColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400 mr-2">
                             Cancelar
                         </button>
-                        <button onClick={handleSubmit} className="bg-green-500 text-white px-4 py-2 rounded">
+                        <button onClick={handleSubmit} className="px-6 py-2 bg-thirdColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400 ml-2">
                             {customer.id ? 'Actualizar' : 'Agregar'}
                         </button>
                     </div>
@@ -116,30 +187,5 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
         </div>
     );
 };
-
-const renderInputField = (
-    name: string,
-    label: string,
-    value: string,
-    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
-    icon: React.ReactNode,
-    error?: string
-) => (
-    <div className="mb-4">
-        <label className="block text-gray-700 font-semibold mb-1">{label}</label>
-        <div className="flex items-center border rounded">
-            <span className="p-2 text-gray-600">{icon}</span>
-            <input
-                type="text"
-                name={name}
-                className={`border-0 p-2 w-full rounded focus:ring-0 ${error ? 'border-red-500' : ''}`}
-                placeholder={`Ingrese ${label.toLowerCase()}`}
-                value={value}
-                onChange={onChange}
-            />
-        </div>
-        {error && <span className="text-red-500 text-sm">{error}</span>}
-    </div>
-);
 
 export default CreateEditClientModal;
