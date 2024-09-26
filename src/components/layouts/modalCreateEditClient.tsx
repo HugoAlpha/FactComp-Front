@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { FaUser, FaIdCard, FaEnvelope, FaFileAlt } from 'react-icons/fa';
 import Swal from 'sweetalert2';
+import { PATH_URL_BACKEND } from '@/utils/constants';
 
 interface Customer {
     id: number;
@@ -54,10 +55,45 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
         return Object.keys(newErrors).length === 0;
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (validateForm()) {
-            onSave(formData);
-            onClose();
+            try {
+                let response;
+                if (customer.id) {
+                    // PUT
+                    response = await fetch(`${PATH_URL_BACKEND}/item/actualizar-item/${customer.id}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(formData),
+                    });
+                } else {
+                    // POST 
+                    response = await fetch(`${PATH_URL_BACKEND}/api/clientes`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(formData),
+                    });
+                }
+
+                if (response.ok) {
+                    const savedCustomer = await response.json();
+                    onSave(savedCustomer);
+                    onClose();
+                    Swal.fire({
+                        icon: 'success',
+                        title: customer.id ? 'Cliente actualizado correctamente' : 'Cliente creado correctamente',
+                        text: '',
+                    });
+                } else {
+                    Swal.fire('Error', 'Ocurrió un error al guardar el cliente', 'error');
+                }
+            } catch (error) {
+                Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
+            }
         } else {
             Swal.fire('Error', 'Por favor, complete los campos obligatorios.', 'error');
         }

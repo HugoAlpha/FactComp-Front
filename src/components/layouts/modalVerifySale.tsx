@@ -1,14 +1,36 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import { FaMoneyBill, FaCreditCard, FaQrcode } from 'react-icons/fa';
+import { PATH_URL_BACKEND } from '@/utils/constants';
 
 const ModalVerifySale = ({ isOpen, onClose, products, total, onSuccess }) => {
     const [paymentMethod, setPaymentMethod] = useState('Efectivo');
     const [paymentAmount, setPaymentAmount] = useState('');
     const [selectedClient, setSelectedClient] = useState('');
+    const [clients, setClients] = useState([]);
     const [changeNeeded, setChangeNeeded] = useState(false);
-    const clients = ['Cliente 1', 'Cliente 2', 'Cliente 3'];
+
+    // Fetch the clients when the modal opens
+    useEffect(() => {
+        if (isOpen) {
+            const fetchClients = async () => {
+                try {
+                    const response = await fetch(`${PATH_URL_BACKEND}/api/clientes`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        setClients(data);
+                    } else {
+                        Swal.fire('Error', 'Error al obtener la lista de clientes', 'error');
+                    }
+                } catch (error) {
+                    Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
+                }
+            };
+
+            fetchClients();
+        }
+    }, [isOpen]);
 
     const handleValidate = () => {
         if (paymentMethod === 'Efectivo' && paymentAmount < total) {
@@ -92,8 +114,8 @@ const ModalVerifySale = ({ isOpen, onClose, products, total, onSuccess }) => {
                     >
                         <option value="">Selecciona un cliente</option>
                         {clients.map((client) => (
-                            <option key={client} value={client}>
-                                {client}
+                            <option key={client.id} value={client.nombreRazonSocial}>
+                                {client.nombreRazonSocial} - {client.numeroDocumento}
                             </option>
                         ))}
                     </select>

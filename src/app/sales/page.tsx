@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaUser, FaCreditCard, FaCartPlus } from 'react-icons/fa';
 import { IoReturnDownBack } from "react-icons/io5";
 import { MdLocalPrintshop } from "react-icons/md";
@@ -9,27 +9,45 @@ import ModalVerifySale from "../../components/layouts/modalVerifySale";
 import { FaHome, FaUsers } from 'react-icons/fa';
 import { MdInventory } from 'react-icons/md';
 import Link from 'next/link';
-
-const productsData = [
-    { id: 1, name: 'Apple Watch Series 7', price: 599, img: '/images/apple-watch.png' },
-    { id: 2, name: 'iMac 27', price: 2499, img: '/images/imac.png' },
-    { id: 3, name: 'iPhone 12', price: 999, img: '/images/iphone-12.png' },
-    { id: 4, name: 'iPad pro 11', price: 1199, img: '/images/ipad-11.png' },
-    { id: 5, name: 'MacBook 13', price: 1499, img: '/images/macbook-13.png' },
-    { id: 6, name: 'iPod Nano', price: 399, img: '/images/ipod-nano.png' },
-    { id: 7, name: 'Airpods', price: 89, img: '/images/airpods.png' },
-];
+import { PATH_URL_BACKEND } from '@/utils/constants';
 
 const Sales = () => {
     const [selectedProducts, setSelectedProducts] = useState([]);
+    const [products, setProducts] = useState([]);
     const [total, setTotal] = useState(0);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
-    const filteredProducts = productsData.filter((product) =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
     const [isSaleSuccessful, setIsSaleSuccessful] = useState(false);
     const [saleDetails, setSaleDetails] = useState(null);
+
+    // Fetch products from the backend
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const response = await fetch(`${PATH_URL_BACKEND}/item/obtener-items`);
+                if (response.ok) {
+                    const data = await response.json();
+                    const formattedProducts = data.map((item) => ({
+                        id: item.id,
+                        name: item.descripcion,
+                        price: item.precioUnitario,
+                        img: '/images/ipad-11.png',
+                    }));
+                    setProducts(formattedProducts);
+                } else {
+                    Swal.fire('Error', 'Error al obtener productos', 'error');
+                }
+            } catch (error) {
+                Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
+            }
+        };
+
+        fetchProducts();
+    }, []);
+
+    const filteredProducts = products.filter((product) =>
+        product.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     const addProduct = (product) => {
         const existingProduct = selectedProducts.find((item) => item.id === product.id);
@@ -242,7 +260,6 @@ const Sales = () => {
                             ))}
                         </div>
                     </div>
-
                     {/* ModalVerifySale */}
                     <ModalVerifySale
                         isOpen={isModalOpen}

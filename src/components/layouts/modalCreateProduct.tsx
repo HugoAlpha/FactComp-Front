@@ -138,86 +138,106 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-            <div className="bg-white rounded-lg p-6 w-full max-w-lg">
-                <h2 className="text-2xl font-bold mb-4">Agregar Nuevo Producto</h2>
-                <form onSubmit={handleCreateProduct}>
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Código</label>
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+            <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg">
+                <div className="bg-white text-black text-2xl font-semibold p-4 rounded-t">
+                    Agregar Nuevo Producto
+                </div>
+                <form className="grid md:grid-cols-2 gap-6 mt-4" onSubmit={handleCreateProduct}>
+                    {/* Código */}
+                    <div className="relative z-0 w-full mb-5 group">
                         <input
                             type="text"
                             name="codigo"
                             value={codigo}
                             onChange={handleChange}
-                            className="w-full p-2 border rounded-lg"
+                            className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                            placeholder=" "
                             required
                         />
-                        {errors.codigo && <p className="text-red-500 text-sm">{errors.codigo}</p>}
+                        <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                            Código
+                        </label>
+                        {errors.codigo && <span className="text-red-500 text-sm">{errors.codigo}</span>}
                     </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Descripción</label>
+
+                    {/* Descripción */}
+                    <div className="relative z-0 w-full mb-5 group">
                         <input
                             type="text"
                             name="descripcion"
                             value={descripcion}
                             onChange={handleChange}
-                            className="w-full p-2 border rounded-lg"
+                            className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                            placeholder=" "
                             required
                         />
-                        {errors.descripcion && <p className="text-red-500 text-sm">{errors.descripcion}</p>}
+                        <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                            Descripción
+                        </label>
+                        {errors.descripcion && <span className="text-red-500 text-sm">{errors.descripcion}</span>}
                     </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Unidad de Medida</label>
+
+                    {/* Unidad de Medida */}
+                    <div className="relative z-0 w-full mb-5 group">
                         <input
                             type="text"
                             name="unidadMedida"
                             value={unidadMedida}
                             onChange={handleChange}
-                            className="w-full p-2 border rounded-lg"
+                            className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                            placeholder=" "
                             required
                         />
-                        {errors.unidadMedida && <p className="text-red-500 text-sm">{errors.unidadMedida}</p>}
+                        <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                            Unidad de Medida
+                        </label>
+                        {errors.unidadMedida && <span className="text-red-500 text-sm">{errors.unidadMedida}</span>}
                     </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Precio Unitario</label>
+
+                    {/* Precio Unitario */}
+                    <div className="relative z-0 w-full mb-5 group">
                         <input
                             type="text"
                             name="precioUnitario"
                             value={precioUnitario}
                             onChange={handleChange}
-                            className="w-full p-2 border rounded-lg"
+                            className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                            placeholder=" "
                             required
                         />
-                        {errors.precioUnitario && <p className="text-red-500 text-sm">{errors.precioUnitario}</p>}
+                        <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                            Precio Unitario
+                        </label>
+                        {errors.precioUnitario && <span className="text-red-500 text-sm">{errors.precioUnitario}</span>}
                     </div>
-                    <div className="mb-4">
-                        <label className="block text-gray-700">Código Producto SIN</label>
+
+                    {/* Código Producto SIN */}
+                    <div className="relative z-0 w-full mb-5 group">
                         <input
                             type="text"
                             name="codigoProductoSin"
                             value={codigoProductoSin}
                             onChange={handleChange}
-                            className="w-full p-2 border rounded-lg"
+                            className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                            placeholder=" "
                             required
                         />
-                        {errors.codigoProductoSin && <p className="text-red-500 text-sm">{errors.codigoProductoSin}</p>}
-                    </div>
-                    <div className="flex justify-end space-x-2">
-                        <button
-                            type="button"
-                            onClick={onClose}
-                            className="bg-gray-500 text-white px-4 py-2 rounded-lg"
-                        >
-                            Cancelar
-                        </button>
-                        <button
-                            type="submit"
-                            className="bg-green-600 text-white px-4 py-2 rounded-lg"
-                        >
-                            Crear Producto
-                        </button>
+                        <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                            Código Producto SIN
+                        </label>
+                        {errors.codigoProductoSin && <span className="text-red-500 text-sm">{errors.codigoProductoSin}</span>}
                     </div>
                 </form>
+
+                <div className="flex justify-end mt-6">
+                    <button onClick={onClose} className="px-6 py-2 bg-sixthColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400 mr-2">
+                        Cancelar
+                    </button>
+                    <button onClick={handleCreateProduct} className="px-6 py-2 bg-thirdColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400 ml-2">
+                        Crear Producto
+                    </button>
+                </div>
             </div>
         </div>
     );
