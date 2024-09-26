@@ -90,7 +90,8 @@ const Branches: React.FC = () => {
             <div className="flex flex-col w-full min-h-screen">
                 <Header />
 
-                <div className="p-6 bg-gray-50 h-screen w-full">
+                <div className="flex-grow overflow-auto bg-gray-50">
+                    <div className="p-6">
                     <h2 className="text-xl font-semibold mb-4 text-black">Lista de Sucursales</h2>
 
                     {/* Filtro por Ciudad */}
@@ -130,43 +131,45 @@ const Branches: React.FC = () => {
                         </select>
                     </div>
 
-                    <table className="min-w-full bg-white border border-gray-300 text-black">
-                        <thead>
-                            <tr className="bg-gray-100">
-                                <th className="border px-4 py-2 text-black">ID Sucursal</th>
-                                <th className="border px-4 py-2 text-black">Descripción</th>
-                                <th className="border px-4 py-2 text-black">Ciudad</th>
-                                <th className="border px-4 py-2 text-black">Empresa</th>
-                                <th className="border px-4 py-2 text-black">Estado</th>
-                                <th className="border px-4 py-2 text-black">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {paginatedBranches.map((branch) => (
-                                <tr key={branch.idSucursales} className="border-b">
-                                    <td className="border px-4 py-2">{branch.idSucursales}</td>
-                                    <td className="border px-4 py-2">{branch.descripcion}</td>
-                                    <td className="border px-4 py-2">{branch.ciudad}</td>
-                                    <td className="border px-4 py-2">{branch.empresa}</td>
-                                    <td className="border px-4 py-2">{branch.estado}</td>
-                                    <td className="border px-4 py-2">
-                                        <button
-                                            onClick={() => handleEditBranch(branch.idSucursales)}
-                                            className="bg-yellow-500 text-white px-2 py-1 rounded mr-2"
-                                        >
-                                            <FaEdit />
-                                        </button>
-                                        <button
-                                            onClick={() => handleDeleteBranch(branch.idSucursales)}
-                                            className="bg-red-500 text-white px-2 py-1 rounded"
-                                        >
-                                            <FaTrashAlt />
-                                        </button>
-                                    </td>
+                    <div className="overflow-x-auto">
+                        <table className="min-w-full bg-white border border-gray-300 text-black">
+                            <thead>
+                                <tr className="bg-gray-100">
+                                    <th className="border px-4 py-2 text-black">ID Sucursal</th>
+                                    <th className="border px-4 py-2 text-black">Descripción</th>
+                                    <th className="border px-4 py-2 text-black">Ciudad</th>
+                                    <th className="border px-4 py-2 text-black">Empresa</th>
+                                    <th className="border px-4 py-2 text-black">Estado</th>
+                                    <th className="border px-4 py-2 text-black">Acciones</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {paginatedBranches.map((branch) => (
+                                    <tr key={branch.idSucursales} className="border-b">
+                                        <td className="border px-4 py-2">{branch.idSucursales}</td>
+                                        <td className="border px-4 py-2">{branch.descripcion}</td>
+                                        <td className="border px-4 py-2">{branch.ciudad}</td>
+                                        <td className="border px-4 py-2">{branch.empresa}</td>
+                                        <td className="border px-4 py-2">{branch.estado}</td>
+                                        <td className="border px-4 py-2">
+                                            <button
+                                                onClick={() => handleEditBranch(branch.idSucursales)}
+                                                className="bg-yellow-500 text-white px-2 py-1 rounded mr-2"
+                                            >
+                                                <FaEdit />
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteBranch(branch.idSucursales)}
+                                                className="bg-red-500 text-white px-2 py-1 rounded"
+                                            >
+                                                <FaTrashAlt />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
 
                     {/* Paginación */}
                     <div className="flex space-x-1 justify-center mt-6">
@@ -204,6 +207,7 @@ const Branches: React.FC = () => {
                     </div>
                 </div>
             </div>
+        </div>
         </div>
     );
 };
