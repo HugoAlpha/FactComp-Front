@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState, useEffect } from 'react';
 import { FaSearch, FaDownload, FaTrashAlt, FaEye } from 'react-icons/fa';
 import Sidebar from '@/components/commons/sidebar';
@@ -6,19 +7,28 @@ import Header from '@/components/commons/header';
 import BillDetailsModal from '@/components/layouts/modalBillDetails';
 import { PATH_URL_BACKEND } from '@/utils/constants';
 
+
 interface FormattedBill {
     documentNumber: string;
     client: string;
     date: string;
     total: string;
     estado: string;
-    codigoSucursal: string;
-    codigoPuntoVenta: string;
-    codigoTipoDocumentoIdentidad: string;
-    codigoMetodoPago: string;
+    codigoSucursal: number;
+    direccion?: string;
+    codigoPuntoVenta: number;
+    fechaEmision?: string;
+    nombreRazonSocial?: string;
+    codigoTipoDocumentoIdentidad: number;
+    numeroDocumento?: string;
+    codigoMetodoPago: number;
+    numeroTarjeta?: string;
+    montoTotal?: number;
+    descuentoAdicional?: number;
 }
 
 const BillList = () => {
+
     const [startDate, setStartDate] = useState(new Date());
     const [endDate, setEndDate] = useState(new Date());
     const [searchQuery, setSearchQuery] = useState('');
@@ -54,8 +64,8 @@ const BillList = () => {
             } catch (error) {
                 console.error('Error fetching bills:', error);
             }
-        };
 
+        };
         fetchBills();
     }, []);
 
@@ -64,6 +74,7 @@ const BillList = () => {
     };
 
     const handleNextPage = () => {
+
         if (currentPage < totalPages) setCurrentPage(currentPage + 1);
     };
 
@@ -79,27 +90,23 @@ const BillList = () => {
     const getPageNumbers = () => {
         const pageNumbers = [];
         const maxVisiblePages = 4;
-
         let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
         let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-
         if (endPage - startPage + 1 < maxVisiblePages) {
             startPage = Math.max(1, endPage - maxVisiblePages + 1);
         }
-
         for (let i = startPage; i <= endPage; i++) {
             pageNumbers.push(i);
         }
-
         return pageNumbers;
     };
 
     return (
+
         <div className="flex min-h-screen">
             <Sidebar />
             <div className="flex flex-col w-full min-h-screen">
                 <Header />
-
                 <div className="flex-grow overflow-auto bg-gray-50">
                     <div className="p-6">
                         <h1 className="text-2xl font-bold mb-6 text-gray-700">Lista de Facturas</h1>
@@ -119,6 +126,7 @@ const BillList = () => {
                                 <button className="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 flex items-center">
                                     <FaDownload className="mr-2" /> PDF
                                 </button>
+
                                 <button className="bg-teal-400 hover:bg-teal-500 text-white font-bold py-2 px-4">
                                     DOCX
                                 </button>
@@ -176,6 +184,7 @@ const BillList = () => {
                                         <th className="px-4 py-2 border text-left font-semibold text-gray-700">Operación</th>
                                     </tr>
                                 </thead>
+
                                 <tbody>
                                     {paginatedBills.map((bill, index) => (
                                         <tr key={index}>
@@ -221,6 +230,7 @@ const BillList = () => {
                                     className={`min-w-9 rounded-full border py-2 px-3.5 text-center text-sm transition-all shadow-sm ${page === currentPage ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-800 hover:text-white hover:border-slate-800'} focus:bg-slate-800 focus:text-white active:border-slate-800 active:bg-slate-800`}
                                 >
                                     {page}
+
                                 </button>
                             ))}
 
@@ -239,8 +249,8 @@ const BillList = () => {
                             </span>
                         </div>
                     </div>
-                </div>
 
+                </div>
                 <BillDetailsModal isOpen={isModalOpen} onClose={closeModal} bill={selectedBill} />
             </div>
         </div>

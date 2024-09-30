@@ -1,4 +1,6 @@
-import React from 'react';
+"use client";
+import React, { useState } from 'react';
+
 
 interface Bill {
     codigoSucursal: number;
@@ -18,6 +20,20 @@ interface BillDetailsModalProps {
     isOpen: boolean;
     onClose: () => void;
     bill: Bill | null;
+}
+
+interface FormattedBill {
+    codigoSucursal: number;
+    direccion?: string;
+    codigoPuntoVenta: number;
+    fechaEmision?: string;
+    nombreRazonSocial?: string;
+    codigoTipoDocumentoIdentidad: number;
+    numeroDocumento?: string;
+    codigoMetodoPago: number;
+    numeroTarjeta?: string;
+    montoTotal?: number;
+    descuentoAdicional?: number;
 }
 
 const BillDetailsModal: React.FC<BillDetailsModalProps> = ({ isOpen, onClose, bill }) => {
