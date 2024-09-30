@@ -4,15 +4,27 @@ import { FaSearch, FaDownload, FaTrashAlt, FaEye } from 'react-icons/fa';
 import Sidebar from '@/components/commons/sidebar';
 import Header from '@/components/commons/header';
 import BillDetailsModal from '@/components/layouts/modalBillDetails';
-import { PATH_URL_BACKEND } from '@/utils/constants';  // Asegúrate de tener esta constante configurada
+import { PATH_URL_BACKEND } from '@/utils/constants';
+
+interface FormattedBill {
+    documentNumber: string;
+    client: string;
+    date: string;
+    total: string;
+    estado: string;
+    codigoSucursal: string;
+    codigoPuntoVenta: string;
+    codigoTipoDocumentoIdentidad: string;
+    codigoMetodoPago: string;
+}
 
 const BillList = () => {
     const [startDate, setStartDate] = useState(new Date());
     const [endDate, setEndDate] = useState(new Date());
     const [searchQuery, setSearchQuery] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedBill, setSelectedBill] = useState(null);
-    const [bills, setBills] = useState([]);
+    const [selectedBill, setSelectedBill] = useState<FormattedBill | null>(null);
+    const [bills, setBills] = useState<FormattedBill[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 10;
     const totalPages = Math.ceil(bills.length / rowsPerPage);
@@ -24,12 +36,16 @@ const BillList = () => {
                 const response = await fetch(`${PATH_URL_BACKEND}/factura`);
                 if (response.ok) {
                     const data = await response.json();
-                    const formattedData = data.map(bill => ({
+                    const formattedData = data.map((bill: any) => ({
                         documentNumber: bill.numeroDocumento,
                         client: bill.nombreRazonSocial,
                         date: new Date(bill.fechaEmision).toLocaleDateString(),
                         total: bill.montoTotal.toFixed(2),
                         estado: 'Válida',
+                        codigoSucursal: bill.codigoSucursal,
+                        codigoPuntoVenta: bill.codigoPuntoVenta,
+                        codigoTipoDocumentoIdentidad: bill.codigoTipoDocumentoIdentidad,
+                        codigoMetodoPago: bill.codigoMetodoPago,
                     }));
                     setBills(formattedData);
                 } else {
@@ -51,7 +67,7 @@ const BillList = () => {
         if (currentPage < totalPages) setCurrentPage(currentPage + 1);
     };
 
-    const openModal = (bill) => {
+    const openModal = (bill: FormattedBill) => {
         setSelectedBill(bill);
         setIsModalOpen(true);
     };
@@ -87,13 +103,7 @@ const BillList = () => {
                 <div className="flex-grow overflow-auto bg-gray-50">
                     <div className="p-6">
                         <h1 className="text-2xl font-bold mb-6 text-gray-700">Lista de Facturas</h1>
-
-                        {/* Barra de búsqueda */}
                         <div className="flex items-center justify-between mb-6">
-                            <button className="bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 text-lg">
-                                EMITIR FACTURA
-                            </button>
-
                             <div className="relative flex items-center w-1/2">
                                 <input
                                     type="text"
@@ -121,9 +131,7 @@ const BillList = () => {
                             </div>
                         </div>
 
-                        {/* Dropdown y Fecha inicio y fin */}
                         <div className="flex items-center justify-between mb-6">
-                            {/* Dropdown para tipo de factura */}
                             <div className="flex">
                                 <select className="border border-gray-300 rounded-lg py-2 px-4 text-gray-700">
                                     <option>Tipo Factura 1</option>
@@ -132,15 +140,14 @@ const BillList = () => {
                                 </select>
                             </div>
 
-                            {/* Fechas */}
                             <div className="flex space-x-4">
                                 <div className="flex flex-col items-start">
                                     <label className="block text-base font-bold text-gray-700">Fecha Inicio</label>
                                     <input
                                         className="mt-1 block w-full rounded-md border bg-white px-3 py-2 shadow-sm focus:border-colorAlpha focus:outline-none focus:ring-colorAlpha sm:text-sm border-colorAlpha"
                                         type="date"
-                                        value={startDate}
-                                        onChange={(e) => setStartDate(e.target.value)}
+                                        value={startDate.toISOString().split('T')[0]}
+                                        onChange={(e) => setStartDate(new Date(e.target.value))}
                                         required
                                     />
                                 </div>
@@ -149,8 +156,8 @@ const BillList = () => {
                                     <input
                                         className="mt-1 block w-full rounded-md border bg-white px-3 py-2 shadow-sm focus:border-colorAlpha focus:outline-none focus:ring-colorAlpha sm:text-sm border-colorAlpha"
                                         type="date"
-                                        value={endDate}
-                                        onChange={(e) => setEndDate(e.target.value)}
+                                        value={endDate.toISOString().split('T')[0]}
+                                        onChange={(e) => setEndDate(new Date(e.target.value))}
                                         required
                                     />
                                 </div>
@@ -198,7 +205,6 @@ const BillList = () => {
                             </table>
                         </div>
 
-                        {/* Paginación */}
                         <div className="flex space-x-1 justify-center mt-6">
                             <button
                                 onClick={handlePrevPage}
@@ -227,7 +233,6 @@ const BillList = () => {
                             </button>
                         </div>
 
-                        {/* Mostrar la información de la paginación */}
                         <div className="flex space-x-1 justify-center mt-2">
                             <span className="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">
                                 Mostrando página <span className="font-semibold text-gray-900 dark:text-white">{currentPage}</span> de <span className="font-semibold text-gray-900 dark:text-white">{totalPages}</span>
@@ -236,7 +241,6 @@ const BillList = () => {
                     </div>
                 </div>
 
-                {/* Modal de detalles de factura */}
                 <BillDetailsModal isOpen={isModalOpen} onClose={closeModal} bill={selectedBill} />
             </div>
         </div>
