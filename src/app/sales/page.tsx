@@ -6,10 +6,12 @@ import { MdLocalPrintshop } from "react-icons/md";
 import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
 import ModalVerifySale from "../../components/layouts/modalVerifySale";
+import ReceiptOptionsModal from "../../components/layouts/modalReceiptOptions";
 import { FaHome, FaUsers } from 'react-icons/fa';
 import { MdInventory } from 'react-icons/md';
 import Link from 'next/link';
 import { PATH_URL_BACKEND } from '@/utils/constants';
+import { GrDocumentConfig } from "react-icons/gr";
 
 const Sales = () => {
     const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
@@ -25,6 +27,8 @@ const Sales = () => {
     const [globalDiscountApplied, setGlobalDiscountApplied] = useState(0);
     const [globalDiscountHistory, setGlobalDiscountHistory] = useState<string[]>([]);
     const [originalTotal, setOriginalTotal] = useState(0);
+    const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
+
 
     interface Product {
         id: number;
@@ -232,6 +236,26 @@ const Sales = () => {
         window.location.href = '/dashboard';
     };
 
+    const handleOpenReceiptModal = () => {
+        setIsReceiptModalOpen(true);
+    };
+
+    const handleCloseReceiptModal = () => {
+        setIsReceiptModalOpen(false);
+    };
+
+    const handlePrintReceipt = () => {
+        console.log("Imprimir recibo");
+
+        setIsReceiptModalOpen(false);
+    };
+
+    const handleDownloadReceipt = () => {
+        console.log("Descargar recibo");
+
+        setIsReceiptModalOpen(false);
+    };
+
     return (
         <div className="bg-white flex p-6 space-x-6 h-screen">
             {!isSaleSuccessful ? (
@@ -430,22 +454,29 @@ const Sales = () => {
                 </>
             ) : (
                 <>
-                    {/* Resumen de la Venta */}
                     <div className="text-black w-full p-6">
                         <h2 className="text-3xl font-bold mb-6 text-center">Pago exitoso</h2>
                         <div className="flex justify-between items-start mb-8">
-                            {/* Detalles de la venta */}
                             <div className="w-2/3 pr-4">
                                 <div className="bg-gray-100 p-4 rounded-lg mb-4">
                                     <p className="text-xl font-bold">Total: {Number(saleDetails?.total || 0).toFixed(2)} Bs.</p>
                                 </div>
                                 <div className="bg-gray-200 p-4 rounded-lg flex items-center justify-between mb-6">
                                     <span>{saleDetails?.client || 'Correo cliente'}</span>
-                                    <button className="bg-gray-300 hover:bg-gray-400 text-black font-bold py-2 px-4 rounded-lg flex items-center">
-                                        <MdLocalPrintshop className="text-xl" />
-                                        <span>Imprimir recibo</span>
+                                    <button
+                                        className="bg-gray-300 hover:bg-gray-400 text-black font-bold py-2 px-4 rounded-lg flex items-center"
+                                        onClick={handleOpenReceiptModal}
+                                    >
+                                        <GrDocumentConfig className="text-xl mr-2" />
+                                        <span>Opciones de recibo</span>
                                     </button>
                                 </div>
+                                <ReceiptOptionsModal
+                                    isOpen={isReceiptModalOpen}
+                                    onClose={handleCloseReceiptModal}
+                                    onPrint={handlePrintReceipt}
+                                    onDownload={handleDownloadReceipt}
+                                />
                             </div>
 
                             {/* Resumen de productos */}
@@ -478,7 +509,6 @@ const Sales = () => {
                             </div>
                         </div>
 
-                        {/* Botones de acciones */}
                         <div className="flex justify-between mt-8">
                             <button
                                 onClick={handleGoToDashboard}
