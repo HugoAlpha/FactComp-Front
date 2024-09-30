@@ -90,16 +90,16 @@ const Dashboard = () => {
 
                         {/* Facturas Recientes */}
                         <div className="grid grid-cols-3 gap-6">
-                            <div className="col-span-2">
-                                <div className="relative overflow-x-auto bg-white shadow-sm border border-slate-200 rounded-lg">
-                                    <div className="p-4">
+                            <div className="col-span-2 flex flex-col min-h-full">
+                                <div className="relative bg-white shadow-sm border border-slate-200 rounded-lg flex-grow">
+                                    <div className="p-4 flex justify-between items-center">
                                         <h4 className="text-lg font-semibold text-slate-800">Facturas Recientes</h4>
                                         <a href="#" className="font-medium text-blue-600 hover:underline">
-                                            See All Customers
+                                            See All Invoices
                                         </a>
-                                        <p className="text-sm text-slate-500">Puedes ver el estado de las Facturas</p>
                                     </div>
-                                    <div className="overflow-x-auto">
+                                    <p className="text-sm text-slate-500 px-4">Puedes ver el estado de las Facturas</p>
+                                    <div className="overflow-x-auto px-4">
                                         <table className="w-full text-sm text-left text-gray-500">
                                             <thead className="text-xs text-gray-700 uppercase bg-gray-50">
                                                 <tr>
@@ -129,66 +129,35 @@ const Dashboard = () => {
                                 </div>
                             </div>
 
-
                             {/* Clientes Recientes */}
-                            <div className="relative overflow-x-auto shadow-md sm:rounded-lg bg-white">
-                                <div className="p-4">
-                                    <h4 className="text-lg font-semibold text-slate-800">Clientes Recientes</h4>
-                                    <p className="text-sm text-slate-500">Resumen de clientes</p>
-                                </div>
-                                <table className="w-full text-sm text-left text-gray-500">
-                                    <tbody>
-                                        <tr className="bg-white border-b hover:bg-gray-50">
-                                            <th scope="row" className="flex items-center px-6 py-4 whitespace-nowrap">
-                                                {/* los https://i.pravatar.cc/40 son para profile images de prueba, no quitar hasta tener los endpoint plox*/}
-                                                <img className="w-10 h-10 rounded-full" src="https://i.pravatar.cc/40?u=JennyWilson" alt="Jenny Wilson" />
-                                                <div className="ps-3">
-                                                    <div className="text-base font-semibold">Jenny Wilson</div>
-                                                    <div className="font-normal text-gray-500">w.lawson@example.com</div>
-                                                </div>
-                                            </th>
-                                            <td className="px-6 py-4 text-right">$11,234</td>
-                                            <td className="px-6 py-4 text-right">Austin</td>
-                                        </tr>
-                                        <tr className="bg-white border-b hover:bg-gray-50">
-                                            <th scope="row" className="flex items-center px-6 py-4 whitespace-nowrap">
-                                                <img className="w-10 h-10 rounded-full" src="https://i.pravatar.cc/40?u=DevonLane" alt="Devon Lane" />
-                                                <div className="ps-3">
-                                                    <div className="text-base font-semibold">Devon Lane</div>
-                                                    <div className="font-normal text-gray-500">dat.roberts@example.com</div>
-                                                </div>
-                                            </th>
-                                            <td className="px-6 py-4 text-right">$11,159</td>
-                                            <td className="px-6 py-4 text-right">New York</td>
-                                        </tr>
-                                        <tr className="bg-white border-b hover:bg-gray-50">
-                                            <th scope="row" className="flex items-center px-6 py-4 whitespace-nowrap">
-                                                <img className="w-10 h-10 rounded-full" src="https://i.pravatar.cc/40?u=JaneCooper" alt="Jane Cooper" />
-                                                <div className="ps-3">
-                                                    <div className="text-base font-semibold">Jane Cooper</div>
-                                                    <div className="font-normal text-gray-500">jgraham@example.com</div>
-                                                </div>
-                                            </th>
-                                            <td className="px-6 py-4 text-right">$10,483</td>
-                                            <td className="px-6 py-4 text-right">Toledo</td>
-                                        </tr>
-                                        <tr className="bg-white hover:bg-gray-50">
-                                            <th scope="row" className="flex items-center px-6 py-4 whitespace-nowrap">
-                                                <img className="w-10 h-10 rounded-full" src="https://i.pravatar.cc/40?u=DianneRussell" alt="Dianne Russell" />
-                                                <div className="ps-3">
-                                                    <div className="text-base font-semibold">Dianne Russell</div>
-                                                    <div className="font-normal text-gray-500">curtis.d@example.com</div>
-                                                </div>
-                                            </th>
-                                            <td className="px-6 py-4 text-right">$9,084</td>
-                                            <td className="px-6 py-4 text-right">Naperville</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                                <div className="p-4">
-                                    <a href="#" className="font-medium text-blue-600 hover:underline">
-                                        See All Customers
-                                    </a>
+                            <div className="flex flex-col min-h-full">
+                                <div className="relative bg-white shadow-sm border border-slate-200 rounded-lg flex-grow">
+                                    <div className="p-4 flex justify-between items-center">
+                                        <h4 className="text-lg font-semibold text-slate-800">Clientes Recientes</h4>
+                                        <a href="#" className="font-medium text-blue-600 hover:underline">
+                                            See All Customers
+                                        </a>
+                                    </div>
+                                    <p className="text-sm text-slate-500 px-4">Resumen de clientes</p>
+                                    <div className="overflow-x-auto px-4">
+                                        <table className="w-full text-sm text-left text-gray-500">
+                                            <tbody>
+                                                {recentClients.map((client) => (
+                                                    <tr className="bg-white border-b hover:bg-gray-50" key={client.id}>
+                                                        <th scope="row" className="flex items-center px-6 py-4 whitespace-nowrap">
+                                                            <img className="w-10 h-10 rounded-full" src={`https://i.pravatar.cc/40?u=${client.name}`} alt={client.name} />
+                                                            <div className="ps-3">
+                                                                <div className="text-base font-semibold">{client.name}</div>
+                                                                <div className="font-normal text-gray-500">{client.email}</div>
+                                                            </div>
+                                                        </th>
+                                                        <td className="px-6 py-4 text-right">{client.amount}</td>
+                                                        <td className="px-6 py-4 text-right">{client.location}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 </div>
                             </div>
                         </div>

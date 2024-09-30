@@ -1,9 +1,10 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FaSearch, FaDownload, FaTrashAlt, FaEye } from 'react-icons/fa';
 import Sidebar from '@/components/commons/sidebar';
 import Header from '@/components/commons/header';
 import BillDetailsModal from '@/components/layouts/modalBillDetails';
+import { PATH_URL_BACKEND } from '@/utils/constants';  // Asegúrate de tener esta constante configurada
 
 const BillList = () => {
     const [startDate, setStartDate] = useState(new Date());
@@ -11,16 +12,37 @@ const BillList = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedBill, setSelectedBill] = useState(null);
-
-    const bills = [
-        { documentNumber: '123456', client: 'Juan Perez', date: '08/17/2023', documentType: 'Electrónica', modality: 'Electrónica', details: 'Factura de venta de productos electrónicos.' },
-        { documentNumber: '789012', client: 'Maria Lopez', date: '08/18/2023', documentType: 'Computarizada', modality: 'Computarizada', details: 'Factura de venta de servicios de software.' },
-    ];
-
+    const [bills, setBills] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const rowsPerPage = 10;  // Aqui se ajusta las filas por página
+    const rowsPerPage = 10;
     const totalPages = Math.ceil(bills.length / rowsPerPage);
     const paginatedBills = bills.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage);
+
+    useEffect(() => {
+        const fetchBills = async () => {
+            try {
+                const response = await fetch(`${PATH_URL_BACKEND}/factura`);
+                if (response.ok) {
+                    const data = await response.json();
+                    const formattedData = data.map(bill => ({
+                        documentNumber: bill.numeroDocumento,
+                        client: bill.nombreRazonSocial,
+                        date: new Date(bill.fechaEmision).toLocaleDateString(),
+                        total: bill.montoTotal.toFixed(2),
+                        estado: 'Válida',
+                    }));
+                    setBills(formattedData);
+                } else {
+                    console.error('Error fetching bills');
+                }
+            } catch (error) {
+                console.error('Error fetching bills:', error);
+            }
+        };
+
+        fetchBills();
+    }, []);
+
     const handlePrevPage = () => {
         if (currentPage > 1) setCurrentPage(currentPage - 1);
     };
@@ -40,7 +62,7 @@ const BillList = () => {
 
     const getPageNumbers = () => {
         const pageNumbers = [];
-        const maxVisiblePages = 4;  // aquí se coloca el limite d botones para la vista de paginación 
+        const maxVisiblePages = 4;
 
         let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
         let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
@@ -110,7 +132,7 @@ const BillList = () => {
                                 </select>
                             </div>
 
-                            {/* Contenedor de fechas */}
+                            {/* Fechas */}
                             <div className="flex space-x-4">
                                 <div className="flex flex-col items-start">
                                     <label className="block text-base font-bold text-gray-700">Fecha Inicio</label>
@@ -142,8 +164,8 @@ const BillList = () => {
                                         <th className="px-4 py-2 border text-left font-semibold text-gray-700">N° Documento</th>
                                         <th className="px-4 py-2 border text-left font-semibold text-gray-700">Cliente</th>
                                         <th className="px-4 py-2 border text-left font-semibold text-gray-700">Fecha</th>
-                                        <th className="px-4 py-2 border text-left font-semibold text-gray-700">Tipo Documento</th>
-                                        <th className="px-4 py-2 border text-left font-semibold text-gray-700">Modalidad</th>
+                                        <th className="px-4 py-2 border text-left font-semibold text-gray-700">Total Facturado</th>
+                                        <th className="px-4 py-2 border text-left font-semibold text-gray-700">Estado</th>
                                         <th className="px-4 py-2 border text-left font-semibold text-gray-700">Operación</th>
                                     </tr>
                                 </thead>
@@ -153,10 +175,10 @@ const BillList = () => {
                                             <td className="px-4 py-2 border text-gray-800">{bill.documentNumber}</td>
                                             <td className="px-4 py-2 border text-gray-800">{bill.client}</td>
                                             <td className="px-4 py-2 border text-gray-800">{bill.date}</td>
-                                            <td className="px-4 py-2 border text-gray-800">{bill.documentType}</td>
+                                            <td className="px-4 py-2 border text-gray-800">${bill.total}</td>
                                             <td className="px-4 py-2 border">
                                                 <span className="inline-block bg-blue-100 text-blue-700 text-xs font-semibold px-2 py-1 rounded-full">
-                                                    {bill.modality}
+                                                    {bill.estado}
                                                 </span>
                                             </td>
                                             <td className="px-4 py-2 border flex space-x-2">

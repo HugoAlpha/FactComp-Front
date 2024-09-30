@@ -1,20 +1,55 @@
 import React from 'react';
 
-interface BillDetailsModalProps {
-    isOpen: boolean;
-    onClose: () => void;
-    bill: {
-        documentNumber: string;
-        client: string;
-        date: string;
-        documentType: string;
-        modality: string;
-        details: string;
-    };
-}
+const BillDetailsModal = ({ isOpen, onClose, bill }) => {
+    if (!isOpen || !bill) return null;
 
-const BillDetailsModal: React.FC<BillDetailsModalProps> = ({ isOpen, onClose, bill }) => {
-    if (!isOpen) return null;
+    const getSucursal = (codigoSucursal) => {
+        switch (codigoSucursal) {
+            case 0:
+                return "La Paz - Miraflores";
+            case 1:
+                return "Santa Cruz - Segundo Anillo";
+            default:
+                return "Sucursal desconocida";
+        }
+    };
+
+    const getPuntoVenta = (codigoPuntoVenta) => {
+        switch (codigoPuntoVenta) {
+            case 0:
+                return "Caja 2";
+            case 1:
+                return "Caja 6";
+            default:
+                return "Punto de venta desconocido";
+        }
+    };
+
+    const getTipoDocumento = (codigoTipoDocumentoIdentidad) => {
+        switch (codigoTipoDocumentoIdentidad) {
+            case 5:
+                return "C.I.";
+            case 0:
+                return "NIT";
+            default:
+                return "Tipo de documento desconocido";
+        }
+    };
+
+    const getMetodoPago = (codigoMetodoPago) => {
+        switch (codigoMetodoPago) {
+            case 1:
+                return "Efectivo";
+            case 2:
+                return "Tarjeta";
+            default:
+                return "Método de pago desconocido";
+        }
+    };
+
+    const formattedFechaEmision = bill.fechaEmision
+        ? new Date(bill.fechaEmision).toLocaleString()
+        : "Fecha desconocida";
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
@@ -25,28 +60,52 @@ const BillDetailsModal: React.FC<BillDetailsModalProps> = ({ isOpen, onClose, bi
                 <div className="p-6">
                     <div className="grid grid-cols-2 gap-6">
                         <div>
-                            <label className="block text-gray-700 font-semibold">N° Documento:</label>
-                            <p>{bill.documentNumber}</p>
+                            <label className="block text-gray-700 font-semibold">Sucursal:</label>
+                            <p>{getSucursal(bill.codigoSucursal)}</p>
+                        </div>
+                        <div>
+                            <label className="block text-gray-700 font-semibold">Dirección:</label>
+                            <p>{bill.direccion || "Dirección desconocida"}</p>
+                        </div>
+                        <div>
+                            <label className="block text-gray-700 font-semibold">Punto de Venta:</label>
+                            <p>{getPuntoVenta(bill.codigoPuntoVenta)}</p>
+                        </div>
+                        <div>
+                            <label className="block text-gray-700 font-semibold">Fecha de Emisión:</label>
+                            <p>{formattedFechaEmision}</p>
                         </div>
                         <div>
                             <label className="block text-gray-700 font-semibold">Cliente:</label>
-                            <p>{bill.client}</p>
-                        </div>
-                        <div>
-                            <label className="block text-gray-700 font-semibold">Fecha:</label>
-                            <p>{bill.date}</p>
+                            <p>{bill.nombreRazonSocial || "Cliente desconocido"}</p>
                         </div>
                         <div>
                             <label className="block text-gray-700 font-semibold">Tipo Documento:</label>
-                            <p>{bill.documentType}</p>
+                            <p>{getTipoDocumento(bill.codigoTipoDocumentoIdentidad)}</p>
                         </div>
                         <div>
-                            <label className="block text-gray-700 font-semibold">Modalidad:</label>
-                            <p>{bill.modality}</p>
+                            <label className="block text-gray-700 font-semibold">N° Documento:</label>
+                            <p>{bill.numeroDocumento || "Documento desconocido"}</p>
                         </div>
                         <div>
-                            <label className="block text-gray-700 font-semibold">Detalles:</label>
-                            <p>{bill.details}</p>
+                            <label className="block text-gray-700 font-semibold">Método de Pago:</label>
+                            <p>{getMetodoPago(bill.codigoMetodoPago)}</p>
+                        </div>
+                        <div>
+                            <label className="block text-gray-700 font-semibold">N° Tarjeta:</label>
+                            <p>{bill.numeroTarjeta || "-"}</p>
+                        </div>
+                        <div>
+                            <label className="block text-gray-700 font-semibold">Monto Total:</label>
+                            <p>
+                                {bill.montoTotal !== undefined && bill.montoTotal !== null
+                                    ? `$${Number(bill.montoTotal).toFixed(2)}`
+                                    : '-'}
+                            </p>
+                        </div>
+                        <div>
+                            <label className="block text-gray-700 font-semibold">Descuento:</label>
+                            <p>{bill.descuentoAdicional !== undefined && bill.descuentoAdicional !== null ? `$${bill.descuentoAdicional.toFixed(2)}` : '-'}</p>
                         </div>
                     </div>
 

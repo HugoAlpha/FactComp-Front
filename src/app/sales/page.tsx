@@ -280,12 +280,12 @@ const Sales = () => {
                                     placeholder="Descuento Global"
                                     value={globalDiscount}
                                     onChange={(e) => setGlobalDiscount(e.target.value)}
-                                    disabled={discountApplied} // Bloquear el input si ya se aplicó el descuento global
+                                    disabled={discountApplied}
                                 />
                                 <button
                                     className="mt-2 bg-blue-500 text-white font-bold py-2 px-4 rounded-lg w-full"
                                     onClick={applyGlobalDiscount}
-                                    disabled={discountApplied} // Bloquear el botón si ya se aplicó el descuento global
+                                    disabled={discountApplied}
                                 >
                                     Aplicar Descuento Global
                                 </button>

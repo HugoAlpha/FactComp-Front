@@ -102,14 +102,14 @@ const ProductList = () => {
                                         <tr key={product.id} className="border-b">
                                             <td className="px-4 py-4">
                                                 <div>
-                                                    <p className="font-bold text-gray-800">{product.descripcion}</p>
+                                                    <p className="font-bold text-black">{product.descripcion}</p>
                                                     <p className="text-sm text-gray-600">Código: {product.codigo}</p>
                                                 </div>
                                             </td>
-                                            <td className="border px-4 py-4 text-gray-800">{product.precioUnitario} Bs.</td>
-                                            <td className="border px-4 py-4 text-gray-800">{product.codigoProductoSin}</td>
+                                            <td className="border px-4 py-4 text-black">{product.precioUnitario} Bs.</td>
+                                            <td className="border px-4 py-4 text-black">{product.codigoProductoSin}</td>
                                             <td className="px-4 py-4 flex space-x-2">
-                                                
+
                                                 <button className="text-red-500 hover:text-red-700">
                                                     <FaTrashAlt />
                                                 </button>
