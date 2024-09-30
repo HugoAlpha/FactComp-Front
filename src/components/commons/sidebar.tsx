@@ -4,10 +4,10 @@ import { FaFileInvoice, FaUser, FaSignOutAlt, FaChevronDown, FaBars, FaHome, FaU
 import { MdOutlinePointOfSale } from "react-icons/md";
 
 const Sidebar = () => {
-    const [openMenus, setOpenMenus] = useState({});
+    const [openMenus, setOpenMenus] = useState<{ [key: string]: boolean }>({});
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
-    const toggleMenu = (menuName) => {
+    const toggleMenu = (menuName: string) => {
         setOpenMenus(prev => ({ ...prev, [menuName]: !prev[menuName] }));
     };
 

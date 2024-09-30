@@ -6,8 +6,16 @@ import Header from '@/components/commons/header';
 import { PATH_URL_BACKEND } from "@/utils/constants";
 import ModalCreateProduct from '@/components/layouts/modalCreateProduct';
 
+interface Product {
+    id: number;
+    descripcion: string;
+    codigo: string;
+    precioUnitario: number;
+    codigoProductoSin: string;
+}
+
 const ProductList = () => {
-    const [products, setProducts] = useState([]);
+    const [products, setProducts] = useState<Product[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 10;
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -16,7 +24,7 @@ const ProductList = () => {
         const fetchProducts = async () => {
             try {
                 const response = await fetch(`${PATH_URL_BACKEND}/item/obtener-items`);
-                const data = await response.json();
+                const data: Product[] = await response.json();
                 setProducts(data);
             } catch (error) {
                 console.error('Error al obtener los productos:', error);
@@ -109,7 +117,6 @@ const ProductList = () => {
                                             <td className="border px-4 py-4 text-black">{product.precioUnitario} Bs.</td>
                                             <td className="border px-4 py-4 text-black">{product.codigoProductoSin}</td>
                                             <td className="px-4 py-4 flex space-x-2">
-
                                                 <button className="text-red-500 hover:text-red-700">
                                                     <FaTrashAlt />
                                                 </button>
@@ -123,7 +130,6 @@ const ProductList = () => {
                             </table>
                         </div>
 
-                        {/* Paginación */}
                         <div className="flex space-x-1 justify-center mt-6">
                             <button
                                 onClick={handlePrevPage}
@@ -159,7 +165,6 @@ const ProductList = () => {
                     </div>
                 </div>
 
-                {/* Modal para crear producto */}
                 <ModalCreateProduct
                     isOpen={isModalOpen}
                     onClose={handleCloseModal}
@@ -169,5 +174,4 @@ const ProductList = () => {
         </div>
     );
 };
-
 export default ProductList;

@@ -5,6 +5,20 @@ import Sidebar from '@/components/commons/sidebar';
 import Header from '@/components/commons/header';
 import CreateEditEnterpriseModal from '@/components/layouts/modalCreateEnterprise';
 
+interface Enterprise {
+    id: number;
+    nit: string;
+    nombreEmpresa: string;
+    sucursales: string;
+    direccion: string;
+    zona: string;
+    telefono: string;
+    ciudad: string;
+    modalidad: string;
+    logo: string;
+}
+
+
 const EnterpriseList = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedEnterprise, setSelectedEnterprise] = useState(null);
@@ -49,25 +63,19 @@ const EnterpriseList = () => {
         setIsModalOpen(false);
     };
 
-    const handleSaveEnterprise = (enterprise) => {
+    const handleSaveEnterprise = (enterprise: Enterprise) => {
         console.log('Empresa guardada:', enterprise);
         closeModal();
     };
 
     return (
         <div className="flex min-h-screen">
-            {/* Sidebar */}
             <Sidebar />
-            {/* Contenido principal */}
             <div className="flex flex-col flex-grow">
-                {/* Header */}
                 <Header />
-
                 <div className="flex-grow overflow-auto bg-gray-50">
                     <div className="p-6">
                         <h1 className="text-2xl font-bold mb-6 text-gray-700">Gestión de Empresas</h1>
-
-                        {/* Botón para agregar empresa */}
                         <div className="flex justify-end mb-4">
                             <button
                                 onClick={openModal}
@@ -160,7 +168,6 @@ const EnterpriseList = () => {
                 </div>
             </div>
 
-            {/* Modal para agregar/editar empresa */}
             <CreateEditEnterpriseModal
                 isOpen={isModalOpen}
                 onClose={closeModal}

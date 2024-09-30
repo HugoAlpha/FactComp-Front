@@ -11,9 +11,9 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const router = useRouter();
 
-  const handleLogin = (e) => {
+  const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (email === "hugo@gmail.com" && password === "12345678") {
+    if (email === "admin@gmail.com" && password === "Alpha123!") {
       Swal.fire({
         icon: 'success',
         title: 'Logeo Exitoso',
