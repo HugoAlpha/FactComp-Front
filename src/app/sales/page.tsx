@@ -12,33 +12,60 @@ import Link from 'next/link';
 import { PATH_URL_BACKEND } from '@/utils/constants';
 
 const Sales = () => {
-    const [selectedProducts, setSelectedProducts] = useState([]);
-    const [products, setProducts] = useState([]);
+    const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
+    const [products, setProducts] = useState<Product[]>([]);
     const [total, setTotal] = useState(0);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [isSaleSuccessful, setIsSaleSuccessful] = useState(false);
-    const [saleDetails, setSaleDetails] = useState(null);
+    const [saleDetails, setSaleDetails] = useState<SaleDetails | null>(null);
     const [discountInput, setDiscountInput] = useState('');
     const [globalDiscount, setGlobalDiscount] = useState('');
     const [discountApplied, setDiscountApplied] = useState(false);
     const [globalDiscountApplied, setGlobalDiscountApplied] = useState(0);
-    const [globalDiscountHistory, setGlobalDiscountHistory] = useState([]);
+    const [globalDiscountHistory, setGlobalDiscountHistory] = useState<string[]>([]);
     const [originalTotal, setOriginalTotal] = useState(0);
+
+    interface Product {
+        id: number;
+        name: string;
+        price: number;
+        discount: number;
+        img: string;
+        quantity?: number;
+        totalPrice?: number;
+        descripcion: string;
+        precioUnitario: number;
+    }
+
+
+    interface SaleDetails {
+        total: number;
+        client: string;
+        paidAmount: number;
+        change: number;
+        orderNumber: string;
+    }
+
 
     useEffect(() => {
         const fetchProducts = async () => {
             try {
                 const response = await fetch(`${PATH_URL_BACKEND}/item/obtener-items`);
                 if (response.ok) {
-                    const data = await response.json();
-                    const formattedProducts = data.map((item) => ({
+                    const data: Product[] = await response.json();
+                    const formattedProducts: Product[] = data.map((item) => ({
                         id: item.id,
                         name: item.descripcion,
                         price: item.precioUnitario,
-                        discount: '',
+                        discount: item.discount,
                         img: '/images/apple-watch.png',
+                        descripcion: item.descripcion,
+                        precioUnitario: item.precioUnitario,
+                        quantity: 1,
+                        totalPrice: item.precioUnitario
                     }));
+
                     setProducts(formattedProducts);
                 } else {
                     Swal.fire('Error', 'Error al obtener productos', 'error');
@@ -51,10 +78,8 @@ const Sales = () => {
         fetchProducts();
     }, []);
 
-
-
-    const updateDiscount = (id, value) => {
-        const updatedProducts = selectedProducts.map((item) => {
+    const updateDiscount = (id: number, value: string) => {
+        const updatedProducts: Product[] = selectedProducts.map((item: Product) => {
             if (item.id === id) {
                 const newDiscount = parseFloat(value);
                 const maxDiscount = item.price + item.discount;
@@ -72,8 +97,9 @@ const Sales = () => {
         setSelectedProducts(updatedProducts);
         calculateTotal(updatedProducts);
     };
-    const calculateTotal = (updatedProducts) => {
-        const subtotal = updatedProducts.reduce((acc, curr) => acc + curr.totalPrice, 0);
+
+    const calculateTotal = (updatedProducts: Product[]) => {
+        const subtotal = updatedProducts.reduce((acc, curr) => acc + (curr.totalPrice ?? 0), 0);
         const totalWithGlobalDiscount = subtotal - globalDiscountApplied;
         setTotal(totalWithGlobalDiscount > 0 ? totalWithGlobalDiscount : 0);
     };
@@ -97,18 +123,16 @@ const Sales = () => {
             return;
         }
 
-        // Guardar el total original antes del descuento para poder revertir
         setOriginalTotal(total);
         setTotal(newTotal);
         setDiscountApplied(true);
 
-        // Agregar el descuento global al historial
         setGlobalDiscountHistory((prevHistory) => [
             ...prevHistory,
             `Descuento aplicado: $${discountValue.toFixed(2)}`
         ]);
 
-        setGlobalDiscount(''); // Limpiar el campo de descuento global
+        setGlobalDiscount('');
     };
 
     const removeGlobalDiscount = () => {
@@ -117,11 +141,8 @@ const Sales = () => {
             return;
         }
 
-        // Revertir el total al valor original
         setTotal(originalTotal);
         setDiscountApplied(false);
-
-        // Eliminar el descuento del historial
         setGlobalDiscountHistory([]);
 
         Swal.fire('Éxito', 'Descuento global eliminado.', 'success');
@@ -131,46 +152,57 @@ const Sales = () => {
         product.name?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const addProduct = (product) => {
-        const existingProduct = selectedProducts.find((item) => item.id === product.id);
+    const addProduct = (product: Product) => {
+        const existingProduct = selectedProducts.find((item: Product) => item.id === product.id);
         let updatedProducts;
         if (existingProduct) {
-            updatedProducts = selectedProducts.map((item) =>
+            updatedProducts = selectedProducts.map((item: Product) =>
                 item.id === product.id
-                    ? { ...item, quantity: item.quantity + 1, totalPrice: (item.quantity + 1) * item.price }
+                    ? { ...item, quantity: item.quantity! + 1, totalPrice: (item.quantity! + 1) * item.price }
                     : item
             );
         } else {
             updatedProducts = [...selectedProducts, { ...product, quantity: 1, totalPrice: product.price }];
         }
         setSelectedProducts(updatedProducts);
-        setTotal(updatedProducts.reduce((acc, curr) => acc + curr.totalPrice, 0));
-    };
-
-    const removeProduct = (id) => {
-        const updatedProducts = selectedProducts.filter((item) => item.id !== id);
-        setSelectedProducts(updatedProducts);
-        setTotal(updatedProducts.reduce((acc, curr) => acc + curr.totalPrice, 0));
         calculateTotal(updatedProducts);
     };
 
-    const increaseQuantity = (id) => {
-        const updatedProducts = selectedProducts.map((item) =>
-            item.id === id ? { ...item, quantity: item.quantity + 1, totalPrice: (item.quantity + 1) * item.price } : item
-        );
+    const removeProduct = (id: number) => {
+        const updatedProducts = selectedProducts.filter((item) => item.id !== id);
         setSelectedProducts(updatedProducts);
-        setTotal(updatedProducts.reduce((acc, curr) => acc + curr.totalPrice, 0));
+        setTotal(updatedProducts.reduce((acc, curr) => acc + (curr.totalPrice ?? 0), 0)); // Maneja totalPrice posiblemente undefined
+        calculateTotal(updatedProducts);
     };
 
-    const decreaseQuantity = (id) => {
+    const increaseQuantity = (id: number) => {
         const updatedProducts = selectedProducts.map((item) =>
-            item.id === id && item.quantity > 1
-                ? { ...item, quantity: item.quantity - 1, totalPrice: (item.quantity - 1) * item.price }
+            item.id === id
+                ? {
+                    ...item,
+                    quantity: (item.quantity ?? 1) + 1,
+                    totalPrice: ((item.quantity ?? 1) + 1) * item.price,
+                }
                 : item
         );
         setSelectedProducts(updatedProducts);
-        setTotal(updatedProducts.reduce((acc, curr) => acc + curr.totalPrice, 0));
+        setTotal(updatedProducts.reduce((acc, curr) => acc + (curr.totalPrice ?? 0), 0));
     };
+
+    const decreaseQuantity = (id: number) => {
+        const updatedProducts = selectedProducts.map((item) =>
+            item.id === id && (item.quantity ?? 1) > 1
+                ? {
+                    ...item,
+                    quantity: (item.quantity ?? 1) - 1,
+                    totalPrice: ((item.quantity ?? 1) - 1) * item.price,
+                }
+                : item
+        );
+        setSelectedProducts(updatedProducts);
+        setTotal(updatedProducts.reduce((acc, curr) => acc + (curr.totalPrice ?? 0), 0));
+    };
+
 
     const handleOpenModal = () => {
         if (selectedProducts.length > 0) {
@@ -183,7 +215,8 @@ const Sales = () => {
             });
         }
     };
-    const handleSaleSuccess = (details) => {
+
+    const handleSaleSuccess = (details: SaleDetails) => {
         setSaleDetails(details);
         setIsSaleSuccessful(true);
         setIsModalOpen(false);
@@ -229,15 +262,18 @@ const Sales = () => {
                                             />
                                             <button onClick={() => increaseQuantity(product.id)}>+</button>
                                         </td>
+
                                         <td className="px-4 py-2">
                                             <input
                                                 type="number"
                                                 className="w-16 text-center border"
-                                                value={product.discount}
-                                                onChange={(e) => updateDiscount(product.id, e.target.value)}
+                                                value={product.discount !== undefined ? parseInt(product.discount.toString()) : ''}
+                                                min="0"
+                                                onChange={(e) => updateDiscount(product.id, e.target.value !== '' ? e.target.value.replace(/^0+/, '') : '0')}
                                             />
                                         </td>
-                                        <td className="px-4 py-2">${product.totalPrice.toFixed(2)}</td>
+
+                                        <td className="px-4 py-2">{product.totalPrice !== undefined ? product.totalPrice.toFixed(2) : '0.00'}</td>
                                         <td className="px-4 py-2">
                                             <button onClick={() => removeProduct(product.id)} className="text-red-500">Remove</button>
                                         </td>
@@ -422,7 +458,7 @@ const Sales = () => {
                                     {selectedProducts.map((product) => (
                                         <li key={product.id} className="flex justify-between">
                                             <span>{product.name} - {product.quantity}x</span>
-                                            <span>{product.totalPrice.toFixed(2)} Bs.</span>
+                                            <span>{product.totalPrice !== undefined ? product.totalPrice.toFixed(2) : '0.00'}</span>
                                         </li>
                                     ))}
                                 </ul>
