@@ -5,15 +5,27 @@ import Sidebar from '@/components/commons/sidebar';
 import Header from '@/components/commons/header';
 import CreateEditEnterpriseModal from '@/components/layouts/modalCreateEnterprise';
 
+interface Enterprise {
+    id: number;
+    nit: string;
+    nombreEmpresa: string;
+    sucursales: string;
+    direccion: string;
+    zona: string;
+    telefono: string;
+    ciudad: string;
+    modalidad: string;
+    logo: string;
+}
+
 const EnterpriseList = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedEnterprise, setSelectedEnterprise] = useState(null);
+    const [selectedEnterprise, setSelectedEnterprise] = useState<Enterprise | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
 
-    const enterprises = [
+    const enterprises: Enterprise[] = [
         { id: 1, nit: '123456789', nombreEmpresa: 'Empresa XYZ', sucursales: '3', direccion: 'Calle Falsa 123', zona: 'Zona Norte', telefono: '+591 12345678', ciudad: 'La Paz', modalidad: 'Presencial', logo: '/img/logo-empresa.jpg' },
-        // ... más empresas aquí para demostrar el scroll
     ];
 
     const totalPages = Math.ceil(enterprises.length / rowsPerPage);
@@ -22,10 +34,6 @@ const EnterpriseList = () => {
         (currentPage - 1) * rowsPerPage,
         currentPage * rowsPerPage
     );
-
-    const getPageNumbers = () => {
-        // ... (sin cambios en esta función)
-    };
 
     const openModal = () => {
         setSelectedEnterprise(null);
@@ -36,7 +44,7 @@ const EnterpriseList = () => {
         setIsModalOpen(false);
     };
 
-    const handleSaveEnterprise = (enterprise) => {
+    const handleSaveEnterprise = (enterprise: Enterprise) => {
         console.log('Empresa guardada:', enterprise);
         closeModal();
     };

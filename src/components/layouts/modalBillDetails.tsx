@@ -1,9 +1,29 @@
 import React from 'react';
 
-const BillDetailsModal = ({ isOpen, onClose, bill }) => {
+interface Bill {
+    codigoSucursal: number;
+    direccion?: string;
+    codigoPuntoVenta: number;
+    fechaEmision?: string;
+    nombreRazonSocial?: string;
+    codigoTipoDocumentoIdentidad: number;
+    numeroDocumento?: string;
+    codigoMetodoPago: number;
+    numeroTarjeta?: string;
+    montoTotal?: number;
+    descuentoAdicional?: number;
+}
+
+interface BillDetailsModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    bill: Bill | null;
+}
+
+const BillDetailsModal: React.FC<BillDetailsModalProps> = ({ isOpen, onClose, bill }) => {
     if (!isOpen || !bill) return null;
 
-    const getSucursal = (codigoSucursal) => {
+    const getSucursal = (codigoSucursal: number) => {
         switch (codigoSucursal) {
             case 0:
                 return "La Paz - Miraflores";
@@ -14,7 +34,7 @@ const BillDetailsModal = ({ isOpen, onClose, bill }) => {
         }
     };
 
-    const getPuntoVenta = (codigoPuntoVenta) => {
+    const getPuntoVenta = (codigoPuntoVenta: number) => {
         switch (codigoPuntoVenta) {
             case 0:
                 return "Caja 2";
@@ -25,7 +45,7 @@ const BillDetailsModal = ({ isOpen, onClose, bill }) => {
         }
     };
 
-    const getTipoDocumento = (codigoTipoDocumentoIdentidad) => {
+    const getTipoDocumento = (codigoTipoDocumentoIdentidad: number) => {
         switch (codigoTipoDocumentoIdentidad) {
             case 5:
                 return "C.I.";
@@ -36,7 +56,7 @@ const BillDetailsModal = ({ isOpen, onClose, bill }) => {
         }
     };
 
-    const getMetodoPago = (codigoMetodoPago) => {
+    const getMetodoPago = (codigoMetodoPago: number) => {
         switch (codigoMetodoPago) {
             case 1:
                 return "Efectivo";

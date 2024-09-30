@@ -199,7 +199,7 @@ const ClientList = () => {
                                         <tr key={customer.id} className="border-b">
                                             <td className="border px-4 py-2">{customer.nombreRazonSocial}</td>
                                             <td className="border px-4 py-2">{customer.numeroDocumento}</td>
-                                            <td className="border px-4 py-2">{customer.complemento}</td>
+                                            <td className="border px-4 py-2">{customer.complemento ?? ''}</td>
                                             <td className="border px-4 py-2">{customer.codigoCliente}</td>
                                             <td className="border px-4 py-2">{customer.email}</td>
                                             <td className="border px-4 py-2">
@@ -259,7 +259,10 @@ const ClientList = () => {
                         <CreateEditClientModal
                             isOpen={isModalOpen}
                             onClose={() => setIsModalOpen(false)}
-                            customer={currentCustomer}
+                            customer={{
+                                ...currentCustomer,
+                                complemento: currentCustomer.complemento ?? '',
+                            }}
                             onSave={handleAddOrEditCustomer}
                         />
                     </div>
