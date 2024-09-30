@@ -19,8 +19,13 @@ const Sales = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [isSaleSuccessful, setIsSaleSuccessful] = useState(false);
     const [saleDetails, setSaleDetails] = useState(null);
+    const [discountInput, setDiscountInput] = useState('');
+    const [globalDiscount, setGlobalDiscount] = useState('');
+    const [discountApplied, setDiscountApplied] = useState(false);
+    const [globalDiscountApplied, setGlobalDiscountApplied] = useState(0);
+    const [globalDiscountHistory, setGlobalDiscountHistory] = useState([]);
+    const [originalTotal, setOriginalTotal] = useState(0);
 
-    // Fetch products from the backend
     useEffect(() => {
         const fetchProducts = async () => {
             try {
@@ -31,7 +36,8 @@ const Sales = () => {
                         id: item.id,
                         name: item.descripcion,
                         price: item.precioUnitario,
-                        img: '/images/ipad-11.png',
+                        discount: '',
+                        img: '/images/apple-watch.png',
                     }));
                     setProducts(formattedProducts);
                 } else {
@@ -45,8 +51,84 @@ const Sales = () => {
         fetchProducts();
     }, []);
 
+
+
+    const updateDiscount = (id, value) => {
+        const updatedProducts = selectedProducts.map((item) => {
+            if (item.id === id) {
+                const newDiscount = parseFloat(value);
+                const maxDiscount = item.price + item.discount;
+
+                if (newDiscount > maxDiscount) {
+                    Swal.fire('Error', 'El descuento no puede exceder el precio del producto.', 'error');
+                    return item;
+                }
+
+                const newTotalPrice = item.price - newDiscount;
+                return { ...item, discount: newDiscount, totalPrice: newTotalPrice > 0 ? newTotalPrice : 0 };
+            }
+            return item;
+        });
+        setSelectedProducts(updatedProducts);
+        calculateTotal(updatedProducts);
+    };
+    const calculateTotal = (updatedProducts) => {
+        const subtotal = updatedProducts.reduce((acc, curr) => acc + curr.totalPrice, 0);
+        const totalWithGlobalDiscount = subtotal - globalDiscountApplied;
+        setTotal(totalWithGlobalDiscount > 0 ? totalWithGlobalDiscount : 0);
+    };
+
+    const applyGlobalDiscount = () => {
+        if (discountApplied) {
+            Swal.fire('Error', 'Ya se ha aplicado un descuento global.', 'error');
+            return;
+        }
+
+        const discountValue = parseFloat(globalDiscount);
+        if (isNaN(discountValue) || discountValue <= 0) {
+            Swal.fire('Error', 'Ingrese un descuento válido.', 'error');
+            return;
+        }
+
+        const newTotal = total - discountValue;
+
+        if (newTotal < 0) {
+            Swal.fire('Error', 'El descuento global no puede hacer que el total sea menor que 0.', 'error');
+            return;
+        }
+
+        // Guardar el total original antes del descuento para poder revertir
+        setOriginalTotal(total);
+        setTotal(newTotal);
+        setDiscountApplied(true);
+
+        // Agregar el descuento global al historial
+        setGlobalDiscountHistory((prevHistory) => [
+            ...prevHistory,
+            `Descuento aplicado: $${discountValue.toFixed(2)}`
+        ]);
+
+        setGlobalDiscount(''); // Limpiar el campo de descuento global
+    };
+
+    const removeGlobalDiscount = () => {
+        if (!discountApplied) {
+            Swal.fire('Error', 'No hay descuento global aplicado para eliminar.', 'error');
+            return;
+        }
+
+        // Revertir el total al valor original
+        setTotal(originalTotal);
+        setDiscountApplied(false);
+
+        // Eliminar el descuento del historial
+        setGlobalDiscountHistory([]);
+
+        Swal.fire('Éxito', 'Descuento global eliminado.', 'success');
+    };
+
     const filteredProducts = products.filter((product) =>
-        product.name.toLowerCase().includes(searchTerm.toLowerCase())
+        product.name?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     const addProduct = (product) => {
@@ -69,6 +151,7 @@ const Sales = () => {
         const updatedProducts = selectedProducts.filter((item) => item.id !== id);
         setSelectedProducts(updatedProducts);
         setTotal(updatedProducts.reduce((acc, curr) => acc + curr.totalPrice, 0));
+        calculateTotal(updatedProducts);
     };
 
     const increaseQuantity = (id) => {
@@ -128,8 +211,8 @@ const Sales = () => {
                                 <tr>
                                     <th className="px-4 py-2">Producto</th>
                                     <th className="px-4 py-2">Cantidad</th>
+                                    <th className="px-4 py-2">Descuento</th>
                                     <th className="px-4 py-2">Precio</th>
-                                    <th className="px-4 py-2">Acción</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -146,6 +229,14 @@ const Sales = () => {
                                             />
                                             <button onClick={() => increaseQuantity(product.id)}>+</button>
                                         </td>
+                                        <td className="px-4 py-2">
+                                            <input
+                                                type="number"
+                                                className="w-16 text-center border"
+                                                value={product.discount}
+                                                onChange={(e) => updateDiscount(product.id, e.target.value)}
+                                            />
+                                        </td>
                                         <td className="px-4 py-2">${product.totalPrice.toFixed(2)}</td>
                                         <td className="px-4 py-2">
                                             <button onClick={() => removeProduct(product.id)} className="text-red-500">Remove</button>
@@ -154,7 +245,14 @@ const Sales = () => {
                                 ))}
                             </tbody>
                         </table>
-                        <div className="mt-4 text-lg font-bold mt-16">Total: ${total.toFixed(2)}</div>
+                        <div className="mt-4 text-lg font-bold">Total: ${total.toFixed(2)}</div>
+
+                        {/* Mostrar el historial de descuentos globales */}
+                        <div className="text-sm text-gray-500 mt-2">
+                            {globalDiscountHistory.map((discount, index) => (
+                                <div key={index}>{discount}</div>
+                            ))}
+                        </div>
 
                         {/* Dialpad */}
                         <div className="mt-4">
@@ -173,17 +271,41 @@ const Sales = () => {
                                     </button>
                                 </div>
                             </div>
-                            <div className="grid grid-cols-3 gap-2 mt-4">
-                                {[1, 2, 3, 4, 5, 6, 7, 8, 9, '*', 0, '#'].map((item) => (
-                                    <button key={item} className="bg-gray-300 hover:bg-gray-400 text-2xl font-bold p-4 rounded-lg">
-                                        {item}
-                                    </button>
-                                ))}
+
+                            {/* Vizualización del descuento global */}
+                            <div className="mb-4">
+                                <input
+                                    type="number"
+                                    className="border p-2 w-full"
+                                    placeholder="Descuento Global"
+                                    value={globalDiscount}
+                                    onChange={(e) => setGlobalDiscount(e.target.value)}
+                                    disabled={discountApplied} // Bloquear el input si ya se aplicó el descuento global
+                                />
+                                <button
+                                    className="mt-2 bg-blue-500 text-white font-bold py-2 px-4 rounded-lg w-full"
+                                    onClick={applyGlobalDiscount}
+                                    disabled={discountApplied} // Bloquear el botón si ya se aplicó el descuento global
+                                >
+                                    Aplicar Descuento Global
+                                </button>
                             </div>
+
+                            {/* Botón para eliminar el descuento global */}
+                            {discountApplied && (
+                                <div className="mb-4">
+                                    <button
+                                        className="bg-red-500 text-white font-bold py-2 px-4 rounded-lg w-full"
+                                        onClick={removeGlobalDiscount}
+                                    >
+                                        Eliminar Descuento Global
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
 
-                    {/* Agregar Productos */}
+                    {/* Agregar productos */}
                     <div className="text-black w-2/3 overflow-y-auto" style={{ maxHeight: '90vh' }}>
                         <h2 className="text-xl font-bold mb-8">Agregar Productos</h2>
                         <div data-dial-init className="fixed top-6 right-6 group">
@@ -260,6 +382,7 @@ const Sales = () => {
                             ))}
                         </div>
                     </div>
+
                     {/* ModalVerifySale */}
                     <ModalVerifySale
                         isOpen={isModalOpen}
@@ -331,7 +454,7 @@ const Sales = () => {
 
                             <button
                                 onClick={handleNewOrder}
-                                className="bg-purple-500 hover:bg-purple-600 text-white font-bold py-3 px-6 rounded-lg flex items-center space-x-2"
+                                className="bg-thirdColor hover:bg-fourthColor text-white font-bold py-3 px-6 rounded-lg flex items-center space-x-2"
                             >
                                 <FaCartPlus className="text-xl" />
                                 <span>Nueva orden</span>

@@ -7,11 +7,12 @@ import { PATH_URL_BACKEND } from '@/utils/constants';
 const ModalVerifySale = ({ isOpen, onClose, products, total, onSuccess }) => {
     const [paymentMethod, setPaymentMethod] = useState('Efectivo');
     const [paymentAmount, setPaymentAmount] = useState('');
+    const [cashAmount, setCashAmount] = useState('');
+    const [cardAmount, setCardAmount] = useState('');
     const [selectedClient, setSelectedClient] = useState('');
     const [clients, setClients] = useState([]);
     const [changeNeeded, setChangeNeeded] = useState(false);
 
-    // Fetch the clients when the modal opens
     useEffect(() => {
         if (isOpen) {
             const fetchClients = async () => {
@@ -40,6 +41,18 @@ const ModalVerifySale = ({ isOpen, onClose, products, total, onSuccess }) => {
                 text: 'La cantidad pagada es insuficiente.',
             });
             return;
+        }
+
+        if (paymentMethod === 'Híbrido') {
+            const totalPayment = parseFloat(cashAmount) + parseFloat(cardAmount);
+            if (totalPayment !== total) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'La suma del efectivo y la tarjeta debe ser igual al total.',
+                });
+                return;
+            }
         }
 
         Swal.fire({
@@ -83,6 +96,12 @@ const ModalVerifySale = ({ isOpen, onClose, products, total, onSuccess }) => {
                         >
                             <FaQrcode className="mr-2" /> QR
                         </button>
+                        <button
+                            onClick={() => setPaymentMethod('Híbrido')}
+                            className={`flex items-center p-2 border rounded ${paymentMethod === 'Híbrido' ? 'bg-fifthColor' : 'bg-gray-100'}`}
+                        >
+                            <FaMoneyBill className="mr-2" /> Híbrido
+                        </button>
                     </div>
                 </div>
 
@@ -101,6 +120,26 @@ const ModalVerifySale = ({ isOpen, onClose, products, total, onSuccess }) => {
                                 Cambio: ${(paymentAmount - total).toFixed(2)}
                             </p>
                         )}
+                    </div>
+                )}
+
+                {/* Payment Details for Híbrido */}
+                {paymentMethod === 'Híbrido' && (
+                    <div className="mb-4">
+                        <label className="block mb-2 font-semibold">Cantidad Pagada en Efectivo</label>
+                        <input
+                            type="number"
+                            className="border p-2 w-full mb-4"
+                            value={cashAmount}
+                            onChange={(e) => setCashAmount(e.target.value.replace(/[^0-9.]/g, ''))}
+                        />
+                        <label className="block mb-2 font-semibold">Cantidad Pagada en Tarjeta</label>
+                        <input
+                            type="number"
+                            className="border p-2 w-full"
+                            value={cardAmount}
+                            onChange={(e) => setCardAmount(e.target.value.replace(/[^0-9.]/g, ''))}
+                        />
                     </div>
                 )}
 
