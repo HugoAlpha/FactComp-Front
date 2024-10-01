@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { FaFileInvoice, FaUser, FaSignOutAlt, FaChevronDown, FaBars, FaHome, FaUsers, FaBuilding } from 'react-icons/fa';
 import { MdOutlinePointOfSale } from "react-icons/md";
 import { HiDocumentCheck } from "react-icons/hi2";
+import { PiStorefrontFill } from "react-icons/pi";
 
 const Sidebar = () => {
     const [openMenu, setOpenMenu] = useState(null);
@@ -49,7 +50,7 @@ const Sidebar = () => {
         },
         {
             name: 'Puntos',
-            icon: <FaFileInvoice size={20} />,
+            icon: <PiStorefrontFill size={20} />,
             subItems: [
                 { name: 'Puntos de venta', href: 'puntoVenta' },
                 { name: 'Sucursales', href: 'branches' }
