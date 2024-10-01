@@ -3,13 +3,17 @@ import React, { useState, useEffect } from 'react';
 import Header from "@/components/commons/header";
 import Sidebar from "@/components/commons/sidebar";
 import { FaEdit, FaTrashAlt } from 'react-icons/fa';
+import Swal from 'sweetalert2';
+import ModalCreateBranches from '../../components/layouts/modalCreateBranches';
+import { PATH_URL_BACKEND } from '@/utils/constants';
 
 interface Branch {
-    idSucursales: number;
-    descripcion: string;
-    ciudad: string;
-    empresa: string;
-    estado: string;
+    id: number;
+    nombre: string;
+    departamento: string;
+    municipio: string;
+    direccion: string;
+    telefono: string;
 }
 
 const Branches: React.FC = () => {
@@ -19,14 +23,46 @@ const Branches: React.FC = () => {
     const [rowsPerPage, setRowsPerPage] = useState<number>(5);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [selectedCity, setSelectedCity] = useState<string>('');
+    const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
 
+    const handleOpenModal = () => {
+        setIsModalOpen(true);
+    };
+
+    const handleCloseModal = () => {
+        setIsModalOpen(false);
+    };
+
+    // Función para obtener las sucursales
+    const fetchBranches = async () => {
+        try {
+            const response = await fetch(`${PATH_URL_BACKEND}/sucursales`);
+
+            if (!response.ok) {
+                const errorMessage = `Error: ${response.status} - ${response.statusText}`;
+                throw new Error(errorMessage);
+            }
+
+            const data = await response.json();
+            const formattedData = data.map((branch: any) => ({
+                id: branch.id,
+                nombre: branch.nombre,
+                departamento: branch.departamento,
+                municipio: branch.municipio,
+                direccion: branch.direccion,
+                telefono: branch.telefono
+            }));
+
+            setBranches(formattedData);
+            setFilteredBranches(formattedData);
+        } catch (error: any) {
+            console.error("Error al obtener las sucursales:", error.message);
+        }
+    };
+
+    // Llamamos a fetchBranches cuando se monta el componente
     useEffect(() => {
-        const data: Branch[] = [
-            { idSucursales: 1, descripcion: 'Sucursal Principal', ciudad: 'Ciudad A', empresa: 'Empresa X', estado: 'Activo' },
-            { idSucursales: 2, descripcion: 'Sucursal Secundaria', ciudad: 'Ciudad B', empresa: 'Empresa Y', estado: 'Inactivo' },
-        ];
-        setBranches(data);
-        setFilteredBranches(data);
+        fetchBranches();
     }, []);
 
     useEffect(() => {
@@ -34,14 +70,14 @@ const Branches: React.FC = () => {
 
         if (searchTerm) {
             filtered = filtered.filter((branch) =>
-                branch.descripcion.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                branch.ciudad.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                branch.empresa.toLowerCase().includes(searchTerm.toLowerCase())
+                branch.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                branch.municipio.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                branch.departamento.toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
 
         if (selectedCity) {
-            filtered = filtered.filter((branch) => branch.ciudad === selectedCity);
+            filtered = filtered.filter((branch) => branch.municipio === selectedCity);
         }
 
         setFilteredBranches(filtered);
@@ -58,11 +94,22 @@ const Branches: React.FC = () => {
         console.log(`Editar sucursal con id: ${id}`);
     };
 
+    // Función para eliminar la sucursal usando SweetAlert
     const handleDeleteBranch = (id: number) => {
-        const confirmDelete = window.confirm("¿Estás seguro de que deseas eliminar esta sucursal?");
-        if (confirmDelete) {
-            console.log(`Eliminar sucursal con id: ${id}`);
-        }
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: "No podrás revertir esto",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sí, eliminarlo'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                console.log(`Eliminar sucursal con id: ${id}`);
+                Swal.fire('Eliminado!', 'La sucursal ha sido eliminada.', 'success');
+            }
+        });
     };
 
     const getPageNumbers = () => {
@@ -83,6 +130,12 @@ const Branches: React.FC = () => {
         return pageNumbers;
     };
 
+    // Función que se ejecuta cuando se crea una nueva sucursal
+    const handleBranchCreated = () => {
+        fetchBranches(); // Vuelve a cargar las sucursales
+        handleCloseModal(); // Cierra el modal después de crear una sucursal
+    };
+
     return (
         <div className="flex min-h-screen">
             <Sidebar />
@@ -91,7 +144,16 @@ const Branches: React.FC = () => {
 
                 <div className="flex-grow overflow-auto bg-gray-50">
                     <div className="p-6">
-                        <h2 className="text-xl font-semibold mb-4 text-black">Lista de Sucursales</h2>
+                        <div className="flex justify-between items-center mb-4">
+                            <h2 className="text-xl font-semibold text-black">Lista de Sucursales</h2>
+                            {/* Botón para abrir el modal */}
+                            <button
+                                onClick={handleOpenModal}
+                                className="bg-thirdColor text-white font-bold py-2 px-4 rounded-lg hover:bg-fourthColor transition duration-200"
+                            >
+                                Agregar Sucursal
+                            </button>
+                        </div>
 
                         {/* Filtro por Ciudad */}
                         <div className="mb-4">
@@ -102,8 +164,11 @@ const Branches: React.FC = () => {
                                 className="border p-2"
                             >
                                 <option value="">Todas</option>
-                                <option value="Ciudad A">Ciudad A</option>
-                                <option value="Ciudad B">Ciudad B</option>
+                                {branches.map((branch) => (
+                                    <option key={branch.id} value={branch.municipio}>
+                                        {branch.municipio}
+                                    </option>
+                                ))}
                             </select>
                         </div>
 
@@ -113,7 +178,7 @@ const Branches: React.FC = () => {
                                 type="text"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                placeholder="Buscar por descripción, ciudad o empresa"
+                                placeholder="Buscar por nombre, ciudad o departamento"
                                 className="border p-2 w-full rounded-lg"
                             />
                         </div>
@@ -122,33 +187,32 @@ const Branches: React.FC = () => {
                             <table className="table-auto w-full bg-white">
                                 <thead>
                                     <tr className="bg-fourthColor text-left text-gray-700">
-                                        <th className="px-6 py-4 font-bold">Descripción</th>
-                                        <th className="px-6 py-4 font-bold">Ciudad</th>
-                                        <th className="px-6 py-4 font-bold">Empresa</th>
-                                        <th className="px-6 py-4 font-bold">Estado</th>
+                                        <th className="px-6 py-4 font-bold">Nombre</th>
+                                        <th className="px-6 py-4 font-bold">Departamento</th>
+                                        <th className="px-6 py-4 font-bold">Municipio</th>
+                                        <th className="px-6 py-4 font-bold">Dirección</th>
+                                        <th className="px-6 py-4 font-bold">Teléfono</th>
                                         <th className="px-6 py-4 font-bold">Operaciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {paginatedBranches.map((branch) => (
-                                        <tr key={branch.idSucursales} className="border-b hover:bg-gray-50 text-black">
-                                            <td className="px-6 py-4">{branch.descripcion}</td>
-                                            <td className="px-6 py-4">{branch.ciudad}</td>
-                                            <td className="px-6 py-4">{branch.empresa}</td>
-                                            <td className="px-6 py-4">{branch.estado}</td>
-                                            <td className="px-6 py-4">
+                                        <tr key={branch.id} className="border-b hover:bg-gray-50 text-black">
+                                            <td className="px-6 py-4 text-black">{branch.nombre}</td>
+                                            <td className="px-6 py-4 text-black">{branch.departamento}</td>
+                                            <td className="px-6 py-4 text-black">{branch.municipio}</td>
+                                            <td className="px-6 py-4 text-black">{branch.direccion}</td>
+                                            <td className="px-6 py-4 text-black">{branch.telefono}</td>
+                                            <td className="px-6 py-4 text-black">
                                                 <div className="flex">
-                                                    {/* Botón de Borrar */}
                                                     <button
-                                                        onClick={() => handleDeleteBranch(branch.idSucursales)}
+                                                        onClick={() => handleDeleteBranch(branch.id)}
                                                         className="bg-red-200 hover:bg-red-300 p-2 rounded-l-lg flex items-center justify-center border border-red-300"
                                                     >
                                                         <FaTrashAlt className="text-black" />
                                                     </button>
-
-                                                    {/* Botón de Editar */}
                                                     <button
-                                                        onClick={() => handleEditBranch(branch.idSucursales)}
+                                                        onClick={() => handleEditBranch(branch.id)}
                                                         className="bg-blue-200 hover:bg-blue-300 p-2 rounded-r-lg flex items-center justify-center border border-blue-300"
                                                     >
                                                         <FaEdit className="text-black" />
@@ -160,8 +224,6 @@ const Branches: React.FC = () => {
                                 </tbody>
                             </table>
                         </div>
-
-                        {/* Paginación */}
                         <div className="flex space-x-1 justify-center mt-6">
                             <button
                                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -198,6 +260,8 @@ const Branches: React.FC = () => {
                     </div>
                 </div>
             </div>
+
+            <ModalCreateBranches isOpen={isModalOpen} onClose={handleCloseModal} onBranchCreated={handleBranchCreated} />
         </div>
     );
 };
