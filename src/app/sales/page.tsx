@@ -26,7 +26,7 @@ const Sales = () => {
     const [globalDiscountHistory, setGlobalDiscountHistory] = useState<string[]>([]);
     const [originalTotal, setOriginalTotal] = useState(0);
     const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
-    const [facturaData, setFacturaData] = useState(null);
+    const [facturaData, setFacturaData] = useState<FacturaData | null>(null);
 
 
     interface Product {
@@ -49,6 +49,27 @@ const Sales = () => {
         change: number;
         orderNumber: string;
     }
+
+    interface FacturaData {
+        numeroFactura: string;
+        nitEmisor: string;
+        razonSocialEmisor: string;
+        municipio: string;
+        nombreRazonSocial: string;
+        numeroDocumento: string;
+        complemento: string;
+        codigoMetodoPago: string;
+        numeroTarjeta: string;
+        montoTotal: number;
+        montoTotalSujetoIva: number;
+      }
+
+      interface SaleData {
+        client: string;
+        total: number;
+        numeroFactura: number;
+      }
+      
 
 
     useEffect(() => {

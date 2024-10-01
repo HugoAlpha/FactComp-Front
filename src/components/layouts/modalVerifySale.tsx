@@ -8,6 +8,7 @@ interface Product {
     nombre: string;
     precio: number;
     cantidad: number;
+    discount?: number;
 }
 
 interface ModalVerifySaleProps {
@@ -22,6 +23,7 @@ interface Client {
     id: number;
     nombreRazonSocial: string;
     numeroDocumento: string;
+    codigoCliente: string;
 }
 
 
