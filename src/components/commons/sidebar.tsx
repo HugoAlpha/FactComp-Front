@@ -1,32 +1,50 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { FaFileInvoice, FaUser, FaSignOutAlt, FaChevronDown, FaBars, FaHome, FaUsers, FaBuilding } from 'react-icons/fa';
 import { MdOutlinePointOfSale } from "react-icons/md";
 
 const Sidebar = () => {
-    const [openMenus, setOpenMenus] = useState({});
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+    const [openMenu, setOpenMenu] = useState(null); // Para controlar un solo submenú abierto
+    const [isOpen, setIsOpen] = useState(true);
+    const [activeLink, setActiveLink] = useState(null);
 
+    // Recuperar enlace activo desde localStorage
+    useEffect(() => {
+        const storedActiveLink = localStorage.getItem('activeLink');
+        if (storedActiveLink) {
+            setActiveLink(storedActiveLink);
+        }
+    }, []);
+
+    // Abrir y cerrar submenús
     const toggleMenu = (menuName) => {
-        setOpenMenus(prev => ({ ...prev, [menuName]: !prev[menuName] }));
+        setOpenMenu(prev => (prev === menuName ? null : menuName)); // Alterna entre abrir y cerrar el submenú
     };
 
+    // Colapsar o expandir la barra lateral
     const toggleSidebar = () => {
-        setIsSidebarOpen(!isSidebarOpen);
+        setIsOpen(!isOpen);
+    };
+
+    // Manejar enlace activo
+    const handleLinkClick = (link) => {
+        setActiveLink(link);
+        localStorage.setItem('activeLink', link); // Guardar enlace activo en localStorage
     };
 
     const menuItems = [
         {
             name: 'Documentos',
-            icon: <FaFileInvoice />,
+            icon: <FaFileInvoice size={20} />,
             subItems: [
                 { name: 'Factura', href: 'bill' },
                 { name: 'Nota DC', href: '#' }
             ]
         },
         {
-            name: 'Gestion POS',
-            icon: <FaUser />,
+            name: 'Gestión POS',
+            icon: <FaUser size={20} />,
             subItems: [
                 { name: 'Clientes', href: 'clientList' },
                 { name: 'Productos', href: 'products' }
@@ -34,7 +52,7 @@ const Sidebar = () => {
         },
         {
             name: 'Puntos',
-            icon: <FaFileInvoice />,
+            icon: <FaFileInvoice size={20} />,
             subItems: [
                 { name: 'Puntos de venta', href: 'puntoVenta' },
                 { name: 'Sucursales', href: 'branches' }
@@ -42,7 +60,7 @@ const Sidebar = () => {
         },
         {
             name: 'Certificación',
-            icon: <FaFileInvoice />,
+            icon: <FaFileInvoice size={20} />,
             subItems: [
                 { name: 'Submenú 1', href: '#' },
                 { name: 'Submenú 2', href: '#' }
@@ -50,15 +68,15 @@ const Sidebar = () => {
         },
         {
             name: 'Parámetros',
-            icon: <FaFileInvoice />,
+            icon: <FaFileInvoice size={20} />,
             subItems: [
                 { name: 'Submenú 1', href: '#' },
                 { name: 'Submenú 2', href: '#' }
             ]
         },
         {
-            name: 'Configuracion SIAT',
-            icon: <FaFileInvoice />,
+            name: 'Configuración SIAT',
+            icon: <FaFileInvoice size={20} />,
             subItems: [
                 { name: 'Actividades', href: 'activities' },
                 { name: 'Leyendas', href: '#' }
@@ -68,16 +86,16 @@ const Sidebar = () => {
 
     return (
         <div className="flex min-h-screen">
-            <div className="md:hidden">
-                <button onClick={toggleSidebar} className="p-4 text-white bg-gray-800">
-                    <FaBars />
-                </button>
-            </div>
-
-            <aside className={`bg-firstColor text-white min-h-screen fixed md:relative z-10 transition-all duration-300
-                ${isSidebarOpen ? 'w-64' : 'w-0 md:w-64'}`}>
+            <aside className={`bg-sixthColor text-white min-h-screen fixed md:relative z-10 transition-all duration-300 ${isOpen ? 'w-64' : 'w-16'}`}>
                 <div className="p-4 flex flex-col h-full">
-                    <div className="mb-6">
+                    {/* Botón para colapsar la barra lateral */}
+                    <div className={`flex ${isOpen ? 'justify-end' : 'justify-center'} mb-2`}>
+                        <button className='text-white' onClick={toggleSidebar}>
+                            <FaBars size={24} />
+                        </button>
+                    </div>
+                    {/* Imagen del logo */}
+                    <div className={`mb-6 ${isOpen ? 'block' : 'hidden'}`}>
                         <Image
                             src="/images/LogoIdAlpha.png"
                             alt="Logo"
@@ -86,24 +104,37 @@ const Sidebar = () => {
                             className="mx-auto"
                         />
                     </div>
+                    {/* Menú de navegación */}
                     <nav className="flex-grow">
                         <ul className="space-y-2">
+                            {/* Enlace al dashboard */}
                             <li>
-                                <a href="dashboard" className="block p-2 font-bold hover:bg-gray-700 rounded-lg">
+                                <Link href="dashboard"
+                                    className={`block p-2 font-bold hover:bg-gray-700 rounded-lg ${activeLink === '/dashboard' ? 'bg-white bg-opacity-20 text-ninthColor' : ''}`}
+                                    onClick={() => handleLinkClick('/dashboard')}>
                                     <span className="flex items-center">
-                                        <FaHome className="mr-2" /> Inicio
+                                        <div className="w-6 h-6 flex justify-center items-center">
+                                            <FaHome size={20} />
+                                        </div>
+                                        {isOpen && <span className="ml-2">Inicio</span>}
                                     </span>
-                                </a>
+                                </Link>
+                            </li>
+                            {/* Enlace a Nueva Venta */}
+                            <li>
+                                <Link href="sales"
+                                    className={`block p-2 font-bold hover:bg-gray-700 rounded-lg ${activeLink === '/sales' ? 'bg-white bg-opacity-20 text-ninthColor' : ''}`}
+                                    onClick={() => handleLinkClick('/sales')}>
+                                    <span className="flex items-center">
+                                        <div className="w-6 h-6 flex justify-center items-center">
+                                            <MdOutlinePointOfSale size={20} />
+                                        </div>
+                                        {isOpen && <span className="ml-2">Nueva Venta</span>}
+                                    </span>
+                                </Link>
                             </li>
 
-                            <li>
-                                <a href="sales" className="block p-2 font-bold hover:bg-gray-700 rounded-lg">
-                                    <span className="flex items-center">
-                                        <MdOutlinePointOfSale className="mr-2" /> Nueva Venta
-                                    </span>
-                                </a>
-                            </li>
-
+                            {/* Mapear items del menú */}
                             {menuItems.map((item, index) => (
                                 <li key={index}>
                                     <button
@@ -111,18 +142,22 @@ const Sidebar = () => {
                                         className="flex items-center justify-between w-full p-2 text-left font-bold hover:bg-gray-700 rounded-lg"
                                     >
                                         <span className="flex items-center">
-                                            {item.icon}
-                                            <span className="ml-2">{item.name}</span>
+                                            <div className="w-6 h-6 flex justify-center items-center">
+                                                {item.icon}
+                                            </div>
+                                            {isOpen && <span className="ml-2">{item.name}</span>}
                                         </span>
-                                        <FaChevronDown className={`transition-transform duration-200 ${openMenus[item.name] ? 'transform rotate-180' : ''}`} />
+                                        {isOpen && <FaChevronDown className={`transition-transform duration-200 ${openMenu === item.name ? 'transform rotate-180' : ''}`} />}
                                     </button>
-                                    {openMenus[item.name] && (
+                                    {isOpen && openMenu === item.name && (
                                         <ul className="ml-4 mt-2 space-y-2">
                                             {item.subItems.map((subItem, subIndex) => (
                                                 <li key={subIndex}>
-                                                    <a href={subItem.href} className="block p-2 pl-4 hover:bg-gray-700 rounded-lg">
+                                                    <Link href={subItem.href}
+                                                        className={`block p-2 pl-4 hover:bg-gray-700 rounded-lg ${activeLink === subItem.href ? 'bg-white bg-opacity-20 text-ninthColor' : ''}`}
+                                                        onClick={() => handleLinkClick(subItem.href)}>
                                                         {subItem.name}
-                                                    </a>
+                                                    </Link>
                                                 </li>
                                             ))}
                                         </ul>
@@ -130,27 +165,42 @@ const Sidebar = () => {
                                 </li>
                             ))}
 
+                            {/* Enlace a Usuarios */}
                             <li>
-                                <a href="/users" className="block p-2 font-bold hover:bg-gray-700 rounded-lg">
+                                <Link href="users"
+                                    className={`block p-2 font-bold hover:bg-gray-700 rounded-lg ${activeLink === '/users' ? 'bg-white bg-opacity-20 text-ninthColor' : ''}`}
+                                    onClick={() => handleLinkClick('/users')}>
                                     <span className="flex items-center">
-                                        <FaUsers className="mr-2" /> Usuarios
+                                        <div className="w-6 h-6 flex justify-center items-center">
+                                            <FaUsers size={20} />
+                                        </div>
+                                        {isOpen && <span className="ml-2">Usuarios</span>}
                                     </span>
-                                </a>
+                                </Link>
                             </li>
 
+                            {/* Enlace a Empresa */}
                             <li>
-                                <a href="/enterprise" className="block p-2 font-bold hover:bg-gray-700 rounded-lg">
+                                <Link href="enterprise"
+                                    className={`block p-2 font-bold hover:bg-gray-700 rounded-lg ${activeLink === '/enterprise' ? 'bg-white bg-opacity-20 text-ninthColor' : ''}`}
+                                    onClick={() => handleLinkClick('/enterprise')}>
                                     <span className="flex items-center">
-                                        <FaBuilding className="mr-2" /> Empresa
+                                        <div className="w-6 h-6 flex justify-center items-center">
+                                            <FaBuilding size={20} />
+                                        </div>
+                                        {isOpen && <span className="ml-2">Empresa</span>}
                                     </span>
-                                </a>
+                                </Link>
                             </li>
                         </ul>
                     </nav>
-
+                    {/* Botón de Logout */}
                     <div className="mt-auto">
                         <button className="flex items-center text-white font-bold hover:bg-gray-700 p-2 rounded-lg w-full">
-                            <FaSignOutAlt className="mr-2" /> Logout
+                            <div className="w-6 h-6 flex justify-center items-center">
+                                <FaSignOutAlt size={20} />
+                            </div>
+                            {isOpen && <span className="ml-2">Logout</span>}
                         </button>
                     </div>
                 </div>

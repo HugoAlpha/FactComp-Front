@@ -145,9 +145,20 @@ const Activities: React.FC = () => {
                                             <td className="border px-4 py-2">{actividad.codigoProductoServicio}</td>
                                             <td className="border px-4 py-2">{actividad.descripcion}</td>
                                             <td className="border px-4 py-2">{actividad.codigoActividadNandina}</td>
-                                            <td className={`border px-4 py-2 ${actividad.estado === 'Habilitado' ? 'text-green-600' : 'text-red-600'}`}>
-                                                {actividad.estado}
+                                            
+                                            <td className="px-6 py-4">
+                                                <div className="flex items-center">
+                                                    <div
+                                                    className={`h-2.5 w-2.5 rounded-full me-2 ${
+                                                        actividad.estado === 'Habilitado' ? 'bg-green-500' : 'bg-red-500'
+                                                    }`}
+                                                    ></div>
+                                                    <span className={actividad.estado === 'Habilitado' ? 'text-green-600' : 'text-red-600'}>
+                                                    {actividad.estado}
+                                                    </span>
+                                                </div>
                                             </td>
+
                                         </tr>
                                     ))}
                                 </tbody>
