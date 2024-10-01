@@ -16,7 +16,7 @@ interface ModalVerifySaleProps {
     onClose: () => void;
     products: Product[];
     total: number;
-    onSuccess: (data: { client: string; total: number }) => void;
+    onSuccess: (data: { client: string; total: number, numeroFactura: number }) => void;
 }
 
 interface Client {
