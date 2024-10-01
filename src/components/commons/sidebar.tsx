@@ -3,13 +3,13 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { FaFileInvoice, FaUser, FaSignOutAlt, FaChevronDown, FaBars, FaHome, FaUsers, FaBuilding } from 'react-icons/fa';
 import { MdOutlinePointOfSale } from "react-icons/md";
+import { HiDocumentCheck } from "react-icons/hi2";
 
 const Sidebar = () => {
-    const [openMenu, setOpenMenu] = useState(null); // Para controlar un solo submenú abierto
+    const [openMenu, setOpenMenu] = useState(null);
     const [isOpen, setIsOpen] = useState(true);
     const [activeLink, setActiveLink] = useState(null);
 
-    // Recuperar enlace activo desde localStorage
     useEffect(() => {
         const storedActiveLink = localStorage.getItem('activeLink');
         if (storedActiveLink) {
@@ -17,20 +17,17 @@ const Sidebar = () => {
         }
     }, []);
 
-    // Abrir y cerrar submenús
     const toggleMenu = (menuName) => {
-        setOpenMenu(prev => (prev === menuName ? null : menuName)); // Alterna entre abrir y cerrar el submenú
+        setOpenMenu(prev => (prev === menuName ? null : menuName));
     };
 
-    // Colapsar o expandir la barra lateral
     const toggleSidebar = () => {
         setIsOpen(!isOpen);
     };
 
-    // Manejar enlace activo
     const handleLinkClick = (link) => {
         setActiveLink(link);
-        localStorage.setItem('activeLink', link); // Guardar enlace activo en localStorage
+        localStorage.setItem('activeLink', link);
     };
 
     const menuItems = [
@@ -76,10 +73,10 @@ const Sidebar = () => {
         },
         {
             name: 'Configuración SIAT',
-            icon: <FaFileInvoice size={20} />,
+            icon: <HiDocumentCheck size={20} />,
             subItems: [
                 { name: 'Actividades', href: 'activities' },
-                { name: 'Leyendas', href: '#' }
+                { name: 'Leyendas', href: 'legends' }
             ]
         }
     ];

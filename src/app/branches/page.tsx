@@ -33,7 +33,6 @@ const Branches: React.FC = () => {
         setIsModalOpen(false);
     };
 
-    // Función para obtener las sucursales
     const fetchBranches = async () => {
         try {
             const response = await fetch(`${PATH_URL_BACKEND}/sucursales`);
@@ -60,7 +59,6 @@ const Branches: React.FC = () => {
         }
     };
 
-    // Llamamos a fetchBranches cuando se monta el componente
     useEffect(() => {
         fetchBranches();
     }, []);
@@ -94,7 +92,6 @@ const Branches: React.FC = () => {
         console.log(`Editar sucursal con id: ${id}`);
     };
 
-    // Función para eliminar la sucursal usando SweetAlert
     const handleDeleteBranch = (id: number) => {
         Swal.fire({
             title: '¿Estás seguro?',
@@ -130,10 +127,10 @@ const Branches: React.FC = () => {
         return pageNumbers;
     };
 
-    // Función que se ejecuta cuando se crea una nueva sucursal
+
     const handleBranchCreated = () => {
-        fetchBranches(); // Vuelve a cargar las sucursales
-        handleCloseModal(); // Cierra el modal después de crear una sucursal
+        fetchBranches();
+        handleCloseModal();
     };
 
     return (
@@ -146,7 +143,6 @@ const Branches: React.FC = () => {
                     <div className="p-6">
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="text-xl font-semibold text-black">Lista de Sucursales</h2>
-                            {/* Botón para abrir el modal */}
                             <button
                                 onClick={handleOpenModal}
                                 className="bg-thirdColor text-white font-bold py-2 px-4 rounded-lg hover:bg-fourthColor transition duration-200"
@@ -154,8 +150,6 @@ const Branches: React.FC = () => {
                                 Agregar Sucursal
                             </button>
                         </div>
-
-                        {/* Filtro por Ciudad */}
                         <div className="mb-4">
                             <label className="mr-2 text-black">Filtrar por Ciudad:</label>
                             <select
@@ -171,8 +165,6 @@ const Branches: React.FC = () => {
                                 ))}
                             </select>
                         </div>
-
-                        {/* Barra de búsqueda */}
                         <div className="mb-4">
                             <input
                                 type="text"
