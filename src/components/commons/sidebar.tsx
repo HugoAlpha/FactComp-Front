@@ -74,7 +74,7 @@ const Sidebar = () => {
                 </button>
             </div>
 
-            <aside className={`bg-firstColor text-white min-h-screen fixed md:relative z-10 transition-all duration-300
+            <aside className={`bg-[#10314b] text-white min-h-screen fixed md:relative z-10 transition-all duration-300
                 ${isSidebarOpen ? 'w-64' : 'w-0 md:w-64'}`}>
                 <div className="p-4 flex flex-col h-full">
                     <div className="mb-6">

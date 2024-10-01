@@ -15,10 +15,12 @@ const Login = () => {
     e.preventDefault();
     if (email === "admin@gmail.com" && password === "Alpha123!") {
       Swal.fire({
+        position: "center",
         icon: 'success',
         title: 'Logeo Exitoso',
         text: 'Bienvenido a Alpha E-Facturación',
-        confirmButtonColor: '#0055FF',
+        showConfirmButton: false,
+        timer: 3500
       }).then(() => {
         router.push('/dashboard');
       });
@@ -27,7 +29,8 @@ const Login = () => {
         icon: 'error',
         title: 'Credenciales Incorrectas',
         text: 'Por favor, verifica tu correo y contraseña',
-        confirmButtonColor: '#F95353',
+        showConfirmButton: false,
+        timer: 1500
       });
     }
   };
@@ -36,20 +39,17 @@ const Login = () => {
     <div className="flex items-center justify-center h-screen bg-gradient-to-r from-[#E6EFF7] to-[#F0F0F0]">
       <div className="bg-white shadow-2xl rounded-lg flex w-5/6 h-5/6 max-w-6xl overflow-hidden">
         <div className="w-1/2 p-10 flex flex-col justify-center bg-white">
-          <div className="mx-auto ">
+          <div className="mx-auto mb-4">
             <Image
               src="/images/LogoIdAlpha.png"
               alt="Logo ID"
-              width={200}
-              height={200}
+              width={300}
+              height={300}
               priority
             />
           </div>
           <h2 className="text-4xl font-bold text-gray-900 mb-6 text-center">Inicio de Sesión</h2>
-          <p className="mb-6 text-lg text-gray-600 text-center">
-            ¿No tienes una cuenta?{" "}
-            <a href="#" className="text-[#10314b] font-semibold">Regístrate aquí</a>
-          </p>
+          
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
               <label htmlFor="email" className="block text-gray-700 mb-2">
