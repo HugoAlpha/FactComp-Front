@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import { FaUser, FaCreditCard, FaCartPlus } from 'react-icons/fa';
 import { IoReturnDownBack } from "react-icons/io5";
-import { MdLocalPrintshop } from "react-icons/md";
 import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
 import ModalVerifySale from "../../components/layouts/modalVerifySale";
@@ -21,13 +20,13 @@ const Sales = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [isSaleSuccessful, setIsSaleSuccessful] = useState(false);
     const [saleDetails, setSaleDetails] = useState<SaleDetails | null>(null);
-    const [discountInput, setDiscountInput] = useState('');
     const [globalDiscount, setGlobalDiscount] = useState('');
     const [discountApplied, setDiscountApplied] = useState(false);
     const [globalDiscountApplied, setGlobalDiscountApplied] = useState(0);
     const [globalDiscountHistory, setGlobalDiscountHistory] = useState<string[]>([]);
     const [originalTotal, setOriginalTotal] = useState(0);
     const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
+    const [facturaData, setFacturaData] = useState(null);
 
 
     interface Product {
@@ -220,10 +219,41 @@ const Sales = () => {
         }
     };
 
-    const handleSaleSuccess = (details: SaleDetails) => {
-        setSaleDetails(details);
-        setIsSaleSuccessful(true);
-        setIsModalOpen(false);
+    const handleSaleSuccess = async (data: { client: string; total: number; numeroFactura: number }) => {
+        if (!data.numeroFactura) {
+            console.error("El número de factura no está definido.");
+            Swal.fire('Error', 'No se pudo obtener el número de factura.', 'error');
+            return;
+        }
+
+        try {
+            const response = await fetch(`${PATH_URL_BACKEND}/factura/${data.numeroFactura}`);
+
+            if (response.ok) {
+                const facturaData = await response.json();
+                console.log(facturaData);
+
+                setSaleDetails({
+                    client: facturaData.nombreRazonSocial || data.client,
+                    total: facturaData.montoTotal || data.total,
+                    paidAmount: 0,
+                    change: 0,
+                    orderNumber: facturaData.numeroFactura.toString(),
+                });
+
+                setFacturaData(facturaData);
+                setIsSaleSuccessful(true);
+                setIsModalOpen(false);
+
+            } else {
+                console.error('Error al obtener los detalles de la factura');
+                Swal.fire('Error', 'No se pudo obtener los detalles de la factura.', 'error');
+            }
+
+        } catch (error) {
+            console.error('Error al obtener la factura:', error);
+            Swal.fire('Error', 'Ocurrió un error inesperado.', 'error');
+        }
     };
 
     const handleNewOrder = () => {
@@ -255,6 +285,13 @@ const Sales = () => {
 
         setIsReceiptModalOpen(false);
     };
+
+    const formattedSelectedProducts = selectedProducts.map((product) => ({
+        id: product.id,
+        nombre: product.name,
+        precio: product.price,
+        cantidad: product.quantity ?? 1,
+    }));
 
     return (
         <div className="bg-white flex p-6 space-x-6 h-screen">
@@ -443,14 +480,18 @@ const Sales = () => {
                         </div>
                     </div>
 
-                    {/* ModalVerifySale */}
                     <ModalVerifySale
                         isOpen={isModalOpen}
                         onClose={() => setIsModalOpen(false)}
-                        products={selectedProducts}
+                        products={formattedSelectedProducts}
                         total={total}
-                        onSuccess={handleSaleSuccess}
+                        onSuccess={(data) => handleSaleSuccess({
+                            client: data.client,
+                            total: data.total,
+                            numeroFactura: data.numeroFactura
+                        })}
                     />
+
                 </>
             ) : (
                 <>
@@ -479,34 +520,63 @@ const Sales = () => {
                                 />
                             </div>
 
-                            {/* Resumen de productos */}
-                            <div className="w-1/3 bg-gray-100 p-4 rounded-lg shadow-md">
-                                <div className="text-center mb-6">
-                                    <img src="/images/LogoIdAlpha.png" alt="logo" className="w-50 h-40 mx-auto" />
-                                    <p className="font-semibold">Orden #{saleDetails?.orderNumber || '0001'}</p>
-                                </div>
-                                <ul className="text-sm">
-                                    {selectedProducts.map((product) => (
-                                        <li key={product.id} className="flex justify-between">
-                                            <span>{product.name} - {product.quantity}x</span>
-                                            <span>{product.totalPrice !== undefined ? product.totalPrice.toFixed(2) : '0.00'}</span>
+                            {/* Resumen de la factura */}
+                            {facturaData && (
+                                <div className="w-1/3 bg-gray-100 p-4 rounded-lg shadow-md">
+                                    <div className="text-center mb-6">
+                                        <img src="/images/LogoIdAlpha.png" alt="logo" className="w-50 h-40 mx-auto" />
+                                        <p className="font-semibold">Orden #{facturaData.numeroFactura || '-'}</p>
+                                    </div>
+
+                                    <ul className="text-sm">
+                                        <li className="flex justify-between">
+                                            <span>NIT Emisor:</span>
+                                            <span>{facturaData.nitEmisor || '-'}</span>
                                         </li>
-                                    ))}
-                                </ul>
-                                <hr className="my-4" />
-                                <div className="flex justify-between font-semibold">
-                                    <span>Total:</span>
-                                    <span>{Number(saleDetails?.total || 0).toFixed(2)} Bs.</span>
+                                        <li className="flex justify-between">
+                                            <span>Razón Social:</span>
+                                            <span>{facturaData.razonSocialEmisor || '-'}</span>
+                                        </li>
+                                        <li className="flex justify-between">
+                                            <span>Municipio:</span>
+                                            <span>{facturaData.municipio || '-'}</span>
+                                        </li>
+                                        <li className="flex justify-between">
+                                            <span>Nombre Cliente:</span>
+                                            <span>{facturaData.nombreRazonSocial || '-'}</span>
+                                        </li>
+                                        <li className="flex justify-between">
+                                            <span>Número Documento:</span>
+                                            <span>{facturaData.numeroDocumento || '-'}</span>
+                                        </li>
+                                        <li className="flex justify-between">
+                                            <span>Complemento:</span>
+                                            <span>{facturaData.complemento || '-'}</span>
+                                        </li>
+                                        <li className="flex justify-between">
+                                            <span>Método de Pago:</span>
+                                            <span>{facturaData.codigoMetodoPago || '-'}</span>
+                                        </li>
+                                        <li className="flex justify-between">
+                                            <span>Número Tarjeta:</span>
+                                            <span>{facturaData.numeroTarjeta || '-'}</span>
+                                        </li>
+                                        <li className="flex justify-between">
+                                            <span>Monto Total:</span>
+                                            <span>{facturaData.montoTotal ? `${facturaData.montoTotal.toFixed(2)} Bs.` : '-'}</span>
+                                        </li>
+                                        <li className="flex justify-between">
+                                            <span>Monto Total Sujeto a IVA:</span>
+                                            <span>{facturaData.montoTotalSujetoIva ? `${facturaData.montoTotalSujetoIva.toFixed(2)} Bs.` : '-'}</span>
+                                        </li>
+                                    </ul>
+                                    <hr className="my-4" />
+                                    <div className="flex justify-between font-semibold">
+                                        <span>Total:</span>
+                                        <span>{facturaData.montoTotal ? `${facturaData.montoTotal.toFixed(2)} Bs.` : '-'}</span>
+                                    </div>
                                 </div>
-                                <div className="flex justify-between mt-2">
-                                    <span>Efectivo:</span>
-                                    <span>{Number(saleDetails?.paidAmount || 0).toFixed(2)} Bs.</span>
-                                </div>
-                                <div className="flex justify-between mt-2">
-                                    <span>Cambio:</span>
-                                    <span>{Number(saleDetails?.change || 0).toFixed(2)} Bs.</span>
-                                </div>
-                            </div>
+                            )}
                         </div>
 
                         <div className="flex justify-between mt-8">
