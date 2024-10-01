@@ -60,7 +60,7 @@ const Sidebar = () => {
             name: 'Certificación',
             icon: <FaFileInvoice size={20} />,
             subItems: [
-                { name: 'Submenú 1', href: '#' },
+                { name: 'CUIS', href: 'codecuis' },
                 { name: 'Submenú 2', href: '#' }
             ]
         },
