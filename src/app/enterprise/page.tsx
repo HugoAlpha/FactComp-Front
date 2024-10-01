@@ -18,15 +18,15 @@ interface Enterprise {
     logo: string;
 }
 
-
 const EnterpriseList = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedEnterprise, setSelectedEnterprise] = useState(null);
+    const [selectedEnterprise, setSelectedEnterprise] = useState<Enterprise | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
 
     const enterprises = [
         { id: 1, nit: '123456789', nombreEmpresa: 'Empresa XYZ', sucursales: '3', direccion: 'Calle Falsa 123', zona: 'Zona Norte', telefono: '+591 12345678', ciudad: 'La Paz', modalidad: 'Presencial', logo: '/img/logo-empresa.jpg' },
+        // Puedes añadir más empresas aquí...
     ];
 
     const totalPages = Math.ceil(enterprises.length / rowsPerPage);
@@ -85,51 +85,63 @@ const EnterpriseList = () => {
                             </button>
                         </div>
 
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full bg-white border border-gray-300">
+                        <div className="overflow-x-auto shadow-lg rounded-lg border border-gray-200">
+                            <table className="min-w-full bg-white">
                                 <thead>
-                                    <tr className="bg-gray-100">
-                                        <th className="px-4 py-2 border text-left font-semibold text-gray-700">ID</th>
-                                        <th className="px-4 py-2 border text-left font-semibold text-gray-700">NIT</th>
-                                        <th className="px-4 py-2 border text-left font-semibold text-gray-700">Empresa</th>
-                                        <th className="px-4 py-2 border text-left font-semibold text-gray-700">Sucursales</th>
-                                        <th className="px-4 py-2 border text-left font-semibold text-gray-700">Dirección</th>
-                                        <th className="px-4 py-2 border text-left font-semibold text-gray-700">Zona</th>
-                                        <th className="px-4 py-2 border text-left font-semibold text-gray-700">Teléfono</th>
-                                        <th className="px-4 py-2 border text-left font-semibold text-gray-700">Ciudad</th>
-                                        <th className="px-4 py-2 border text-left font-semibold text-gray-700">Modalidad</th>
-                                        <th className="px-4 py-2 border text-left font-semibold text-gray-700">Logo de la Empresa</th>
-                                        <th className="px-4 py-2 border text-left font-semibold text-gray-700">Operaciones</th>
+                                    <tr className="bg-fourthColor text-left text-gray-700">
+                                        <th className="px-6 py-4 font-bold">ID</th>
+                                        <th className="px-6 py-4 font-bold">NIT</th>
+                                        <th className="px-6 py-4 font-bold">Empresa</th>
+                                        <th className="px-6 py-4 font-bold">Sucursales</th>
+                                        <th className="px-6 py-4 font-bold">Dirección</th>
+                                        <th className="px-6 py-4 font-bold">Zona</th>
+                                        <th className="px-6 py-4 font-bold">Teléfono</th>
+                                        <th className="px-6 py-4 font-bold">Ciudad</th>
+                                        <th className="px-6 py-4 font-bold">Modalidad</th>
+                                        <th className="px-6 py-4 font-bold">Logo de la Empresa</th>
+                                        <th className="px-6 py-4 font-bold">Operaciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {paginatedEnterprises.map((enterprise) => (
-                                        <tr key={enterprise.id} className="border-b">
-                                            <td className="border px-4 py-4">{enterprise.id}</td>
-                                            <td className="border px-4 py-4">{enterprise.nit}</td>
-                                            <td className="border px-4 py-4">{enterprise.nombreEmpresa}</td>
-                                            <td className="border px-4 py-4">{enterprise.sucursales}</td>
-                                            <td className="border px-4 py-4">{enterprise.direccion}</td>
-                                            <td className="border px-4 py-4">{enterprise.zona}</td>
-                                            <td className="border px-4 py-4">{enterprise.telefono}</td>
-                                            <td className="border px-4 py-4">{enterprise.ciudad}</td>
-                                            <td className="border px-4 py-4">{enterprise.modalidad}</td>
-                                            <td className="border px-4 py-4">
-                                                <img src={enterprise.logo} alt="Logo Empresa" className="w-16 h-16 object-cover rounded-md" />
+                                        <tr key={enterprise.id} className="border-b hover:bg-gray-50 text-black">
+                                            <td className="px-6 py-4">{enterprise.id}</td>
+                                            <td className="px-6 py-4">{enterprise.nit}</td>
+                                            <td className="px-6 py-4">{enterprise.nombreEmpresa}</td>
+                                            <td className="px-6 py-4">{enterprise.sucursales}</td>
+                                            <td className="px-6 py-4">{enterprise.direccion}</td>
+                                            <td className="px-6 py-4">{enterprise.zona}</td>
+                                            <td className="px-6 py-4">{enterprise.telefono}</td>
+                                            <td className="px-6 py-4">{enterprise.ciudad}</td>
+                                            <td className="px-6 py-4">{enterprise.modalidad}</td>
+                                            <td className="px-6 py-4">
+                                                <img src={enterprise.logo} alt={enterprise.nombreEmpresa} className="h-10 w-10" />
                                             </td>
-                                            <td className="px-4 py-4 flex space-x-2">
-                                                <button className="text-blue-500 hover:text-blue-700">
-                                                    <FaEdit />
-                                                </button>
-                                                <button className="text-red-500 hover:text-red-700">
-                                                    <FaTrashAlt />
-                                                </button>
+                                            <td className="px-6 py-4">
+                                                <div className="flex">
+                                                    {/* Botón de Borrar */}
+                                                    <button className="bg-red-200 hover:bg-red-300 p-2 rounded-l-lg flex items-center justify-center border border-red-300">
+                                                        <FaTrashAlt className="text-black" />
+                                                    </button>
+                                                    
+                                                    {/* Botón de Editar */}
+                                                    <button
+                                                        className="bg-blue-200 hover:bg-blue-300 p-2 rounded-r-lg flex items-center justify-center border border-blue-300"
+                                                        onClick={() => {
+                                                            setSelectedEnterprise(enterprise);
+                                                            openModal();
+                                                        }}
+                                                    >
+                                                        <FaEdit className="text-black" />
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
                         </div>
+
                         {/* Paginación */}
                         <div className="flex space-x-1 justify-center mt-6">
                             <button
@@ -160,20 +172,20 @@ const EnterpriseList = () => {
                         </div>
 
                         <div className="flex space-x-1 justify-center mt-2">
-                            <span className="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">
-                                Mostrando página <span className="font-semibold text-gray-900 dark:text-white">{currentPage}</span> de <span className="font-semibold text-gray-900 dark:text-white">{totalPages}</span>
+                            <span className="text-sm font-normal text-gray-500 mb-4 md:mb-0 block w-full md:inline md:w-auto">
+                                Mostrando página <span className="font-semibold text-gray-900">{currentPage}</span> de <span className="font-semibold text-gray-900">{totalPages}</span>
                             </span>
                         </div>
+
+                        <CreateEditEnterpriseModal
+                            isOpen={isModalOpen}
+                            onClose={closeModal}
+                            onSave={handleSaveEnterprise}
+                            enterprise={selectedEnterprise}
+                        />
                     </div>
                 </div>
             </div>
-
-            <CreateEditEnterpriseModal
-                isOpen={isModalOpen}
-                onClose={closeModal}
-                enterprise={selectedEnterprise || { id: 0, nit: '', nombreEmpresa: '', sucursales: '', direccion: '', zona: '', telefono: '', ciudad: '', modalidad: '', logo: '' }}
-                onSave={handleSaveEnterprise}
-            />
         </div>
     );
 };

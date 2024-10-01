@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import Header from "@/components/commons/header";
 import Sidebar from "@/components/commons/sidebar";
 import { FaEdit, FaTrashAlt } from 'react-icons/fa';
-import { MdPointOfSale } from "react-icons/md";
 import ModalCreatePos from '@/components/layouts/modalCreatePos';
 
 interface PuntoVenta {
@@ -105,7 +104,7 @@ const PuntoVenta: React.FC = () => {
 
                 <div className="flex-grow overflow-auto bg-gray-50">
                     <div className="p-6">
-                        <h2 className="text-xl font-semibold mb-4 text-black">Lista de Puntos de venta</h2>
+                        <h2 className="text-xl font-semibold mb-4 text-black">Lista de Puntos de Venta</h2>
 
                         {/* Filtro por Sucursal */}
                         <div className="mb-4">
@@ -126,76 +125,69 @@ const PuntoVenta: React.FC = () => {
                                 type="text"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                placeholder="Buscar por descripción, nombre o CUIS"
-                                className="border p-2 w-full"
+                                placeholder="Buscar por descripción, nombre o CUIS..."
+                                className="border p-2 rounded-lg w-1/3"
                             />
-
                             <button
-                                className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 text-lg flex items-center space-x-2"
+                                className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 text-lg"
                                 onClick={handleOpenModal}
                             >
-                                <MdPointOfSale className="text-4xl" />
-                                <span>Agregar Punto de Venta</span>
+                                Agregar Punto de Venta
                             </button>
                         </div>
 
-                        <div className="mb-4">
-                            <label className="mr-2 text-black">Filas por página:</label>
-                            <select
-                                value={rowsPerPage}
-                                onChange={(e) => setRowsPerPage(Number(e.target.value))}
-                                className="border p-2"
-                            >
-                                <option value={5}>5</option>
-                                <option value={10}>10</option>
-                                <option value={15}>15</option>
-                            </select>
-                        </div>
+                        <ModalCreatePos
+                            isOpen={isModalOpen}
+                            onClose={handleCloseModal}
+                            onSave={(newPos) => {
+                                // lógica para guardar nuevo punto de venta
+                            }}
+                        />
 
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full bg-white border border-gray-300 text-black">
+                        <div className="overflow-x-auto shadow-lg rounded-lg border border-gray-200">
+                            <table className="table-auto w-full bg-white">
                                 <thead>
-                                    <tr className="bg-gray-100">
-                                        <th className="border px-4 py-2 text-black">Descripción</th>
-                                        <th className="border px-4 py-2 text-black">Sucursal</th>
-                                        <th className="border px-4 py-2 text-black">Nombre Punto Venta</th>
-                                        <th className="border px-4 py-2 text-black">CUIS</th>
-                                        <th className="border px-4 py-2 text-black">Tipo Punto Venta</th>
-                                        <th className="border px-4 py-2 text-black">Estado</th>
-                                        <th className="border px-4 py-2 text-black">Acciones</th>
+                                    <tr className="bg-fourthColor text-left text-gray-700">
+                                        <th className="px-6 py-4 font-bold">Descripción</th>
+                                        <th className="px-6 py-4 font-bold">Sucursal</th>
+                                        <th className="px-6 py-4 font-bold">Nombre</th>
+                                        <th className="px-6 py-4 font-bold">CUIS</th>
+                                        <th className="px-6 py-4 font-bold">Tipo</th>
+                                        <th className="px-6 py-4 font-bold">Estado</th>
+                                        <th className="px-6 py-4 font-bold">Operaciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {paginatedCustomers.map((customer) => (
-                                        <tr key={customer.id} className="border-b">
-                                            <td className="border px-4 py-2">{customer.descripcion}</td>
-                                            <td className="border px-4 py-2">{customer.sucursal}</td>
-                                            <td className="border px-4 py-2">{customer.nombrePuntoVenta}</td>
-                                            <td className="border px-4 py-2">{customer.cuis}</td>
-                                            <td className="border px-4 py-2">{customer.tipoPuntoVenta}</td>
-                                            <td className="border px-4 py-2">{customer.estado}</td>
-                                            <td className="border px-4 py-2">
-                                                <button
-                                                    onClick={() => handleEditPuntoVenta(customer.id)}
-                                                    className="bg-yellow-500 text-white px-2 py-1 rounded mr-2"
-                                                >
-                                                    <FaEdit />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDeletePuntoVenta(customer.id)}
-                                                    className="bg-red-500 text-white px-2 py-1 rounded"
-                                                >
-                                                    <FaTrashAlt />
-                                                </button>
+                                        <tr key={customer.id} className="border-b hover:bg-gray-50 text-black">
+                                            <td className="px-6 py-4">{customer.descripcion}</td>
+                                            <td className="px-6 py-4">{customer.sucursal}</td>
+                                            <td className="px-6 py-4">{customer.nombrePuntoVenta}</td>
+                                            <td className="px-6 py-4">{customer.cuis}</td>
+                                            <td className="px-6 py-4">{customer.tipoPuntoVenta}</td>
+                                            <td className="px-6 py-4">{customer.estado}</td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex">
+                                                    {/* Botón de Borrar */}
+                                                    <button 
+                                                        className="bg-red-200 hover:bg-red-300 p-2 rounded-l-lg flex items-center justify-center border border-red-300" 
+                                                        onClick={() => handleDeletePuntoVenta(customer.id)}>
+                                                        <FaTrashAlt className="text-black" />
+                                                    </button>
+                                                    
+                                                    {/* Botón de Editar */}
+                                                    <button 
+                                                        className="bg-blue-200 hover:bg-blue-300 p-2 rounded-r-lg flex items-center justify-center border border-blue-300" 
+                                                        onClick={() => handleEditPuntoVenta(customer.id)}>
+                                                        <FaEdit className="text-black" />
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
                         </div>
-
-                        {/* Modal de creación */}
-                        {isModalOpen && <ModalCreatePos isOpen={isModalOpen} onClose={handleCloseModal} />}
 
                         {/* Paginación */}
                         <div className="flex space-x-1 justify-center mt-6">
@@ -211,7 +203,7 @@ const PuntoVenta: React.FC = () => {
                                 <button
                                     key={page}
                                     onClick={() => setCurrentPage(page)}
-                                    className={`min-w-9 rounded-full border py-2 px-3.5 text-center text-sm transition-all shadow-sm ${page === currentPage ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-800 hover:text-white hover:border-slate-800'} focus:bg-slate-800 focus:text-white active:border-slate-800 active:bg-slate-800`}
+                                    className={`min-w-9 rounded-full border py-2 px-3.5 text-center text-sm transition-all shadow-sm ${page === currentPage ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-800 hover:text-white hover:border-slate-800'} focus:bg-slate-800 focus:text-white active:border-slate-600`}
                                 >
                                     {page}
                                 </button>
@@ -220,15 +212,10 @@ const PuntoVenta: React.FC = () => {
                             <button
                                 onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                                 disabled={currentPage === totalPages}
-                                className="min-w-9 rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
                             >
                                 Next
                             </button>
-                        </div>
-                        <div className="flex space-x-1 justify-center mt-2">
-                            <span className="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">
-                                Mostrando página <span className="font-semibold text-gray-900 dark:text-white">{currentPage}</span> de <span className="font-semibold text-gray-900 dark:text-white">{totalPages}</span>
-                            </span>
                         </div>
                     </div>
                 </div>

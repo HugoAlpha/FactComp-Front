@@ -138,17 +138,19 @@ const ClientList = () => {
 
                 <div className="flex-grow overflow-auto bg-gray-50">
                     <div className="p-6">
-                        <h2 className="text-xl font-semibold mb-4 text-black">Lista de Clientes</h2>
+                        <h2 className="text-2xl font-bold mb-6 text-gray-700">Gestión de Clientes</h2>
 
+                        {/* Barra de búsqueda */}
                         <div className="flex justify-between mb-4">
                             <input
                                 type="text"
-                                className="border p-2 w-full text-black"
-                                placeholder="Buscar clientes..."
+                                placeholder="Buscar cliente por nombre o documento..."
+                                className="border p-2 rounded-lg w-1/3"
                                 value={filter}
                                 onChange={handleFilterChange}
                             />
                             <button
+                                className="bg-sixthColor text-white py-2 px-4 rounded-lg hover:bg-thirdColor text-lg"
                                 onClick={() => {
                                     setCurrentCustomer({
                                         id: 0,
@@ -161,60 +163,54 @@ const ClientList = () => {
                                     });
                                     setIsModalOpen(true);
                                 }}
-                                className="ml-4 bg-green-700 text-white px-4 py-2 rounded flex items-center"
                             >
-                                <FaPlus className="mr-2" /> Agregar Cliente
+                                Agregar Cliente <FaPlus className="inline-block ml-2" />
                             </button>
+                            <CreateEditClientModal
+                                isOpen={isModalOpen}
+                                onClose={() => setIsModalOpen(false)}
+                                onSave={handleAddOrEditCustomer}
+                                customer={currentCustomer}
+                            />
                         </div>
 
-                        <div className="mb-4">
-                            <label className="mr-2 text-black">Filas por página:</label>
-                            <select
-                                value={rowsPerPage}
-                                onChange={(e) => setRowsPerPage(Number(e.target.value))}
-                                className="border p-2"
-                            >
-                                <option value={10}>10</option>
-                                <option value={20}>20</option>
-                                <option value={30}>30</option>
-                                <option value={40}>40</option>
-                                <option value={50}>50</option>
-                            </select>
-                        </div>
-
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full bg-white border border-gray-300">
+                        <div className="overflow-x-auto shadow-lg rounded-lg border border-gray-200">
+                            <table className="table-auto w-full bg-white">
                                 <thead>
-                                    <tr className="bg-firstColor">
-                                        <th className="border px-4 py-2 text-black">Nombre / Razón Social</th>
-                                        <th className="border px-4 py-2 text-black">Número Documento</th>
-                                        <th className="border px-4 py-2 text-black">Complemento</th>
-                                        <th className="border px-4 py-2 text-black">Código Cliente</th>
-                                        <th className="border px-4 py-2 text-black">Correo Electrónico</th>
-                                        <th className="border px-4 py-2 text-black">Acciones</th>
+                                    <tr className="bg-fourthColor text-left text-gray-700">
+                                        <th className="px-6 py-4 font-bold">Nombre/Razón Social</th>
+                                        <th className="px-6 py-4 font-bold">Tipo Doc.</th>
+                                        <th className="px-6 py-4 font-bold">Número Documento</th>
+                                        <th className="px-6 py-4 font-bold">Complemento</th>
+                                        <th className="px-6 py-4 font-bold">Código Cliente</th>
+                                        <th className="px-6 py-4 font-bold">Email</th>
+                                        <th className="px-6 py-4 font-bold">Operaciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {paginatedCustomers.map((customer) => (
-                                        <tr key={customer.id} className="border-b">
-                                            <td className="border px-4 py-2">{customer.nombreRazonSocial}</td>
-                                            <td className="border px-4 py-2">{customer.numeroDocumento}</td>
-                                            <td className="border px-4 py-2">{customer.complemento ?? ''}</td>
-                                            <td className="border px-4 py-2">{customer.codigoCliente}</td>
-                                            <td className="border px-4 py-2">{customer.email}</td>
-                                            <td className="border px-4 py-2">
-                                                <button
-                                                    onClick={() => handleEditCustomer(customer.id)}
-                                                    className="bg-yellow-500 text-white px-2 py-1 rounded mr-2"
-                                                >
-                                                    <FaEdit />
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDeleteCustomer(customer.id)}
-                                                    className="bg-red-500 text-white px-2 py-1 rounded"
-                                                >
-                                                    <FaTrashAlt />
-                                                </button>
+                                        <tr key={customer.id} className="border-b hover:bg-gray-50 text-black">
+                                            <td className="px-6 py-4">{customer.nombreRazonSocial}</td>
+                                            <td className="px-6 py-4">{customer.codigoTipoDocumentoIdentidad}</td>
+                                            <td className="px-6 py-4">{customer.numeroDocumento}</td>
+                                            <td className="px-6 py-4">{customer.complemento}</td>
+                                            <td className="px-6 py-4">{customer.codigoCliente}</td>
+                                            <td className="px-6 py-4">{customer.email}</td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex">
+                                                    <button 
+                                                        className="bg-red-200 hover:bg-red-300 p-2 rounded-l-lg flex items-center justify-center border border-red-300"
+                                                        onClick={() => handleDeleteCustomer(customer.id)}
+                                                    >
+                                                        <FaTrashAlt className="text-black" />
+                                                    </button>
+                                                    <button 
+                                                        className="bg-blue-200 hover:bg-blue-300 p-2 rounded-r-lg flex items-center justify-center border border-blue-300"
+                                                        onClick={() => handleEditCustomer(customer.id)}
+                                                    >
+                                                        <FaEdit className="text-black" />
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
@@ -227,44 +223,29 @@ const ClientList = () => {
                             <button
                                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                                 disabled={currentPage === 1}
-                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                             >
                                 Prev
                             </button>
 
-                            {getPageNumbers().map((page) => (
+                            {getPageNumbers().map((number) => (
                                 <button
-                                    key={page}
-                                    onClick={() => setCurrentPage(page)}
-                                    className={`min-w-9 rounded-full border py-2 px-3.5 text-center text-sm transition-all shadow-sm ${page === currentPage ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-800 hover:text-white hover:border-slate-800'} focus:bg-slate-800 focus:text-white active:border-slate-800 active:bg-slate-800`}
+                                    key={number}
+                                    onClick={() => setCurrentPage(number)}
+                                    className={`rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 ${currentPage === number ? 'bg-slate-800 text-white' : ''}`}
                                 >
-                                    {page}
+                                    {number}
                                 </button>
                             ))}
 
                             <button
                                 onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                                 disabled={currentPage === totalPages}
-                                className="min-w-9 rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                             >
                                 Next
                             </button>
                         </div>
-                        <div className="flex space-x-1 justify-center mt-2">
-                            <span className="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">
-                                Mostrando página <span className="font-semibold text-gray-900 dark:text-white">{currentPage}</span> de <span className="font-semibold text-gray-900 dark:text-white">{totalPages}</span>
-                            </span>
-                        </div>
-
-                        <CreateEditClientModal
-                            isOpen={isModalOpen}
-                            onClose={() => setIsModalOpen(false)}
-                            customer={{
-                                ...currentCustomer,
-                                complemento: currentCustomer.complemento ?? '',
-                            }}
-                            onSave={handleAddOrEditCustomer}
-                        />
                     </div>
                 </div>
             </div>

@@ -33,23 +33,28 @@ const Login = () => {
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-100">
-      <div className="bg-white shadow-lg rounded-lg flex w-5/6 h-5/6 max-w-7xl">
+    <div className="flex items-center justify-center h-screen bg-gray-100 p-4">
+      <div className="bg-white shadow-lg rounded-lg flex flex-col md:flex-row w-full h-full max-w-7xl md:h-auto">
         {/* Formulario */}
-        <div className="w-1/2 p-12 flex flex-col justify-center">
-          <div className="mx-auto mb-1">
+        <div className="w-full md:w-1/2 p-6 md:p-12 flex flex-col justify-center">
+          <div className="mx-auto mb-1 max-w-xs">
             <Image
               src="/images/LogoIdAlpha.png"
               alt="Logo ID"
               width={400}
               height={400}
               priority
+              className="max-w-full h-auto"
             />
           </div>
-          <h2 className="text-4xl font-bold text-gray-800 mb-6 text-center">Inicio de Sesión</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-6 text-center">
+            Inicio de Sesión
+          </h2>
           <p className="mb-6 text-lg text-gray-600 text-center">
             Si aún no tienes una cuenta,{" "}
-            <a href="#" className="text-[#181143] font-semibold">Regístrate aquí</a>
+            <a href="#" className="text-[#181143] font-semibold">
+              Regístrate aquí
+            </a>
           </p>
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
@@ -117,16 +122,19 @@ const Login = () => {
         </div>
 
         {/* Logo y Recuadro */}
-        <div className="w-1/2 bg-gray-50 flex flex-col items-center justify-center rounded-r-lg p-6">
-          <div className="bg-gray-200 p-12 rounded-lg flex flex-col items-center">
+        <div className="w-full md:w-1/2 bg-gray-50 flex flex-col items-center justify-center rounded-r-lg p-6">
+          <div className="bg-gray-200 p-8 md:p-12 rounded-lg flex flex-col items-center">
             <Image
               src="/images/logo.svg"
               alt="Logo"
-              width={800}
-              height={800}
+              width={400}
+              height={400}
               priority
+              className="max-w-full h-auto"
             />
-            <h2 className="text-3xl font-bold text-gray-800 mt-6">Alpha E-Facturación</h2>
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mt-6">
+              Alpha E-Facturación
+            </h2>
           </div>
         </div>
       </div>

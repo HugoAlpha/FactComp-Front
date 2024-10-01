@@ -5,7 +5,6 @@ import { FaFileInvoice, FaUser, FaSignOutAlt, FaChevronDown, FaBars, FaHome, FaU
 import { MdOutlinePointOfSale } from "react-icons/md";
 
 const Sidebar = () => {
-<<<<<<< HEAD
     const [openMenu, setOpenMenu] = useState(null); // Para controlar un solo submenú abierto
     const [isOpen, setIsOpen] = useState(true);
     const [activeLink, setActiveLink] = useState(null);
@@ -21,13 +20,6 @@ const Sidebar = () => {
     // Abrir y cerrar submenús
     const toggleMenu = (menuName) => {
         setOpenMenu(prev => (prev === menuName ? null : menuName)); // Alterna entre abrir y cerrar el submenú
-=======
-    const [openMenus, setOpenMenus] = useState<{ [key: string]: boolean }>({});
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
-
-    const toggleMenu = (menuName: string) => {
-        setOpenMenus(prev => ({ ...prev, [menuName]: !prev[menuName] }));
->>>>>>> a77a38e6d45ee1a8891275c126490f643a328996
     };
 
     // Colapsar o expandir la barra lateral
@@ -94,7 +86,7 @@ const Sidebar = () => {
 
     return (
         <div className="flex min-h-screen">
-            <aside className={`bg-sixthColor text-white min-h-screen fixed md:relative z-10 transition-all duration-300 ${isOpen ? 'w-64' : 'w-16'}`}>
+            <aside className={`bg-firstColor text-white min-h-screen fixed md:relative z-10 transition-all duration-300 ${isOpen ? 'w-64' : 'w-16'}`}>
                 <div className="p-4 flex flex-col h-full">
                     {/* Botón para colapsar la barra lateral */}
                     <div className={`flex ${isOpen ? 'justify-end' : 'justify-center'} mb-2`}>
@@ -204,11 +196,11 @@ const Sidebar = () => {
                     </nav>
                     {/* Botón de Logout */}
                     <div className="mt-auto">
-                        <button className="flex items-center text-white font-bold hover:bg-gray-700 p-2 rounded-lg w-full">
+                        <button className="flex items-center text-white font-bold hover:bg-gray-700 p-2 w-full rounded-lg">
                             <div className="w-6 h-6 flex justify-center items-center">
                                 <FaSignOutAlt size={20} />
                             </div>
-                            {isOpen && <span className="ml-2">Logout</span>}
+                            {isOpen && <span className="ml-2">Salir</span>}
                         </button>
                     </div>
                 </div>
