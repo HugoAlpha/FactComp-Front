@@ -62,14 +62,15 @@ const Sales = () => {
         numeroTarjeta: string;
         montoTotal: number;
         montoTotalSujetoIva: number;
-      }
+        cuf: string;
+    }
 
-      interface SaleData {
+    interface SaleData {
         client: string;
         total: number;
         numeroFactura: number;
-      }
-      
+    }
+
 
 
     useEffect(() => {
@@ -536,8 +537,8 @@ const Sales = () => {
                                 <ReceiptOptionsModal
                                     isOpen={isReceiptModalOpen}
                                     onClose={handleCloseReceiptModal}
-                                    onPrint={handlePrintReceipt}
-                                    onDownload={handleDownloadReceipt}
+                                    cuf={facturaData.cuf}
+                                    numeroFactura={parseInt(facturaData.numeroFactura)}
                                 />
                             </div>
 
