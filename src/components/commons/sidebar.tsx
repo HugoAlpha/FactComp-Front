@@ -5,6 +5,7 @@ import { FaFileInvoice, FaUser, FaSignOutAlt, FaChevronDown, FaBars, FaHome, FaU
 import { MdOutlinePointOfSale } from "react-icons/md";
 
 const Sidebar = () => {
+<<<<<<< HEAD
     const [openMenu, setOpenMenu] = useState(null); // Para controlar un solo submenú abierto
     const [isOpen, setIsOpen] = useState(true);
     const [activeLink, setActiveLink] = useState(null);
@@ -20,6 +21,13 @@ const Sidebar = () => {
     // Abrir y cerrar submenús
     const toggleMenu = (menuName) => {
         setOpenMenu(prev => (prev === menuName ? null : menuName)); // Alterna entre abrir y cerrar el submenú
+=======
+    const [openMenus, setOpenMenus] = useState<{ [key: string]: boolean }>({});
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+    const toggleMenu = (menuName: string) => {
+        setOpenMenus(prev => ({ ...prev, [menuName]: !prev[menuName] }));
+>>>>>>> a77a38e6d45ee1a8891275c126490f643a328996
     };
 
     // Colapsar o expandir la barra lateral

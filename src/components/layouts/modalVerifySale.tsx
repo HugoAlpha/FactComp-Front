@@ -1,17 +1,41 @@
-"use client";
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 import { FaMoneyBill, FaCreditCard, FaQrcode } from 'react-icons/fa';
 import { PATH_URL_BACKEND } from '@/utils/constants';
 
-const ModalVerifySale = ({ isOpen, onClose, products, total, onSuccess }) => {
+interface Product {
+    id: number;
+    nombre: string;
+    precio: number;
+    cantidad: number;
+    discount?: number;
+}
+
+interface ModalVerifySaleProps {
+    isOpen: boolean;
+    onClose: () => void;
+    products: Product[];
+    total: number;
+    onSuccess: (data: { client: string; total: number, numeroFactura: number }) => void;
+}
+
+interface Client {
+    id: number;
+    nombreRazonSocial: string;
+    numeroDocumento: string;
+    codigoCliente: string;
+}
+
+
+const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({ isOpen, onClose, products, total, onSuccess }) => {
     const [paymentMethod, setPaymentMethod] = useState('Efectivo');
     const [paymentAmount, setPaymentAmount] = useState('');
+    const [cashAmount, setCashAmount] = useState('');
+    const [cardAmount, setCardAmount] = useState('');
     const [selectedClient, setSelectedClient] = useState('');
-    const [clients, setClients] = useState([]);
+    const [clients, setClients] = useState<Client[]>([]);
     const [changeNeeded, setChangeNeeded] = useState(false);
 
-    // Fetch the clients when the modal opens
     useEffect(() => {
         if (isOpen) {
             const fetchClients = async () => {
@@ -32,8 +56,8 @@ const ModalVerifySale = ({ isOpen, onClose, products, total, onSuccess }) => {
         }
     }, [isOpen]);
 
-    const handleValidate = () => {
-        if (paymentMethod === 'Efectivo' && paymentAmount < total) {
+    const handleValidate = async () => {
+        if (paymentMethod === 'Efectivo' && Number(paymentAmount) < total) {
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
@@ -42,16 +66,66 @@ const ModalVerifySale = ({ isOpen, onClose, products, total, onSuccess }) => {
             return;
         }
 
-        Swal.fire({
-            icon: 'success',
-            title: 'Venta Realizada',
-            text: 'La venta ha sido procesada con éxito.',
-        }).then(() => {
-            onSuccess({
-                client: selectedClient,
-                total: paymentAmount || total,
+        if (paymentMethod === 'Híbrido') {
+            const totalPayment = parseFloat(cashAmount) + parseFloat(cardAmount);
+            if (totalPayment !== total) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'La suma del efectivo y la tarjeta debe ser igual al total.',
+                });
+                return;
+            }
+        }
+
+        try {
+            const body = {
+                usuario: clients.find(client => client.nombreRazonSocial === selectedClient)?.codigoCliente || '',
+                idPuntoVenta: "1",
+                idCliente: clients.find(client => client.nombreRazonSocial === selectedClient)?.id || '',
+                nitInvalido: true,
+                detalle: products.map(product => ({
+                    idProducto: product.id,
+                    cantidad: product.cantidad.toString(),
+                    montoDescuento: product.discount ? product.discount.toFixed(2) : '00.0'
+                }))
+            };
+
+            const response = await fetch(`${PATH_URL_BACKEND}/factura/emitir`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(body),
             });
-        });
+
+            if (response.ok) {
+                const data = await response.json();
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Factura emitida con éxito',
+                    text: `CUF: ${data.cuf}, Número de factura: ${data.numeroFactura}`,
+                }).then(() => {
+                    onSuccess({
+                        client: selectedClient,
+                        total: Number(paymentAmount) || total,
+                        numeroFactura: data.numeroFactura
+                    });
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error al emitir factura',
+                    text: 'No se pudo emitir la factura, intenta de nuevo.',
+                });
+            }
+        } catch (error) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error de conexión',
+                text: 'No se pudo conectar con el servidor.',
+            });
+        }
     };
 
     if (!isOpen) return null;
@@ -61,7 +135,6 @@ const ModalVerifySale = ({ isOpen, onClose, products, total, onSuccess }) => {
             <div className="bg-white p-8 rounded-lg shadow-lg max-w-lg w-full">
                 <h2 className="text-xl font-bold mb-4">Verificación de Pago</h2>
 
-                {/* Payment Method */}
                 <div className="mb-4">
                     <label className="block mb-2 font-semibold">Método de Pago</label>
                     <div className="flex space-x-4">
@@ -83,10 +156,15 @@ const ModalVerifySale = ({ isOpen, onClose, products, total, onSuccess }) => {
                         >
                             <FaQrcode className="mr-2" /> QR
                         </button>
+                        <button
+                            onClick={() => setPaymentMethod('Híbrido')}
+                            className={`flex items-center p-2 border rounded ${paymentMethod === 'Híbrido' ? 'bg-fifthColor' : 'bg-gray-100'}`}
+                        >
+                            <FaMoneyBill className="mr-2" /> Híbrido
+                        </button>
                     </div>
                 </div>
 
-                {/* Payment Details for Efectivo */}
                 {paymentMethod === 'Efectivo' && (
                     <div className="mb-4">
                         <label className="block mb-2 font-semibold">Cantidad Pagada</label>
@@ -96,15 +174,33 @@ const ModalVerifySale = ({ isOpen, onClose, products, total, onSuccess }) => {
                             value={paymentAmount}
                             onChange={(e) => setPaymentAmount(e.target.value.replace(/[^0-9.]/g, ''))}
                         />
-                        {paymentAmount > total && (
+                        {Number(paymentAmount) > total && (
                             <p className="text-green-500 mt-2">
-                                Cambio: ${(paymentAmount - total).toFixed(2)}
+                                Cambio: ${(Number(paymentAmount) - total).toFixed(2)}
                             </p>
                         )}
                     </div>
                 )}
 
-                {/* Client Selection */}
+                {paymentMethod === 'Híbrido' && (
+                    <div className="mb-4">
+                        <label className="block mb-2 font-semibold">Cantidad Pagada en Efectivo</label>
+                        <input
+                            type="number"
+                            className="border p-2 w-full mb-4"
+                            value={cashAmount}
+                            onChange={(e) => setCashAmount(e.target.value.replace(/[^0-9.]/g, ''))}
+                        />
+                        <label className="block mb-2 font-semibold">Cantidad Pagada en Tarjeta</label>
+                        <input
+                            type="number"
+                            className="border p-2 w-full"
+                            value={cardAmount}
+                            onChange={(e) => setCardAmount(e.target.value.replace(/[^0-9.]/g, ''))}
+                        />
+                    </div>
+                )}
+
                 <div className="mb-4">
                     <label className="block mb-2 font-semibold">Cliente</label>
                     <select
@@ -121,12 +217,10 @@ const ModalVerifySale = ({ isOpen, onClose, products, total, onSuccess }) => {
                     </select>
                 </div>
 
-                {/* Total */}
                 <div className="mb-4">
                     <h3 className="text-lg font-bold">Total: ${total.toFixed(2)}</h3>
                 </div>
 
-                {/* Action Buttons */}
                 <div className="flex justify-end space-x-4">
                     <button
                         className="px-6 py-2 bg-sixthColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400 mr-2"
