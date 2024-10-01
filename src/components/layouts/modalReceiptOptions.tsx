@@ -13,7 +13,7 @@ const ReceiptOptionsModal: React.FC<ReceiptOptionsModalProps> = ({ isOpen, onClo
 
   const handlePrintReceipt = async () => {
     try {
-      const response = await fetch(`http://10.1.70.216:8081/api/v1/pdf/download?cuf=${cuf}&numeroFactura=${numeroFactura}`, {
+      const response = await fetch(`http://10.1.70.216:8081/api/v1/pdf/download?cufd=${cuf}&numeroFactura=${numeroFactura}`, {
         method: 'GET',
       });
 
@@ -34,15 +34,13 @@ const ReceiptOptionsModal: React.FC<ReceiptOptionsModalProps> = ({ isOpen, onClo
 
   const handleDownloadReceipt = async () => {
     try {
-      const response = await fetch(`http://10.1.70.216:8081/api/v1/pdf/download?cuf=${cuf}&numeroFactura=${numeroFactura}`, {
+      const response = await fetch(`http://10.1.70.216:8081/api/v1/pdf/download?cufd=${cuf}&numeroFactura=${numeroFactura}`, {
         method: 'GET',
       });
 
       if (response.ok) {
         const blob = await response.blob();
         const url = window.URL.createObjectURL(blob);
-
-        // Crea un enlace de descarga y haz clic en él automáticamente
         const link = document.createElement('a');
         link.href = url;
         link.download = `Factura_${numeroFactura}.pdf`;
