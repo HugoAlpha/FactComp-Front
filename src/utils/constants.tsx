@@ -1,1 +1,1 @@
-export const PATH_URL_BACKEND = "http://10.1.70.216:8081/api/v1";
+export const PATH_URL_BACKEND = "http://10.1.4.65:8081/api/v1";

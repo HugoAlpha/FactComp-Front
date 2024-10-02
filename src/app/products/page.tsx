@@ -1,10 +1,11 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { FaTrashAlt, FaEdit } from 'react-icons/fa';
+import { FaTrashAlt, FaEdit, FaPlus } from 'react-icons/fa';
 import Sidebar from '@/components/commons/sidebar';
 import Header from '@/components/commons/header';
 import { PATH_URL_BACKEND } from "@/utils/constants";
 import ModalCreateProduct from '@/components/layouts/modalCreateProduct';
+import Swal from 'sweetalert2';
 
 interface Product {
     id: number;
@@ -28,6 +29,7 @@ const ProductList = () => {
                 setProducts(data);
             } catch (error) {
                 console.error('Error al obtener los productos:', error);
+                Swal.fire('Error', 'Error al obtener los productos', 'error');
             }
         };
 
@@ -85,44 +87,56 @@ const ProductList = () => {
                 <Header />
                 <div className="flex-grow overflow-auto bg-gray-50">
                     <div className="p-6">
-                        <h1 className="text-2xl font-bold mb-6 text-gray-700">Gestión de Productos</h1>
-                        <div className="flex justify-end mb-4">
+                        <h2 className="text-2xl font-bold mb-6 text-gray-700">Gestión de Productos</h2>
+
+                        <div className="flex justify-between mb-4">
+                            <input
+                                type="text"
+                                placeholder="Buscar producto..."
+                                className="border p-2 rounded-lg w-1/3"
+                            />
                             <button
-                                className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 text-lg"
+                                className="bg-sixthColor text-white py-2 px-4 rounded-lg hover:bg-thirdColor text-lg"
                                 onClick={handleOpenModal}
                             >
-                                Agregar Producto
+                                Agregar Producto <FaPlus className="inline-block ml-2" />
                             </button>
                         </div>
-                        <div className="overflow-x-auto">
 
-                            <table className="min-w-full bg-white border border-gray-300 text-black">
+                        <div className="overflow-x-auto shadow-lg rounded-lg border border-gray-200">
+                            <table className="table-auto w-full bg-white">
                                 <thead>
-                                    <tr className="bg-gray-100">
-                                        <th className="px-4 py-2 border text-left font-semibold text-gray-700">Descripción</th>
-                                        <th className="px-4 py-2 border text-left font-semibold text-gray-700">Precio Unitario</th>
-                                        <th className="px-4 py-2 border text-left font-semibold text-gray-700">Código Producto SIN</th>
-                                        <th className="px-4 py-2 border text-left font-semibold text-gray-700">Operación</th>
+                                    <tr className="bg-fourthColor text-left text-gray-700">
+                                        <th className="px-6 py-4 font-bold">Descripción</th>
+                                        <th className="px-6 py-4 font-bold">Precio Unitario</th>
+                                        <th className="px-6 py-4 font-bold">Código Producto SIN</th>
+                                        <th className="px-6 py-4 font-bold">Operaciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {paginatedProducts.map((product) => (
-                                        <tr key={product.id} className="border-b">
-                                            <td className="px-4 py-4">
+                                        <tr key={product.id} className="border-b hover:bg-gray-50 text-black">
+                                            <td className="px-6 py-4">
                                                 <div>
                                                     <p className="font-bold text-black">{product.descripcion}</p>
                                                     <p className="text-sm text-gray-600">Código: {product.codigo}</p>
                                                 </div>
                                             </td>
-                                            <td className="border px-4 py-4 text-black">{product.precioUnitario} Bs.</td>
-                                            <td className="border px-4 py-4 text-black">{product.codigoProductoSin}</td>
-                                            <td className="px-4 py-4 flex space-x-2">
-                                                <button className="text-red-500 hover:text-red-700">
-                                                    <FaTrashAlt />
-                                                </button>
-                                                <button className="text-blue-500 hover:text-blue-700">
-                                                    <FaEdit />
-                                                </button>
+                                            <td className="px-6 py-4">{product.precioUnitario} Bs.</td>
+                                            <td className="px-6 py-4">{product.codigoProductoSin}</td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex">
+                                                    <button
+                                                        className="bg-red-200 hover:bg-red-300 p-2 rounded-l-lg flex items-center justify-center border border-red-300"
+                                                    >
+                                                        <FaTrashAlt className="text-black" />
+                                                    </button>
+                                                    <button
+                                                        className="bg-blue-200 hover:bg-blue-300 p-2 rounded-r-lg flex items-center justify-center border border-blue-300"
+                                                    >
+                                                        <FaEdit className="text-black" />
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
                                     ))}
@@ -130,11 +144,12 @@ const ProductList = () => {
                             </table>
                         </div>
 
+                        {/* Paginación */}
                         <div className="flex space-x-1 justify-center mt-6">
                             <button
                                 onClick={handlePrevPage}
                                 disabled={currentPage === 1}
-                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                             >
                                 Prev
                             </button>
@@ -143,7 +158,7 @@ const ProductList = () => {
                                 <button
                                     key={page}
                                     onClick={() => setCurrentPage(page)}
-                                    className={`min-w-9 rounded-full border py-2 px-3.5 text-center text-sm transition-all shadow-sm ${page === currentPage ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-800 hover:text-white hover:border-slate-800'} focus:bg-slate-800 focus:text-white active:border-slate-800 active:bg-slate-800`}
+                                    className={`rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 ${currentPage === page ? 'bg-slate-800 text-white' : ''}`}
                                 >
                                     {page}
                                 </button>
@@ -152,14 +167,15 @@ const ProductList = () => {
                             <button
                                 onClick={handleNextPage}
                                 disabled={currentPage === totalPages}
-                                className="min-w-9 rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                             >
                                 Next
                             </button>
                         </div>
+
                         <div className="flex space-x-1 justify-center mt-2">
-                            <span className="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">
-                                Mostrando página <span className="font-semibold text-gray-900 dark:text-white">{currentPage}</span> de <span className="font-semibold text-gray-900 dark:text-white">{totalPages}</span>
+                            <span className="text-sm font-normal text-gray-500 mb-4 md:mb-0 block w-full md:inline md:w-auto">
+                                Mostrando página <span className="font-semibold text-gray-900">{currentPage}</span> de <span className="font-semibold text-gray-900">{totalPages}</span>
                             </span>
                         </div>
                     </div>
@@ -174,4 +190,5 @@ const ProductList = () => {
         </div>
     );
 };
+
 export default ProductList;
