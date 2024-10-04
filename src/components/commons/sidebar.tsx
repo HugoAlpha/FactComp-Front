@@ -74,12 +74,12 @@ const Sidebar = () => {
                 </button>
             </div>
 
-            <aside className={`bg-[#10314b] text-white min-h-screen fixed md:relative z-10 transition-all duration-300
+            <aside className={`bg-principalColor text-white min-h-screen fixed md:relative z-10 transition-all duration-300
                 ${isSidebarOpen ? 'w-64' : 'w-0 md:w-64'}`}>
                 <div className="p-4 flex flex-col h-full">
                     <div className="mb-6">
                         <Image
-                            src="/images/LogoIdAlpha.png"
+                            src="/images/LogoIdAlpha2.png"
                             alt="Logo"
                             width={250}
                             height={150}
@@ -89,7 +89,7 @@ const Sidebar = () => {
                     <nav className="flex-grow">
                         <ul className="space-y-2">
                             <li>
-                                <a href="dashboard" className="block p-2 font-bold hover:bg-gray-700 rounded-lg">
+                                <a href="dashboard" className="block p-2 font-bold hover:bg-firstColor rounded-lg">
                                     <span className="flex items-center">
                                         <FaHome className="mr-2" /> Inicio
                                     </span>
@@ -97,7 +97,7 @@ const Sidebar = () => {
                             </li>
 
                             <li>
-                                <a href="sales" className="block p-2 font-bold hover:bg-gray-700 rounded-lg">
+                                <a href="sales" className="block p-2 font-bold hover:bg-firstColor rounded-lg">
                                     <span className="flex items-center">
                                         <MdOutlinePointOfSale className="mr-2" /> Nueva Venta
                                     </span>
@@ -108,7 +108,7 @@ const Sidebar = () => {
                                 <li key={index}>
                                     <button
                                         onClick={() => toggleMenu(item.name)}
-                                        className="flex items-center justify-between w-full p-2 text-left font-bold hover:bg-gray-700 rounded-lg"
+                                        className="flex items-center justify-between w-full p-2 text-left font-bold hover:bg-firstColor rounded-lg"
                                     >
                                         <span className="flex items-center">
                                             {item.icon}
@@ -120,7 +120,7 @@ const Sidebar = () => {
                                         <ul className="ml-4 mt-2 space-y-2">
                                             {item.subItems.map((subItem, subIndex) => (
                                                 <li key={subIndex}>
-                                                    <a href={subItem.href} className="block p-2 pl-4 hover:bg-gray-700 rounded-lg">
+                                                    <a href={subItem.href} className="block p-2 pl-4 hover:bg-firstColor rounded-lg">
                                                         {subItem.name}
                                                     </a>
                                                 </li>
@@ -131,7 +131,7 @@ const Sidebar = () => {
                             ))}
 
                             <li>
-                                <a href="/users" className="block p-2 font-bold hover:bg-gray-700 rounded-lg">
+                                <a href="/users" className="block p-2 font-bold hover:bg-firstColor rounded-lg">
                                     <span className="flex items-center">
                                         <FaUsers className="mr-2" /> Usuarios
                                     </span>
@@ -139,17 +139,18 @@ const Sidebar = () => {
                             </li>
 
                             <li>
-                                <a href="/enterprise" className="block p-2 font-bold hover:bg-gray-700 rounded-lg">
+                                <a href="/enterprise" className="block p-2 font-bold hover:bg-firstColor rounded-lg">
                                     <span className="flex items-center">
                                         <FaBuilding className="mr-2" /> Empresa
                                     </span>
                                 </a>
                             </li>
                         </ul>
+                        
                     </nav>
 
                     <div className="mt-auto">
-                        <button className="flex items-center text-white font-bold hover:bg-gray-700 p-2 rounded-lg w-full">
+                        <button className="flex items-center text-white font-bold hover:bg-firstColor p-2 rounded-lg w-full">
                             <FaSignOutAlt className="mr-2" /> Logout
                         </button>
                     </div>
