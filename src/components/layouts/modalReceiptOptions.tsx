@@ -1,5 +1,6 @@
 import React from 'react';
 import Swal from 'sweetalert2';
+import { PATH_URL_BACKEND } from '@/utils/constants';
 
 interface ReceiptOptionsModalProps {
   isOpen: boolean;
@@ -13,7 +14,7 @@ const ReceiptOptionsModal: React.FC<ReceiptOptionsModalProps> = ({ isOpen, onClo
 
   const handlePrintReceipt = async () => {
     try {
-      const response = await fetch(`http://10.1.70.216:8081/api/v1/pdf/download?cufd=${cuf}&numeroFactura=${numeroFactura}`, {
+      const response = await fetch(`${PATH_URL_BACKEND}/pdf/download?cufd=${cuf}&numeroFactura=${numeroFactura}`, {
         method: 'GET',
       });
 
@@ -34,7 +35,7 @@ const ReceiptOptionsModal: React.FC<ReceiptOptionsModalProps> = ({ isOpen, onClo
 
   const handleDownloadReceipt = async () => {
     try {
-      const response = await fetch(`http://10.1.70.216:8081/api/v1/pdf/download?cufd=${cuf}&numeroFactura=${numeroFactura}`, {
+      const response = await fetch(`${PATH_URL_BACKEND}/pdf/download?cufd=${cuf}&numeroFactura=${numeroFactura}`, {
         method: 'GET',
       });
 
