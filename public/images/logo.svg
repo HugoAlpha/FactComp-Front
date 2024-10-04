@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 viewBox="0 0 500 500" style="enable-background:new 0 0 500 500;" xml:space="preserve">
+	viewBox="0 0 500 500" style="enable-background:new 0 0 500 500;" xml:space="preserve">
 <g id="BACKGROUND">
 	<radialGradient id="SVGID_1_" cx="250" cy="250" r="250" gradientUnits="userSpaceOnUse">
 		<stop  offset="0" style="stop-color:#FFFFFF"/>
@@ -25,7 +25,7 @@
 			c0,0.006,0,0.006,0,0.006c0.946,1.212,1.965,2.362,3.052,3.432c3.324,3.307,7.294,5.963,11.7,7.77
 			c4.219,1.733,8.835,2.69,13.677,2.69c10.5,0,27.116-10.998,27.393-10.658c5.448-2.826,11.638-4.423,18.202-4.423
 			c14.015,0,26.321,7.293,33.351,18.285C272.526,240.621,272.986,215.636,260.074,197.956z"/>
-		
+
 			<linearGradient id="SVGID_00000165201390649344031690000013691907989506089113_" gradientUnits="userSpaceOnUse" x1="207.0763" y1="105.7186" x2="299.5279" y2="281.336">
 			<stop  offset="0" style="stop-color:#89E2E8"/>
 			<stop  offset="0.5052" style="stop-color:#5D9CB4"/>

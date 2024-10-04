@@ -36,18 +36,22 @@ const Login = () => {
   };
 
   return (
+
     <div className="flex items-center justify-center h-screen bg-gradient-to-r from-[#E6EFF7] to-[#F0F0F0]">
       <div className="bg-white shadow-2xl rounded-lg flex w-5/6 h-5/6 max-w-6xl overflow-hidden">
         <div className="w-1/2 p-10 flex flex-col justify-center bg-white">
           <div className="mx-auto mb-4">
+
             <Image
               src="/images/LogoIdAlpha.png"
               alt="Logo ID"
               width={300}
               height={300}
               priority
+              className="max-w-full h-auto"
             />
           </div>
+
           <h2 className="text-4xl font-bold text-gray-900 mb-6 text-center">Inicio de Sesión</h2>
           
           <form onSubmit={handleLogin} className="space-y-6">
@@ -108,13 +112,16 @@ const Login = () => {
         {/* Logo y Recuadro */}
         <div className="w-1/2 bg-[#10314b] flex flex-col items-center justify-center p-12">
           <div className="bg-white p-8 shadow-lg rounded-lg flex flex-col items-center">
+
             <Image
               src="/images/efactu2.png"
               alt="Logo"
+
               width={260}
               height={260}
             />
             <h2 className="text-3xl font-bold text-[#10314b] mt-6">Alpha E-Facturación</h2>
+
           </div>
         </div>
       </div>

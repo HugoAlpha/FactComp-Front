@@ -1,6 +1,6 @@
 "use client";
-import React, { useState } from 'react';
-
+import React from 'react';
+import Swal from 'sweetalert2';
 
 interface Bill {
     codigoSucursal: number;
@@ -22,20 +22,6 @@ interface BillDetailsModalProps {
     bill: Bill | null;
 }
 
-interface FormattedBill {
-    codigoSucursal: number;
-    direccion?: string;
-    codigoPuntoVenta: number;
-    fechaEmision?: string;
-    nombreRazonSocial?: string;
-    codigoTipoDocumentoIdentidad: number;
-    numeroDocumento?: string;
-    codigoMetodoPago: number;
-    numeroTarjeta?: string;
-    montoTotal?: number;
-    descuentoAdicional?: number;
-}
-
 const BillDetailsModal: React.FC<BillDetailsModalProps> = ({ isOpen, onClose, bill }) => {
     if (!isOpen || !bill) return null;
 
@@ -51,102 +37,67 @@ const BillDetailsModal: React.FC<BillDetailsModalProps> = ({ isOpen, onClose, bi
     };
 
     const getPuntoVenta = (codigoPuntoVenta: number) => {
-        switch (codigoPuntoVenta) {
-            case 0:
-                return "Caja 2";
-            case 1:
-                return "Caja 6";
-            default:
-                return "Punto de venta desconocido";
-        }
+        return `Punto de venta ${codigoPuntoVenta}`;
     };
-
-    const getTipoDocumento = (codigoTipoDocumentoIdentidad: number) => {
-        switch (codigoTipoDocumentoIdentidad) {
-            case 5:
-                return "C.I.";
-            case 0:
-                return "NIT";
-            default:
-                return "Tipo de documento desconocido";
-        }
-    };
-
-    const getMetodoPago = (codigoMetodoPago: number) => {
-        switch (codigoMetodoPago) {
-            case 1:
-                return "Efectivo";
-            case 2:
-                return "Tarjeta";
-            default:
-                return "Método de pago desconocido";
-        }
-    };
-
-    const formattedFechaEmision = bill.fechaEmision
-        ? new Date(bill.fechaEmision).toLocaleString()
-        : "Fecha desconocida";
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white rounded-lg shadow-lg w-1/2">
-                <div className="bg-blue-600 text-white p-4 rounded-t-lg">
-                    <h2 className="text-lg font-semibold">Detalles de la Factura</h2>
+            <div className="bg-white rounded shadow-lg w-500">
+                <div className="bg-white text-black text-2xl font-semibold p-4 rounded-t">
+                    Detalles de la Factura
                 </div>
-                <div className="p-6">
-                    <div className="grid grid-cols-2 gap-6">
-                        <div>
-                            <label className="block text-gray-700 font-semibold">Sucursal:</label>
-                            <p>{getSucursal(bill.codigoSucursal)}</p>
+                <div className="p-6 m-6">
+                    <div className="grid gap-4">
+                        <div className="flex justify-between">
+                            <span className="font-semibold">Sucursal:</span>
+                            <span>{getSucursal(bill.codigoSucursal)}</span>
                         </div>
-                        <div>
-                            <label className="block text-gray-700 font-semibold">Dirección:</label>
-                            <p>{bill.direccion || "Dirección desconocida"}</p>
+                        <div className="flex justify-between">
+                            <span className="font-semibold">Dirección:</span>
+                            <span>{bill.direccion || 'N/A'}</span>
                         </div>
-                        <div>
-                            <label className="block text-gray-700 font-semibold">Punto de Venta:</label>
-                            <p>{getPuntoVenta(bill.codigoPuntoVenta)}</p>
+                        <div className="flex justify-between">
+                            <span className="font-semibold">Punto de Venta:</span>
+                            <span>{getPuntoVenta(bill.codigoPuntoVenta)}</span>
                         </div>
-                        <div>
-                            <label className="block text-gray-700 font-semibold">Fecha de Emisión:</label>
-                            <p>{formattedFechaEmision}</p>
+                        <div className="flex justify-between">
+                            <span className="font-semibold">Fecha de Emisión:</span>
+                            <span>{bill.fechaEmision || 'N/A'}</span>
                         </div>
-                        <div>
-                            <label className="block text-gray-700 font-semibold">Cliente:</label>
-                            <p>{bill.nombreRazonSocial || "Cliente desconocido"}</p>
+                        <div className="flex justify-between">
+                            <span className="font-semibold">Razón Social:</span>
+                            <span>{bill.nombreRazonSocial || 'N/A'}</span>
                         </div>
-                        <div>
-                            <label className="block text-gray-700 font-semibold">Tipo Documento:</label>
-                            <p>{getTipoDocumento(bill.codigoTipoDocumentoIdentidad)}</p>
+                        <div className="flex justify-between">
+                            <span className="font-semibold">Tipo de Documento:</span>
+                            <span>{bill.codigoTipoDocumentoIdentidad === 0 ? 'NIT' : 'CI'}</span>
                         </div>
-                        <div>
-                            <label className="block text-gray-700 font-semibold">N° Documento:</label>
-                            <p>{bill.numeroDocumento || "Documento desconocido"}</p>
+                        <div className="flex justify-between">
+                            <span className="font-semibold">Número Documento:</span>
+                            <span>{bill.numeroDocumento || 'N/A'}</span>
                         </div>
-                        <div>
-                            <label className="block text-gray-700 font-semibold">Método de Pago:</label>
-                            <p>{getMetodoPago(bill.codigoMetodoPago)}</p>
+                        <div className="flex justify-between">
+                            <span className="font-semibold">Método de Pago:</span>
+                            <span>{bill.codigoMetodoPago}</span>
                         </div>
-                        <div>
-                            <label className="block text-gray-700 font-semibold">N° Tarjeta:</label>
-                            <p>{bill.numeroTarjeta || "-"}</p>
+                        <div className="flex justify-between">
+                            <span className="font-semibold">Número de Tarjeta:</span>
+                            <span>{bill.numeroTarjeta || 'N/A'}</span>
                         </div>
-                        <div>
-                            <label className="block text-gray-700 font-semibold">Monto Total:</label>
-                            <p>
-                                {bill.montoTotal !== undefined && bill.montoTotal !== null
-                                    ? `$${Number(bill.montoTotal).toFixed(2)}`
-                                    : '-'}
-                            </p>
+                        <div className="flex justify-between">
+                            <span className="font-semibold">Monto Total:</span>
+                            <span>{bill.montoTotal ? `$${bill.montoTotal.toFixed(2)}` : 'N/A'}</span>
                         </div>
-                        <div>
-                            <label className="block text-gray-700 font-semibold">Descuento:</label>
-                            <p>{bill.descuentoAdicional !== undefined && bill.descuentoAdicional !== null ? `$${bill.descuentoAdicional.toFixed(2)}` : '-'}</p>
+                        <div className="flex justify-between">
+                            <span className="font-semibold">Descuento Adicional:</span>
+                            <span>{bill.descuentoAdicional ? `$${bill.descuentoAdicional.toFixed(2)}` : 'N/A'}</span>
                         </div>
                     </div>
-
                     <div className="flex justify-end mt-6">
-                        <button onClick={onClose} className="bg-red-500 text-white px-4 py-2 rounded">
+                        <button
+                            onClick={onClose}
+                            className="px-6 py-2 bg-sixthColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400"
+                        >
                             Cerrar
                         </button>
                     </div>

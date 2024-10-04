@@ -77,117 +77,136 @@ const Activities: React.FC = () => {
     };
 
     return (
-        <div className="flex min-h-screen">
+        <div className="flex min-h-screen bg-gray-100">
             <Sidebar />
             <div className="flex flex-col w-full min-h-screen">
                 <Header />
 
-                <div className="flex-grow overflow-auto bg-gray-50">
-                    <div className="p-6">
-                        <h2 className="text-xl font-semibold mb-4 text-black">Lista de Actividades</h2>
+                <div className="flex-grow overflow-auto bg-white p-8">
+                    <h2 className="text-2xl font-semibold mb-6 text-gray-700">Lista de Actividades</h2>
 
-                        {/* Filtro por Estado */}
-                        <div className="mb-4">
-                            <label className="mr-2 text-black">Filtrar por Estado:</label>
-                            <select
-                                value={estadoFiltro}
-                                onChange={(e) => setEstadoFiltro(e.target.value)}
-                                className="border p-2"
-                            >
-                                <option value="Todos">Todos</option>
-                                <option value="Habilitado">Habilitado</option>
-                                <option value="Deshabilitado">Deshabilitado</option>
-                            </select>
-                        </div>
+                    {/* Filtro por Estado */}
+                    <div className="mb-6">
+                        <label className="mr-4 text-gray-600 font-medium">Filtrar por Estado:</label>
+                        <select
+                            value={estadoFiltro}
+                            onChange={(e) => setEstadoFiltro(e.target.value)}
+                            className="border border-gray-300 rounded-lg p-2 text-gray-700"
+                        >
+                            <option value="Todos">Todos</option>
+                            <option value="Habilitado">Habilitado</option>
+                            <option value="Deshabilitado">Deshabilitado</option>
+                        </select>
+                    </div>
 
-                        <div className="mb-4">
-                            <label className="mr-2 text-black">Seleccionar Actividades:</label>
-                            <div className="border p-2 text-black">
-                                {actividades.map((actividad) => (
-                                    <label key={actividad.id} className="block">
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedActividades.includes(actividad.id)}
-                                            onChange={() => handleSelectActividad(actividad.id)}
-                                            className="mr-2"
-                                        />
-                                        {actividad.descripcion}
-                                    </label>
-                                ))}
-                            </div>
+                    {/* Seleccionar Actividades */}
+                    <div className="mb-6">
+                        <label className="mr-4 text-gray-600 font-medium">Seleccionar Actividades:</label>
+                        <div className="border border-gray-300 rounded-lg p-4 bg-gray-50">
+                            {actividades.map((actividad) => (
+                                <label key={actividad.id} className="block text-gray-700">
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedActividades.includes(actividad.id)}
+                                        onChange={() => handleSelectActividad(actividad.id)}
+                                        className="mr-2"
+                                    />
+                                    {actividad.descripcion}
+                                </label>
+                            ))}
                         </div>
+                    </div>
 
-                        <div className="mb-4">
-                            <label className="mr-2 text-black">Filas por página:</label>
-                            <select
-                                value={rowsPerPage}
-                                onChange={(e) => setRowsPerPage(Number(e.target.value))}
-                                className="border p-2"
-                            >
-                                <option value={5}>5</option>
-                                <option value={10}>10</option>
-                                <option value={15}>15</option>
-                            </select>
-                        </div>
-                        <div className="overflow-x-auto">
-                            <table className="table-auto w-full text-black">
-                                <thead>
-                                    <tr>
-                                        <th className="border px-4 py-2">Código Producto Servicio</th>
-                                        <th className="border px-4 py-2">Descripción</th>
-                                        <th className="border px-4 py-2">Código Actividad</th>
-                                        <th className="border px-4 py-2">Estado</th>
+                    {/* Filas por página */}
+                    <div className="mb-6">
+                        <label className="mr-4 text-gray-600 font-medium">Filas por página:</label>
+                        <select
+                            value={rowsPerPage}
+                            onChange={(e) => setRowsPerPage(Number(e.target.value))}
+                            className="border border-gray-300 rounded-lg p-2 text-gray-700"
+                        >
+                            <option value={5}>5</option>
+                            <option value={10}>10</option>
+                            <option value={15}>15</option>
+                        </select>
+                    </div>
+
+                    {/* Tabla de actividades */}
+                    <div className="overflow-x-auto shadow-lg rounded-lg border border-gray-200">
+                        <table className="table-auto w-full bg-white">
+                            <thead>
+                            <tr className="bg-fourthColor text-left text-gray-700">
+                                <th className="px-6 py-4 font-bold">Código Producto Servicio</th>
+                                <th className="px-6 py-4 font-bold">Descripción</th>
+                                <th className="px-6 py-4 font-bold">Código Actividad</th>
+                                <th className="px-6 py-4 font-bold">Estado</th>
+                            </tr>
+
+                            </thead>
+                            <tbody>
+                                {paginatedActividades.map((actividad) => (
+                                    <tr key={actividad.id} className="border-b hover:bg-gray-50 text-black">
+                                        <td className="px-6 py-4">{actividad.codigoProductoServicio}</td>
+                                        <td className="px-6 py-4">{actividad.descripcion}</td>
+                                        <td className="px-6 py-4">{actividad.codigoActividadNandina}</td>
+                                        <td className="px-6 py-4">
+    <div className="flex items-center">
+        <div
+            className={`h-2.5 w-2.5 rounded-full me-2 ${
+                actividad.estado === 'Habilitado' ? 'bg-green-500' : 'bg-red-500'
+            }`}
+        ></div>
+        <div
+            className={`px-2 py-1 rounded-lg ${
+                actividad.estado === 'Habilitado' ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'
+            }`}
+        >
+            <span>
+                {actividad.estado}
+            </span>
+        </div>
+    </div>
+</td>
+
                                     </tr>
-                                </thead>
-                                <tbody>
-                                    {paginatedActividades.map((actividad) => (
-                                        <tr key={actividad.id}>
-                                            <td className="border px-4 py-2">{actividad.codigoProductoServicio}</td>
-                                            <td className="border px-4 py-2">{actividad.descripcion}</td>
-                                            <td className="border px-4 py-2">{actividad.codigoActividadNandina}</td>
-                                            <td className={`border px-4 py-2 ${actividad.estado === 'Habilitado' ? 'text-green-600' : 'text-red-600'}`}>
-                                                {actividad.estado}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
 
-                        {/* Paginación */}
-                        <div className="flex space-x-1 justify-center mt-6">
-                            <button
-                                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                                disabled={currentPage === 1}
-                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
-                            >
-                                Prev
-                            </button>
+                    {/* Paginación */}
+                    <div className="flex justify-between items-center mt-6">
+                        <button
+                            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                            disabled={currentPage === 1}
+                            className="rounded-full py-2 px-4 bg-gray-200 text-gray-600 hover:bg-gray-300 disabled:opacity-50"
+                        >
+                            Anterior
+                        </button>
 
+                        <div className="flex space-x-2">
                             {getPageNumbers().map((page) => (
                                 <button
                                     key={page}
                                     onClick={() => setCurrentPage(page)}
-                                    className={`min-w-9 rounded-full border py-2 px-3.5 text-center text-sm transition-all shadow-sm ${page === currentPage ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-800 hover:text-white hover:border-slate-800'} focus:bg-slate-800 focus:text-white active:border-slate-800 active:bg-slate-800`}
+                                    className={`py-2 px-4 rounded-full ${
+                                        page === currentPage
+                                            ? 'bg-gray-800 text-white'
+                                            : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                                    }`}
                                 >
                                     {page}
                                 </button>
                             ))}
-
-                            <button
-                                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                                disabled={currentPage === totalPages}
-                                className="min-w-9 rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
-                            >
-                                Next
-                            </button>
                         </div>
 
-                        <div className="flex space-x-1 justify-center mt-2">
-                            <span className="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">
-                                Mostrando página <span className="font-semibold text-gray-900 dark:text-white">{currentPage}</span> de <span className="font-semibold text-gray-900 dark:text-white">{totalPages}</span>
-                            </span>
-                        </div>
+                        <button
+                            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                            disabled={currentPage === totalPages}
+                            className="rounded-full py-2 px-4 bg-gray-200 text-gray-600 hover:bg-gray-300 disabled:opacity-50"
+                        >
+                            Siguiente
+                        </button>
                     </div>
                 </div>
             </div>

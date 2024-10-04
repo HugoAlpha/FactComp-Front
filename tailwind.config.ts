@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 const config: Config = {
@@ -16,6 +17,9 @@ const config: Config = {
         fourthColor: "#9CBFCF",
         fifthColor: "#D8E3E8",
         sixthColor: "#8C9CBC"
+        seventhColor: "#bfccdc",
+        eighthColor: "#d8e3e8",
+        ninthColor: "#bcc8d4"
       },
     },
   },

@@ -73,7 +73,7 @@ const UserList = () => {
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                             <button
-                                className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 text-lg"
+                                className="bg-sixthColor text-white py-2 px-4 rounded-lg hover:bg-fourthColor text-lg"
                                 onClick={() => setIsModalOpen(true)}
                             >
                                 Agregar Usuario
@@ -87,33 +87,40 @@ const UserList = () => {
                             />
                         </div>
 
-                        <div className="overflow-x-auto">
-                            <table className="min-w-full bg-white border border-gray-300">
+                        <div className="overflow-x-auto shadow-lg rounded-lg border border-gray-200">
+                            <table className="table-auto w-full bg-white">
                                 <thead>
-                                    <tr className="bg-gray-100">
-                                        <th className="px-4 py-2 border text-left font-semibold text-gray-700">Nombre de Usuario</th>
-                                        <th className="px-4 py-2 border text-left font-semibold text-gray-700">Nombre completo</th>
-                                        <th className="px-4 py-2 border text-left font-semibold text-gray-700">Id empresa</th>
-                                        <th className="px-4 py-2 border text-left font-semibold text-gray-700">Sucursal</th>
-                                        <th className="px-4 py-2 border text-left font-semibold text-gray-700">Operaciones</th>
+                                    <tr className="bg-fourthColor text-left text-gray-700">
+                                        <th className="px-6 py-4 font-bold">Nombre de Usuario</th>
+                                        <th className="px-6 py-4 font-bold">Nombre completo</th>
+                                        <th className="px-6 py-4 font-bold">Id empresa</th>
+                                        <th className="px-6 py-4 font-bold">Sucursal</th>
+                                        <th className="px-6 py-4 font-bold">Operaciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {paginatedUsers.map((user) => (
-                                        <tr key={user.id} className="border-b">
-                                            <td className="border px-4 py-4 text-gray-800">{user.username}</td>
-                                            <td className="border px-4 py-4 text-gray-800">{user.fullname}</td>
-                                            <td className="border px-4 py-4 text-gray-800">{user.companyId}</td>
-                                            <td className="border px-4 py-4 text-gray-800">{user.branch}</td>
-                                            <td className="border px-4 py-4 flex space-x-2">
-                                                {/* Iconos de Borrar y Editar */}
-                                                <button className="text-red-500 hover:text-red-700">
-                                                    <FaTrashAlt />
-                                                </button>
-                                                <button className="text-blue-500 hover:text-blue-700">
-                                                    <FaEdit />
-                                                </button>
+                                        <tr key={user.id} className="border-b hover:bg-gray-50 text-black">
+                                            <td className="px-6 py-4">{user.username}</td>
+                                            <td className="px-6 py-4">{user.fullname}</td>
+                                            <td className="px-6 py-4">{user.companyId}</td>
+                                            <td className="px-6 py-4">{user.branch}</td>
+                                            <td className="px-6 py-4">
+                                                <div className="flex">
+                                                    {/* Botón de Borrar */}
+                                                    <button className="bg-red-200 hover:bg-red-300 p-2 rounded-l-lg flex items-center justify-center border border-red-300">
+                                                        <FaTrashAlt className="text-black" />
+                                                    </button>
+                                                    
+                                                    {/* Botón de Editar */}
+                                                    <button className="bg-orange-100 hover:bg-orange-100 p-2 rounded-r-lg flex items-center justify-center border border-orange-100">
+                                                        <FaEdit className="text-black" />
+                                                    </button>
+                                                </div>
                                             </td>
+
+
+
                                         </tr>
                                     ))}
                                 </tbody>
