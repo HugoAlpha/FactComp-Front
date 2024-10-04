@@ -41,7 +41,7 @@ const CodeReceipt = () => {
     const [filteredCodes, setFilteredCodes] = useState<Code[]>([]);
     const [filterStatus, setFilterStatus] = useState<string>("Todos");
     const [selectedSucursal, setSelectedSucursal] = useState<string>("Todos");
-    const [sucursales, setSucursales] = useState<string[]>([]);
+    const [sucursales, setSucursales] = useState<string[]>([]);  // Lista de sucursales
     const [daysToExpire, setDaysToExpire] = useState<number | null>(null);
     const [rowsPerPage] = useState<number>(10);
     const [currentPage, setCurrentPage] = useState<number>(1);
@@ -61,10 +61,12 @@ const CodeReceipt = () => {
                         puntoVenta: code.puntoVenta
                     }));
                     setCodes(formattedData);
+
+                    // Extraer las sucursales únicas
                     const uniqueSucursales = Array.from(
                         new Set(formattedData.map((code: Code) => code.puntoVenta.sucursal.nombre))
                     );
-                    setSucursales(uniqueSucursales);             
+                    setSucursales(uniqueSucursales);
                 } else {
                     console.error('Error fetching codes');
                 }
@@ -101,9 +103,12 @@ const CodeReceipt = () => {
                 return false;
             });
         }
+
+        // Filtrar por sucursal seleccionada
         if (selectedSucursal !== "Todos") {
             filtered = filtered.filter(code => code.puntoVenta.sucursal.nombre === selectedSucursal);
         }
+
         setFilteredCodes(filtered);
         setCurrentPage(1);
     }, [searchTerm, filterStatus, selectedSucursal, codes, daysToExpire]);
@@ -147,7 +152,7 @@ const CodeReceipt = () => {
         if (!vigente) {
             return (
                 <span className="px-2 py-1 rounded-full bg-red-100 text-red-600">
-                    Vencido 
+                    Vencido
                 </span>
             );
         } else {
@@ -181,26 +186,22 @@ const CodeReceipt = () => {
                             </select>
 
                             {filterStatus === "Por Vencer" && (
-                                <div className="flex items-center">
-                                    <p className="mr-2">Dentro de:</p>
-                                    <select
-                                        value={daysToExpire || ""}
-                                        onChange={(e) => setDaysToExpire(e.target.value ? Number(e.target.value) : null)}
-                                        className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                    >
-                                        <option value="5">5 días</option>
-                                        <option value="10">10 días</option>
-                                        <option value="15">15 días</option>
-                                    </select>
-                                </div>
+                                <select
+                                    value={daysToExpire || ""}
+                                    onChange={(e) => setDaysToExpire(e.target.value ? Number(e.target.value) : null)}
+                                    className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                >
+                                    <option value="5">5 días</option>
+                                    <option value="10">10 días</option>
+                                    <option value="15">15 días</option>
+                                </select>
                             )}
-
 
                             <select
                                 value={selectedSucursal}
                                 onChange={(e) => setSelectedSucursal(e.target.value)}
                                 className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            > 
+                            >
                                 <option value="Todos">Todas las sucursales</option>
                                 {sucursales.map((sucursal, index) => (
                                     <option key={index} value={sucursal}>
@@ -222,35 +223,47 @@ const CodeReceipt = () => {
                             <table className="table-auto w-full bg-white">
                                 <thead>
                                     <tr className="bg-gray-200 text-left text-gray-700">
-                                        
-                                        <th className="px-6 py-4 font-bold">Departamento</th>
-                                        <th className="px-6 py-4 font-bold">Municipio</th>
-                                        <th className="px-6 py-4 font-bold">Punto de venta</th>
-                                        <th className="px-6 py-4 font-bold">Sucursal</th>
                                         <th className="px-6 py-4 font-bold">Codigo</th>
                                         <th className="px-6 py-4 font-bold">Fecha de solicitud</th>
                                         <th className="px-6 py-4 font-bold">Fecha de vigencia</th>
                                         <th className="px-6 py-4 font-bold">Estado</th>
+                                        <th className="px-6 py-4 font-bold">Sucursal</th>
+                                        <th className="px-6 py-4 font-bold">Departamento</th>
+                                        <th className="px-6 py-4 font-bold">Municipio</th>
+                                        <th className="px-6 py-4 font-bold">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {paginatedCodes.length > 0 ? (
                                         paginatedCodes.map(code => (
-                                            <tr key={code.id} className="border-b hover:bg-gray-50 text-black">
-                                                <td className="border px-6 py-4">{code.puntoVenta.sucursal.departamento}</td>
-                                                <td className="border px-6 py-4">{code.puntoVenta.sucursal.municipio}</td>
-                                                <td className="border px-6 py-4">{code.puntoVenta.nombre}</td>
-                                                <td className="border px-6 py-4">{code.puntoVenta.sucursal.nombre}</td>
+                                            <tr key={code.id}>
                                                 <td className="border px-6 py-4">{code.codigo}</td>
                                                 <td className="border px-6 py-4">{code.fechaSolicitada}</td>
                                                 <td className="border px-6 py-4">{code.fechaVigencia}</td>
                                                 <td className="border px-6 py-4">{getStatus(code.fechaVigencia, code.vigente)}</td>
+                                                <td className="border px-6 py-4">{code.puntoVenta.sucursal.nombre}</td>
+                                                <td className="border px-6 py-4">{code.puntoVenta.sucursal.departamento}</td>
+                                                <td className="border px-6 py-4">{code.puntoVenta.sucursal.municipio}</td>
+                                                <td className="border px-6 py-4">
+                                                    <button
+                                                        onClick={() => handleEditCode(code.id)}
+                                                        className="text-blue-600 hover:text-blue-800 mr-4"
+                                                    >
+                                                        <FaEdit />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeleteCode(code.id)}
+                                                        className="text-red-600 hover:text-red-800"
+                                                    >
+                                                        <FaTrashAlt />
+                                                    </button>
+                                                </td>
                                             </tr>
                                         ))
                                     ) : (
                                         <tr>
-                                            <td colSpan={8} className="text-center py-6 text-gray-500">
-                                                No hay datos disponibles.
+                                            <td colSpan={8} className="border px-6 py-4 text-center">
+                                                No se encontraron datos.
                                             </td>
                                         </tr>
                                     )}
@@ -258,36 +271,19 @@ const CodeReceipt = () => {
                             </table>
                         </div>
 
-                        <div className="flex justify-between mt-6">
-                            <button
-                                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                                disabled={currentPage === 1}
-                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-                            >
-                                Prev
-                            </button>
-
-                            {getPageNumbers().map((page) => (
+                        <div className="mt-4 flex justify-center space-x-2">
+                            {getPageNumbers().map((number) => (
                                 <button
-                                    key={page}
-                                    onClick={() => setCurrentPage(page)}
-                                    className={`px-4 py-2 mx-1 text-sm rounded-md transition-all shadow-sm ${
-                                        currentPage === page
-                                            ? "bg-slate-800 border-slate-800 text-white"
-                                            : "border border-slate-300 bg-white text-slate-600 hover:bg-slate-800 hover:border-slate-800 hover:text-white"
-                                    }`}
+                                    key={number}
+                                    onClick={() => setCurrentPage(number)}
+                                    className={`px-4 py-2 border border-gray-300 rounded-md ${currentPage === number
+                                        ? "bg-blue-500 text-white"
+                                        : "bg-white text-black hover:bg-gray-100"
+                                        }`}
                                 >
-                                    {page}
+                                    {number}
                                 </button>
                             ))}
-
-                            <button
-                                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                                disabled={currentPage === totalPages}
-                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-                            >
-                                Next
-                            </button>
                         </div>
                     </div>
                 </div>
