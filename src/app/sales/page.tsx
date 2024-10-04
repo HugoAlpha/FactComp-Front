@@ -104,18 +104,17 @@ const Sales = () => {
     }, []);
 
     const updateDiscount = (id: number, value: string) => {
-        const updatedProducts: Product[] = selectedProducts.map((item: Product) => {
+        console.log(`Actualizando descuento del producto con id: ${id}, nuevo valor: ${value}`);
+        const updatedProducts = selectedProducts.map((item: Product) => {
             if (item.id === id) {
-                const newDiscount = parseFloat(value);
-                const maxDiscount = item.price + item.discount;
-
-                if (newDiscount > maxDiscount) {
-                    Swal.fire('Error', 'El descuento no puede exceder el precio del producto.', 'error');
-                    return item;
-                }
-
-                const newTotalPrice = item.price - newDiscount;
-                return { ...item, discount: newDiscount, totalPrice: newTotalPrice > 0 ? newTotalPrice : 0 };
+                const newDiscount = value ? parseFloat(value) : 0;
+ 
+                console.log(`Nuevo descuento aplicado: ${newDiscount}`); // Loguea el nuevo descuento
+                return {
+                    ...item,
+                    discount: newDiscount, // Actualizamos el descuento
+                    totalPrice: (item.price - newDiscount > 0 ? item.price - newDiscount : 0)
+                };
             }
             return item;
         });
@@ -313,6 +312,7 @@ const Sales = () => {
         nombre: product.name,
         precio: product.price,
         cantidad: product.quantity ?? 1,
+        discount: product.discount // Incluimos el descuento aquí
     }));
 
     return (
@@ -350,12 +350,12 @@ const Sales = () => {
                                             <input
                                                 type="number"
                                                 className="w-16 text-center border"
-                                                value={product.discount !== undefined ? parseInt(product.discount.toString()) : ''}
+                                                value={product.discount !== undefined ? product.discount.toString() : ''} // Mostramos el descuento actual
                                                 min="0"
-                                                onChange={(e) => updateDiscount(product.id, e.target.value !== '' ? e.target.value.replace(/^0+/, '') : '0')}
+                                                onChange={(e) => updateDiscount(product.id, e.target.value)} // Capturamos el nuevo valor del descuento
                                             />
                                         </td>
-
+ 
                                         <td className="px-4 py-2">{product.totalPrice !== undefined ? product.totalPrice.toFixed(2) : '0.00'}</td>
                                         <td className="px-4 py-2">
                                             <button onClick={() => removeProduct(product.id)} className="text-red-500">Remove</button>
