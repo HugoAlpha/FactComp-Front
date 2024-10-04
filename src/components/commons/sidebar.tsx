@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { FaFileInvoice, FaUser, FaSignOutAlt, FaChevronDown, FaBars, FaHome, FaUsers, FaBuilding } from 'react-icons/fa';
-import { MdOutlinePointOfSale } from "react-icons/md";
+import { MdOutlinePointOfSale, MdVerified } from "react-icons/md";
 import { HiDocumentCheck } from "react-icons/hi2";
 import { PiStorefrontFill } from "react-icons/pi";
 
@@ -58,10 +58,10 @@ const Sidebar = () => {
         },
         {
             name: 'Certificación',
-            icon: <FaFileInvoice size={20} />,
+            icon: <MdVerified size={20} />,
             subItems: [
                 { name: 'CUIS', href: 'codecuis' },
-                { name: 'Submenú 2', href: '#' }
+                { name: 'CUFD', href: 'codecufd' }
             ]
         },
         {

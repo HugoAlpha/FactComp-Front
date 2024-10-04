@@ -37,7 +37,6 @@ const BillDetailsModal: React.FC<BillDetailsModalProps> = ({ isOpen, onClose, bi
     };
 
     const getPuntoVenta = (codigoPuntoVenta: number) => {
-        // Implement similar logic for point of sale if needed
         return `Punto de venta ${codigoPuntoVenta}`;
     };
 
@@ -95,8 +94,8 @@ const BillDetailsModal: React.FC<BillDetailsModalProps> = ({ isOpen, onClose, bi
                         </div>
                     </div>
                     <div className="flex justify-end mt-6">
-                        <button 
-                            onClick={onClose} 
+                        <button
+                            onClick={onClose}
                             className="px-6 py-2 bg-sixthColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400"
                         >
                             Cerrar

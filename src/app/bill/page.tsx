@@ -1,5 +1,4 @@
 "use client";
-
 import React, { useState, useEffect } from 'react';
 import { FaSearch, FaDownload, FaTrashAlt, FaEye } from 'react-icons/fa';
 import Sidebar from '@/components/commons/sidebar';
@@ -132,15 +131,12 @@ const BillList = () => {
                                             <td className="px-6 py-4">{bill.estado}</td>
                                             <td className="px-6 py-4">
                                                 <div className="flex">
-                                                    {/* Botón de Ver */}
                                                     <button
                                                         className="bg-green-200 hover:bg-green-300 p-2 rounded-l-lg flex items-center justify-center border border-green-300"
                                                         onClick={() => openModal(bill)}
                                                     >
                                                         <FaEye className="text-black" />
                                                     </button>
-
-                                                    {/* Botón de Borrar */}
                                                     <button className="bg-red-200 hover:bg-red-300 p-2 rounded-r-lg flex items-center justify-center border border-red-300">
                                                         <FaTrashAlt className="text-black" />
                                                     </button>
@@ -151,8 +147,6 @@ const BillList = () => {
                                 </tbody>
                             </table>
                         </div>
-
-                        {/* Paginación */}
                         <div className="flex space-x-1 justify-center mt-6">
                             <button
                                 onClick={handlePrevPage}
@@ -190,7 +184,11 @@ const BillList = () => {
                 </div>
             </div>
             {isModalOpen && (
-                <BillDetailsModal bill={selectedBill} onClose={closeModal} />
+                <BillDetailsModal
+                    isOpen={isModalOpen}
+                    bill={selectedBill}
+                    onClose={closeModal}
+                />
             )}
         </div>
     );
