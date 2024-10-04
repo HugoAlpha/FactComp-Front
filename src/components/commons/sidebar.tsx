@@ -90,8 +90,7 @@ const Sidebar = () => {
                 </button>
             </div>
 
-            <aside className={`bg-principalColor text-white min-h-screen fixed md:relative z-10 transition-all duration-300
-                ${isSidebarOpen ? 'w-64' : 'w-0 md:w-64'}`}>
+            <aside className={`bg-principalColor text-white min-h-screen fixed md:relative z-10 transition-all duration-300 ${isOpen ? 'w-64' : 'w-0 md:w-16 overflow-hidden'}`}>
                 <div className="p-4 flex flex-col h-full">
                     {/* Botón para colapsar la barra lateral */}
                     <div className={`flex ${isOpen ? 'justify-end' : 'justify-center'} mb-2`}>
@@ -115,7 +114,7 @@ const Sidebar = () => {
                             {/* Enlace al dashboard */}
                             <li>
                                 <Link href="dashboard"
-                                    className={`block p-2 font-bold hover:bg-gray-700 rounded-lg ${activeLink === '/dashboard' ? 'bg-white bg-opacity-20 text-ninthColor' : ''}`}
+                                    className={`block p-2 font-bold hover:bg-firstColor rounded-lg ${activeLink === '/dashboard' ? 'bg-white bg-opacity-20 text-ninthColor' : ''}`}
                                     onClick={() => handleLinkClick('/dashboard')}>
                                     <span className="flex items-center">
                                         <div className="w-6 h-6 flex justify-center items-center">
@@ -128,7 +127,7 @@ const Sidebar = () => {
                             {/* Enlace a Nueva Venta */}
                             <li>
                                 <Link href="sales"
-                                    className={`block p-2 font-bold hover:bg-gray-700 rounded-lg ${activeLink === '/sales' ? 'bg-white bg-opacity-20 text-ninthColor' : ''}`}
+                                    className={`block p-2 font-bold hover:bg-firstColor rounded-lg ${activeLink === '/sales' ? 'bg-white bg-opacity-20 text-ninthColor' : ''}`}
                                     onClick={() => handleLinkClick('/sales')}>
                                     <span className="flex items-center">
                                         <div className="w-6 h-6 flex justify-center items-center">
@@ -159,7 +158,7 @@ const Sidebar = () => {
                                             {item.subItems.map((subItem, subIndex) => (
                                                 <li key={subIndex}>
                                                     <Link href={subItem.href}
-                                                        className={`block p-2 pl-4 hover:bg-gray-700 rounded-lg ${activeLink === subItem.href ? 'bg-white bg-opacity-20 text-ninthColor' : ''}`}
+                                                        className={`block p-2 pl-4 hover:bg-firstColor rounded-lg ${activeLink === subItem.href ? 'bg-white bg-opacity-20 text-ninthColor' : ''}`}
                                                         onClick={() => handleLinkClick(subItem.href)}>
                                                         {subItem.name}
                                                     </Link>
@@ -173,7 +172,7 @@ const Sidebar = () => {
                             {/* Enlace a Usuarios */}
                             <li>
                                 <Link href="users"
-                                    className={`block p-2 font-bold hover:bg-gray-700 rounded-lg ${activeLink === '/users' ? 'bg-white bg-opacity-20 text-ninthColor' : ''}`}
+                                    className={`block p-2 font-bold hover:bg-firstColor rounded-lg ${activeLink === '/users' ? 'bg-white bg-opacity-20 text-ninthColor' : ''}`}
                                     onClick={() => handleLinkClick('/users')}>
                                     <span className="flex items-center">
                                         <div className="w-6 h-6 flex justify-center items-center">
@@ -187,7 +186,7 @@ const Sidebar = () => {
                             {/* Enlace a Empresa */}
                             <li>
                                 <Link href="enterprise"
-                                    className={`block p-2 font-bold hover:bg-gray-700 rounded-lg ${activeLink === '/enterprise' ? 'bg-white bg-opacity-20 text-ninthColor' : ''}`}
+                                    className={`block p-2 font-bold hover:bg-firstColor rounded-lg ${activeLink === '/enterprise' ? 'bg-white bg-opacity-20 text-ninthColor' : ''}`}
                                     onClick={() => handleLinkClick('/enterprise')}>
                                     <span className="flex items-center">
                                         <div className="w-6 h-6 flex justify-center items-center">
@@ -198,20 +197,19 @@ const Sidebar = () => {
                                 </Link>
                             </li>
                         </ul>
-                        
                     </nav>
                     {/* Botón de Logout */}
                     <div className="mt-auto">
-                        <button className="flex items-center text-white font-bold hover:bg-gray-700 p-2 w-full rounded-lg">
+                        <button className="flex items-center text-white font-bold hover:bg-firstColor p-2 w-full rounded-lg">
                             <div className="w-6 h-6 flex justify-center items-center">
                                 <FaSignOutAlt size={20} />
                             </div>
                             {isOpen && <span className="ml-2">Salir</span>}
-
                         </button>
                     </div>
                 </div>
             </aside>
+
         </div>
     );
 };

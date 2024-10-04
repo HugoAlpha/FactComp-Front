@@ -16,7 +16,7 @@ const config: Config = {
         thirdColor: "#75C4D2",
         fourthColor: "#9CBFCF",
         fifthColor: "#D8E3E8",
-        sixthColor: "#8C9CBC"
+        sixthColor: "#8C9CBC",
         seventhColor: "#bfccdc",
         eighthColor: "#d8e3e8",
         ninthColor: "#bcc8d4"
