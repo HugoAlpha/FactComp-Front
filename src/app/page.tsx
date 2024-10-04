@@ -15,10 +15,12 @@ const Login = () => {
     e.preventDefault();
     if (email === "admin@gmail.com" && password === "Alpha123!") {
       Swal.fire({
+        position: "center",
         icon: 'success',
         title: 'Logeo Exitoso',
         text: 'Bienvenido a Alpha E-Facturación',
-        confirmButtonColor: '#181143',
+        showConfirmButton: false,
+        timer: 3500
       }).then(() => {
         router.push('/dashboard');
       });
@@ -27,41 +29,37 @@ const Login = () => {
         icon: 'error',
         title: 'Credenciales Incorrectas',
         text: 'Por favor, verifica tu correo y contraseña',
-        confirmButtonColor: '#d33',
+        showConfirmButton: false,
+        timer: 1500
       });
     }
   };
 
   return (
-    <div className="flex items-center justify-center h-screen bg-gray-100 p-4">
-      <div className="bg-white shadow-lg rounded-lg flex flex-col md:flex-row w-full h-full max-w-7xl md:h-auto">
-        {/* Formulario */}
-        <div className="w-full md:w-1/2 p-6 md:p-12 flex flex-col justify-center">
-          <div className="mx-auto mb-1 max-w-xs">
+
+    <div className="flex items-center justify-center h-screen bg-gradient-to-r from-[#E6EFF7] to-[#F0F0F0]">
+      <div className="bg-white shadow-2xl rounded-lg flex w-5/6 h-5/6 max-w-6xl overflow-hidden">
+        <div className="w-1/2 p-10 flex flex-col justify-center bg-white">
+          <div className="mx-auto mb-4">
+
             <Image
               src="/images/LogoIdAlpha.png"
               alt="Logo ID"
-              width={400}
-              height={400}
+              width={300}
+              height={300}
               priority
               className="max-w-full h-auto"
             />
           </div>
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-6 text-center">
-            Inicio de Sesión
-          </h2>
-          <p className="mb-6 text-lg text-gray-600 text-center">
-            Si aún no tienes una cuenta,{" "}
-            <a href="#" className="text-[#181143] font-semibold">
-              Regístrate aquí
-            </a>
-          </p>
+
+          <h2 className="text-4xl font-bold text-gray-900 mb-6 text-center">Inicio de Sesión</h2>
+          
           <form onSubmit={handleLogin} className="space-y-6">
             <div>
               <label htmlFor="email" className="block text-gray-700 mb-2">
                 Correo
               </label>
-              <div className="flex items-center border rounded-lg px-4 py-3">
+              <div className="flex items-center border border-gray-300 rounded-lg px-4 py-3 bg-[#F9F9F9]">
                 <FaUserAlt className="text-gray-400 mr-3" />
                 <input
                   type="email"
@@ -78,7 +76,7 @@ const Login = () => {
               <label htmlFor="password" className="block text-gray-700 mb-2">
                 Contraseña
               </label>
-              <div className="flex items-center border rounded-lg px-4 py-3">
+              <div className="flex items-center border border-gray-300 rounded-lg px-4 py-3 bg-[#F9F9F9]">
                 <FaLock className="text-gray-400 mr-3" />
                 <input
                   type="password"
@@ -92,49 +90,38 @@ const Login = () => {
             </div>
 
             <div className="flex justify-between items-center mb-6">
-              <label className="flex items-center text-lg">
+              <label className="flex items-center text-lg text-gray-600">
                 <input type="checkbox" className="mr-2" />
                 Recuérdame
               </label>
-              <a href="#" className="text-lg text-[#181143] hover:text-gray-500">
+              <a href="#" className="text-lg text-[#10314b] hover:text-gray-500">
                 ¿Olvidaste tu Password?
               </a>
             </div>
 
             <button
               type="submit"
-              className="w-full bg-[#181143] text-white font-semibold py-3 rounded-lg text-lg hover:bg-green-700 transition"
+              className="w-full bg-[#10314b] text-white font-semibold py-3 rounded-lg text-lg hover:bg-[#10314b] transition"
             >
               Ingresar
             </button>
           </form>
-          <div className="flex justify-center space-x-6 mt-6">
-            <button className="text-gray-500 text-3xl">
-              <i className="fab fa-facebook"></i>
-            </button>
-            <button className="text-gray-500 text-3xl">
-              <i className="fab fa-apple"></i>
-            </button>
-            <button className="text-gray-500 text-3xl">
-              <i className="fab fa-google"></i>
-            </button>
-          </div>
+          
         </div>
 
         {/* Logo y Recuadro */}
-        <div className="w-full md:w-1/2 bg-gray-50 flex flex-col items-center justify-center rounded-r-lg p-6">
-          <div className="bg-gray-200 p-8 md:p-12 rounded-lg flex flex-col items-center">
+        <div className="w-1/2 bg-[#10314b] flex flex-col items-center justify-center p-12">
+          <div className="bg-white p-8 shadow-lg rounded-lg flex flex-col items-center">
+
             <Image
-              src="/images/logo.svg"
+              src="/images/efactu2.png"
               alt="Logo"
-              width={400}
-              height={400}
-              priority
-              className="max-w-full h-auto"
+
+              width={260}
+              height={260}
             />
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mt-6">
-              Alpha E-Facturación
-            </h2>
+            <h2 className="text-3xl font-bold text-[#10314b] mt-6">Alpha E-Facturación</h2>
+
           </div>
         </div>
       </div>

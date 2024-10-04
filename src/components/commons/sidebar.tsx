@@ -84,7 +84,14 @@ const Sidebar = () => {
 
     return (
         <div className="flex min-h-screen">
-            <aside className={`bg-firstColor text-white min-h-screen fixed md:relative z-10 transition-all duration-300 ${isOpen ? 'w-64' : 'w-16'}`}>
+            <div className="md:hidden">
+                <button onClick={toggleSidebar} className="p-4 text-white bg-gray-800">
+                    <FaBars />
+                </button>
+            </div>
+
+            <aside className={`bg-principalColor text-white min-h-screen fixed md:relative z-10 transition-all duration-300
+                ${isSidebarOpen ? 'w-64' : 'w-0 md:w-64'}`}>
                 <div className="p-4 flex flex-col h-full">
                     {/* Botón para colapsar la barra lateral */}
                     <div className={`flex ${isOpen ? 'justify-end' : 'justify-center'} mb-2`}>
@@ -95,7 +102,7 @@ const Sidebar = () => {
                     {/* Imagen del logo */}
                     <div className={`mb-6 ${isOpen ? 'block' : 'hidden'}`}>
                         <Image
-                            src="/images/LogoIdAlpha.png"
+                            src="/images/LogoIdAlpha2.png"
                             alt="Logo"
                             width={250}
                             height={150}
@@ -137,7 +144,7 @@ const Sidebar = () => {
                                 <li key={index}>
                                     <button
                                         onClick={() => toggleMenu(item.name)}
-                                        className="flex items-center justify-between w-full p-2 text-left font-bold hover:bg-gray-700 rounded-lg"
+                                        className="flex items-center justify-between w-full p-2 text-left font-bold hover:bg-firstColor rounded-lg"
                                     >
                                         <span className="flex items-center">
                                             <div className="w-6 h-6 flex justify-center items-center">
@@ -191,6 +198,7 @@ const Sidebar = () => {
                                 </Link>
                             </li>
                         </ul>
+                        
                     </nav>
                     {/* Botón de Logout */}
                     <div className="mt-auto">
@@ -199,6 +207,7 @@ const Sidebar = () => {
                                 <FaSignOutAlt size={20} />
                             </div>
                             {isOpen && <span className="ml-2">Salir</span>}
+
                         </button>
                     </div>
                 </div>

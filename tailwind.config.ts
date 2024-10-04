@@ -10,16 +10,16 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        firstColor: "#5086A8", //#5086a8 
-        secondColor: "#F1F1F1", //##f1f1f1
-        thirdColor: "#75C4D2",  //#75c4d2
-        fourthColor: "#9CBFCF", //#9cbfcf
-        fifthColor: "#D8E3E8",  //#9cbfcf
-        sixthColor: "#8C9CBC", //#8c9cbc
+        principalColor: "#10314b",
+        firstColor: "#5086A8",
+        secondColor: "#F1F1F1",
+        thirdColor: "#75C4D2",
+        fourthColor: "#9CBFCF",
+        fifthColor: "#D8E3E8",
+        sixthColor: "#8C9CBC"
         seventhColor: "#bfccdc",
         eighthColor: "#d8e3e8",
         ninthColor: "#bcc8d4"
-        
       },
     },
   },
