@@ -4,10 +4,12 @@ import Header from "@/components/commons/header";
 import Sidebar from "@/components/commons/sidebar";
 import { FaEdit, FaTrashAlt } from "react-icons/fa";
 import Swal from "sweetalert2";
+import { PATH_URL_BACKEND } from "@/utils/constants";
 
 interface Legend {
     id: number;
-    descripcion: string;
+    codigoActividad: string;
+    descripcionLeyenda: string;
 }
 
 const Legends: React.FC = () => {
@@ -18,15 +20,22 @@ const Legends: React.FC = () => {
     const [currentPage, setCurrentPage] = useState<number>(1);
 
     useEffect(() => {
-        const data: Legend[] = [
-            {
-                id: 1,
-                descripcion:
-                    "Ley N° 453: Los servicios deben suministrarse en condiciones de inocuidad, calidad y seguridad.",
-            },
-        ];
-        setLegends(data);
-        setFilteredLegends(data);
+        const fetchLegends = async () => {
+            try {
+                const response = await fetch(`${PATH_URL_BACKEND}/leyendas`);
+                if (response.ok) {
+                    const data: Legend[] = await response.json();
+                    setLegends(data);
+                    setFilteredLegends(data);
+                } else {
+                    Swal.fire('Error', 'Error al obtener las leyendas', 'error');
+                }
+            } catch (error) {
+                Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
+            }
+        };
+
+        fetchLegends();
     }, []);
 
     useEffect(() => {
@@ -34,7 +43,7 @@ const Legends: React.FC = () => {
 
         if (searchTerm) {
             filtered = filtered.filter((legend) =>
-                legend.descripcion.toLowerCase().includes(searchTerm.toLowerCase())
+                legend.descripcionLeyenda.toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
 
@@ -115,35 +124,21 @@ const Legends: React.FC = () => {
                             <table className="table-auto w-full bg-white">
                                 <thead>
                                     <tr className="bg-fourthColor text-left text-gray-700">
+                                        <th className="px-6 py-4 font-bold">Código Actividad</th>
                                         <th className="px-6 py-4 font-bold">Descripción</th>
-                                        <th className="px-6 py-4 font-bold">Operaciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {paginatedLegends.map((legend) => (
                                         <tr key={legend.id} className="border-b hover:bg-gray-50 text-black">
-                                            <td className="px-6 py-4 text-black">{legend.descripcion}</td>
-                                            <td className="px-6 py-4 text-black">
-                                                <div className="flex">
-                                                    <button
-                                                        onClick={() => handleDeleteLegend(legend.id)}
-                                                        className="bg-red-200 hover:bg-red-300 p-2 rounded-l-lg flex items-center justify-center border border-red-300"
-                                                    >
-                                                        <FaTrashAlt className="text-black" />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleEditLegend(legend.id)}
-                                                        className="bg-blue-200 hover:bg-blue-300 p-2 rounded-r-lg flex items-center justify-center border border-blue-300"
-                                                    >
-                                                        <FaEdit className="text-black" />
-                                                    </button>
-                                                </div>
-                                            </td>
+                                            <td className="px-6 py-4 text-black">{legend.codigoActividad}</td>
+                                            <td className="px-6 py-4 text-black">{legend.descripcionLeyenda}</td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
                         </div>
+
                         <div className="flex space-x-1 justify-center mt-6">
                             <button
                                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}

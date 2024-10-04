@@ -2,13 +2,23 @@ import { PATH_URL_BACKEND } from '@/utils/constants';
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 
+interface Product {
+    id?: number;
+    codigo: string;
+    descripcion: string;
+    unidadMedida: number;
+    precioUnitario: number;
+    codigoProductoSin: number;
+}
+
 interface ModalCreateProductProps {
     isOpen: boolean;
     onClose: () => void;
     onProductCreated: (newProduct: any) => void;
+    product?: Product;
 }
 
-const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose, onProductCreated }) => {
+const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose, onProductCreated, product }) => {
     const [codigo, setCodigo] = useState('');
     const [descripcion, setDescripcion] = useState('');
     const [unidadMedida, setUnidadMedida] = useState('');
@@ -25,11 +35,19 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
 
     useEffect(() => {
         if (isOpen) {
-            setCodigo('');
-            setDescripcion('');
-            setUnidadMedida('');
-            setPrecioUnitario('');
-            setCodigoProductoSin('');
+            if (product) {
+                setCodigo(product.codigo);
+                setDescripcion(product.descripcion);
+                setUnidadMedida(product.unidadMedida.toString());
+                setPrecioUnitario(product.precioUnitario.toString());
+                setCodigoProductoSin(product.codigoProductoSin.toString());
+            } else {
+                setCodigo('');
+                setDescripcion('');
+                setUnidadMedida('');
+                setPrecioUnitario('');
+                setCodigoProductoSin('');
+            }
             setErrors({
                 codigo: '',
                 descripcion: '',
@@ -38,7 +56,7 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                 codigoProductoSin: '',
             });
         }
-    }, [isOpen]);
+    }, [isOpen, product]);
 
     const validateField = (name: string, value: string) => {
         let error = '';
@@ -98,7 +116,7 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
         validateField(name, value);
     };
 
-    const handleCreateProduct = async (e: React.FormEvent) => {
+    const handleSubmitProduct = async (e: React.FormEvent) => {
         e.preventDefault();
         if (Object.values(errors).some((error) => error !== '') || !codigo || !descripcion || !unidadMedida || !precioUnitario || !codigoProductoSin) {
             Swal.fire('Error', 'Por favor corrige los errores en el formulario', 'error');
@@ -114,21 +132,34 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
         };
 
         try {
-            const response = await fetch(`${PATH_URL_BACKEND}/item/crear-item`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(productData),
-            });
+            let response;
+            if (product && product.id) {
+                // Si estamos editando un producto (PUT)
+                response = await fetch(`${PATH_URL_BACKEND}/item/actualizar-item/${product.id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(productData),
+                });
+            } else {
+                // Si estamos creando un nuevo producto (POST)
+                response = await fetch(`${PATH_URL_BACKEND}/item/crear-item`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(productData),
+                });
+            }
 
             if (response.ok) {
-                const newProduct = await response.json();
-                onProductCreated(newProduct);
-                Swal.fire('Éxito', 'Producto creado correctamente', 'success');
+                const savedProduct = await response.json();
+                onProductCreated(savedProduct);
+                Swal.fire('Éxito', product ? 'Producto actualizado correctamente' : 'Producto creado correctamente', 'success');
                 onClose();
             } else {
-                Swal.fire('Error', 'Error al crear el producto', 'error');
+                Swal.fire('Error', product ? 'Error al actualizar el producto' : 'Error al crear el producto', 'error');
             }
         } catch (error) {
             Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
@@ -141,9 +172,9 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
             <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg">
                 <div className="bg-white text-black text-2xl font-semibold p-4 rounded-t">
-                    Agregar Nuevo Producto
+                    {product ? 'Editar Producto' : 'Agregar Nuevo Producto'}
                 </div>
-                <form className="grid md:grid-cols-2 gap-6 mt-4" onSubmit={handleCreateProduct}>
+                <form className="grid md:grid-cols-2 gap-6 mt-4" onSubmit={handleSubmitProduct}>
                     {/* Código */}
                     <div className="relative z-0 w-full mb-5 group">
                         <input
@@ -234,8 +265,8 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                     <button onClick={onClose} className="px-6 py-2 bg-sixthColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400 mr-2">
                         Cancelar
                     </button>
-                    <button onClick={handleCreateProduct} className="px-6 py-2 bg-thirdColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400 ml-2">
-                        Crear Producto
+                    <button onClick={handleSubmitProduct} className="px-6 py-2 bg-thirdColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400 ml-2">
+                        {product ? 'Actualizar Producto' : 'Crear Producto'}
                     </button>
                 </div>
             </div>

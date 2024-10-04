@@ -20,6 +20,7 @@ const ProductList = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 10;
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null); // Estado para almacenar el producto a editar
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -72,12 +73,23 @@ const ProductList = () => {
         return pageNumbers;
     };
 
-    const handleOpenModal = () => {
+    const handleOpenModal = (product?: Product) => {
+        setSelectedProduct(product || null);
         setIsModalOpen(true);
     };
 
     const handleCloseModal = () => {
         setIsModalOpen(false);
+        setSelectedProduct(null);
+    };
+
+    const handleProductCreatedOrUpdated = (updatedProduct: Product) => {
+        if (selectedProduct) {
+            setProducts(products.map((p) => (p.id === updatedProduct.id ? updatedProduct : p)));
+        } else {
+            setProducts([...products, updatedProduct]);
+        }
+        handleCloseModal();
     };
 
     return (
@@ -97,7 +109,7 @@ const ProductList = () => {
                             />
                             <button
                                 className="bg-sixthColor text-white py-2 px-4 rounded-lg hover:bg-thirdColor text-lg"
-                                onClick={handleOpenModal}
+                                onClick={() => handleOpenModal()} // Abrir modal para crear producto
                             >
                                 Agregar Producto <FaPlus className="inline-block ml-2" />
                             </button>
@@ -133,6 +145,7 @@ const ProductList = () => {
                                                     </button>
                                                     <button
                                                         className="bg-blue-200 hover:bg-blue-300 p-2 rounded-r-lg flex items-center justify-center border border-blue-300"
+                                                        onClick={() => handleOpenModal(product)} // Abrir modal para editar producto
                                                     >
                                                         <FaEdit className="text-black" />
                                                     </button>
@@ -180,11 +193,11 @@ const ProductList = () => {
                         </div>
                     </div>
                 </div>
-
                 <ModalCreateProduct
                     isOpen={isModalOpen}
                     onClose={handleCloseModal}
-                    onProductCreated={(newProduct) => setProducts([...products, newProduct])}
+                    product={selectedProduct}
+                    onProductCreated={handleProductCreatedOrUpdated}
                 />
             </div>
         </div>
