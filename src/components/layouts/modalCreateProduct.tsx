@@ -11,6 +11,13 @@ interface Product {
     codigoProductoSin: number;
 }
 
+interface ProductOption {
+    id: number;
+    codigoActividad: string;
+    codigoProducto: number;
+    descripcionProducto: string;
+}
+
 interface ModalCreateProductProps {
     isOpen: boolean;
     onClose: () => void;
@@ -20,37 +27,56 @@ interface ModalCreateProductProps {
 
 const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose, onProductCreated, product }) => {
     const [codigo, setCodigo] = useState('');
-    const [descripcion, setDescripcion] = useState('');
+    const [nombreProducto, setNombreProducto] = useState('');
     const [unidadMedida, setUnidadMedida] = useState('');
     const [precioUnitario, setPrecioUnitario] = useState('');
     const [codigoProductoSin, setCodigoProductoSin] = useState('');
+    const [productOptions, setProductOptions] = useState<ProductOption[]>([]);
+    const [selectedOption, setSelectedOption] = useState<ProductOption | null>(null);
 
     const [errors, setErrors] = useState({
         codigo: '',
-        descripcion: '',
+        nombreProducto: '',
         unidadMedida: '',
         precioUnitario: '',
         codigoProductoSin: '',
     });
 
+    // Fetch de las opciones de productos
     useEffect(() => {
+        const fetchProductOptions = async () => {
+            try {
+                const response = await fetch(`${PATH_URL_BACKEND}/productos`);
+                if (response.ok) {
+                    const data: ProductOption[] = await response.json();
+                    setProductOptions(data);
+                } else {
+                    Swal.fire('Error', 'Error al obtener las opciones de productos', 'error');
+                }
+            } catch (error) {
+                Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
+            }
+        };
+
         if (isOpen) {
+            fetchProductOptions();
+
             if (product) {
                 setCodigo(product.codigo);
-                setDescripcion(product.descripcion);
+                setNombreProducto(product.descripcion);
                 setUnidadMedida(product.unidadMedida.toString());
                 setPrecioUnitario(product.precioUnitario.toString());
                 setCodigoProductoSin(product.codigoProductoSin.toString());
             } else {
                 setCodigo('');
-                setDescripcion('');
+                setNombreProducto('');
                 setUnidadMedida('');
                 setPrecioUnitario('');
                 setCodigoProductoSin('');
             }
             setErrors({
                 codigo: '',
-                descripcion: '',
+                nombreProducto: '',
                 unidadMedida: '',
                 precioUnitario: '',
                 codigoProductoSin: '',
@@ -61,16 +87,6 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
     const validateField = (name: string, value: string) => {
         let error = '';
         switch (name) {
-            case 'codigo':
-                if (!/^\d+$/.test(value)) {
-                    error = 'El código solo puede contener números.';
-                }
-                break;
-            case 'descripcion':
-                if (!/^[a-zA-Z0-9\s]*$/.test(value)) {
-                    error = 'La descripción solo puede contener letras, números y espacios.';
-                }
-                break;
             case 'unidadMedida':
                 if (!/^\d+$/.test(value) || Number(value) <= 0) {
                     error = 'La unidad de medida debe ser un número positivo.';
@@ -79,11 +95,6 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
             case 'precioUnitario':
                 if (!/^\d+(\.\d{1,2})?$/.test(value) || Number(value) <= 0) {
                     error = 'El precio unitario debe ser un número positivo con hasta dos decimales.';
-                }
-                break;
-            case 'codigoProductoSin':
-                if (!/^\d+$/.test(value) || Number(value) <= 0) {
-                    error = 'El código Producto SIN debe ser un número positivo.';
                 }
                 break;
             default:
@@ -95,11 +106,8 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         switch (name) {
-            case 'codigo':
-                setCodigo(value);
-                break;
-            case 'descripcion':
-                setDescripcion(value);
+            case 'nombreProducto':
+                setNombreProducto(value);
                 break;
             case 'unidadMedida':
                 setUnidadMedida(value);
@@ -107,34 +115,41 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
             case 'precioUnitario':
                 setPrecioUnitario(value);
                 break;
-            case 'codigoProductoSin':
-                setCodigoProductoSin(value);
-                break;
             default:
                 break;
         }
         validateField(name, value);
     };
 
+    const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const selectedId = parseInt(e.target.value);
+        const selectedProduct = productOptions.find(option => option.id === selectedId);
+
+        if (selectedProduct) {
+            setSelectedOption(selectedProduct);
+            setCodigo(selectedProduct.codigoActividad);
+            setCodigoProductoSin(selectedProduct.codigoProducto.toString());
+        }
+    };
+
     const handleSubmitProduct = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (Object.values(errors).some((error) => error !== '') || !codigo || !descripcion || !unidadMedida || !precioUnitario || !codigoProductoSin) {
+        if (Object.values(errors).some((error) => error !== '') || !selectedOption || !nombreProducto || !unidadMedida || !precioUnitario) {
             Swal.fire('Error', 'Por favor corrige los errores en el formulario', 'error');
             return;
         }
 
         const productData = {
-            codigo,
-            descripcion,
+            codigo: selectedOption.codigoActividad,
+            descripcion: nombreProducto,
             unidadMedida: Number(unidadMedida),
             precioUnitario: Number(precioUnitario),
-            codigoProductoSin: Number(codigoProductoSin),
+            codigoProductoSin: Number(selectedOption.codigoProducto),
         };
 
         try {
             let response;
             if (product && product.id) {
-                // Si estamos editando un producto (PUT)
                 response = await fetch(`${PATH_URL_BACKEND}/item/actualizar-item/${product.id}`, {
                     method: 'PUT',
                     headers: {
@@ -143,7 +158,6 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                     body: JSON.stringify(productData),
                 });
             } else {
-                // Si estamos creando un nuevo producto (POST)
                 response = await fetch(`${PATH_URL_BACKEND}/item/crear-item`, {
                     method: 'POST',
                     headers: {
@@ -175,41 +189,40 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                     {product ? 'Editar Producto' : 'Agregar Nuevo Producto'}
                 </div>
                 <form className="grid md:grid-cols-2 gap-6 mt-4" onSubmit={handleSubmitProduct}>
-                    {/* Código */}
+                    {/* Dropdown para seleccionar la descripción del producto */}
+                    <div className="relative z-0 w-full mb-5 group">
+                        <select
+                            className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                            onChange={handleSelectChange}
+                            value={selectedOption ? selectedOption.id : ''}
+                            required
+                        >
+                            <option value="">Selecciona una descripción del producto</option>
+                            {productOptions.map((option) => (
+                                <option key={option.id} value={option.id}>
+                                    {option.descripcionProducto}
+                                </option>
+                            ))}
+                        </select>
+                        <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                            Homologación
+                        </label>
+                    </div>
                     <div className="relative z-0 w-full mb-5 group">
                         <input
                             type="text"
-                            name="codigo"
-                            value={codigo}
+                            name="nombreProducto"
+                            value={nombreProducto}
                             onChange={handleChange}
                             className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                             placeholder=" "
                             required
                         />
                         <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
-                            Código
+                            Nombre/Descripción del Producto
                         </label>
-                        {errors.codigo && <span className="text-red-500 text-sm">{errors.codigo}</span>}
+                        {errors.nombreProducto && <span className="text-red-500 text-sm">{errors.nombreProducto}</span>}
                     </div>
-
-                    {/* Descripción */}
-                    <div className="relative z-0 w-full mb-5 group">
-                        <input
-                            type="text"
-                            name="descripcion"
-                            value={descripcion}
-                            onChange={handleChange}
-                            className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                            placeholder=" "
-                            required
-                        />
-                        <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
-                            Descripción
-                        </label>
-                        {errors.descripcion && <span className="text-red-500 text-sm">{errors.descripcion}</span>}
-                    </div>
-
-                    {/* Unidad de Medida */}
                     <div className="relative z-0 w-full mb-5 group">
                         <input
                             type="text"
@@ -241,23 +254,6 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                             Precio Unitario
                         </label>
                         {errors.precioUnitario && <span className="text-red-500 text-sm">{errors.precioUnitario}</span>}
-                    </div>
-
-                    {/* Código Producto SIN */}
-                    <div className="relative z-0 w-full mb-5 group">
-                        <input
-                            type="text"
-                            name="codigoProductoSin"
-                            value={codigoProductoSin}
-                            onChange={handleChange}
-                            className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                            placeholder=" "
-                            required
-                        />
-                        <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
-                            Código Producto SIN
-                        </label>
-                        {errors.codigoProductoSin && <span className="text-red-500 text-sm">{errors.codigoProductoSin}</span>}
                     </div>
                 </form>
 
