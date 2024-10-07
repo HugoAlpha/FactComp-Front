@@ -17,6 +17,7 @@ interface Branch {
     razonSocial: string;
     empresaId: number;
     codigo: string;
+    
 }
 
 const Branches: React.FC = () => {
@@ -133,6 +134,7 @@ const Branches: React.FC = () => {
                 direccion: branch.direccion,
                 telefono: branch.telefono,
                 empresaId: branch.empresa.id,
+                razonSocial: branch.razonSocial,
             };
             handleOpenModal(branchToEdit);
         } catch (error) {
