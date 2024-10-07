@@ -2,79 +2,76 @@ import { PATH_URL_BACKEND } from '@/utils/constants';
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 
+interface Empresa {
+    id: number;
+    razonSocial: string;
+}
+
 interface ModalCreateBranchProps {
     isOpen: boolean;
     onClose: () => void;
     onBranchCreated: (newBranch: any) => void;
+    branchToEdit: any | null;
 }
 
-const ModalCreateBranch: React.FC<ModalCreateBranchProps> = ({ isOpen, onClose, onBranchCreated }) => {
-    const [codigo, setCodigo] = useState('');
+const ModalCreateBranch: React.FC<ModalCreateBranchProps> = ({ isOpen, onClose, onBranchCreated, branchToEdit }) => {
+    const [codigo, setCodigo] = useState(''); 
     const [nombre, setNombre] = useState('');
     const [departamento, setDepartamento] = useState('');
     const [municipio, setMunicipio] = useState('');
     const [direccion, setDireccion] = useState('');
     const [telefono, setTelefono] = useState('');
+    const [empresaId, setEmpresaId] = useState<number | null>(null);
+    const [empresas, setEmpresas] = useState<Empresa[]>([]);
+
     const [errors, setErrors] = useState({
         codigo: '',
         nombre: '',
         departamento: '',
         municipio: '',
         direccion: '',
-        telefono: ''
+        telefono: '',
+        empresa: ''
     });
 
     useEffect(() => {
+        const fetchEmpresas = async () => {
+            try {
+                const response = await fetch(`${PATH_URL_BACKEND}/empresa`);
+                if (!response.ok) {
+                    throw new Error('Error al cargar empresas');
+                }
+                const data = await response.json();
+                setEmpresas(data);
+            } catch (error) {
+                console.error(error);
+            }
+        };
+
         if (isOpen) {
-            setCodigo('');
-            setNombre('');
-            setDepartamento('');
-            setMunicipio('');
-            setDireccion('');
-            setTelefono('');
-            setErrors({
-                codigo: '',
-                nombre: '',
-                departamento: '',
-                municipio: '',
-                direccion: '',
-                telefono: ''
-            });
-        }
-    }, [isOpen]);
+            fetchEmpresas();
 
-    const validateField = (name: string, value: string) => {
-        let error = '';
-        switch (name) {
-            case 'codigo':
-                if (!/^\d+$/.test(value)) {
-                    error = 'El código solo puede contener números.';
-                }
-                break;
-            case 'nombre':
-                if (!value.trim()) {
-                    error = 'El nombre no puede estar vacío.';
-                }
-                break;
-            case 'departamento':
-            case 'municipio':
-            case 'direccion':
-                if (!value.trim()) {
-                    error = `El campo ${name} no puede estar vacío.`;
-                }
-                break;
-            case 'telefono':
-                if (!/^\d+$/.test(value)) {
-                    error = 'El teléfono solo puede contener números.';
-                }
-                break;
-            default:
-                break;
+            if (branchToEdit) {
+                setCodigo(branchToEdit.codigo || '');
+                setNombre(branchToEdit.nombre || '');
+                setDepartamento(branchToEdit.departamento || '');
+                setMunicipio(branchToEdit.municipio || '');
+                setDireccion(branchToEdit.direccion || '');
+                setTelefono(branchToEdit.telefono || '');
+                setEmpresaId(branchToEdit.empresaId || null);
+            } else {
+                setCodigo('');
+                setNombre('');
+                setDepartamento('');
+                setMunicipio('');
+                setDireccion('');
+                setTelefono('');
+                setEmpresaId(null);
+            }
         }
-        setErrors((prevErrors) => ({ ...prevErrors, [name]: error }));
-    };
+    }, [isOpen, branchToEdit]);
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         switch (name) {
             case 'codigo':
@@ -95,26 +92,40 @@ const ModalCreateBranch: React.FC<ModalCreateBranchProps> = ({ isOpen, onClose, 
             case 'telefono':
                 setTelefono(value);
                 break;
+            case 'empresa':
+                setEmpresaId(Number(value));
+                break;
             default:
                 break;
         }
-        validateField(name, value);
     };
 
-    const handleCreateBranch = async () => {
+    const handleSaveBranch = async () => {
+        if (!empresaId) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Debes seleccionar una empresa.',
+            });
+            return;
+        }
+
         const body = {
-            codigo,
+            codigo, 
             nombre,
             departamento,
             municipio,
             direccion,
             telefono,
-            empresa: { id: 1, nit: null, razonSocial: null }
+            empresa: { id: empresaId }
         };
 
         try {
-            const response = await fetch(`${PATH_URL_BACKEND}/sucursales`, {
-                method: 'POST',
+            const method = branchToEdit ? 'PUT' : 'POST';
+            const endpoint = branchToEdit ? `${PATH_URL_BACKEND}/sucursales/${branchToEdit.id}` : `${PATH_URL_BACKEND}/sucursales`;
+            
+            const response = await fetch(endpoint, {
+                method,
                 headers: {
                     'Content-Type': 'application/json',
                 },
@@ -122,8 +133,7 @@ const ModalCreateBranch: React.FC<ModalCreateBranchProps> = ({ isOpen, onClose, 
             });
 
             if (!response.ok) {
-                const errorMessage = `Error: ${response.status} - ${response.statusText}`;
-                throw new Error(errorMessage);
+                throw new Error('Error al guardar la sucursal');
             }
 
             const newBranch = await response.json();
@@ -131,22 +141,20 @@ const ModalCreateBranch: React.FC<ModalCreateBranchProps> = ({ isOpen, onClose, 
 
             Swal.fire({
                 icon: 'success',
-                title: 'Sucursal creada',
-                text: 'La sucursal fue creada correctamente.',
+                title: branchToEdit ? 'Sucursal actualizada' : 'Sucursal creada',
+                text: branchToEdit ? 'La sucursal fue actualizada correctamente.' : 'La sucursal fue creada correctamente.',
             });
 
             onClose();
-
-        } catch (error: any) {
-            console.error("Error al crear la sucursal:", error.message);
+        } catch (error) {
+            console.error("Error al guardar la sucursal:", error);
             Swal.fire({
-                icon: 'success',
-                title: 'Éxito',
-                text: 'La sucursal fue creada correctamente.',
+                icon: 'error',
+                title: 'Error',
+                text: 'No se pudo guardar la sucursal.',
             });
         }
     };
-
 
     if (!isOpen) return null;
 
@@ -154,10 +162,9 @@ const ModalCreateBranch: React.FC<ModalCreateBranchProps> = ({ isOpen, onClose, 
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
             <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg">
                 <div className="bg-white text-black text-2xl font-semibold p-4 rounded-t">
-                    Agregar Nueva Sucursal
+                    {branchToEdit ? 'Editar Sucursal' : 'Agregar Nueva Sucursal'}
                 </div>
-                <form className="grid md:grid-cols-2 gap-6 mt-4" onSubmit={handleCreateBranch}>
-                    {/* Código */}
+                <form className="grid md:grid-cols-2 gap-6 mt-4">
                     <div className="relative z-0 w-full mb-5 group">
                         <input
                             type="text"
@@ -171,10 +178,8 @@ const ModalCreateBranch: React.FC<ModalCreateBranchProps> = ({ isOpen, onClose, 
                         <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
                             Código
                         </label>
-                        {errors.codigo && <span className="text-red-500 text-sm">{errors.codigo}</span>}
                     </div>
 
-                    {/* Nombre */}
                     <div className="relative z-0 w-full mb-5 group">
                         <input
                             type="text"
@@ -188,27 +193,32 @@ const ModalCreateBranch: React.FC<ModalCreateBranchProps> = ({ isOpen, onClose, 
                         <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
                             Nombre
                         </label>
-                        {errors.nombre && <span className="text-red-500 text-sm">{errors.nombre}</span>}
                     </div>
 
-                    {/* Departamento */}
                     <div className="relative z-0 w-full mb-5 group">
-                        <input
-                            type="text"
+                        <select
                             name="departamento"
                             value={departamento}
                             onChange={handleChange}
                             className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                            placeholder=" "
                             required
-                        />
+                        >
+                            <option value="">Seleccionar Departamento</option>
+                            <option value="La Paz">La Paz</option>
+                            <option value="Santa Cruz">Santa Cruz</option>
+                            <option value="Cochabamba">Cochabamba</option>
+                            <option value="Potosi">Potosi</option>
+                            <option value="Sucre">Sucre</option>
+                            <option value="Oruro">Oruro</option>
+                            <option value="Tarija">Tarija</option>
+                            <option value="Pando">Pando</option>
+                            <option value="Beni">Beni</option>
+                        </select>
                         <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
                             Departamento
                         </label>
-                        {errors.departamento && <span className="text-red-500 text-sm">{errors.departamento}</span>}
                     </div>
 
-                    {/* Municipio */}
                     <div className="relative z-0 w-full mb-5 group">
                         <input
                             type="text"
@@ -222,10 +232,8 @@ const ModalCreateBranch: React.FC<ModalCreateBranchProps> = ({ isOpen, onClose, 
                         <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
                             Municipio
                         </label>
-                        {errors.municipio && <span className="text-red-500 text-sm">{errors.municipio}</span>}
                     </div>
 
-                    {/* Dirección */}
                     <div className="relative z-0 w-full mb-5 group">
                         <input
                             type="text"
@@ -239,10 +247,8 @@ const ModalCreateBranch: React.FC<ModalCreateBranchProps> = ({ isOpen, onClose, 
                         <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
                             Dirección
                         </label>
-                        {errors.direccion && <span className="text-red-500 text-sm">{errors.direccion}</span>}
                     </div>
 
-                    {/* Teléfono */}
                     <div className="relative z-0 w-full mb-5 group">
                         <input
                             type="text"
@@ -256,7 +262,26 @@ const ModalCreateBranch: React.FC<ModalCreateBranchProps> = ({ isOpen, onClose, 
                         <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
                             Teléfono
                         </label>
-                        {errors.telefono && <span className="text-red-500 text-sm">{errors.telefono}</span>}
+                    </div>
+
+                    <div className="relative z-0 w-full mb-5 group">
+                        <select
+                            name="empresa"
+                            value={empresaId ?? ''}
+                            onChange={handleChange}
+                            className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                            required
+                        >
+                            <option value="">Seleccionar Empresa</option>
+                            {empresas.map((empresa) => (
+                                <option key={empresa.id} value={empresa.id}>
+                                    {empresa.razonSocial}
+                                </option>
+                            ))}
+                        </select>
+                        <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                            Empresa
+                        </label>
                     </div>
                 </form>
 
@@ -264,8 +289,8 @@ const ModalCreateBranch: React.FC<ModalCreateBranchProps> = ({ isOpen, onClose, 
                     <button onClick={onClose} className="px-6 py-2 bg-sixthColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400 mr-2">
                         Cancelar
                     </button>
-                    <button onClick={handleCreateBranch} className="px-6 py-2 bg-thirdColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400 ml-2">
-                        Crear Sucursal
+                    <button onClick={handleSaveBranch} className="px-6 py-2 bg-thirdColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400 ml-2">
+                        {branchToEdit ? 'Actualizar Sucursal' : 'Crear Sucursal'}
                     </button>
                 </div>
             </div>

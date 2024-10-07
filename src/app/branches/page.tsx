@@ -4,7 +4,7 @@ import Header from "@/components/commons/header";
 import Sidebar from "@/components/commons/sidebar";
 import { FaEdit, FaTrashAlt } from 'react-icons/fa';
 import Swal from 'sweetalert2';
-import ModalCreateBranches from '../../components/layouts/modalCreateBranches';
+import ModalCreateBranch from '@/components/layouts/modalCreateBranches';
 import { PATH_URL_BACKEND } from '@/utils/constants';
 
 interface Branch {
@@ -14,6 +14,9 @@ interface Branch {
     municipio: string;
     direccion: string;
     telefono: string;
+    razonSocial: string;
+    empresaId: number;
+    codigo: string;
 }
 
 const Branches: React.FC = () => {
@@ -24,8 +27,10 @@ const Branches: React.FC = () => {
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [selectedCity, setSelectedCity] = useState<string>('');
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+    const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null);
 
-    const handleOpenModal = () => {
+    const handleOpenModal = (branch: Branch | null = null) => {
+        setSelectedBranch(branch);
         setIsModalOpen(true);
     };
 
@@ -45,11 +50,14 @@ const Branches: React.FC = () => {
             const data = await response.json();
             const formattedData = data.map((branch: any) => ({
                 id: branch.id,
+                codigo: branch.codigo,
                 nombre: branch.nombre,
                 departamento: branch.departamento,
                 municipio: branch.municipio,
                 direccion: branch.direccion,
-                telefono: branch.telefono
+                telefono: branch.telefono,
+                razonSocial: branch.empresa.razonSocial,
+                empresaId: branch.empresa.id,
             }));
 
             setBranches(formattedData);
@@ -58,6 +66,7 @@ const Branches: React.FC = () => {
             console.error("Error al obtener las sucursales:", error.message);
         }
     };
+
 
     useEffect(() => {
         fetchBranches();
@@ -70,7 +79,8 @@ const Branches: React.FC = () => {
             filtered = filtered.filter((branch) =>
                 branch.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 branch.municipio.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                branch.departamento.toLowerCase().includes(searchTerm.toLowerCase())
+                branch.departamento.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                branch.razonSocial.toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
 
@@ -88,28 +98,8 @@ const Branches: React.FC = () => {
         currentPage * rowsPerPage
     );
 
-    const handleEditBranch = (id: number) => {
-        console.log(`Editar sucursal con id: ${id}`);
-    };
-
-    const handleDeleteBranch = (id: number) => {
-        Swal.fire({
-            title: '¿Estás seguro?',
-            text: "No podrás revertir esto",
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Sí, eliminarlo'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                console.log(`Eliminar sucursal con id: ${id}`);
-                Swal.fire('Eliminado!', 'La sucursal ha sido eliminada.', 'success');
-            }
-        });
-    };
-
     const getPageNumbers = () => {
+        const totalPages = Math.ceil(filteredBranches.length / rowsPerPage);
         const pageNumbers = [];
         const maxVisiblePages = 4;
 
@@ -127,8 +117,60 @@ const Branches: React.FC = () => {
         return pageNumbers;
     };
 
+    const handleEditBranch = async (id: number) => {
+        try {
+            const response = await fetch(`${PATH_URL_BACKEND}/sucursales/${id}`);
+            if (!response.ok) {
+                throw new Error("No se pudo obtener la sucursal");
+            }
+            const branch = await response.json();
+            const branchToEdit = {
+                id: branch.id,
+                codigo: branch.codigo,
+                nombre: branch.nombre,
+                departamento: branch.departamento,
+                municipio: branch.municipio,
+                direccion: branch.direccion,
+                telefono: branch.telefono,
+                empresaId: branch.empresa.id,
+            };
+            handleOpenModal(branchToEdit);
+        } catch (error) {
+            console.error("Error al obtener la sucursal:", error);
+        }
+    };
 
-    const handleBranchCreated = () => {
+
+
+    const handleDeleteBranch = (id: number) => {
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: "No podrás revertir esto",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sí, eliminarlo'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch(`${PATH_URL_BACKEND}/sucursales/${id}`, {
+                        method: 'DELETE',
+                    });
+                    if (!response.ok) {
+                        throw new Error('No se pudo eliminar la sucursal');
+                    }
+                    fetchBranches();
+                    Swal.fire('Eliminado!', 'La sucursal ha sido eliminada.', 'success');
+                } catch (error) {
+                    console.error("Error al eliminar la sucursal:", error);
+                    Swal.fire('Error!', 'No se pudo eliminar la sucursal.', 'error');
+                }
+            }
+        });
+    };
+
+    const handleBranchCreatedOrUpdated = () => {
         fetchBranches();
         handleCloseModal();
     };
@@ -144,7 +186,7 @@ const Branches: React.FC = () => {
                         <div className="flex justify-between items-center mb-4">
                             <h2 className="text-xl font-semibold text-black">Lista de Sucursales</h2>
                             <button
-                                onClick={handleOpenModal}
+                                onClick={() => handleOpenModal()}
                                 className="bg-thirdColor text-white font-bold py-2 px-4 rounded-lg hover:bg-fourthColor transition duration-200"
                             >
                                 Agregar Sucursal
@@ -170,7 +212,7 @@ const Branches: React.FC = () => {
                                 type="text"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
-                                placeholder="Buscar por nombre, ciudad o departamento"
+                                placeholder="Buscar por nombre, ciudad, departamento o razón social"
                                 className="border p-2 w-full rounded-lg"
                             />
                         </div>
@@ -179,22 +221,26 @@ const Branches: React.FC = () => {
                             <table className="table-auto w-full bg-white">
                                 <thead>
                                     <tr className="bg-fourthColor text-left text-gray-700">
+                                        <th className="px-6 py-4 font-bold">Código</th>
                                         <th className="px-6 py-4 font-bold">Nombre</th>
                                         <th className="px-6 py-4 font-bold">Departamento</th>
                                         <th className="px-6 py-4 font-bold">Municipio</th>
                                         <th className="px-6 py-4 font-bold">Dirección</th>
                                         <th className="px-6 py-4 font-bold">Teléfono</th>
+                                        <th className="px-6 py-4 font-bold">Razón Social</th>
                                         <th className="px-6 py-4 font-bold">Operaciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {paginatedBranches.map((branch) => (
                                         <tr key={branch.id} className="border-b hover:bg-gray-50 text-black">
+                                            <td className="px-6 py-4 text-black">{branch.codigo}</td>
                                             <td className="px-6 py-4 text-black">{branch.nombre}</td>
                                             <td className="px-6 py-4 text-black">{branch.departamento}</td>
                                             <td className="px-6 py-4 text-black">{branch.municipio}</td>
                                             <td className="px-6 py-4 text-black">{branch.direccion}</td>
                                             <td className="px-6 py-4 text-black">{branch.telefono}</td>
+                                            <td className="px-6 py-4 text-black">{branch.razonSocial}</td>
                                             <td className="px-6 py-4 text-black">
                                                 <div className="flex">
                                                     <button
@@ -216,6 +262,7 @@ const Branches: React.FC = () => {
                                 </tbody>
                             </table>
                         </div>
+
                         <div className="flex space-x-1 justify-center mt-6">
                             <button
                                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -253,9 +300,15 @@ const Branches: React.FC = () => {
                 </div>
             </div>
 
-            <ModalCreateBranches isOpen={isModalOpen} onClose={handleCloseModal} onBranchCreated={handleBranchCreated} />
+            <ModalCreateBranch
+                isOpen={isModalOpen}
+                onClose={handleCloseModal}
+                onBranchCreated={handleBranchCreatedOrUpdated}
+                branchToEdit={selectedBranch}
+            />
         </div>
     );
 };
 
 export default Branches;
+
