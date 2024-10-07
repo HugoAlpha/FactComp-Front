@@ -11,6 +11,7 @@ import { MdInventory } from 'react-icons/md';
 import Link from 'next/link';
 import { PATH_URL_BACKEND } from '@/utils/constants';
 import { GrDocumentConfig } from "react-icons/gr";
+import CreateEditClientModal from '@/components/layouts/modalCreateEditClient';
 
 const Sales = () => {
     const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
@@ -27,7 +28,16 @@ const Sales = () => {
     const [originalTotal, setOriginalTotal] = useState(0);
     const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
     const [facturaData, setFacturaData] = useState<FacturaData | null>(null);
-
+    const [isClientModalOpen, setIsClientModalOpen] = useState(false);
+    const [currentCustomer, setCurrentCustomer] = useState<Customer>({
+        id: 0,
+        nombreRazonSocial: '',
+        numeroDocumento: '',
+        complemento: '',
+        codigoTipoDocumentoIdentidad: 0,
+        codigoCliente: '',
+        email: '',
+    });
 
     interface Product {
         id: number;
@@ -100,6 +110,8 @@ const Sales = () => {
 
         fetchProducts();
     }, []);
+
+    
 
     const updateDiscount = (id: number, value: string) => {
         console.log(`Actualizando descuento del producto con id: ${id}, nuevo valor: ${value}`);
@@ -306,6 +318,29 @@ const Sales = () => {
         setIsReceiptModalOpen(false);
     };
 
+    const handleOpenClientModal = () => {
+        setIsClientModalOpen(true);
+    };
+
+    const handleCloseClientModal = () => {
+        setIsClientModalOpen(false);
+        setCurrentCustomer({
+            id: 0,
+            nombreRazonSocial: '',
+            numeroDocumento: '',
+            complemento: '',
+            codigoTipoDocumentoIdentidad: 0,
+            codigoCliente: '',
+            email: '',
+        });
+    };
+
+    const handleSaveCustomer = (savedCustomer: Customer) => {
+
+        console.log('Cliente guardado:', savedCustomer);
+        handleCloseClientModal();
+    };
+
     const formattedSelectedProducts = selectedProducts.map((product) => ({
         id: product.id,
         nombre: product.name,
@@ -376,9 +411,17 @@ const Sales = () => {
                         <div className="mt-4">
                             <div className="mr-4">
                                 <div className="mb-2">
-                                    <button className="flex items-center justify-center bg-gray-100 text-black font-bold py-2 px-4 rounded-lg w-full">
+                                    <button className="flex items-center justify-center bg-gray-100 text-black font-bold py-2 px-4 rounded-lg w-full"
+                                    onClick={handleOpenClientModal}>
+                                        
                                         <FaUser className="mr-2" /> Cliente
                                     </button>
+                                    <CreateEditClientModal
+                                        isOpen={isClientModalOpen}
+                                        onClose={handleCloseClientModal}
+                                        customer={currentCustomer}
+                                        onSave={handleSaveCustomer}
+                                    />
                                 </div>
                                 <div className="mb-2">
                                     <button
