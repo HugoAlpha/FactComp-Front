@@ -586,7 +586,7 @@ const Sales = () => {
                             {facturaData && (
                                 <div className="w-1/3 bg-gray-100 p-4 rounded-lg shadow-md">
                                     <div className="text-center mb-6">
-                                        <img src="/images/LogoIdAlpha2.png" alt="logo" className="w-50 h-40 mx-auto" />
+                                        <img src="/images/LogoIdAlpha.png" alt="logo" className=" mx-auto" />
                                         <p className="font-semibold">Orden #{facturaData.numeroFactura || '-'}</p>
                                     </div>
 
