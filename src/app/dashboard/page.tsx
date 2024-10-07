@@ -32,18 +32,14 @@ const Dashboard = () => {
                 const response = await fetch(`${PATH_URL_BACKEND}/factura`);
                 if (response.ok) {
                     const data = await response.json();
-
-                    // Ordenamos las facturas por fecha de emisión en orden descendente
                     const sortedData = data.sort((a, b) => new Date(b.fechaEmision) - new Date(a.fechaEmision));
                     const lastFourInvoices = sortedData.slice(0, 4);
-
-                    // Mapeamos los últimos 4 registros de facturas
                     const formattedInvoices = lastFourInvoices.map(invoice => ({
                         id: invoice.id,
                         status: invoice.estado === "VALIDA" ? "Fac. Válida" : "Anulada",
                         statusColor: invoice.estado === "VALIDA" ? "green" : "red",
                         method: invoice.codigoMetodoPago === 1 ? "Efectivo" : invoice.codigoMetodoPago === 2 ? "Tarjeta" : "Transferencia",
-                        amount: `$${invoice.montoTotal.toFixed(2)}`,
+                        amount: `Bs ${invoice.montoTotal.toFixed(2)}`,
                         date: new Date(invoice.fechaEmision).toLocaleDateString(),
                         company: invoice.razonSocialEmisor,
                     }));
@@ -51,7 +47,7 @@ const Dashboard = () => {
                     const formattedClients = lastFourInvoices.map(invoice => ({
                         id: invoice.id,
                         name: invoice.nombreRazonSocial ? invoice.nombreRazonSocial : "Sin Nombre",
-                        amount: `$${invoice.montoTotal.toFixed(2)}`,
+                        amount: `Bs ${invoice.montoTotal.toFixed(2)}`,
                         location: `${invoice.numeroDocumento}`,
                     }));
 
@@ -101,14 +97,13 @@ const Dashboard = () => {
                             </div>
                         </div>
 
-                        {/* Facturas Recientes */}
                         <div className="grid grid-cols-3 gap-6">
                             <div className="col-span-2 flex flex-col min-h-full">
                                 <div className="relative bg-white shadow-sm border border-slate-200 rounded-lg flex-grow">
                                     <div className="p-4 flex justify-between items-center">
                                         <h4 className="text-lg font-semibold text-slate-800">Facturas Recientes</h4>
-                                        <a href="bill" className="font-medium text-blue-600 hover:underline">
-                                            See All Invoices
+                                        <a href="bill" className="font-bold text-firstColor hover:underline">
+                                            Ver todas las facturas
                                         </a>
                                     </div>
                                     <p className="text-sm text-slate-500 px-4">Puedes ver el estado de las Facturas</p>
@@ -147,8 +142,8 @@ const Dashboard = () => {
                                 <div className="relative bg-white shadow-sm border border-slate-200 rounded-lg flex-grow">
                                     <div className="p-4 flex justify-between items-center">
                                         <h4 className="text-lg font-semibold text-slate-800">Clientes Recientes</h4>
-                                        <a href="clientList" className="font-medium text-blue-600 hover:underline">
-                                            See All Customers
+                                        <a href="clientList" className="font-bold text-firstColor hover:underline">
+                                            Ver todos los clientes
                                         </a>
                                     </div>
                                     <p className="text-sm text-slate-500 px-4">Resumen de clientes</p>
@@ -158,7 +153,7 @@ const Dashboard = () => {
                                                 {recentClients.map((client) => (
                                                     <tr className="bg-white border-b hover:bg-gray-50" key={client.id}>
                                                         <th scope="row" className="flex items-center px-6 py-4 whitespace-nowrap">
-                                                            <img className="w-10 h-10 rounded-full" src={`https://i.pravatar.cc/40?u=${client.name}`} alt={client.name} />
+                                                            <img className="w-10 h-10 rounded-full" src={`https://cdn.pixabay.com/photo/2017/11/10/05/48/user-2935527_1280.png`} alt={client.name} />
                                                             <div className="ps-3">
                                                                 <div className="text-base font-semibold">{client.name}</div>
                                                                 <div className="font-normal text-gray-500">{client.location}</div>
