@@ -8,6 +8,7 @@ import { PATH_URL_BACKEND } from '@/utils/constants';
 import Swal from 'sweetalert2';
 
 interface FormattedBill {
+    id: string
     documentNumber: string;
     client: string;
     date: string;
@@ -110,7 +111,7 @@ const BillList = () => {
         return pageNumbers;
     };
 
-    const handleAnularFactura = async (bill) => {
+    const handleAnularFactura = async (bill: any) => {
         console.log('Factura seleccionada para anulación:', bill);
 
         if (!bill.cuf) {
