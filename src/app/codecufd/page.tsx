@@ -147,7 +147,9 @@ const CUFDList = () => {
                                             <td className="px-6 py-4">{formatDate(cufd.fechaInicio)}</td>
                                             <td className="px-6 py-4">{formatDate(cufd.fechaVigencia)}</td>
                                             <td className="px-6 py-4">
-                                                {cufd.vigente ? 'Activo' : 'Inactivo'}
+                                                <span className={cufd.vigente ? 'text-green-500 font-semibold' : 'text-red-500 font-semibold'}>
+                                                    {cufd.vigente ? 'Activo' : 'Inactivo'}
+                                                </span>
                                             </td>
                                         </tr>
                                     ))}
