@@ -163,7 +163,7 @@ const Sales = () => {
 
         setGlobalDiscountHistory((prevHistory) => [
             ...prevHistory,
-            `Descuento aplicado: $${discountValue.toFixed(2)}`
+            `Descuento aplicado: Bs ${discountValue.toFixed(2)}`
         ]);
 
         setGlobalDiscount('');
@@ -396,7 +396,7 @@ const Sales = () => {
                                 ))}
                             </tbody>
                         </table>
-                        <div className="mt-4 text-lg font-bold">Total: ${total.toFixed(2)}</div>
+                        <div className="mt-4 text-lg font-bold">Total: Bs {total.toFixed(2)}</div>
 
                         {/* Mostrar el historial de descuentos globales */}
                         <div className="text-sm text-gray-500 mt-2">
@@ -536,7 +536,7 @@ const Sales = () => {
                                 >
                                     <img src={product.img} alt={product.name} className="h-24 w-full object-contain mb-2 transition-all duration-300 hover:scale-110" />
                                     <h3 className="text-xs font-semibold truncate">{product.name}</h3>
-                                    <p className="text-sm font-bold">${product.price}</p>
+                                    <p className="text-sm font-bold">Bs {product.price}</p>
                                 </div>
                             ))}
                         </div>
@@ -586,7 +586,7 @@ const Sales = () => {
                             {facturaData && (
                                 <div className="w-1/3 bg-gray-100 p-4 rounded-lg shadow-md">
                                     <div className="text-center mb-6">
-                                        <img src="/images/LogoIdAlpha2.png" alt="logo" className="w-50 h-40 mx-auto" />
+                                        <img src="/images/LogoIdAlpha.png" alt="logo" className=" mx-auto" />
                                         <p className="font-semibold">Orden #{facturaData.numeroFactura || '-'}</p>
                                     </div>
 
