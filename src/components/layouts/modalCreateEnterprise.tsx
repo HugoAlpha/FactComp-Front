@@ -1,17 +1,10 @@
-import React from 'react';
-import { FaBuilding, FaIdCard, FaMapMarkedAlt, FaPhone, FaCity, FaClipboardList } from 'react-icons/fa';
+import React, { useState, useEffect } from 'react';
+import { FaBuilding, FaIdCard } from 'react-icons/fa';
 
 interface Enterprise {
     id: number;
     nit: string;
-    nombreEmpresa: string;
-    sucursales: string;
-    direccion: string;
-    zona: string;
-    telefono: string;
-    ciudad: string;
-    modalidad: string;
-    logo: string;
+    razonSocial: string;
 }
 
 interface EnterpriseModalProps {
@@ -22,10 +15,10 @@ interface EnterpriseModalProps {
 }
 
 const CreateEditEnterpriseModal: React.FC<EnterpriseModalProps> = ({ isOpen, onClose, enterprise, onSave }) => {
-    const [formData, setFormData] = React.useState<Enterprise>(enterprise);
-    const [errors, setErrors] = React.useState<{ [key: string]: string }>({});
+    const [formData, setFormData] = useState<Enterprise>(enterprise);
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
-    React.useEffect(() => {
+    useEffect(() => {
         setFormData(enterprise);
         setErrors({});
     }, [enterprise, isOpen]);
@@ -39,13 +32,7 @@ const CreateEditEnterpriseModal: React.FC<EnterpriseModalProps> = ({ isOpen, onC
     const validateForm = () => {
         const newErrors: { [key: string]: string } = {};
         if (!formData.nit) newErrors.nit = 'Este campo es requerido';
-        if (!formData.nombreEmpresa) newErrors.nombreEmpresa = 'Este campo es requerido';
-        if (!formData.sucursales) newErrors.sucursales = 'Este campo es requerido';
-        if (!formData.direccion) newErrors.direccion = 'Este campo es requerido';
-        if (!formData.zona) newErrors.zona = 'Este campo es requerido';
-        if (!formData.telefono) newErrors.telefono = 'Este campo es requerido';
-        if (!formData.ciudad) newErrors.ciudad = 'Este campo es requerido';
-        if (!formData.modalidad) newErrors.modalidad = 'Este campo es requerido';
+        if (!formData.razonSocial) newErrors.razonSocial = 'Este campo es requerido';
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -69,19 +56,7 @@ const CreateEditEnterpriseModal: React.FC<EnterpriseModalProps> = ({ isOpen, onC
                     <div className="grid grid-cols-1 gap-6 text-black">
                         <div className="grid grid-cols-2 gap-6">
                             {renderInputField("nit", "NIT", formData.nit, handleInputChange, <FaIdCard />, errors.nit)}
-                            {renderInputField("nombreEmpresa", "Nombre Empresa", formData.nombreEmpresa, handleInputChange, <FaBuilding />, errors.nombreEmpresa)}
-                        </div>
-                        <div className="grid grid-cols-2 gap-6">
-                            {renderInputField("sucursales", "Sucursales", formData.sucursales, handleInputChange, <FaClipboardList />, errors.sucursales)}
-                            {renderInputField("direccion", "Dirección", formData.direccion, handleInputChange, <FaMapMarkedAlt />, errors.direccion)}
-                        </div>
-                        <div className="grid grid-cols-2 gap-6">
-                            {renderInputField("zona", "Zona", formData.zona, handleInputChange, <FaMapMarkedAlt />, errors.zona)}
-                            {renderInputField("telefono", "Teléfono", formData.telefono, handleInputChange, <FaPhone />, errors.telefono)}
-                        </div>
-                        <div className="grid grid-cols-2 gap-6">
-                            {renderInputField("ciudad", "Ciudad", formData.ciudad, handleInputChange, <FaCity />, errors.ciudad)}
-                            {renderInputField("modalidad", "Modalidad", formData.modalidad, handleInputChange, <FaClipboardList />, errors.modalidad)}
+                            {renderInputField("razonSocial", "Razón Social", formData.razonSocial, handleInputChange, <FaBuilding />, errors.razonSocial)}
                         </div>
                     </div>
 
