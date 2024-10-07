@@ -111,7 +111,7 @@ const BillList = () => {
     };
 
     const handleAnularFactura = async (bill) => {
-        console.log('Factura seleccionada para anulación:', bill);  // Verificar que 'bill' tiene los valores correctos
+        console.log('Factura seleccionada para anulación:', bill);
 
         if (!bill.cuf) {
             Swal.fire('Error', 'No se encontró el CUF de la factura', 'error');
@@ -151,7 +151,7 @@ const BillList = () => {
                             'La factura ha sido anulada correctamente.',
                             'success'
                         );
-                        // Puedes actualizar la lista de facturas después de la anulación
+
                         fetchBills(estadoFilter);
                     } else {
                         Swal.fire(

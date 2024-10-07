@@ -42,7 +42,6 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
         codigoProductoSin: '',
     });
 
-    // Fetch de las opciones de productos
     useEffect(() => {
         const fetchProductOptions = async () => {
             try {

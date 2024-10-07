@@ -64,19 +64,19 @@ const Sidebar = () => {
                 { name: 'CUFD', href: 'codecufd' }
             ]
         },
-        {
-            name: 'Parámetros',
-            icon: <FaFileInvoice size={20} />,
-            subItems: [
-                { name: 'Submenú 1', href: '#' },
-                { name: 'Submenú 2', href: '#' }
-            ]
-        },
+        //{
+        //  name: 'Parámetros',
+        //icon: <FaFileInvoice size={20} />,
+        //subItems: [
+        //    { name: 'Submenú 1', href: '#' },
+        //  { name: 'Submenú 2', href: '#' }
+        //]
+        //},
         {
             name: 'Configuración SIAT',
             icon: <HiDocumentCheck size={20} />,
             subItems: [
-                { name: 'Actividades', href: 'activities' },
+                //{ name: 'Actividades', href: 'activities' },
                 { name: 'Leyendas', href: 'legends' }
             ]
         }

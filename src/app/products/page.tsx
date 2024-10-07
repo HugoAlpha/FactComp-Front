@@ -20,7 +20,7 @@ const ProductList = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 10;
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null); // Estado para almacenar el producto a editar
+    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
     useEffect(() => {
         const fetchProducts = async () => {

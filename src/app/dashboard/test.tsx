@@ -1,16 +1,59 @@
 "use client";
-import { useState, useEffect } from "react";
 import { FaCircle } from "react-icons/fa";
+import { useState } from "react";
 import Sidebar from "@/components/commons/sidebar";
 import Header from "@/components/commons/header";
 import CreateEditClientModal from "@/components/layouts/modalCreateEditClient";
-import { PATH_URL_BACKEND } from "@/utils/constants";
 
 const Dashboard = () => {
     const [isClientModalOpen, setIsClientModalOpen] = useState(false);
     const [selectedClient, setSelectedClient] = useState(null);
-    const [recentInvoices, setRecentInvoices] = useState([]);
-    const [recentClients, setRecentClients] = useState([]);
+
+    const recentInvoices = [
+        {
+            id: 1,
+            status: "Fac. Válida",
+            method: "Visa card ****4831",
+            amount: "$182.94",
+            date: "Jan 17, 2022",
+            company: "Amazon",
+            statusColor: "green",
+        },
+        {
+            id: 2,
+            status: "Fac. Válida",
+            method: "Mastercard ****6442",
+            amount: "$99.00",
+            date: "Jan 17, 2022",
+            company: "Facebook",
+            statusColor: "green",
+        },
+        {
+            id: 3,
+            status: "Pendiente",
+            method: "Account ****882",
+            amount: "$249.94",
+            date: "Jan 17, 2022",
+            company: "Netflix",
+            statusColor: "yellow",
+        },
+        {
+            id: 4,
+            status: "Anulada",
+            method: "Amex ****5666",
+            amount: "$199.24",
+            date: "Jan 17, 2022",
+            company: "Amazon Prime",
+            statusColor: "red",
+        },
+    ];
+
+    const recentClients = [
+        { id: 1, name: "Jenny Wilson", amount: "$11,234", location: "Austin", email: "w.lawson@example.com" },
+        { id: 2, name: "Devon Lane", amount: "$11,159", location: "New York", email: "dat.roberts@example.com" },
+        { id: 3, name: "Jane Cooper", amount: "$10,483", location: "Toledo", email: "jgraham@example.com" },
+        { id: 4, name: "Dianne Russell", amount: "$9,084", location: "Naperville", email: "curtis.d@example.com" },
+    ];
 
     const handleOpenClientModal = () => {
         setSelectedClient(null);
@@ -25,48 +68,6 @@ const Dashboard = () => {
         console.log("Cliente guardado:", newClient);
         handleCloseClientModal();
     };
-
-    useEffect(() => {
-        const fetchData = async () => {
-            try {
-                const response = await fetch(`${PATH_URL_BACKEND}/factura`);
-                if (response.ok) {
-                    const data = await response.json();
-
-                    // Ordenamos las facturas por fecha de emisión en orden descendente
-                    const sortedData = data.sort((a, b) => new Date(b.fechaEmision) - new Date(a.fechaEmision));
-                    const lastFourInvoices = sortedData.slice(0, 4);
-
-                    // Mapeamos los últimos 4 registros de facturas
-                    const formattedInvoices = lastFourInvoices.map(invoice => ({
-                        id: invoice.id,
-                        status: invoice.estado === "VALIDA" ? "Fac. Válida" : "Anulada",
-                        statusColor: invoice.estado === "VALIDA" ? "green" : "red",
-                        method: invoice.codigoMetodoPago === 1 ? "Efectivo" : invoice.codigoMetodoPago === 2 ? "Tarjeta" : "Transferencia",
-                        amount: `$${invoice.montoTotal.toFixed(2)}`,
-                        date: new Date(invoice.fechaEmision).toLocaleDateString(),
-                        company: invoice.razonSocialEmisor,
-                    }));
-
-                    const formattedClients = lastFourInvoices.map(invoice => ({
-                        id: invoice.id,
-                        name: invoice.nombreRazonSocial ? invoice.nombreRazonSocial : "Sin Nombre",
-                        amount: `$${invoice.montoTotal.toFixed(2)}`,
-                        location: `${invoice.numeroDocumento}`,
-                    }));
-
-                    setRecentInvoices(formattedInvoices);
-                    setRecentClients(formattedClients);
-                } else {
-                    console.error("Error al obtener los datos de las facturas");
-                }
-            } catch (error) {
-                console.error("Error al conectar con el servidor", error);
-            }
-        };
-
-        fetchData();
-    }, []);
 
     return (
         <div className="flex min-h-screen">
@@ -142,7 +143,6 @@ const Dashboard = () => {
                                 </div>
                             </div>
 
-                            {/* Clientes Recientes */}
                             <div className="flex flex-col min-h-full">
                                 <div className="relative bg-white shadow-sm border border-slate-200 rounded-lg flex-grow">
                                     <div className="p-4 flex justify-between items-center">
@@ -161,10 +161,11 @@ const Dashboard = () => {
                                                             <img className="w-10 h-10 rounded-full" src={`https://i.pravatar.cc/40?u=${client.name}`} alt={client.name} />
                                                             <div className="ps-3">
                                                                 <div className="text-base font-semibold">{client.name}</div>
-                                                                <div className="font-normal text-gray-500">{client.location}</div>
+                                                                <div className="font-normal text-gray-500">{client.email}</div>
                                                             </div>
                                                         </th>
                                                         <td className="px-6 py-4 text-right">{client.amount}</td>
+                                                        <td className="px-6 py-4 text-right">{client.location}</td>
                                                     </tr>
                                                 ))}
                                             </tbody>
@@ -173,7 +174,6 @@ const Dashboard = () => {
                                 </div>
                             </div>
                         </div>
-
                         <section className="bg-white mt-8">
                             <div className="py-8 px-4 mx-auto max-w-screen-xl sm:py-16 lg:px-6">
                                 <div className="mx-auto max-w-screen-sm text-center">
@@ -194,7 +194,7 @@ const Dashboard = () => {
                                         {/* Botón para nuevo cliente */}
                                         <a
                                             href="#"
-                                            onClick={handleOpenClientModal}
+                                            onClick={handleOpenClientModal} // Llamamos a la función para abrir el modal
                                             className="text-white bg-thirdColor hover:bg-fourthColor focus:ring-4 focus:ring-green-300 font-bold rounded-lg text-sm px-5 py-2.5 dark:bg-green-500 dark:hover:bg-green-600 focus:outline-none dark:focus:ring-green-800"
                                         >
                                             Agregar un Nuevo Cliente
@@ -211,7 +211,7 @@ const Dashboard = () => {
             <CreateEditClientModal
                 isOpen={isClientModalOpen}
                 onClose={handleCloseClientModal}
-                customer={selectedClient || { id: 0, nombreRazonSocial: '', numeroDocumento: '', complemento: '', codigoTipoDocumentoIdentidad: 0, codigoCliente: '', email: '' }}
+                customer={selectedClient || { id: 0, nombreRazonSocial: '', numeroDocumento: '', complemento: '', codigoTipoDocumentoIdentidad: 0, codigoCliente: '', email: '' }} // Valores por defecto
                 onSave={handleSaveClient}
             />
         </div>

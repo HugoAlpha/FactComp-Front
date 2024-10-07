@@ -90,7 +90,7 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({ isOpen, onClose, prod
                     montoDescuento: product.discount ? product.discount.toFixed(2) : '00.0'
                 }))
             };
-
+            console.log(body)
             const response = await fetch(`${PATH_URL_BACKEND}/factura/emitir`, {
                 method: 'POST',
                 headers: {
