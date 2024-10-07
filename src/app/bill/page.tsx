@@ -8,6 +8,7 @@ import { PATH_URL_BACKEND } from '@/utils/constants';
 import Swal from 'sweetalert2';
 
 interface FormattedBill {
+    id:string
     documentNumber: string;
     client: string;
     date: string;
