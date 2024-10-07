@@ -111,20 +111,18 @@ const Sales = () => {
         fetchProducts();
     }, []);
 
-    
-
     const updateDiscount = (id: number, value: string) => {
         console.log(`Actualizando descuento del producto con id: ${id}, nuevo valor: ${value}`);
         const updatedProducts = selectedProducts.map((item: Product) => {
             if (item.id === id) {
                 const newDiscount = value ? parseFloat(value) : 0;
-                const newTotalPrice = item.quantity! * (item.price - newDiscount > 0 ? item.price - newDiscount : 0);
+                const subtotal = item.price * item.quantity!;
+                const newTotalPrice = subtotal - newDiscount;
 
-                console.log(`Nuevo descuento aplicado: ${newDiscount}`);
                 return {
                     ...item,
                     discount: newDiscount,
-                    totalPrice: newTotalPrice
+                    totalPrice: newTotalPrice > 0 ? newTotalPrice : 0
                 };
             }
             return item;
@@ -217,12 +215,12 @@ const Sales = () => {
                 ? {
                     ...item,
                     quantity: (item.quantity ?? 1) + 1,
-                    totalPrice: ((item.quantity ?? 1) + 1) * (item.price - (item.discount ?? 0)),
+                    totalPrice: ((item.quantity ?? 1) + 1) * item.price - item.discount,
                 }
                 : item
         );
         setSelectedProducts(updatedProducts);
-        setTotal(updatedProducts.reduce((acc, curr) => acc + (curr.totalPrice ?? 0), 0));
+        calculateTotal(updatedProducts);
     };
 
     const decreaseQuantity = (id: number) => {
@@ -231,12 +229,12 @@ const Sales = () => {
                 ? {
                     ...item,
                     quantity: (item.quantity ?? 1) - 1,
-                    totalPrice: ((item.quantity ?? 1) - 1) * (item.price - (item.discount ?? 0)),
+                    totalPrice: ((item.quantity ?? 1) - 1) * item.price - item.discount,
                 }
                 : item
         );
         setSelectedProducts(updatedProducts);
-        setTotal(updatedProducts.reduce((acc, curr) => acc + (curr.totalPrice ?? 0), 0));
+        calculateTotal(updatedProducts);
     };
 
     const handleOpenModal = () => {
@@ -346,7 +344,7 @@ const Sales = () => {
         nombre: product.name,
         precio: product.price,
         cantidad: product.quantity ?? 1,
-        discount: product.discount // Incluimos el descuento aquí
+        discount: product.discount
     }));
 
     return (
@@ -412,8 +410,8 @@ const Sales = () => {
                             <div className="mr-4">
                                 <div className="mb-2">
                                     <button className="flex items-center justify-center bg-gray-100 text-black font-bold py-2 px-4 rounded-lg w-full"
-                                    onClick={handleOpenClientModal}>
-                                        
+                                        onClick={handleOpenClientModal}>
+
                                         <FaUser className="mr-2" /> Cliente
                                     </button>
                                     <CreateEditClientModal

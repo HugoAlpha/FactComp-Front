@@ -84,13 +84,16 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({ isOpen, onClose, prod
                 idPuntoVenta: "1",
                 idCliente: clients.find(client => client.nombreRazonSocial === selectedClient)?.id || '',
                 nitInvalido: true,
+                codigoMetodoPago: 5,
                 detalle: products.map(product => ({
                     idProducto: product.id,
                     cantidad: product.cantidad.toString(),
                     montoDescuento: product.discount ? product.discount.toFixed(2) : '00.0'
                 }))
             };
-            console.log(body)
+
+            console.log(body);
+
             const response = await fetch(`${PATH_URL_BACKEND}/factura/emitir`, {
                 method: 'POST',
                 headers: {
