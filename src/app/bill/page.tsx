@@ -1,9 +1,11 @@
 "use client";
 import React, { useState, useEffect, useMemo } from 'react';
-import { FaSearch, FaDownload, FaTrashAlt, FaEye, FaTimes } from 'react-icons/fa';
+import { FaSearch, FaEye, FaTimes } from 'react-icons/fa';
+import { HiReceiptRefund } from "react-icons/hi2";
 import Sidebar from '@/components/commons/sidebar';
 import Header from '@/components/commons/header';
 import { PATH_URL_BACKEND } from '@/utils/constants';
+import Swal from 'sweetalert2';
 
 interface FormattedBill {
     documentNumber: string;
@@ -13,6 +15,7 @@ interface FormattedBill {
     estado: string;
     codigoSucursal: number;
     codigoPuntoVenta: number;
+    cuf: string;
 }
 
 const BillList = () => {
@@ -21,30 +24,41 @@ const BillList = () => {
     const [bills, setBills] = useState<FormattedBill[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const rowsPerPage = 10;
+    const [estadoFilter, setEstadoFilter] = useState('TODAS');
 
-    useEffect(() => {
-        const fetchBills = async () => {
-            try {
-                const response = await fetch(`${PATH_URL_BACKEND}/factura`);
-                if (response.ok) {
-                    const data = await response.json();
-                    const formattedData = data.map((bill: any) => ({
+    const fetchBills = async (estado?: string) => {
+        try {
+            const estadoParam = estado === 'TODAS' ? '' : (estado === 'VALIDA' ? '1' : '0');
+            const endpoint = estadoParam ? `${PATH_URL_BACKEND}/factura/estado?estado=${estadoParam}` : `${PATH_URL_BACKEND}/factura`;
+            const response = await fetch(endpoint);
+            if (response.ok) {
+                const data = await response.json();
+                const formattedData = data
+                    .filter((bill: any) => estado === 'TODAS' || bill.estado !== null)
+                    .map((bill: any) => ({
                         documentNumber: bill.numeroDocumento,
                         client: bill.nombreRazonSocial,
                         date: new Date(bill.fechaEmision).toLocaleDateString(),
                         total: bill.montoTotal.toFixed(2),
-                        estado: 'Válida',
+                        estado: bill.estado || '-',
                         codigoSucursal: bill.codigoSucursal,
                         codigoPuntoVenta: bill.codigoPuntoVenta,
+                        cuf: bill.cuf
                     }));
-                    setBills(formattedData);
-                } else {
-                    console.error('Error fetching bills');
-                }
-            } catch (error) {
-                console.error('Error fetching bills:', error);
+                setBills(formattedData);
+            } else {
+                console.error('Error fetching bills');
             }
-        };
+        } catch (error) {
+            console.error('Error fetching bills:', error);
+        }
+    };
+
+    useEffect(() => {
+        fetchBills(estadoFilter);
+    }, [estadoFilter]);
+
+    useEffect(() => {
         fetchBills();
     }, []);
 
@@ -78,28 +92,81 @@ const BillList = () => {
         setSelectedBill(bill);
     };
 
-    const getPageNumbers = (currentPage, totalPages) => {
+    const getPageNumbers = (currentPage: number, totalPages: number) => {
         const pageNumbers = [];
         const maxVisiblePages = 4;
-    
-        // Cálculo del rango de páginas a mostrar
+
         let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
         let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-    
-        // Ajuste si el rango es menor que el máximo visible
+
         if (endPage - startPage + 1 < maxVisiblePages) {
             startPage = Math.max(1, endPage - maxVisiblePages + 1);
         }
-    
-        // Agrega los números de página al array
+
         for (let i = startPage; i <= endPage; i++) {
             pageNumbers.push(i);
         }
-    
+
         return pageNumbers;
     };
-    
-    
+
+    const handleAnularFactura = async (bill) => {
+        console.log('Factura seleccionada para anulación:', bill);  // Verificar que 'bill' tiene los valores correctos
+
+        if (!bill.cuf) {
+            Swal.fire('Error', 'No se encontró el CUF de la factura', 'error');
+            return;
+        }
+
+        Swal.fire({
+            title: '¿Estás seguro de anular esta factura?',
+            text: "No podrás revertir esto.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sí, anular'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    const body = {
+                        cuf: bill.cuf,
+                        anulacionMotivo: 1,
+                        idPuntoVenta: bill.codigoPuntoVenta
+                    };
+
+                    console.log('Body que se enviará al POST:', body);
+
+                    const response = await fetch(`${PATH_URL_BACKEND}/factura/anular`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(body),
+                    });
+
+                    if (response.ok) {
+                        Swal.fire(
+                            'Anulada!',
+                            'La factura ha sido anulada correctamente.',
+                            'success'
+                        );
+                        // Puedes actualizar la lista de facturas después de la anulación
+                        fetchBills(estadoFilter);
+                    } else {
+                        Swal.fire(
+                            'Error!',
+                            'No se pudo anular la factura.',
+                            'error'
+                        );
+                    }
+                } catch (error) {
+                    console.error('Error al anular factura:', error);
+                    Swal.fire('Error', 'No se pudo conectar con el servidor.', 'error');
+                }
+            }
+        });
+    };
 
     return (
         <div className="flex min-h-screen">
@@ -109,9 +176,17 @@ const BillList = () => {
                 <div className="flex-grow overflow-auto bg-gray-50 p-6">
                     <h1 className="text-2xl font-bold mb-6 text-gray-700">Lista de Facturas</h1>
                     <div className="flex items-center justify-between mb-6">
-                        <button className="bg-slate-400 text-white py-3 px-6 rounded-lg hover:bg-thirdColor text-lg">
-                            EMITIR FACTURA
-                        </button>
+                        {/* Dropdown para filtrar por estado */}
+                        <select
+                            value={estadoFilter}
+                            onChange={(e) => setEstadoFilter(e.target.value)}
+                            className="border border-gray-300 rounded-lg py-3 px-4 text-lg bg-white text-gray-700"
+                        >
+                            <option value="TODAS">Todas</option>
+                            <option value="VALIDA">Válida</option>
+                            <option value="ANULADA">Anulada</option>
+                        </select>
+
                         <div className="relative flex items-center w-1/2">
                             <input
                                 type="text"
@@ -140,12 +215,12 @@ const BillList = () => {
                                     </thead>
                                     <tbody>
                                         {paginatedBills.map((bill) => (
-                                            <tr key={bill.documentNumber} className="border-b hover:bg-gray-50 text-black">
+                                            <tr key={bill.id} className="border-b hover:bg-gray-50 text-black">
                                                 <td className="px-6 py-4">{bill.documentNumber}</td>
                                                 <td className="px-6 py-4">{bill.client}</td>
                                                 <td className="px-6 py-4">{bill.date}</td>
                                                 <td className="px-6 py-4">{bill.total}</td>
-                                                <td className="px-6 py-4">{bill.estado}</td>
+                                                <td className="px-6 py-4">{bill.estado || '-'}</td>
                                                 <td className="px-6 py-4">
                                                     <div className="flex">
                                                         <button
@@ -154,8 +229,11 @@ const BillList = () => {
                                                         >
                                                             <FaEye className="text-black" />
                                                         </button>
-                                                        <button className="bg-red-200 hover:bg-red-300 p-2 rounded-r-lg flex items-center justify-center border border-red-300">
-                                                            <FaTrashAlt className="text-black" />
+                                                        <button
+                                                            className="bg-red-200 hover:bg-red-300 p-2 rounded-r-lg flex items-center justify-center border border-red-300"
+                                                            onClick={() => handleAnularFactura(bill)}
+                                                        >
+                                                            <HiReceiptRefund className="text-black" />
                                                         </button>
                                                     </div>
                                                 </td>
@@ -164,6 +242,8 @@ const BillList = () => {
                                     </tbody>
                                 </table>
                             </div>
+
+                            {/* Paginación */}
                             <div className="flex space-x-1 justify-center mt-6">
                                 <button
                                     onClick={handlePrevPage}
@@ -173,7 +253,7 @@ const BillList = () => {
                                     Prev
                                 </button>
 
-                                {getPageNumbers().map((page) => (
+                                {getPageNumbers(currentPage, totalPages).map((page) => (
                                     <button
                                         key={page}
                                         onClick={() => setCurrentPage(page)}

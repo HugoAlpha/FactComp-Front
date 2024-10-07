@@ -13,6 +13,13 @@ interface Customer {
     email: string;
 }
 
+interface DocumentType {
+    id: number;
+    codigoClasificador: string;
+    descripcion: string;
+    codigoTipoParametro: string;
+}
+
 interface CustomerModalProps {
     isOpen: boolean;
     onClose: () => void;
@@ -23,7 +30,26 @@ interface CustomerModalProps {
 const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, customer, onSave }) => {
     const [formData, setFormData] = useState<Customer>({ ...customer, codigoTipoDocumentoIdentidad: 0 });
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
-    const [tipoDocumento, setTipoDocumento] = useState<string>(customer.codigoTipoDocumentoIdentidad === 0 ? 'NIT' : 'CI');
+    const [documentTypes, setDocumentTypes] = useState<DocumentType[]>([]);
+    const [selectedDocumentType, setSelectedDocumentType] = useState<string>(customer.codigoTipoDocumentoIdentidad.toString());
+
+    useEffect(() => {
+        const fetchDocumentTypes = async () => {
+            try {
+                const response = await fetch(`${PATH_URL_BACKEND}/parametro/identidad`);
+                if (response.ok) {
+                    const data: DocumentType[] = await response.json();
+                    setDocumentTypes(data);
+                } else {
+                    Swal.fire('Error', 'Error al obtener tipos de documentos de identidad', 'error');
+                }
+            } catch (error) {
+                Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
+            }
+        };
+
+        fetchDocumentTypes();
+    }, []);
 
     useEffect(() => {
         setFormData(customer);
@@ -36,12 +62,16 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
         setErrors((prevErrors) => ({ ...prevErrors, [name]: '' }));
     };
 
-    const handleTipoDocumentoChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const selectedTipo = e.target.value;
-        setTipoDocumento(selectedTipo);
-
-        const codigoTipoDocumentoIdentidad = selectedTipo === 'NIT' ? 0 : 1;
-        setFormData((prevData) => ({ ...prevData, codigoTipoDocumentoIdentidad }));
+    const handleDocumentTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const selectedType = e.target.value;
+        setSelectedDocumentType(selectedType);
+        const selectedTypeObject = documentTypes.find((docType) => docType.codigoClasificador === selectedType);
+        if (selectedTypeObject) {
+            setFormData((prevData) => ({
+                ...prevData,
+                codigoTipoDocumentoIdentidad: parseInt(selectedTypeObject.codigoClasificador),
+            }));
+        }
     };
 
     const validateForm = () => {
@@ -69,7 +99,7 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
                         body: JSON.stringify(formData),
                     });
                 } else {
-                    // POST 
+                    // POST
                     response = await fetch(`${PATH_URL_BACKEND}/api/clientes`, {
                         method: 'POST',
                         headers: {
@@ -163,13 +193,17 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
                         {/* Tipo Documento */}
                         <div className="relative z-0 w-full mb-5 group">
                             <select
-                                value={tipoDocumento}
-                                onChange={handleTipoDocumentoChange}
+                                value={selectedDocumentType}
+                                onChange={handleDocumentTypeChange}
                                 className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                                 required
                             >
-                                <option value="NIT">NIT</option>
-                                <option value="CI">CI</option>
+                                <option value="">Selecciona un tipo de documento</option>
+                                {documentTypes.map((docType) => (
+                                    <option key={docType.id} value={docType.codigoClasificador}>
+                                        {docType.descripcion}
+                                    </option>
+                                ))}
                             </select>
                             <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
                                 Tipo Documento
