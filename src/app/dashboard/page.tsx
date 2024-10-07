@@ -12,6 +12,12 @@ const Dashboard = () => {
     const [recentInvoices, setRecentInvoices] = useState([]);
     const [recentClients, setRecentClients] = useState([]);
 
+
+    const [dailySales, setDailySales] = useState(0);
+    const [monthlySales, setMonthlySales] = useState(0);
+    const [totalOrders, setTotalOrders] = useState(0);
+    const [totalClients, setTotalClients] = useState(0);
+
     const handleOpenClientModal = () => {
         setSelectedClient(null);
         setIsClientModalOpen(true);
@@ -29,6 +35,26 @@ const Dashboard = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
+                const dailySalesResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/ventas-diarias-monto?fecha=2024-10-03`);
+                const dailySalesData = await dailySalesResponse.json();
+                console.log("Respuesta completa de ventas diarias:", dailySalesData);
+                setDailySales(dailySalesData || 0);
+
+                const monthlySalesResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/ventas-mensuales-montos?fechaInicio=2024-10-01&fechaFin=2024-10-03`);
+                const monthlySalesData = await monthlySalesResponse.json();
+                console.log("Respuesta completa de ventas mensuales:", monthlySalesData);
+                setMonthlySales(monthlySalesData || 0);
+
+                const totalOrdersResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/ventas-cantidad/1`);
+                const totalOrdersData = await totalOrdersResponse.json();
+                console.log("Respuesta completa de total de órdenes:", totalOrdersData);
+                setTotalOrders(totalOrdersData || 0);
+
+                const totalClientsResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/clientes-registrados`);
+                const totalClientsData = await totalClientsResponse.json();
+                console.log("Respuesta completa de clientes registrados:", totalClientsData);
+                setTotalClients(totalClientsData || 0);
+
                 const response = await fetch(`${PATH_URL_BACKEND}/factura`);
                 if (response.ok) {
                     const data = await response.json();
@@ -72,28 +98,28 @@ const Dashboard = () => {
                 <div className="flex-grow overflow-auto bg-gray-50">
                     <div className="p-6">
                         <div className="grid grid-cols-4 gap-6 mb-6">
+                            {/* Ventas de Hoy */}
                             <div className="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg p-4">
                                 <h3 className="text-lg font-semibold text-slate-800">Ventas de Hoy</h3>
-                                <p className="text-2xl font-bold text-slate-800">$12,426</p>
-                                <span className="text-green-500 text-sm">+36%</span>
+                                <p className="text-2xl font-bold text-slate-800">Bs {dailySales ? dailySales.toFixed(2) : 'Cargando...'}</p>
                             </div>
 
+                            {/* Total Mensual */}
                             <div className="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg p-4">
                                 <h3 className="text-lg font-semibold text-slate-800">Total Mensual</h3>
-                                <p className="text-2xl font-bold text-slate-800">$2,38,485</p>
-                                <span className="text-red-500 text-sm">-14%</span>
+                                <p className="text-2xl font-bold text-slate-800">Bs {monthlySales ? monthlySales.toFixed(2) : 'Cargando...'}</p>
                             </div>
 
+                            {/* Total Órdenes */}
                             <div className="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg p-4">
-                                <h3 className="text-lg font-semibold text-slate-800">Total Ordenes</h3>
-                                <p className="text-2xl font-bold text-slate-800">84,382</p>
-                                <span className="text-green-500 text-sm">+36%</span>
+                                <h3 className="text-lg font-semibold text-slate-800">Total Órdenes</h3>
+                                <p className="text-2xl font-bold text-slate-800">{totalOrders ? totalOrders : 'Cargando...'}</p>
                             </div>
 
+                            {/* Clientes Registrados */}
                             <div className="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg p-4">
                                 <h3 className="text-lg font-semibold text-slate-800">Clientes</h3>
-                                <p className="text-2xl font-bold text-slate-800">33,493</p>
-                                <span className="text-green-500 text-sm">+36%</span>
+                                <p className="text-2xl font-bold text-slate-800">{totalClients ? totalClients : 'Cargando...'}</p>
                             </div>
                         </div>
 
@@ -202,7 +228,6 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            {/* Modal para crear o editar cliente */}
             <CreateEditClientModal
                 isOpen={isClientModalOpen}
                 onClose={handleCloseClientModal}

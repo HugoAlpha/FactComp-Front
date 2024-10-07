@@ -67,7 +67,6 @@ const CUFDList = () => {
                     });
                     if (response.ok) {
                         Swal.fire('¡Emitido!', 'El CUFD ha sido emitido.', 'success');
-                        // Actualizamos la lista de CUFD después de emitir uno nuevo
                         fetchCUFDs();
                     } else {
                         Swal.fire('Error', 'No se pudo emitir el CUFD.', 'error');

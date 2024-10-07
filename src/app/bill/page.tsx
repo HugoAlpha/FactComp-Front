@@ -39,14 +39,17 @@ const BillList = () => {
                     .map((bill: any) => ({
                         documentNumber: bill.numeroDocumento,
                         client: bill.nombreRazonSocial,
-                        date: new Date(bill.fechaEmision).toLocaleDateString(),
+                        date: new Date(bill.fechaEmision),
                         total: bill.montoTotal.toFixed(2),
                         estado: bill.estado || '-',
                         codigoSucursal: bill.codigoSucursal,
                         codigoPuntoVenta: bill.codigoPuntoVenta,
                         cuf: bill.cuf
                     }));
-                setBills(formattedData);
+
+                const sortedData = formattedData.sort((a, b) => b.date - a.date);
+
+                setBills(sortedData);
             } else {
                 console.error('Error fetching bills');
             }
@@ -219,7 +222,9 @@ const BillList = () => {
                                             <tr key={bill.id} className="border-b hover:bg-gray-50 text-black">
                                                 <td className="px-6 py-4">{bill.documentNumber}</td>
                                                 <td className="px-6 py-4">{bill.client}</td>
-                                                <td className="px-6 py-4">{bill.date}</td>
+                                                <td className="px-6 py-4">
+                                                    {bill.date.toLocaleDateString()} {bill.date.toLocaleTimeString()}
+                                                </td>
                                                 <td className="px-6 py-4">{bill.total}</td>
                                                 <td className="px-6 py-4">{bill.estado || '-'}</td>
                                                 <td className="px-6 py-4">
