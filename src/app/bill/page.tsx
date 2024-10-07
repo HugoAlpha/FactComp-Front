@@ -44,8 +44,11 @@ const BillList = () => {
                         estado: bill.estado || '-',
                         codigoSucursal: bill.codigoSucursal,
                         codigoPuntoVenta: bill.codigoPuntoVenta,
-                        cuf: bill.cuf
+                        cuf: bill.cuf,
+                        puntoVenta: bill.puntoVenta,
+                        id: bill.puntoVenta.id
                     }));
+                console.log(formattedData)
 
                 const sortedData = formattedData.sort((a, b) => b.date - a.date);
 
@@ -136,7 +139,7 @@ const BillList = () => {
                     const body = {
                         cuf: bill.cuf,
                         anulacionMotivo: 1,
-                        idPuntoVenta: bill.codigoPuntoVenta
+                        idPuntoVenta: bill.puntoVenta.id
                     };
 
                     console.log('Body que se enviará al POST:', body);
@@ -297,7 +300,7 @@ const BillList = () => {
                                     <h2 className="text-xl font-bold mb-4">Detalles de la Factura</h2>
                                     <p><strong>Número de Documento:</strong> {selectedBill.documentNumber}</p>
                                     <p><strong>Cliente:</strong> {selectedBill.client}</p>
-                                    <p><strong>Fecha:</strong> {selectedBill.date}</p>
+                                    <p><strong>Fecha:</strong> {selectedBill.date.toLocaleDateString()} {selectedBill.date.toLocaleTimeString()}</p>
                                     <p><strong>Total:</strong> {selectedBill.total}</p>
                                     <p><strong>Estado:</strong> {selectedBill.estado}</p>
                                     <p><strong>Código Sucursal:</strong> {selectedBill.codigoSucursal}</p>
