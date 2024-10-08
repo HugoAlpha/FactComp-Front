@@ -24,7 +24,7 @@ const BillList = () => {
     const [selectedBill, setSelectedBill] = useState<FormattedBill | null>(null);
     const [bills, setBills] = useState<FormattedBill[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const rowsPerPage = 10;
+    const [rowsPerPage, setRowsPerPage] = useState<number>(10);
     const [estadoFilter, setEstadoFilter] = useState('TODAS');
 
     const fetchBills = async (estado?: string) => {
@@ -89,6 +89,11 @@ const BillList = () => {
 
     const handlePrevPage = () => {
         if (currentPage > 1) setCurrentPage(prev => prev - 1);
+    };
+
+    const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setFilter(e.target.value);
+        setCurrentPage(1);
     };
 
     const handleNextPage = () => {
@@ -175,6 +180,11 @@ const BillList = () => {
         });
     };
 
+    const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setRowsPerPage(parseInt(e.target.value));
+        setCurrentPage(1);
+    };
+
     return (
         <div className="flex min-h-screen">
             <Sidebar />
@@ -184,6 +194,18 @@ const BillList = () => {
                     <h1 className="text-2xl font-bold mb-6 text-gray-700">Lista de Facturas</h1>
                     <div className="flex items-center justify-between mb-6">
                         {/* Dropdown para filtrar por estado */}
+                        <select
+                                value={rowsPerPage}
+                                onChange={handleRowsPerPageChange}
+                                className="border p-2 rounded-lg w-20"
+                            >
+                                <option value={10}>10</option>
+                                <option value={20}>20</option>
+                                <option value={30}>30</option>
+                                <option value={40}>40</option>
+                                <option value={50}>50</option>
+                            </select>
+                            
                         <select
                             value={estadoFilter}
                             onChange={(e) => setEstadoFilter(e.target.value)}
@@ -195,6 +217,9 @@ const BillList = () => {
                         </select>
 
                         <div className="relative flex items-center w-1/2">
+                            
+                        
+
                             <input
                                 type="text"
                                 placeholder="Buscar factura"

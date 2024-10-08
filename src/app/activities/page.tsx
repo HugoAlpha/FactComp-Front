@@ -16,7 +16,7 @@ const Activities: React.FC = () => {
     const [selectedActividades, setSelectedActividades] = useState<number[]>([]);
     const [estadoFiltro, setEstadoFiltro] = useState<string>('Todos');
     const [filteredActividades, setFilteredActividades] = useState<Actividad[]>([]);
-    const [rowsPerPage, setRowsPerPage] = useState<number>(5);
+    const [rowsPerPage, setRowsPerPage] = useState<number>(10);
     const [currentPage, setCurrentPage] = useState<number>(1);
 
     useEffect(() => {
@@ -76,6 +76,11 @@ const Activities: React.FC = () => {
         return pageNumbers;
     };
 
+    const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setRowsPerPage(parseInt(e.target.value));
+        setCurrentPage(1);
+    };
+
     return (
         <div className="flex min-h-screen bg-gray-100">
             <Sidebar />
@@ -118,18 +123,17 @@ const Activities: React.FC = () => {
                     </div>
 
                     {/* Filas por página */}
-                    <div className="mb-6">
-                        <label className="mr-4 text-gray-600 font-medium">Filas por página:</label>
-                        <select
-                            value={rowsPerPage}
-                            onChange={(e) => setRowsPerPage(Number(e.target.value))}
-                            className="border border-gray-300 rounded-lg p-2 text-gray-700"
-                        >
-                            <option value={5}>5</option>
-                            <option value={10}>10</option>
-                            <option value={15}>15</option>
-                        </select>
-                    </div>
+                    <select
+                                value={rowsPerPage}
+                                onChange={handleRowsPerPageChange}
+                                className="border p-2 rounded-lg w-20"
+                            >
+                                <option value={10}>10</option>
+                                <option value={20}>20</option>
+                                <option value={30}>30</option>
+                                <option value={40}>40</option>
+                                <option value={50}>50</option>
+                            </select>
 
                     {/* Tabla de actividades */}
                     <div className="overflow-x-auto shadow-lg rounded-lg border border-gray-200">

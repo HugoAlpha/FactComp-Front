@@ -18,7 +18,7 @@ interface Product {
 const ProductList = () => {
     const [products, setProducts] = useState<Product[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const rowsPerPage = 10;
+    const [rowsPerPage, setRowsPerPage] = useState<number>(10);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
 
@@ -92,6 +92,11 @@ const ProductList = () => {
         handleCloseModal();
     };
 
+    const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setRowsPerPage(parseInt(e.target.value));
+        setCurrentPage(1);
+    };
+
     return (
         <div className="flex min-h-screen">
             <Sidebar />
@@ -100,8 +105,21 @@ const ProductList = () => {
                 <div className="flex-grow overflow-auto bg-gray-50">
                     <div className="p-6">
                         <h2 className="text-2xl font-bold mb-6 text-gray-700">Gestión de Productos</h2>
-
+                        
                         <div className="flex justify-between mb-4">
+                            <div className='justify-end'>
+                            <select
+                                value={rowsPerPage}
+                                onChange={handleRowsPerPageChange}
+                                className="border p-2 rounded-lg w-20"
+                            >
+                                <option value={10}>10</option>
+                                <option value={20}>20</option>
+                                <option value={30}>30</option>
+                                <option value={40}>40</option>
+                                <option value={50}>50</option>
+                            </select>
+                        </div>
                             <input
                                 type="text"
                                 placeholder="Buscar producto..."
@@ -114,6 +132,7 @@ const ProductList = () => {
                                 Agregar Producto <FaPlus className="inline-block ml-2" />
                             </button>
                         </div>
+                        
 
                         <div className="overflow-x-auto shadow-lg rounded-lg border border-gray-200">
                             <table className="table-auto w-full bg-white">

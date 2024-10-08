@@ -18,7 +18,7 @@ const EnterpriseList = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedEnterprise, setSelectedEnterprise] = useState<Enterprise | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
-    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [rowsPerPage, setRowsPerPage] = useState<number>(10);
     const [enterprises, setEnterprises] = useState<Enterprise[]>([]);
     const [loading, setLoading] = useState(true);
 
@@ -157,6 +157,11 @@ const EnterpriseList = () => {
         return <div>Loading...</div>;
     }
 
+    const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setRowsPerPage(parseInt(e.target.value));
+        setCurrentPage(1);
+    };
+
     return (
         <div className="flex min-h-screen">
             <Sidebar />
@@ -165,7 +170,21 @@ const EnterpriseList = () => {
                 <div className="flex-grow overflow-auto bg-gray-50">
                     <div className="p-6">
                         <h1 className="text-2xl font-bold mb-6 text-gray-700">Gestión de Empresas</h1>
+                        <div className="justify-end">
+                        <select
+                                value={rowsPerPage}
+                                onChange={handleRowsPerPageChange}
+                                className="border p-2 rounded-lg w-20"
+                            >
+                                <option value={10}>10</option>
+                                <option value={20}>20</option>
+                                <option value={30}>30</option>
+                                <option value={40}>40</option>
+                                <option value={50}>50</option>
+                            </select>
+                        </div>
                         <div className="flex justify-end mb-4">
+                        
                             <button
                                 onClick={() => openModal()}
                                 className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 text-lg"

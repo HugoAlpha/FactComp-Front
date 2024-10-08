@@ -53,6 +53,11 @@ const ClientList = () => {
         setCurrentPage(1);
     };
 
+    const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setRowsPerPage(parseInt(e.target.value));
+        setCurrentPage(1);
+    };
+
     const filteredCustomers = customers.filter((customer) =>
         Object.values(customer)
             .some((field) => field && field.toString().toLowerCase().includes(filter.toLowerCase()))
@@ -112,11 +117,6 @@ const ClientList = () => {
         setCurrentPage(1);
     };
 
-    const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setRowsPerPage(parseInt(e.target.value));
-        setCurrentPage(1);
-    };
-    
     const getPageNumbers = () => {
         const pageNumbers = [];
         const maxVisiblePages = 4;
@@ -145,9 +145,16 @@ const ClientList = () => {
                     <div className="p-6">
                         <h2 className="text-2xl font-bold mb-6 text-gray-700">Gestión de Clientes</h2>
 
-                        {/* Barra de búsqueda */}
+                        {/* Barra de búsqueda y selector de filas */}
                         <div className="flex justify-between mb-4">
-                        <select
+                            <input
+                                type="text"
+                                placeholder="Buscar cliente por nombre o documento..."
+                                className="border p-2 rounded-lg w-1/3"
+                                value={filter}
+                                onChange={handleFilterChange}
+                            />
+                            <select
                                 value={rowsPerPage}
                                 onChange={handleRowsPerPageChange}
                                 className="border p-2 rounded-lg w-20"
@@ -158,14 +165,6 @@ const ClientList = () => {
                                 <option value={40}>40</option>
                                 <option value={50}>50</option>
                             </select>
-
-                            <input
-                                type="text"
-                                placeholder="Buscar cliente por nombre o documento..."
-                                className="border p-2 rounded-lg w-1/3"
-                                value={filter}
-                                onChange={handleFilterChange}
-                            />
                             <button
                                 className="bg-sixthColor text-white py-2 px-4 rounded-lg hover:bg-thirdColor text-lg"
                                 onClick={() => {
@@ -233,35 +232,42 @@ const ClientList = () => {
                                     ))}
                                 </tbody>
                             </table>
-                        </div>
 
-                        {/* Paginación */}
-                        <div className="flex space-x-1 justify-center mt-6">
-                            <button
-                                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                                disabled={currentPage === 1}
-                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-                            >
-                                Prev
-                            </button>
-
-                            {getPageNumbers().map((number) => (
-                                <button
-                                    key={number}
-                                    onClick={() => setCurrentPage(number)}
-                                    className={`rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 ${currentPage === number ? 'bg-slate-800 text-white' : ''}`}
-                                >
-                                    {number}
-                                </button>
-                            ))}
-
-                            <button
-                                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                                disabled={currentPage === totalPages}
-                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-                            >
-                                Next
-                            </button>
+                            {/* Paginación */}
+                            <div className="flex justify-between items-center px-4 py-3 bg-gray-50 border-t">
+                                <span className="text-sm text-gray-700">
+                                    Página {currentPage} de {totalPages}
+                                </span>
+                                <div className="flex space-x-2">
+                                    <button
+                                        className="px-4 py-2 bg-white border rounded-lg text-gray-700 hover:bg-gray-100"
+                                        disabled={currentPage === 1}
+                                        onClick={() => setCurrentPage(currentPage - 1)}
+                                    >
+                                        Anterior
+                                    </button>
+                                    {getPageNumbers().map((page) => (
+                                        <button
+                                            key={page}
+                                            className={`px-4 py-2 border rounded-lg ${
+                                                currentPage === page
+                                                    ? 'bg-gray-300 text-gray-700'
+                                                    : 'bg-white text-gray-700 hover:bg-gray-100'
+                                            }`}
+                                            onClick={() => setCurrentPage(page)}
+                                        >
+                                            {page}
+                                        </button>
+                                    ))}
+                                    <button
+                                        className="px-4 py-2 bg-white border rounded-lg text-gray-700 hover:bg-gray-100"
+                                        disabled={currentPage === totalPages}
+                                        onClick={() => setCurrentPage(currentPage + 1)}
+                                    >
+                                        Siguiente
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

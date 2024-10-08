@@ -43,7 +43,7 @@ const CodeReceipt = () => {
     const [selectedSucursal, setSelectedSucursal] = useState<string>("Todos");
     const [sucursales, setSucursales] = useState<string[]>([]);
     const [daysToExpire, setDaysToExpire] = useState<number | null>(null);
-    const [rowsPerPage] = useState<number>(10);
+    const [rowsPerPage, setRowsPerPage] = useState<number>(10);
     const [currentPage, setCurrentPage] = useState<number>(1);
 
     useEffect(() => {
@@ -140,6 +140,11 @@ const CodeReceipt = () => {
         return pageNumbers;
     };
 
+    const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setRowsPerPage(parseInt(e.target.value));
+        setCurrentPage(1);
+    };
+
     const getStatus = (fechaVigencia: string, vigente: boolean) => {
         const currentDate = new Date();
         const expirationDate = new Date(fechaVigencia);
@@ -168,6 +173,17 @@ const CodeReceipt = () => {
                     <div className="p-6">
                         <h1 className="text-2xl font-bold mb-6 text-gray-700">CUIS</h1>
                         
+                        <select
+                                value={rowsPerPage}
+                                onChange={handleRowsPerPageChange}
+                                className="border p-2 rounded-lg w-20"
+                            >
+                                <option value={10}>10</option>
+                                <option value={20}>20</option>
+                                <option value={30}>30</option>
+                                <option value={40}>40</option>
+                                <option value={50}>50</option>
+                            </select>
                         <div className="mb-4 flex space-x-4 text-black">
                             <select
                                 value={filterStatus}

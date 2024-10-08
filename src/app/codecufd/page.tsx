@@ -120,6 +120,11 @@ const CUFDList = () => {
         }
     };
 
+    const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setRowsPerPage(parseInt(e.target.value));
+        setCurrentPage(1);
+    };
+
     return (
         <div className="flex min-h-screen">
             <Sidebar />
@@ -138,6 +143,18 @@ const CUFDList = () => {
                             </button>
                         </div>
                         <div className="flex justify-between mb-4">
+                        <select
+                                value={rowsPerPage}
+                                onChange={handleRowsPerPageChange}
+                                className="border p-2 rounded-lg w-20"
+                            >
+                                <option value={10}>10</option>
+                                <option value={20}>20</option>
+                                <option value={30}>30</option>
+                                <option value={40}>40</option>
+                                <option value={50}>50</option>
+                            </select>
+                            
                             <input
                                 type="text"
                                 placeholder="Buscar CUFD por id o estado..."

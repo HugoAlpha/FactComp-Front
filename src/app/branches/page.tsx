@@ -24,7 +24,7 @@ const Branches: React.FC = () => {
     const [branches, setBranches] = useState<Branch[]>([]);
     const [searchTerm, setSearchTerm] = useState<string>('');
     const [filteredBranches, setFilteredBranches] = useState<Branch[]>([]);
-    const [rowsPerPage, setRowsPerPage] = useState<number>(5);
+    const [rowsPerPage, setRowsPerPage] = useState<number>(10);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [selectedCity, setSelectedCity] = useState<string>('');
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -177,6 +177,11 @@ const Branches: React.FC = () => {
         handleCloseModal();
     };
 
+    const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setRowsPerPage(parseInt(e.target.value));
+        setCurrentPage(1);
+    };
+
     return (
         <div className="flex min-h-screen">
             <Sidebar />
@@ -209,7 +214,18 @@ const Branches: React.FC = () => {
                                 ))}
                             </select>
                         </div>
-                        <div className="mb-4">
+                        <div className="flex justify-between mb-4">
+                        <select
+                                value={rowsPerPage}
+                                onChange={handleRowsPerPageChange}
+                                className="border p-2 rounded-lg w-20"
+                            >
+                                <option value={10}>10</option>
+                                <option value={20}>20</option>
+                                <option value={30}>30</option>
+                                <option value={40}>40</option>
+                                <option value={50}>50</option>
+                            </select>
                             <input
                                 type="text"
                                 value={searchTerm}
