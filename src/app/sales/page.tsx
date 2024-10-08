@@ -38,6 +38,7 @@ const Sales = () => {
         codigoCliente: '',
         email: '',
     });
+    const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
     interface Product {
         id: number;
@@ -412,7 +413,7 @@ const Sales = () => {
                                     <button className="flex items-center justify-center bg-gray-100 text-black font-bold py-2 px-4 rounded-lg w-full"
                                         onClick={handleOpenClientModal}>
 
-                                        <FaUser className="mr-2" /> Cliente
+                                        <FaUser className="mr-2" /> Agregar cliente
                                     </button>
                                     <CreateEditClientModal
                                         isOpen={isClientModalOpen}
@@ -465,9 +466,9 @@ const Sales = () => {
                     </div>
 
                     {/* Agregar productos */}
-                    <div className="text-black w-2/3 overflow-y-auto" style={{ maxHeight: '90vh' }}>
+                    <div className="text-black w-2/3 overflow-y-auto" style={{ maxHeight: "90vh" }}>
                         <h2 className="text-xl font-bold mb-8">Agregar Productos</h2>
-                        <div data-dial-init className="fixed top-6 right-6 group">
+                        <div data-dial-init className="fixed top-6 right-6 group z-50">
                             <button
                                 type="button"
                                 className="flex items-center justify-center text-white bg-thirdColor rounded-full w-14 h-14 hover:bg-fourthColor dark:bg-blue-600 dark:hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 focus:outline-none dark:focus:ring-blue-800"
@@ -521,25 +522,76 @@ const Sales = () => {
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
-                        <div className="flex mb-4 space-x-4">
-                            <button className="bg-gray-200 p-2 rounded">All</button>
-                            <button className="bg-gray-200 p-2 rounded">Watches</button>
-                            <button className="bg-gray-200 p-2 rounded">Computers</button>
-                            <button className="bg-gray-200 p-2 rounded">Phones</button>
-                        </div>
-                        <div className="grid grid-cols-6 gap-4">
-                            {filteredProducts.map((product) => (
-                                <div
-                                    key={product.id}
-                                    onClick={() => addProduct(product)}
-                                    className="cursor-pointer bg-white border rounded-lg p-2 shadow hover:bg-gray-100"
-                                >
-                                    <img src={product.img} alt={product.name} className="h-24 w-full object-contain mb-2 transition-all duration-300 hover:scale-110" />
-                                    <h3 className="text-xs font-semibold truncate">{product.name}</h3>
-                                    <p className="text-sm font-bold">Bs {product.price}</p>
+                        {/* Tabs para cambiar la vista */}
+                        <div className="w-full mb-4">
+                            <div className="flex justify-end">
+                                <div className="flex bg-gray-100 hover:bg-gray-200 rounded-lg transition p-1 dark:bg-neutral-700 dark:hover:bg-neutral-600">
+                                    <ul className="relative flex gap-x-1" role="tablist" aria-label="Tabs" aria-orientation="horizontal">
+                                        <li className="z-30 flex-auto text-center">
+                                            <button
+                                                type="button"
+                                                className={`hs-tab-active:bg-white hs-tab-active:text-gray-700 hs-tab-active:dark:bg-neutral-800 hs-tab-active:dark:text-neutral-400 py-3 px-4 inline-flex items-center gap-x-2 bg-transparent text-sm text-gray-500 hover:text-gray-700 focus:outline-none focus:text-gray-700 font-medium rounded-lg hover:text-blue-600 dark:text-neutral-400 dark:hover:text-white dark:focus:text-white ${viewMode === "grid" ? "active" : ""
+                                                    }`}
+                                                onClick={() => setViewMode("grid")}
+                                            >
+                                                Grilla
+                                            </button>
+                                        </li>
+                                        <li className="z-30 flex-auto text-center">
+                                            <button
+                                                type="button"
+                                                className={`hs-tab-active:bg-white hs-tab-active:text-gray-700 hs-tab-active:dark:bg-neutral-800 hs-tab-active:dark:text-neutral-400 py-3 px-4 inline-flex items-center gap-x-2 bg-transparent text-sm text-gray-500 hover:text-gray-700 focus:outline-none focus:text-gray-700 font-medium rounded-lg hover:text-blue-600 dark:text-neutral-400 dark:hover:text-white dark:focus:text-white ${viewMode === "list" ? "active" : ""
+                                                    }`}
+                                                onClick={() => setViewMode("list")}
+                                            >
+                                                Lista
+                                            </button>
+                                        </li>
+                                    </ul>
                                 </div>
-                            ))}
+                            </div>
                         </div>
+
+                        {/* Vista Grid / List */}
+                        {viewMode === "grid" ? (
+                            <div className="grid grid-cols-6 gap-4">
+                                {filteredProducts.map((product) => (
+                                    <div
+                                        key={product.id}
+                                        onClick={() => addProduct(product)}
+                                        className="cursor-pointer bg-white border rounded-lg p-2 shadow hover:bg-gray-100"
+                                    >
+                                        <img
+                                            src={product.img}
+                                            alt={product.name}
+                                            className="h-24 w-full object-contain mb-2 transition-all duration-300 hover:scale-110"
+                                        />
+                                        <h3 className="text-xs font-semibold truncate">{product.name}</h3>
+                                        <p className="text-sm font-bold">Bs {product.price}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        ) : (
+                            <div className="space-y-2">
+                                {filteredProducts.map((product) => (
+                                    <div
+                                        key={product.id}
+                                        onClick={() => addProduct(product)}
+                                        className="cursor-pointer flex items-center bg-white border rounded-lg p-2 shadow hover:bg-gray-100"
+                                    >
+                                        <img
+                                            src={product.img}
+                                            alt={product.name}
+                                            className="h-12 w-12 object-contain mr-4 transition-all duration-300 hover:scale-110"
+                                        />
+                                        <div className="flex-grow">
+                                            <h3 className="text-sm font-semibold">{product.name}</h3>
+                                            <p className="text-sm font-bold">Bs {product.price}</p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </div>
 
                     <ModalVerifySale

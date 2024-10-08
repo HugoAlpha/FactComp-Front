@@ -110,9 +110,9 @@ const Dashboard = () => {
                                 <p className="text-2xl font-bold text-slate-800">Bs {monthlySales ? monthlySales.toFixed(2) : 'Cargando...'}</p>
                             </div>
 
-                            {/* Total Órdenes */}
+                            {/* Total de Facturas */}
                             <div className="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg p-4">
-                                <h3 className="text-lg font-semibold text-slate-800">Total Órdenes</h3>
+                                <h3 className="text-lg font-semibold text-slate-800">Total de Facturas</h3>
                                 <p className="text-2xl font-bold text-slate-800">{totalOrders ? totalOrders : 'Cargando...'}</p>
                             </div>
 

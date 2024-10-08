@@ -101,6 +101,25 @@ const CUFDList = () => {
         return new Date(dateString).toLocaleString();
     };
 
+    const getStatus = (fechaVigencia: string, vigente: boolean) => {
+        const currentDate = new Date();
+        const expirationDate = new Date(fechaVigencia);
+
+        if (!vigente) {
+            return (
+                <span className="px-2 py-1 rounded-full bg-red-100 text-red-600">
+                    Inactivo
+                </span>
+            );
+        } else {
+            return (
+                <span className="px-2 py-1 rounded-full bg-green-100 text-green-600">
+                    Activo
+                </span>
+            );
+        }
+    };
+
     return (
         <div className="flex min-h-screen">
             <Sidebar />
@@ -146,11 +165,7 @@ const CUFDList = () => {
                                             <td className="px-6 py-4">{cufd.codigo}</td>
                                             <td className="px-6 py-4">{formatDate(cufd.fechaInicio)}</td>
                                             <td className="px-6 py-4">{formatDate(cufd.fechaVigencia)}</td>
-                                            <td className="px-6 py-4">
-                                                <span className={cufd.vigente ? 'text-green-500 font-semibold' : 'text-red-500 font-semibold'}>
-                                                    {cufd.vigente ? 'Activo' : 'Inactivo'}
-                                                </span>
-                                            </td>
+                                            <td className="border px-6 py-4">{getStatus(cufd.fechaVigencia, cufd.vigente)}</td>
                                         </tr>
                                     ))}
                                 </tbody>
