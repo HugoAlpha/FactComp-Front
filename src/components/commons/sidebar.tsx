@@ -77,7 +77,8 @@ const Sidebar = () => {
             icon: <HiDocumentCheck size={20} />,
             subItems: [
                 //{ name: 'Actividades', href: 'activities' },
-                { name: 'Leyendas', href: 'legends' }
+                { name: 'Leyendas', href: 'legends' },
+                { name: 'Parámetros', href: 'parameters' }
             ]
         }
     ];
@@ -138,7 +139,6 @@ const Sidebar = () => {
                                 </Link>
                             </li>
 
-                            {/* Mapear items del menú */}
                             {menuItems.map((item, index) => (
                                 <li key={index}>
                                     <button
