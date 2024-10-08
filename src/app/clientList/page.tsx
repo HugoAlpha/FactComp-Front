@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '@/components/commons/sidebar';
 import Header from '@/components/commons/header';
-import { FaEdit, FaTrashAlt, FaPlus } from 'react-icons/fa';
+import { FaEdit, FaTrashAlt, FaPlus, FaSearch } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import CreateEditClientModal from '@/components/layouts/modalCreateEditClient';
 import { PATH_URL_BACKEND } from '@/utils/constants';
@@ -116,7 +116,7 @@ const ClientList = () => {
         setRowsPerPage(parseInt(e.target.value));
         setCurrentPage(1);
     };
-    
+
     const getPageNumbers = () => {
         const pageNumbers = [];
         const maxVisiblePages = 4;
@@ -145,27 +145,7 @@ const ClientList = () => {
                     <div className="p-6">
                         <h2 className="text-2xl font-bold mb-6 text-gray-700">Gestión de Clientes</h2>
 
-                        {/* Barra de búsqueda */}
-                        <div className="flex justify-between mb-4">
-                        <select
-                                value={rowsPerPage}
-                                onChange={handleRowsPerPageChange}
-                                className="border p-2 rounded-lg w-20"
-                            >
-                                <option value={10}>10</option>
-                                <option value={20}>20</option>
-                                <option value={30}>30</option>
-                                <option value={40}>40</option>
-                                <option value={50}>50</option>
-                            </select>
-
-                            <input
-                                type="text"
-                                placeholder="Buscar cliente por nombre o documento..."
-                                className="border p-2 rounded-lg w-1/3"
-                                value={filter}
-                                onChange={handleFilterChange}
-                            />
+                        <div className="flex justify-end my-2">
                             <button
                                 className="bg-sixthColor text-white py-2 px-4 rounded-lg hover:bg-thirdColor text-lg"
                                 onClick={() => {
@@ -189,6 +169,35 @@ const ClientList = () => {
                                 onSave={handleAddOrEditCustomer}
                                 customer={currentCustomer}
                             />
+                        </div>
+                        {/* Barra de búsqueda */}
+                        <div className="flex justify-between mb-4">
+                            <div>
+                                <label htmlFor="itemsPerPage" className="mr-2 text-sm">Elementos por página:</label>
+                                <select
+                                            value={rowsPerPage}
+                                            onChange={handleRowsPerPageChange}
+                                            className="border p-2 rounded-lg w-20"
+                                        >
+                                            <option value={10}>10</option>
+                                            <option value={20}>20</option>
+                                            <option value={30}>30</option>
+                                            <option value={40}>40</option>
+                                            <option value={50}>50</option>
+                                        </select>
+                            </div>
+
+                            <div className="relative flex items-center w-full max-w-md">
+                            <input
+                                type="text"
+                                placeholder="Buscar cliente por nombre o documento..."
+                                className="border border-gray-300 focus:border-firstColor focus:ring-firstColor focus:outline-none px-4 py-2 rounded-lg w-full shadow-sm text-sm placeholder-gray-400"
+                                value={filter}
+                                onChange={handleFilterChange}
+                            /> 
+                            <FaSearch className="absolute right-4 text-gray-500 text-xl pointer-events-none" />
+                            </div>
+                            
                         </div>
 
                         <div className="overflow-x-auto shadow-lg rounded-lg border border-gray-200">
@@ -242,7 +251,7 @@ const ClientList = () => {
                                 disabled={currentPage === 1}
                                 className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                             >
-                                Prev
+                                Ant.
                             </button>
 
                             {getPageNumbers().map((number) => (
@@ -260,8 +269,13 @@ const ClientList = () => {
                                 disabled={currentPage === totalPages}
                                 className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                             >
-                                Next
+                                Sig.
                             </button>
+                        </div>
+                        <div className="flex space-x-1 justify-center mt-2">
+                            <span className="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">
+                                Mostrando página <span className="font-semibold text-gray-900 dark:text-black">{currentPage}</span> de <span className="font-semibold text-gray-900 dark:text-black">{totalPages}</span>
+                            </span>
                         </div>
                     </div>
                 </div>

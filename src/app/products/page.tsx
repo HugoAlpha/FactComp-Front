@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { FaTrashAlt, FaEdit, FaPlus } from 'react-icons/fa';
+import { FaTrashAlt, FaEdit, FaPlus, FaSearch } from 'react-icons/fa';
 import Sidebar from '@/components/commons/sidebar';
 import Header from '@/components/commons/header';
 import { PATH_URL_BACKEND } from "@/utils/constants";
@@ -105,32 +105,37 @@ const ProductList = () => {
                 <div className="flex-grow overflow-auto bg-gray-50">
                     <div className="p-6">
                         <h2 className="text-2xl font-bold mb-6 text-gray-700">Gestión de Productos</h2>
-                        
-                        <div className="flex justify-between mb-4">
-                            <div className='justify-end'>
-                            <select
-                                value={rowsPerPage}
-                                onChange={handleRowsPerPageChange}
-                                className="border p-2 rounded-lg w-20"
-                            >
-                                <option value={10}>10</option>
-                                <option value={20}>20</option>
-                                <option value={30}>30</option>
-                                <option value={40}>40</option>
-                                <option value={50}>50</option>
-                            </select>
-                        </div>
-                            <input
-                                type="text"
-                                placeholder="Buscar producto..."
-                                className="border p-2 rounded-lg w-1/3"
-                            />
+                        <div className="flex justify-end my-2">
                             <button
                                 className="bg-sixthColor text-white py-2 px-4 rounded-lg hover:bg-thirdColor text-lg"
                                 onClick={() => handleOpenModal()} // Abrir modal para crear producto
                             >
                                 Agregar Producto <FaPlus className="inline-block ml-2" />
                             </button>
+                        </div>
+                        <div className="flex justify-between mb-4">
+                            <div>
+                                <label htmlFor="itemsPerPage" className="mr-2 text-sm">Elementos por página:</label>
+                                <select
+                                    value={rowsPerPage}
+                                    onChange={handleRowsPerPageChange}
+                                    className="border p-2 rounded-lg w-20"
+                                >
+                                    <option value={10}>10</option>
+                                    <option value={20}>20</option>
+                                    <option value={30}>30</option>
+                                    <option value={40}>40</option>
+                                    <option value={50}>50</option>
+                                </select>
+                            </div>
+                            <div className="relative flex items-center w-full max-w-md">
+                               <input
+                                type="text"
+                                placeholder="Buscar producto..."
+                                className="border border-gray-300 focus:border-firstColor focus:ring-firstColor focus:outline-none px-4 py-2 rounded-lg w-full shadow-sm text-sm placeholder-gray-400"
+                            />
+                            <FaSearch className="absolute right-4 text-gray-500 text-xl pointer-events-none" />
+                            </div>
                         </div>
                         
 
@@ -183,7 +188,7 @@ const ProductList = () => {
                                 disabled={currentPage === 1}
                                 className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                             >
-                                Prev
+                                Ant.
                             </button>
 
                             {getPageNumbers().map((page) => (
@@ -201,7 +206,7 @@ const ProductList = () => {
                                 disabled={currentPage === totalPages}
                                 className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                             >
-                                Next
+                                Sig.
                             </button>
                         </div>
 

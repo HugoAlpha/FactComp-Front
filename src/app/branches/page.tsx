@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from "@/components/commons/header";
 import Sidebar from "@/components/commons/sidebar";
-import { FaEdit, FaTrashAlt } from 'react-icons/fa';
+import { FaEdit, FaSearch, FaTrashAlt } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import ModalCreateBranch from '@/components/layouts/modalCreateBranches';
 import { PATH_URL_BACKEND } from '@/utils/constants';
@@ -190,49 +190,63 @@ const Branches: React.FC = () => {
 
                 <div className="flex-grow overflow-auto bg-gray-50">
                     <div className="p-6">
-                        <div className="flex justify-between items-center mb-4">
-                            <h2 className="text-xl font-semibold text-black">Lista de Sucursales</h2>
+                        <h2 className="text-xl font-semibold text-black">Lista de Sucursales</h2>
+                        <div className="flex justify-end mb-4">
                             <button
                                 onClick={() => handleOpenModal()}
-                                className="bg-thirdColor text-white font-bold py-2 px-4 rounded-lg hover:bg-fourthColor transition duration-200"
+                                className="bg-sixthColor text-white font-bold py-2 px-4 rounded-lg hover:bg-thirdColor transition duration-200"
                             >
                                 Agregar Sucursal
                             </button>
                         </div>
                         <div className="mb-4">
-                            <label className="mr-2 text-black">Filtrar por Ciudad:</label>
-                            <select
-                                value={selectedCity}
-                                onChange={(e) => setSelectedCity(e.target.value)}
-                                className="border p-2"
-                            >
-                                <option value="">Todas</option>
-                                {branches.map((branch) => (
-                                    <option key={branch.id} value={branch.municipio}>
-                                        {branch.municipio}
-                                    </option>
-                                ))}
-                            </select>
+                            
                         </div>
                         <div className="flex justify-between mb-4">
-                        <select
-                                value={rowsPerPage}
-                                onChange={handleRowsPerPageChange}
-                                className="border p-2 rounded-lg w-20"
-                            >
-                                <option value={10}>10</option>
-                                <option value={20}>20</option>
-                                <option value={30}>30</option>
-                                <option value={40}>40</option>
-                                <option value={50}>50</option>
-                            </select>
-                            <input
-                                type="text"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                placeholder="Buscar por nombre, ciudad, departamento o razón social"
-                                className="border p-2 w-full rounded-lg"
-                            />
+                            <div>
+                                <label htmlFor="itemsPerPage" className="mr-2 text-sm">Elementos por página:</label>
+                                <select
+                                    value={rowsPerPage}
+                                    onChange={handleRowsPerPageChange}
+                                    className="border px-2 rounded-lg w-20"
+                                >
+                                    <option value={10}>10</option>
+                                    <option value={20}>20</option>
+                                    <option value={50}>50</option>
+                                </select>
+                            </div>
+                            <div className='flex justify-center'>
+                                <div className="flex items-center">
+                                    <label className="mr-2 text-black">Filtrar por Ciudad:</label>
+                                    <select
+                                        value={selectedCity}
+                                        onChange={(e) => setSelectedCity(e.target.value)}
+                                        className="border p-2"
+                                    >
+                                        <option value="">Todas</option>
+                                        {branches.map((branch) => (
+                                            <option key={branch.id} value={branch.municipio}>
+                                                {branch.municipio}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="relative flex items-center w-full max-w-md">
+                               
+                                <input
+                                    type="text"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    placeholder="Buscar por nombre, ciudad, departamento o razón social"
+                                    className="border border-gray-300 focus:border-firstColor focus:ring-firstColor focus:outline-none px-4 py-2 rounded-lg w-full shadow-sm text-sm placeholder-gray-400 ml-2"
+                                    style={{width:'600px'}}
+                                />
+                            <FaSearch className="absolute right-4 text-gray-500 text-xl pointer-events-none" />
+                            </div>
+                            </div>
+
+                        
                         </div>
 
                         <div className="overflow-x-auto shadow-lg rounded-lg border border-gray-200">
@@ -287,7 +301,7 @@ const Branches: React.FC = () => {
                                 disabled={currentPage === 1}
                                 className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
                             >
-                                Prev
+                                Ant.
                             </button>
 
                             {getPageNumbers().map((page) => (
@@ -305,13 +319,13 @@ const Branches: React.FC = () => {
                                 disabled={currentPage === totalPages}
                                 className="min-w-9 rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
                             >
-                                Next
+                                Sig.
                             </button>
                         </div>
 
                         <div className="flex space-x-1 justify-center mt-2">
                             <span className="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">
-                                Mostrando página <span className="font-semibold text-gray-900 dark:text-white">{currentPage}</span> de <span className="font-semibold text-gray-900 dark:text-white">{totalPages}</span>
+                                Mostrando página <span className="font-semibold text-gray-900 dark:text-black">{currentPage}</span> de <span className="font-semibold text-gray-900 dark:text-black">{totalPages}</span>
                             </span>
                         </div>
                     </div>

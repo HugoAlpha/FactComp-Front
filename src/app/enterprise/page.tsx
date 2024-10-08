@@ -162,6 +162,33 @@ const EnterpriseList = () => {
         setCurrentPage(1);
     };
 
+    const getPageNumbers = () => {
+        const totalPages = Math.ceil(enterprises.length / rowsPerPage);
+        const pageNumbers = [];
+        const maxVisiblePages = 4;
+
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+        if (endPage - startPage + 1 < maxVisiblePages) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
+            pageNumbers.push(i);
+        }
+
+        return pageNumbers;
+    };
+    const totalPages = Math.ceil(enterprises.length / rowsPerPage);
+    const indexOfLastEnterprise = currentPage * rowsPerPage;
+    const indexOfFirstEnterprise = indexOfLastEnterprise - rowsPerPage;
+    const currentEnterprises = enterprises.slice(indexOfFirstEnterprise, indexOfLastEnterprise);
+
+    if (loading) {
+        return <div>Loading...</div>;
+    }
+
     return (
         <div className="flex min-h-screen">
             <Sidebar />
@@ -170,28 +197,28 @@ const EnterpriseList = () => {
                 <div className="flex-grow overflow-auto bg-gray-50">
                     <div className="p-6">
                         <h1 className="text-2xl font-bold mb-6 text-gray-700">Gestión de Empresas</h1>
-                        <div className="justify-end">
-                        <select
+                        <div className="flex justify-between items-center mb-4">
+                            <div className="flex items-center">
+                                <label htmlFor="itemsPerPage" className="mr-2 text-sm">Elementos por página:</label>    
+                                <select
                                 value={rowsPerPage}
                                 onChange={handleRowsPerPageChange}
                                 className="border p-2 rounded-lg w-20"
-                            >
+                                >
                                 <option value={10}>10</option>
                                 <option value={20}>20</option>
-                                <option value={30}>30</option>
-                                <option value={40}>40</option>
                                 <option value={50}>50</option>
-                            </select>
-                        </div>
-                        <div className="flex justify-end mb-4">
-                        
+                                </select>
+                            </div>
+
                             <button
                                 onClick={() => openModal()}
-                                className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 text-lg"
+                                className="bg-sixthColor text-white py-2 px-4 rounded-lg hover:bg-thirdColor text-lg"
                             >
                                 Agregar Empresa
                             </button>
                         </div>
+
 
                         <div className="overflow-x-auto shadow-lg rounded-lg border border-gray-200">
                             <table className="min-w-full bg-white">
@@ -204,7 +231,7 @@ const EnterpriseList = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {enterprises.map((enterprise) => (
+                                    {currentEnterprises.map((enterprise) => (
                                         <tr key={enterprise.id} className="border-b hover:bg-gray-50 text-black">
                                             <td className="px-6 py-4">{enterprise.id}</td>
                                             <td className="px-6 py-4">{enterprise.nit}</td>
@@ -238,6 +265,39 @@ const EnterpriseList = () => {
                             enterprise={selectedEnterprise || { id: 0, nit: '', razonSocial: '' }}
                         />
                     </div>
+                    <div className="flex space-x-1 justify-center mt-6">
+                            <button
+                                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                                disabled={currentPage === 1}
+                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+                            >
+                                Ant.
+                            </button>
+
+                            {getPageNumbers().map((page) => (
+                                <button
+                                    key={page}
+                                    onClick={() => setCurrentPage(page)}
+                                    className={`min-w-9 rounded-full border py-2 px-3.5 text-center text-sm transition-all shadow-sm ${page === currentPage ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-800 hover:text-white hover:border-slate-800'} focus:bg-slate-800 focus:text-white active:border-slate-800 active:bg-slate-800`}
+                                >
+                                    {page}
+                                </button>
+                            ))}
+
+                            <button
+                                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                                disabled={currentPage === totalPages}
+                                className="min-w-9 rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+                            >
+                                Sig.
+                            </button>
+                        </div>
+
+                        <div className="flex space-x-1 justify-center mt-2">
+                            <span className="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">
+                                Mostrando página <span className="font-semibold text-gray-900 dark:text-black">{currentPage}</span> de <span className="font-semibold text-gray-900 dark:text-black">{totalPages}</span>
+                            </span>
+                        </div>
                 </div>
             </div>
         </div>

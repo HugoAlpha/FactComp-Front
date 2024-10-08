@@ -1,5 +1,5 @@
 "use client";
-import { FaTrashAlt, FaEdit } from 'react-icons/fa';
+import { FaTrashAlt, FaEdit, FaSearch } from 'react-icons/fa';
 import Sidebar from '@/components/commons/sidebar';
 import Header from '@/components/commons/header';
 import { useState } from 'react';
@@ -71,7 +71,9 @@ const UserList = () => {
                         {/* Barra de búsqueda */}
                         <div className="flex justify-between mb-4">
 
-                        <select
+                        <div>
+                                <label htmlFor="itemsPerPage" className="mr-2 text-sm">Elementos por página:</label>
+                                <select
                                 value={rowsPerPage}
                                 onChange={handleRowsPerPageChange}
                                 className="border p-2 rounded-lg w-20"
@@ -83,13 +85,19 @@ const UserList = () => {
                                 <option value={50}>50</option>
                             </select>
 
-                            <input
+                            </div>
+
+                            <div className="relative flex items-center w-full max-w-md">
+                                <input
                                 type="text"
                                 placeholder="Buscar usuario por nombre completo..."
-                                className="border p-2 rounded-lg w-1/3"
+                                className="border border-gray-300 focus:border-firstColor focus:ring-firstColor focus:outline-none px-4 py-2 rounded-lg w-full shadow-sm text-sm placeholder-gray-400"
                                 value={searchTerm}
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
+                            
+                            <FaSearch className="absolute right-4 text-gray-500 text-xl pointer-events-none" />
+                            </div>
                             <button
                                 className="bg-sixthColor text-white py-2 px-4 rounded-lg hover:bg-fourthColor text-lg"
                                 onClick={() => setIsModalOpen(true)}
@@ -131,7 +139,7 @@ const UserList = () => {
                                                     </button>
                                                     
                                                     {/* Botón de Editar */}
-                                                    <button className="bg-orange-100 hover:bg-orange-100 p-2 rounded-r-lg flex items-center justify-center border border-orange-100">
+                                                    <button className="bg-blue-200 hover:bg-blue-300 p-2 rounded-r-lg flex items-center justify-center border border-blue-300">
                                                         <FaEdit className="text-black" />
                                                     </button>
                                                 </div>
@@ -152,7 +160,7 @@ const UserList = () => {
                                 disabled={currentPage === 1}
                                 className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
                             >
-                                Prev
+                                Ant.
                             </button>
 
                             {getPageNumbers().map((page) => (
@@ -170,13 +178,13 @@ const UserList = () => {
                                 disabled={currentPage === totalPages}
                                 className="min-w-9 rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
                             >
-                                Next
+                                Sig.
                             </button>
                         </div>
 
                         <div className="flex space-x-1 justify-center mt-2">
                             <span className="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">
-                                Mostrando página <span className="font-semibold text-gray-900 dark:text-white">{currentPage}</span> de <span className="font-semibold text-gray-900 dark:text-white">{totalPages}</span>
+                                Mostrando página <span className="font-semibold text-gray-900 dark:text-black">{currentPage}</span> de <span className="font-semibold text-gray-900 dark:text-black">{totalPages}</span>
                             </span>
                         </div>
                     </div>

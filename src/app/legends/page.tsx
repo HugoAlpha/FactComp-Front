@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Header from "@/components/commons/header";
 import Sidebar from "@/components/commons/sidebar";
-import { FaEdit, FaTrashAlt } from "react-icons/fa";
+import { FaEdit, FaSearch, FaTrashAlt } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { PATH_URL_BACKEND } from "@/utils/constants";
 
@@ -116,18 +116,21 @@ const Legends: React.FC = () => {
                             </h2>
                         </div>
                         <div className="flex justify-between mb-4">
-                        <select
+                        <div>
+                                <label htmlFor="itemsPerPage" className="mr-2 text-sm">Elementos por página:</label>
+                                <select
                                 value={rowsPerPage}
                                 onChange={handleRowsPerPageChange}
                                 className="border p-2 rounded-lg w-20"
                             >
                                 <option value={10}>10</option>
                                 <option value={20}>20</option>
-                                <option value={30}>30</option>
-                                <option value={40}>40</option>
+                                
                                 <option value={50}>50</option>
                             </select>
-
+                            </div>
+                            <div className="relative flex items-center w-full max-w-md">
+                                
                             <input
                                 type="text"
                                 value={searchTerm}
@@ -135,6 +138,8 @@ const Legends: React.FC = () => {
                                 placeholder="Buscar Registro"
                                 className="border p-2 w-full rounded-lg"
                             />
+                            <FaSearch className="absolute right-4 text-gray-500 text-xl pointer-events-none" />
+                            </div>
                         </div>
 
                         <div className="overflow-x-auto shadow-lg rounded-lg border border-gray-200">
@@ -162,7 +167,7 @@ const Legends: React.FC = () => {
                                 disabled={currentPage === 1}
                                 className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
                             >
-                                Prev
+                                Ant.
                             </button>
 
                             {getPageNumbers().map((page) => (
@@ -183,14 +188,13 @@ const Legends: React.FC = () => {
                                 disabled={currentPage === totalPages}
                                 className="min-w-9 rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
                             >
-                                Next
+                                Sig.
                             </button>
                         </div>
 
                         <div className="flex space-x-1 justify-center mt-2">
                             <span className="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">
-                                Mostrando página <span className="font-semibold text-gray-900 dark:text-white">{currentPage}</span> de{" "}
-                                <span className="font-semibold text-gray-900 dark:text-white">{totalPages}</span>
+                                Mostrando página <span className="font-semibold text-gray-900 dark:text-black">{currentPage}</span> de <span className="font-semibold text-gray-900 dark:text-black">{totalPages}</span>
                             </span>
                         </div>
                     </div>

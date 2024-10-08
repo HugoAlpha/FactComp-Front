@@ -215,7 +215,8 @@ const BillList = () => {
                 <div className="flex-grow overflow-auto bg-gray-50 p-6">
                     <h1 className="text-2xl font-bold mb-6 text-gray-700">Lista de Facturas</h1>
                     <div className="flex items-center justify-between mb-6">
-                        {/* Dropdown para filtrar por estado */}
+                    <div>
+                        <label htmlFor="itemsPerPage" className="mr-2 text-sm">Elementos por página:</label>
                         <select
                             value={rowsPerPage}
                             onChange={handleRowsPerPageChange}
@@ -226,32 +227,36 @@ const BillList = () => {
                             <option value={30}>30</option>
                             <option value={40}>40</option>
                             <option value={50}>50</option>
-                        </select>
+                        </select> 
+                    </div>
 
+                    <div className="flex items-center space-x-4">
+                        {/* Filtro de estado */}
                         <select
                             value={estadoFilter}
                             onChange={(e) => setEstadoFilter(e.target.value)}
-                            className="border border-gray-300 rounded-lg py-3 px-4 text-lg bg-white text-gray-700"
+                            className="border border-gray-300 rounded-lg py-2 px-4 text-base bg-white text-gray-700"
                         >
                             <option value="TODAS">Todas</option>
                             <option value="VALIDA">Válida</option>
                             <option value="ANULADA">Anulada</option>
-                        </select>
+                        </select>  
 
-                        <div className="relative flex items-center w-1/2">
-
-
-
+                        {/* Buscador */}
+                        <div className="relative flex items-center">
                             <input
                                 type="text"
                                 placeholder="Buscar factura"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
-                                className="border border-gray-300 rounded-lg py-3 px-4 w-full text-lg"
+                                className="border border-gray-300 focus:border-firstColor focus:ring-firstColor focus:outline-none px-4 py-2 rounded-lg w-full shadow-sm text-sm placeholder-gray-400"
+                                style={{width:"400px"}}
                             />
-                            <FaSearch className="absolute right-3 text-gray-500 text-2xl" />
+                            <FaSearch className="absolute right-3 text-gray-500 text-xl" />
                         </div>
                     </div>
+                </div>
+
 
                     <div className="flex space-x-6">
                         <div className={`${selectedBill ? 'w-2/3' : 'w-full'} transition-all duration-300`}>
@@ -306,7 +311,7 @@ const BillList = () => {
                                     disabled={currentPage === 1}
                                     className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                                 >
-                                    Prev
+                                    Ant.
                                 </button>
 
                                 {getPageNumbers(currentPage, totalPages).map((page) => (
@@ -324,7 +329,7 @@ const BillList = () => {
                                     disabled={currentPage === totalPages}
                                     className="min-w-9 rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                                 >
-                                    Next
+                                    Sig.
                                 </button>
                             </div>
 

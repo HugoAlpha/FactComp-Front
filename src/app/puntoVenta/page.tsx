@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from "@/components/commons/header";
 import Sidebar from "@/components/commons/sidebar";
-import { FaEdit, FaTrashAlt } from 'react-icons/fa';
+import { FaEdit, FaSearch, FaTrashAlt } from 'react-icons/fa';
 import ModalCreatePos from '@/components/layouts/modalCreatePos';
 
 interface PuntoVenta {
@@ -112,46 +112,55 @@ const PuntoVenta: React.FC = () => {
                         <h2 className="text-xl font-semibold mb-4 text-black">Lista de Puntos de Venta</h2>
 
                         {/* Filtro por Sucursal */}
-                        <div className="mb-4">
-                            <label className="mr-2 text-black">Filtrar por Sucursal:</label>
-                            <select
-                                value={selectedSucursal}
-                                onChange={(e) => setSelectedSucursal(e.target.value)}
-                                className="border p-2"
-                            >
-                                <option value="">Todas</option>
-                                <option value="Sucursal A">Sucursal A</option>
-                                <option value="Sucursal B">Sucursal B</option>
-                            </select>
-                        </div>
-
-                        <div className="flex justify-between mb-4">
-
-                        <select
-                                value={rowsPerPage}
-                                onChange={handleRowsPerPageChange}
-                                className="border p-2 rounded-lg w-20"
-                            >
-                                <option value={10}>10</option>
-                                <option value={20}>20</option>
-                                <option value={30}>30</option>
-                                <option value={40}>40</option>
-                                <option value={50}>50</option>
-                            </select>
-
-                            <input
-                                type="text"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                placeholder="Buscar por descripción, nombre o CUIS..."
-                                className="border p-2 rounded-lg w-1/3"
-                            />
+                        <div className="flex justify-end mb-2">
                             <button
-                                className="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 text-lg"
+                                className="bg-sixthColor text-white py-2 px-4 rounded-lg hover:bg-thirdColor text-lg"
                                 onClick={handleOpenModal}
                             >
                                 Agregar Punto de Venta
                             </button>
+                            
+                        </div>
+
+                        <div className="flex items-center mb-4 justify-between">
+                            <div>
+                                <label htmlFor="itemsPerPage" className="mr-2 text-sm">Elementos por página:</label>
+                                <select
+                                    value={rowsPerPage}
+                                    onChange={handleRowsPerPageChange}
+                                    className="border p-2 rounded-lg w-20"
+                                >
+                                    <option value={10}>10</option>
+                                    <option value={20}>20</option>
+                                    <option value={50}>50</option>
+                                </select>
+                            </div>
+                            <div className="flex justify-end">
+                                <div className="flex items-center">
+                                    <label className="text-black my-0 mr-2">Filtrar por Sucursal:</label>
+                                    <select
+                                        value={selectedSucursal}
+                                        onChange={(e) => setSelectedSucursal(e.target.value)}
+                                        className="border p-2"
+                                    >
+                                        <option value="">Todas</option>
+                                        <option value="Sucursal A">Sucursal A</option>
+                                        <option value="Sucursal B">Sucursal B</option>
+                                    </select>
+                                </div>
+
+                                <div className="relative flex items-center">
+                                    <input
+                                        type="text"
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        placeholder="Buscar por descripción, nombre o CUIS..."
+                                        className="border border-gray-300 focus:border-firstColor focus:ring-firstColor focus:outline-none px-4 py-2 rounded-lg w-full shadow-sm text-sm placeholder-gray-400 ml-3"
+                                        style={{width:"400px"}}
+                                    />
+                                    <FaSearch className="absolute right-3 text-gray-500 text-xl" />
+                                    </div>
+                            </div>
                         </div>
 
                         <ModalCreatePos
@@ -214,7 +223,7 @@ const PuntoVenta: React.FC = () => {
                                 disabled={currentPage === 1}
                                 className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
                             >
-                                Prev
+                                Ant.
                             </button>
 
                             {getPageNumbers().map((page) => (
@@ -232,8 +241,13 @@ const PuntoVenta: React.FC = () => {
                                 disabled={currentPage === totalPages}
                                 className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
                             >
-                                Next
+                                Sig.
                             </button>
+                        </div>
+                        <div className="flex space-x-1 justify-center mt-2">
+                            <span className="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">
+                                Mostrando página <span className="font-semibold text-gray-900 dark:text-black">{currentPage}</span> de <span className="font-semibold text-gray-900 dark:text-black">{totalPages}</span>
+                            </span>
                         </div>
                     </div>
                 </div>

@@ -275,7 +275,7 @@ const Parameters = () => {
                             {["metodoPago", "eventoSignificativo", "motivoAnulacion", "paisOrigen", "tiposFactura", "identidad", "documentoSector", "tipoEmision", "tipoHabitacion", "tipoMoneda", "tipoPuntoVenta", "unidadMedida"].map((tab) => (
                                 <button
                                     key={tab}
-                                    className={`pb-1 ${activeTab === tab ? "border-b-4 border-firstColor text-firstColor" : "text-gray-500"}`}
+                                    className={`mx-3 pb-1 ${activeTab === tab ? "border-b-4 border-firstColor text-firstColor" : "text-gray-500"}`}
                                     onClick={() => {
                                         setActiveTab(tab);
                                         setCurrentPage(1);
@@ -321,7 +321,7 @@ const Parameters = () => {
                                 disabled={currentPage === 1}
                                 className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
                             >
-                                Prev
+                                Ant.
                             </button>
 
                             {getPageNumbers().map((page) => (
@@ -339,7 +339,7 @@ const Parameters = () => {
                                 disabled={currentPage === totalPages}
                                 className="min-w-9 rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
                             >
-                                Next
+                                Sig.
                             </button>
                         </div>
 
