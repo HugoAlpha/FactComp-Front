@@ -185,6 +185,28 @@ const BillList = () => {
         setCurrentPage(1);
     };
 
+    const getStatus = (estado: string) => {
+        if (estado === 'ANULADO') {
+            return (
+                <span className="px-2 py-1 rounded-full bg-red-100 text-red-600">
+                    Anulada
+                </span>
+            );
+        } else if (estado === 'VALIDA') {
+            return (
+                <span className="px-2 py-1 rounded-full bg-green-100 text-green-600">
+                    Válida
+                </span>
+            );
+        } else {
+            return (
+                <span className="px-2 py-1 rounded-full bg-gray-100 text-gray-600">
+                    Desconocida
+                </span>
+            );
+        }
+    };
+
     return (
         <div className="flex min-h-screen">
             <Sidebar />
@@ -195,17 +217,17 @@ const BillList = () => {
                     <div className="flex items-center justify-between mb-6">
                         {/* Dropdown para filtrar por estado */}
                         <select
-                                value={rowsPerPage}
-                                onChange={handleRowsPerPageChange}
-                                className="border p-2 rounded-lg w-20"
-                            >
-                                <option value={10}>10</option>
-                                <option value={20}>20</option>
-                                <option value={30}>30</option>
-                                <option value={40}>40</option>
-                                <option value={50}>50</option>
-                            </select>
-                            
+                            value={rowsPerPage}
+                            onChange={handleRowsPerPageChange}
+                            className="border p-2 rounded-lg w-20"
+                        >
+                            <option value={10}>10</option>
+                            <option value={20}>20</option>
+                            <option value={30}>30</option>
+                            <option value={40}>40</option>
+                            <option value={50}>50</option>
+                        </select>
+
                         <select
                             value={estadoFilter}
                             onChange={(e) => setEstadoFilter(e.target.value)}
@@ -217,8 +239,8 @@ const BillList = () => {
                         </select>
 
                         <div className="relative flex items-center w-1/2">
-                            
-                        
+
+
 
                             <input
                                 type="text"
@@ -254,7 +276,7 @@ const BillList = () => {
                                                     {bill.date.toLocaleDateString()} {bill.date.toLocaleTimeString()}
                                                 </td>
                                                 <td className="px-6 py-4">{bill.total}</td>
-                                                <td className="px-6 py-4">{bill.estado || '-'}</td>
+                                                <td className="px-6 py-4">{getStatus(bill.estado)}</td>
                                                 <td className="px-6 py-4">
                                                     <div className="flex">
                                                         <button

@@ -102,9 +102,6 @@ const CUFDList = () => {
     };
 
     const getStatus = (fechaVigencia: string, vigente: boolean) => {
-        const currentDate = new Date();
-        const expirationDate = new Date(fechaVigencia);
-
         if (!vigente) {
             return (
                 <span className="px-2 py-1 rounded-full bg-red-100 text-red-600">
@@ -143,7 +140,7 @@ const CUFDList = () => {
                             </button>
                         </div>
                         <div className="flex justify-between mb-4">
-                        <select
+                            <select
                                 value={rowsPerPage}
                                 onChange={handleRowsPerPageChange}
                                 className="border p-2 rounded-lg w-20"
@@ -154,7 +151,7 @@ const CUFDList = () => {
                                 <option value={40}>40</option>
                                 <option value={50}>50</option>
                             </select>
-                            
+
                             <input
                                 type="text"
                                 placeholder="Buscar CUFD por id o estado..."

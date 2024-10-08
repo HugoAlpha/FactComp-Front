@@ -84,7 +84,6 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
     }
 
     try {
-      // Mostrar la alerta de carga con temporizador de 5 segundos
       let timerInterval: NodeJS.Timeout;
       Swal.fire({
         title: 'Se está generando la factura',
@@ -132,7 +131,6 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
         body: JSON.stringify(body),
       });
 
-      // Esperar a que el temporizador termine antes de cerrar la alerta
       await new Promise((resolve) => setTimeout(resolve, 5000));
       Swal.close();
 
@@ -157,7 +155,6 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
         });
       }
     } catch (error) {
-      // Cerrar la alerta de carga en caso de error
       Swal.close();
       Swal.fire({
         icon: 'error',
@@ -179,33 +176,29 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
           <div className="flex space-x-4">
             <button
               onClick={() => setPaymentMethod('Efectivo')}
-              className={`flex items-center p-2 border rounded ${
-                paymentMethod === 'Efectivo' ? 'bg-fifthColor' : 'bg-gray-100'
-              }`}
+              className={`flex items-center p-2 border rounded ${paymentMethod === 'Efectivo' ? 'bg-fifthColor' : 'bg-gray-100'
+                }`}
             >
               <FaMoneyBill className="mr-2" /> Efectivo
             </button>
             <button
               onClick={() => setPaymentMethod('Tarjeta')}
-              className={`flex items-center p-2 border rounded ${
-                paymentMethod === 'Tarjeta' ? 'bg-fifthColor' : 'bg-gray-100'
-              }`}
+              className={`flex items-center p-2 border rounded ${paymentMethod === 'Tarjeta' ? 'bg-fifthColor' : 'bg-gray-100'
+                }`}
             >
               <FaCreditCard className="mr-2" /> Tarjeta
             </button>
             <button
               onClick={() => setPaymentMethod('QR')}
-              className={`flex items-center p-2 border rounded ${
-                paymentMethod === 'QR' ? 'bg-fifthColor' : 'bg-gray-100'
-              }`}
+              className={`flex items-center p-2 border rounded ${paymentMethod === 'QR' ? 'bg-fifthColor' : 'bg-gray-100'
+                }`}
             >
               <FaQrcode className="mr-2" /> QR
             </button>
             <button
               onClick={() => setPaymentMethod('Híbrido')}
-              className={`flex items-center p-2 border rounded ${
-                paymentMethod === 'Híbrido' ? 'bg-fifthColor' : 'bg-gray-100'
-              }`}
+              className={`flex items-center p-2 border rounded ${paymentMethod === 'Híbrido' ? 'bg-fifthColor' : 'bg-gray-100'
+                }`}
             >
               <FaMoneyBill className="mr-2" /> Híbrido
             </button>
