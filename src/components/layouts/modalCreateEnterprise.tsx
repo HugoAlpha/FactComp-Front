@@ -47,27 +47,29 @@ const CreateEditEnterpriseModal: React.FC<EnterpriseModalProps> = ({ isOpen, onC
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="bg-white rounded shadow-lg w-500">
-                <div className="bg-green-700 text-white text-lg font-semibold p-4 rounded-t">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+            <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg">
+                <div className="bg-white text-black text-2xl font-semibold p-4 rounded-t">
                     {enterprise.id ? 'Edición de Empresa' : 'Agregación de Empresa'}
                 </div>
-                <div className="p-6 m-6">
-                    <div className="grid grid-cols-1 gap-6 text-black">
-                        <div className="grid grid-cols-2 gap-6">
-                            {renderInputField("nit", "NIT", formData.nit, handleInputChange, <FaIdCard />, errors.nit)}
-                            {renderInputField("razonSocial", "Razón Social", formData.razonSocial, handleInputChange, <FaBuilding />, errors.razonSocial)}
-                        </div>
-                    </div>
+                <form className="grid md:grid-cols-2 gap-6 mt-4">
+                    {renderInputField("nit", "NIT", formData.nit, handleInputChange, <FaIdCard />, errors.nit)}
+                    {renderInputField("razonSocial", "Razón Social", formData.razonSocial, handleInputChange, <FaBuilding />, errors.razonSocial)}
+                </form>
 
-                    <div className="flex justify-end mt-6">
-                        <button onClick={onClose} className="bg-red-500 text-white px-4 py-2 rounded mr-2">
-                            Cancelar
-                        </button>
-                        <button onClick={handleSubmit} className="bg-green-500 text-white px-4 py-2 rounded">
-                            {enterprise.id ? 'Actualizar' : 'Agregar'}
-                        </button>
-                    </div>
+                <div className="flex justify-end mt-6">
+                    <button 
+                        onClick={onClose} 
+                        className="px-6 py-2 bg-sixthColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400 mr-2"
+                    >
+                        Cancelar
+                    </button>
+                    <button 
+                        onClick={handleSubmit} 
+                        className="px-6 py-2 bg-thirdColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400 ml-2"
+                    >
+                        {enterprise.id ? 'Actualizar' : 'Agregar'}
+                    </button>
                 </div>
             </div>
         </div>
@@ -82,20 +84,20 @@ const renderInputField = (
     icon: React.ReactNode,
     error?: string
 ) => (
-    <div className="mb-4">
-        <label className="block text-gray-700 font-semibold mb-1">{label}</label>
-        <div className="flex items-center border rounded">
-            <span className="p-2 text-gray-600">{icon}</span>
-            <input
-                type="text"
-                name={name}
-                className={`border-0 p-2 w-full rounded focus:ring-0 ${error ? 'border-red-500' : ''}`}
-                placeholder={`Ingrese ${label.toLowerCase()}`}
-                value={value}
-                onChange={onChange}
-            />
-        </div>
-        {error && <span className="text-red-500 text-sm">{error}</span>}
+    <div className="relative z-0 w-full mb-5 group">
+        <input
+            type="text"
+            name={name}
+            value={value}
+            onChange={onChange}
+            className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+            placeholder=" "
+        />
+        <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+            {label}
+        </label>
+        <span className="absolute right-0 top-3 text-gray-400">{icon}</span>
+        {error && <span className="text-red-500 text-xs mt-1">{error}</span>}
     </div>
 );
 
