@@ -78,7 +78,7 @@ const ModalCreateUser: React.FC<ModalCreateUserProps> = ({ isOpen, onClose, onSa
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
             <div className="bg-white rounded shadow-lg w-500">
                 <div className="bg-white text-black text-2xl font-semibold p-4 rounded-t">
                     {user ? 'Edición de Usuario' : 'Creación de Usuario'}

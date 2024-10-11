@@ -91,7 +91,7 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
                 let response;
                 if (customer.id) {
                     // PUT
-                    response = await fetch(`${PATH_URL_BACKEND}/item/actualizar-item/${customer.id}`, {
+                    response = await fetch(`${PATH_URL_BACKEND}/api/clientes/${customer.id}`, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
@@ -132,7 +132,7 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
             <div className="bg-white rounded shadow-lg w-500">
                 <div className="bg-white text-black text-2xl font-semibold p-4 rounded-t">
                     {customer.id ? 'Edición de Cliente' : 'Agregar nuevo Cliente'}

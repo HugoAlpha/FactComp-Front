@@ -33,7 +33,7 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
   total,
   onSuccess,
 }) => {
-  const [paymentMethod, setPaymentMethod] = useState('Efectivo');
+  const [paymentMethod, setPaymentMethod] = useState('1');
   const [paymentAmount, setPaymentAmount] = useState('');
   const [cashAmount, setCashAmount] = useState('');
   const [cardAmount, setCardAmount] = useState('');
@@ -77,7 +77,7 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
   }, [isOpen]);
 
   const handleValidate = async () => {
-    if (paymentMethod === 'Efectivo' && Number(paymentAmount) < total) {
+    if (paymentMethod === '1' && Number(paymentAmount) < total) {
       Swal.fire({
         icon: 'error',
         title: 'Error',
@@ -86,7 +86,7 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
       return;
     }
 
-    if (paymentMethod === 'Híbrido') {
+    if (paymentMethod === '10') {
       const totalPayment = parseFloat(cashAmount) + parseFloat(cardAmount);
       if (totalPayment !== total) {
         Swal.fire({
@@ -197,9 +197,8 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
             {defaultMethods.map((method) => (
               <button
                 key={method.codigoClasificador}
-                onClick={() => setPaymentMethod(method.descripcion)}
-                className={`flex items-center p-2 border rounded ${paymentMethod === method.descripcion ? 'bg-fifthColor' : 'bg-gray-100'
-                  }`}
+                onClick={() => setPaymentMethod(method.codigoClasificador)}
+                className={`flex items-center p-2 border rounded ${paymentMethod === method.codigoClasificador ? 'bg-fifthColor' : 'bg-gray-100'}`}
               >
                 <FaMoneyBill className="mr-2" /> {method.descripcion}
               </button>
@@ -218,14 +217,13 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
               {paymentMethods
                 .filter(
                   (method) =>
-                    !defaultMethods.some((defaultMethod) => defaultMethod.id === method.id)
+                    !defaultMethods.some((defaultMethod) => defaultMethod.codigoClasificador === method.codigoClasificador)
                 )
                 .map((method) => (
                   <button
                     key={method.codigoClasificador}
-                    onClick={() => setPaymentMethod(method.descripcion)}
-                    className={`flex items-center p-2 border rounded mb-2 ${paymentMethod === method.descripcion ? 'bg-fifthColor' : 'bg-gray-100'
-                      }`}
+                    onClick={() => setPaymentMethod(method.codigoClasificador)}
+                    className={`flex items-center p-2 border rounded mb-2 ${paymentMethod === method.codigoClasificador ? 'bg-fifthColor' : 'bg-gray-100'}`}
                   >
                     {method.descripcion}
                   </button>
@@ -234,7 +232,7 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
           )}
         </div>
 
-        {paymentMethod === 'Efectivo' && (
+        {paymentMethod === '1' && (
           <div className="mb-4">
             <label className="block mb-2 font-semibold">Cantidad Pagada</label>
             <input
@@ -251,7 +249,7 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
           </div>
         )}
 
-        {paymentMethod === 'Híbrido' && (
+        {paymentMethod === '10' && (
           <div className="mb-4">
             <label className="block mb-2 font-semibold">Cantidad Pagada en Efectivo</label>
             <input

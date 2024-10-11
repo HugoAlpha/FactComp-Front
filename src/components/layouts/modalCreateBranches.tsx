@@ -15,7 +15,7 @@ interface ModalCreateBranchProps {
 }
 
 const ModalCreateBranch: React.FC<ModalCreateBranchProps> = ({ isOpen, onClose, onBranchCreated, branchToEdit }) => {
-    const [codigo, setCodigo] = useState(''); 
+    const [codigo, setCodigo] = useState('');
     const [nombre, setNombre] = useState('');
     const [departamento, setDepartamento] = useState('');
     const [municipio, setMunicipio] = useState('');
@@ -111,7 +111,7 @@ const ModalCreateBranch: React.FC<ModalCreateBranchProps> = ({ isOpen, onClose, 
         }
 
         const body = {
-            codigo, 
+            codigo,
             nombre,
             departamento,
             municipio,
@@ -123,7 +123,7 @@ const ModalCreateBranch: React.FC<ModalCreateBranchProps> = ({ isOpen, onClose, 
         try {
             const method = branchToEdit ? 'PUT' : 'POST';
             const endpoint = branchToEdit ? `${PATH_URL_BACKEND}/sucursales/${branchToEdit.id}` : `${PATH_URL_BACKEND}/sucursales`;
-            
+
             const response = await fetch(endpoint, {
                 method,
                 headers: {
@@ -159,7 +159,7 @@ const ModalCreateBranch: React.FC<ModalCreateBranchProps> = ({ isOpen, onClose, 
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
             <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg">
                 <div className="bg-white text-black text-2xl font-semibold p-4 rounded-t">
                     {branchToEdit ? 'Editar Sucursal' : 'Agregar Nueva Sucursal'}
