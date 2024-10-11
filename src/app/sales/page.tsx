@@ -577,13 +577,9 @@ const Sales = () => {
                                     <div
                                         key={product.id}
                                         onClick={() => addProduct(product)}
-                                        className="cursor-pointer flex items-center bg-white border rounded-lg p-2 shadow hover:bg-gray-100"
+                                        className="cursor-pointer flex items-center bg-white border rounded-lg p-2 shadow transition-all duration-300 hover:bg-gray-100"
                                     >
-                                        <img
-                                            src={product.img}
-                                            alt={product.name}
-                                            className="h-12 w-12 object-contain mr-4 transition-all duration-300 hover:scale-110"
-                                        />
+
                                         <div className="flex-grow">
                                             <h3 className="text-sm font-semibold">{product.name}</h3>
                                             <p className="text-sm font-bold">Bs {product.price}</p>

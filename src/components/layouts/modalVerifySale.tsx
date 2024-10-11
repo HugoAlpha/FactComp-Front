@@ -39,7 +39,23 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
   const [cardAmount, setCardAmount] = useState('');
   const [selectedClient, setSelectedClient] = useState('');
   const [clients, setClients] = useState<Client[]>([]);
-  const [changeNeeded, setChangeNeeded] = useState(false);
+  const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
+  const [showAllMethods, setShowAllMethods] = useState(false);
+
+  useEffect(() => {
+    const fetchPaymentMethods = async () => {
+      try {
+        const response = await fetch(`${PATH_URL_BACKEND}/parametro/metodo-pago`);
+        if (response.ok) {
+          const data = await response.json();
+          setPaymentMethods(data);
+        }
+      } catch (error) {
+        Swal.fire('Error', 'No se pudieron obtener los métodos de pago.', 'error');
+      }
+    };
+    fetchPaymentMethods();
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -56,7 +72,6 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
           Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
         }
       };
-
       fetchClients();
     }
   }, [isOpen]);
@@ -113,15 +128,13 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
         idPuntoVenta: '1',
         idCliente: clients.find((client) => client.nombreRazonSocial === selectedClient)?.id || '',
         nitInvalido: true,
-        codigoMetodoPago: 5,
+        codigoMetodoPago: paymentMethod,
         detalle: products.map((product) => ({
           idProducto: product.id,
           cantidad: product.cantidad.toString(),
           montoDescuento: product.discount ? product.discount.toFixed(2) : '00.0',
         })),
       };
-
-      console.log(body);
 
       const response = await fetch(`${PATH_URL_BACKEND}/factura/emitir`, {
         method: 'POST',
@@ -166,6 +179,13 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
 
   if (!isOpen) return null;
 
+  const defaultMethods = [
+    { descripcion: 'Efectivo', codigoClasificador: '1' },
+    { descripcion: 'Tarjeta', codigoClasificador: '2' },
+    { descripcion: 'QR', codigoClasificador: '7' },
+    { descripcion: 'Híbrido', codigoClasificador: '10' },
+  ];
+
   return (
     <div className="text-black fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div className="bg-white p-8 rounded-lg shadow-lg max-w-lg w-full">
@@ -174,35 +194,44 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
         <div className="mb-4">
           <label className="block mb-2 font-semibold">Método de Pago</label>
           <div className="flex space-x-4">
-            <button
-              onClick={() => setPaymentMethod('Efectivo')}
-              className={`flex items-center p-2 border rounded ${paymentMethod === 'Efectivo' ? 'bg-fifthColor' : 'bg-gray-100'
-                }`}
-            >
-              <FaMoneyBill className="mr-2" /> Efectivo
-            </button>
-            <button
-              onClick={() => setPaymentMethod('Tarjeta')}
-              className={`flex items-center p-2 border rounded ${paymentMethod === 'Tarjeta' ? 'bg-fifthColor' : 'bg-gray-100'
-                }`}
-            >
-              <FaCreditCard className="mr-2" /> Tarjeta
-            </button>
-            <button
-              onClick={() => setPaymentMethod('QR')}
-              className={`flex items-center p-2 border rounded ${paymentMethod === 'QR' ? 'bg-fifthColor' : 'bg-gray-100'
-                }`}
-            >
-              <FaQrcode className="mr-2" /> QR
-            </button>
-            <button
-              onClick={() => setPaymentMethod('Híbrido')}
-              className={`flex items-center p-2 border rounded ${paymentMethod === 'Híbrido' ? 'bg-fifthColor' : 'bg-gray-100'
-                }`}
-            >
-              <FaMoneyBill className="mr-2" /> Híbrido
-            </button>
+            {defaultMethods.map((method) => (
+              <button
+                key={method.codigoClasificador}
+                onClick={() => setPaymentMethod(method.descripcion)}
+                className={`flex items-center p-2 border rounded ${paymentMethod === method.descripcion ? 'bg-fifthColor' : 'bg-gray-100'
+                  }`}
+              >
+                <FaMoneyBill className="mr-2" /> {method.descripcion}
+              </button>
+            ))}
+            {paymentMethods.length > defaultMethods.length && (
+              <button
+                onClick={() => setShowAllMethods((prev) => !prev)}
+                className="flex items-center p-2 border rounded bg-gray-100"
+              >
+                {showAllMethods ? 'Ver menos' : 'Ver más'}
+              </button>
+            )}
           </div>
+          {showAllMethods && (
+            <div className="mt-4 max-h-60 overflow-y-auto">
+              {paymentMethods
+                .filter(
+                  (method) =>
+                    !defaultMethods.some((defaultMethod) => defaultMethod.id === method.id)
+                )
+                .map((method) => (
+                  <button
+                    key={method.codigoClasificador}
+                    onClick={() => setPaymentMethod(method.descripcion)}
+                    className={`flex items-center p-2 border rounded mb-2 ${paymentMethod === method.descripcion ? 'bg-fifthColor' : 'bg-gray-100'
+                      }`}
+                  >
+                    {method.descripcion}
+                  </button>
+                ))}
+            </div>
+          )}
         </div>
 
         {paymentMethod === 'Efectivo' && (
