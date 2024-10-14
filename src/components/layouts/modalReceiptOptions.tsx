@@ -33,6 +33,27 @@ const ReceiptOptionsModal: React.FC<ReceiptOptionsModalProps> = ({ isOpen, onClo
     }
   };
 
+  const handlePrintRollo = async () => {
+    try {
+      const response = await fetch(`${PATH_URL_BACKEND}/pdf/download/rollo?cuf=${cuf}&numeroFactura=${numeroFactura}`, {
+        method: 'GET',
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const printWindow = window.open(url);
+        printWindow?.focus();
+        printWindow?.print();
+      } else {
+        Swal.fire('Error', 'No se pudo descargar la factura para imprimir.', 'error');
+      }
+    } catch (error) {
+      console.error('Error al descargar la factura para imprimir:', error);
+      Swal.fire('Error', 'Ocurrió un error al intentar descargar la factura.', 'error');
+    }
+  };
+
   const handleDownloadReceipt = async () => {
     try {
       const response = await fetch(`${PATH_URL_BACKEND}/pdf/download?cufd=${cuf}&numeroFactura=${numeroFactura}`, {
@@ -62,11 +83,17 @@ const ReceiptOptionsModal: React.FC<ReceiptOptionsModalProps> = ({ isOpen, onClo
       <div className="bg-white p-6 rounded-lg shadow-lg w-96">
         <h2 className="text-xl font-bold mb-4 text-center">Opciones de Recibo</h2>
         <div className="flex flex-col space-y-4">
+        <button
+            onClick={handlePrintRollo}
+            className="bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600"
+          >
+            Impresion en rollo
+          </button>
           <button
             onClick={handlePrintReceipt}
             className="bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600"
           >
-            Imprimir
+            Impresion carta
           </button>
           <button
             onClick={handleDownloadReceipt}
