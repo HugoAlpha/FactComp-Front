@@ -18,6 +18,12 @@ interface ProductOption {
     descripcionProducto: string;
 }
 
+interface UnidadMedidaOption {
+    id: number;
+    codigoClasificador: string;
+    descripcion: string;
+}
+
 interface ModalCreateProductProps {
     isOpen: boolean;
     onClose: () => void;
@@ -26,13 +32,15 @@ interface ModalCreateProductProps {
 }
 
 const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose, onProductCreated, product }) => {
-    const [codigo, setCodigo] = useState('');
+    const [codigo, setCodigo] = useState(''); // Campo para que el usuario lo escriba
     const [nombreProducto, setNombreProducto] = useState('');
-    const [unidadMedida, setUnidadMedida] = useState('');
+    const [unidadMedida, setUnidadMedida] = useState<string>('');
     const [precioUnitario, setPrecioUnitario] = useState('');
-    const [codigoProductoSin, setCodigoProductoSin] = useState('');
+    const [codigoProductoSin, setCodigoProductoSin] = useState(''); // Se sigue obteniendo del GET
     const [productOptions, setProductOptions] = useState<ProductOption[]>([]);
+    const [unidadMedidaOptions, setUnidadMedidaOptions] = useState<UnidadMedidaOption[]>([]);
     const [selectedOption, setSelectedOption] = useState<ProductOption | null>(null);
+    const [selectedUnidadMedida, setSelectedUnidadMedida] = useState<string>('');
 
     const [errors, setErrors] = useState({
         codigo: '',
@@ -57,8 +65,23 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
             }
         };
 
+        const fetchUnidadMedidaOptions = async () => {
+            try {
+                const response = await fetch(`${PATH_URL_BACKEND}/parametro/unidad-medida`);
+                if (response.ok) {
+                    const data: UnidadMedidaOption[] = await response.json();
+                    setUnidadMedidaOptions(data);
+                } else {
+                    Swal.fire('Error', 'Error al obtener las opciones de unidad de medida', 'error');
+                }
+            } catch (error) {
+                Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
+            }
+        };
+
         if (isOpen) {
             fetchProductOptions();
+            fetchUnidadMedidaOptions();
 
             if (product) {
                 setCodigo(product.codigo);
@@ -66,6 +89,7 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                 setUnidadMedida(product.unidadMedida.toString());
                 setPrecioUnitario(product.precioUnitario.toString());
                 setCodigoProductoSin(product.codigoProductoSin.toString());
+                setSelectedUnidadMedida(product.unidadMedida.toString());
             } else {
                 setCodigo('');
                 setNombreProducto('');
@@ -83,41 +107,21 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
         }
     }, [isOpen, product]);
 
-    const validateField = (name: string, value: string) => {
-        let error = '';
-        switch (name) {
-            case 'unidadMedida':
-                if (!/^\d+$/.test(value) || Number(value) <= 0) {
-                    error = 'La unidad de medida debe ser un número positivo.';
-                }
-                break;
-            case 'precioUnitario':
-                if (!/^\d+(\.\d{1,2})?$/.test(value) || Number(value) <= 0) {
-                    error = 'El precio unitario debe ser un número positivo con hasta dos decimales.';
-                }
-                break;
-            default:
-                break;
-        }
-        setErrors((prevErrors) => ({ ...prevErrors, [name]: error }));
-    };
-
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         switch (name) {
             case 'nombreProducto':
                 setNombreProducto(value);
                 break;
-            case 'unidadMedida':
-                setUnidadMedida(value);
-                break;
             case 'precioUnitario':
                 setPrecioUnitario(value);
+                break;
+            case 'codigo': // Cambio para que el código sea ingresado manualmente
+                setCodigo(value);
                 break;
             default:
                 break;
         }
-        validateField(name, value);
     };
 
     const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -126,24 +130,28 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
 
         if (selectedProduct) {
             setSelectedOption(selectedProduct);
-            setCodigo(selectedProduct.codigoActividad);
-            setCodigoProductoSin(selectedProduct.codigoProducto.toString());
+            setCodigoProductoSin(selectedProduct.codigoProducto.toString()); // Solo cambia el codigoProductoSin del GET
         }
+    };
+
+    const handleUnidadMedidaChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const selectedCodigo = e.target.value;
+        setSelectedUnidadMedida(selectedCodigo);
     };
 
     const handleSubmitProduct = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (Object.values(errors).some((error) => error !== '') || !selectedOption || !nombreProducto || !unidadMedida || !precioUnitario) {
+        if (Object.values(errors).some((error) => error !== '') || !selectedOption || !nombreProducto || !selectedUnidadMedida || !precioUnitario) {
             Swal.fire('Error', 'Por favor corrige los errores en el formulario', 'error');
             return;
         }
 
         const productData = {
-            codigo: selectedOption.codigoActividad,
+            codigo, // Se envía el código ingresado por el usuario
             descripcion: nombreProducto,
-            unidadMedida: Number(unidadMedida),
+            unidadMedida: selectedUnidadMedida, // Enviar el códigoClasificador de la unidad de medida seleccionada
             precioUnitario: Number(precioUnitario),
-            codigoProductoSin: Number(selectedOption.codigoProducto),
+            codigoProductoSin: Number(selectedOption.codigoProducto), // Se sigue obteniendo del GET
         };
 
         try {
@@ -188,6 +196,22 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                     {product ? 'Editar Producto' : 'Agregar Nuevo Producto'}
                 </div>
                 <form className="grid md:grid-cols-2 gap-6 mt-4" onSubmit={handleSubmitProduct}>
+                    {/* Campo para el código que el usuario puede escribir */}
+                    <div className="relative z-0 w-full mb-5 group">
+                        <input
+                            type="text"
+                            name="codigo"
+                            value={codigo}
+                            onChange={handleChange}
+                            className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                            placeholder=" "
+                            required
+                        />
+                        <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                            Código del Producto
+                        </label>
+                    </div>
+
                     {/* Dropdown para seleccionar la descripción del producto */}
                     <div className="relative z-0 w-full mb-5 group">
                         <select
@@ -207,6 +231,28 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                             Homologación
                         </label>
                     </div>
+
+                    {/* Dropdown para seleccionar la unidad de medida */}
+                    <div className="relative z-0 w-full mb-5 group">
+                        <select
+                            className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                            onChange={handleUnidadMedidaChange}
+                            value={selectedUnidadMedida}
+                            required
+                        >
+                            <option value="">Selecciona una unidad de medida</option>
+                            {unidadMedidaOptions.map((option) => (
+                                <option key={option.codigoClasificador} value={option.codigoClasificador}>
+                                    {option.descripcion}
+                                </option>
+                            ))}
+                        </select>
+                        <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                            Unidad de Medida
+                        </label>
+                    </div>
+
+                    {/* Campo para Nombre/Descripción del Producto */}
                     <div className="relative z-0 w-full mb-5 group">
                         <input
                             type="text"
@@ -222,23 +268,8 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                         </label>
                         {errors.nombreProducto && <span className="text-red-500 text-sm">{errors.nombreProducto}</span>}
                     </div>
-                    <div className="relative z-0 w-full mb-5 group">
-                        <input
-                            type="text"
-                            name="unidadMedida"
-                            value={unidadMedida}
-                            onChange={handleChange}
-                            className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                            placeholder=" "
-                            required
-                        />
-                        <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
-                            Unidad de Medida
-                        </label>
-                        {errors.unidadMedida && <span className="text-red-500 text-sm">{errors.unidadMedida}</span>}
-                    </div>
 
-                    {/* Precio Unitario */}
+                    {/* Campo para Precio Unitario */}
                     <div className="relative z-0 w-full mb-5 group">
                         <input
                             type="text"
@@ -252,7 +283,6 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                         <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
                             Precio Unitario
                         </label>
-                        {errors.precioUnitario && <span className="text-red-500 text-sm">{errors.precioUnitario}</span>}
                     </div>
                 </form>
 

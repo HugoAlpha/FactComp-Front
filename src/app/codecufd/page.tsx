@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Sidebar from '@/components/commons/sidebar';
 import Header from '@/components/commons/header';
-import { FaEdit, FaTrashAlt, FaPlus, FaSearch } from 'react-icons/fa';
+import { FaPlus, FaSearch } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import { PATH_URL_BACKEND } from '@/utils/constants';
 
@@ -24,7 +24,13 @@ const CUFDList = () => {
         try {
             const response = await fetch(`${PATH_URL_BACKEND}/codigos/cufd/activo/1`);
             const data = await response.json();
-            setCUFDs(data);
+
+            // Filtrar y ordenar: activo primero, luego el resto por fecha de emisión de mayor a menor
+            const sortedData = data.sort((a: CUFD, b: CUFD) => new Date(b.fechaInicio).getTime() - new Date(a.fechaInicio).getTime());
+            const activeCUFD = sortedData.find((cufd: CUFD) => cufd.vigente === true);
+            const otherCUFDs = sortedData.filter((cufd: CUFD) => cufd.vigente !== true);
+            setCUFDs([activeCUFD, ...otherCUFDs]);  // Colocar el activo en primer lugar
+
         } catch (error) {
             console.error('Error fetching CUFDs:', error);
             Swal.fire('Error', 'Error al obtener los registros de CUFD', 'error');
@@ -102,9 +108,6 @@ const CUFDList = () => {
     };
 
     const getStatus = (fechaVigencia: string, vigente: boolean) => {
-        const currentDate = new Date();
-        const expirationDate = new Date(fechaVigencia);
-
         if (!vigente) {
             return (
                 <span className="px-2 py-1 rounded-full bg-red-100 text-red-600">
@@ -133,7 +136,7 @@ const CUFDList = () => {
 
                 <div className="flex-grow overflow-auto bg-gray-50">
                     <div className="p-6">
-                        <h2 className="text-xl font-bold mb-6 text-gray-700">Registros de CUFD</h2>     
+                        <h2 className="text-xl font-bold mb-6 text-gray-700">Registros de CUFD</h2>
                         <div className="flex justify-end items-center mb-4">
                             <button
                                 className="bg-sixthColor text-white py-2 px-4 rounded-lg hover:bg-thirdColor text-lg"
