@@ -32,11 +32,11 @@ interface ModalCreateProductProps {
 }
 
 const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose, onProductCreated, product }) => {
-    const [codigo, setCodigo] = useState(''); // Campo para que el usuario lo escriba
+    const [codigo, setCodigo] = useState('');
     const [nombreProducto, setNombreProducto] = useState('');
     const [unidadMedida, setUnidadMedida] = useState<string>('');
     const [precioUnitario, setPrecioUnitario] = useState('');
-    const [codigoProductoSin, setCodigoProductoSin] = useState(''); // Se sigue obteniendo del GET
+    const [codigoProductoSin, setCodigoProductoSin] = useState('');
     const [productOptions, setProductOptions] = useState<ProductOption[]>([]);
     const [unidadMedidaOptions, setUnidadMedidaOptions] = useState<UnidadMedidaOption[]>([]);
     const [selectedOption, setSelectedOption] = useState<ProductOption | null>(null);
@@ -50,77 +50,70 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
         codigoProductoSin: '',
     });
 
+    // Primer useEffect: carga productOptions y unidadMedidaOptions solo al abrir el modal
     useEffect(() => {
-        const fetchProductOptions = async () => {
-            try {
-                const response = await fetch(`${PATH_URL_BACKEND}/productos`);
-                if (response.ok) {
-                    const data: ProductOption[] = await response.json();
-                    setProductOptions(data);
-                } else {
-                    Swal.fire('Error', 'Error al obtener las opciones de productos', 'error');
-                }
-            } catch (error) {
-                Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
-            }
-        };
-
-        const fetchUnidadMedidaOptions = async () => {
-            try {
-                const response = await fetch(`${PATH_URL_BACKEND}/parametro/unidad-medida`);
-                if (response.ok) {
-                    const data: UnidadMedidaOption[] = await response.json();
-                    setUnidadMedidaOptions(data);
-                } else {
-                    Swal.fire('Error', 'Error al obtener las opciones de unidad de medida', 'error');
-                }
-            } catch (error) {
-                Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
-            }
-        };
-
         if (isOpen) {
+            const fetchProductOptions = async () => {
+                try {
+                    const response = await fetch(`${PATH_URL_BACKEND}/productos`);
+                    if (response.ok) {
+                        const data: ProductOption[] = await response.json();
+                        setProductOptions(data);
+                    } else {
+                        Swal.fire('Error', 'Error al obtener las opciones de productos', 'error');
+                    }
+                } catch (error) {
+                    Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
+                }
+            };
+
+            const fetchUnidadMedidaOptions = async () => {
+                try {
+                    const response = await fetch(`${PATH_URL_BACKEND}/parametro/unidad-medida`);
+                    if (response.ok) {
+                        const data: UnidadMedidaOption[] = await response.json();
+                        setUnidadMedidaOptions(data);
+                    } else {
+                        Swal.fire('Error', 'Error al obtener las opciones de unidad de medida', 'error');
+                    }
+                } catch (error) {
+                    Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
+                }
+            };
+
             fetchProductOptions();
             fetchUnidadMedidaOptions();
-
-            if (product) {
-                setCodigo(product.codigo);
-                setNombreProducto(product.descripcion);
-                setUnidadMedida(product.unidadMedida.toString());
-                setPrecioUnitario(product.precioUnitario.toString());
-                setCodigoProductoSin(product.codigoProductoSin.toString());
-                setSelectedUnidadMedida(product.unidadMedida.toString());
-            } else {
-                setCodigo('');
-                setNombreProducto('');
-                setUnidadMedida('');
-                setPrecioUnitario('');
-                setCodigoProductoSin('');
-            }
-            setErrors({
-                codigo: '',
-                nombreProducto: '',
-                unidadMedida: '',
-                precioUnitario: '',
-                codigoProductoSin: '',
-            });
         }
-    }, [isOpen, product]);
+    }, [isOpen]); // Solo ejecutamos cuando se abre el modal.
+
+    // Segundo useEffect: actualiza los campos solo si hay producto y las opciones ya están cargadas
+    useEffect(() => {
+        if (product && productOptions.length > 0) {
+            setCodigo(product.codigo);
+            setNombreProducto(product.descripcion);
+            setUnidadMedida(product.unidadMedida ? product.unidadMedida.toString() : '');
+            setPrecioUnitario(product.precioUnitario ? product.precioUnitario.toString() : '');
+            setCodigoProductoSin(product.codigoProductoSin ? product.codigoProductoSin.toString() : '');
+            setSelectedUnidadMedida(product.unidadMedida ? product.unidadMedida.toString() : '');
+
+            // Buscar y asignar la opción de homologación que corresponde al producto
+            const foundOption = productOptions.find(
+                (option) => option.codigoProducto === product.codigoProductoSin
+            );
+            if (foundOption) {
+                setSelectedOption(foundOption);  // Asignar la opción seleccionada correctamente
+            }
+        }
+    }, [product, productOptions]); // Solo se actualiza cuando el producto o las opciones cambian.
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
-        switch (name) {
-            case 'nombreProducto':
-                setNombreProducto(value);
-                break;
-            case 'precioUnitario':
-                setPrecioUnitario(value);
-                break;
-            case 'codigo': // Cambio para que el código sea ingresado manualmente
-                setCodigo(value);
-                break;
-            default:
-                break;
+        if (name === 'nombreProducto') {
+            setNombreProducto(value);
+        } else if (name === 'precioUnitario') {
+            setPrecioUnitario(value);
+        } else if (name === 'codigo') {
+            setCodigo(value);
         }
     };
 
@@ -130,7 +123,7 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
 
         if (selectedProduct) {
             setSelectedOption(selectedProduct);
-            setCodigoProductoSin(selectedProduct.codigoProducto.toString()); // Solo cambia el codigoProductoSin del GET
+            setCodigoProductoSin(selectedProduct.codigoProducto.toString());
         }
     };
 
@@ -147,11 +140,11 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
         }
 
         const productData = {
-            codigo, // Se envía el código ingresado por el usuario
+            codigo,
             descripcion: nombreProducto,
-            unidadMedida: selectedUnidadMedida, // Enviar el códigoClasificador de la unidad de medida seleccionada
+            unidadMedida: selectedUnidadMedida,
             precioUnitario: Number(precioUnitario),
-            codigoProductoSin: Number(selectedOption.codigoProducto), // Se sigue obteniendo del GET
+            codigoProductoSin: Number(selectedOption?.codigoProducto), // Usar la opción seleccionada
         };
 
         try {
@@ -196,7 +189,7 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                     {product ? 'Editar Producto' : 'Agregar Nuevo Producto'}
                 </div>
                 <form className="grid md:grid-cols-2 gap-6 mt-4" onSubmit={handleSubmitProduct}>
-                    {/* Campo para el código que el usuario puede escribir */}
+                    {/* Campo para el código */}
                     <div className="relative z-0 w-full mb-5 group">
                         <input
                             type="text"
@@ -212,7 +205,7 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                         </label>
                     </div>
 
-                    {/* Dropdown para seleccionar la descripción del producto */}
+                    {/* Dropdown para seleccionar la homologación */}
                     <div className="relative z-0 w-full mb-5 group">
                         <select
                             className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
@@ -266,7 +259,6 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                         <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
                             Nombre/Descripción del Producto
                         </label>
-                        {errors.nombreProducto && <span className="text-red-500 text-sm">{errors.nombreProducto}</span>}
                     </div>
 
                     {/* Campo para Precio Unitario */}

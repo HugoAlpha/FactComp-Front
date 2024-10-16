@@ -108,7 +108,7 @@ const ProductList = () => {
                         <div className="flex justify-end my-2">
                             <button
                                 className="bg-sixthColor text-white py-2 px-4 rounded-lg hover:bg-thirdColor text-lg"
-                                onClick={() => handleOpenModal()} // Abrir modal para crear producto
+                                onClick={() => handleOpenModal()}
                             >
                                 Agregar Producto <FaPlus className="inline-block ml-2" />
                             </button>
@@ -129,15 +129,15 @@ const ProductList = () => {
                                 </select>
                             </div>
                             <div className="relative flex items-center w-full max-w-md">
-                               <input
-                                type="text"
-                                placeholder="Buscar producto..."
-                                className="border border-gray-300 focus:border-firstColor focus:ring-firstColor focus:outline-none px-4 py-2 rounded-lg w-full shadow-sm text-sm placeholder-gray-400"
-                            />
-                            <FaSearch className="absolute right-4 text-gray-500 text-xl pointer-events-none" />
+                                <input
+                                    type="text"
+                                    placeholder="Buscar producto..."
+                                    className="border border-gray-300 focus:border-firstColor focus:ring-firstColor focus:outline-none px-4 py-2 rounded-lg w-full shadow-sm text-sm placeholder-gray-400"
+                                />
+                                <FaSearch className="absolute right-4 text-gray-500 text-xl pointer-events-none" />
                             </div>
                         </div>
-                        
+
 
                         <div className="overflow-x-auto shadow-lg rounded-lg border border-gray-200">
                             <table className="table-auto w-full bg-white">

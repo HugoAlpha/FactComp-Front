@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { FaUser, FaCreditCard, FaCartPlus } from 'react-icons/fa';
+import { FaUser, FaCreditCard, FaCartPlus, FaEdit } from 'react-icons/fa';
 import { IoReturnDownBack } from "react-icons/io5";
 import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
@@ -12,6 +12,7 @@ import Link from 'next/link';
 import { PATH_URL_BACKEND } from '@/utils/constants';
 import { GrDocumentConfig } from "react-icons/gr";
 import CreateEditClientModal from '@/components/layouts/modalCreateEditClient';
+import ModalCreateProduct from '@/components/layouts/modalCreateProduct';
 
 const Sales = () => {
     const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
@@ -29,6 +30,8 @@ const Sales = () => {
     const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
     const [facturaData, setFacturaData] = useState<FacturaData | null>(null);
     const [isClientModalOpen, setIsClientModalOpen] = useState(false);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [productToEdit, setProductToEdit] = useState<Product | null>(null);
     const [currentCustomer, setCurrentCustomer] = useState<Customer>({
         id: 0,
         nombreRazonSocial: '',
@@ -50,6 +53,9 @@ const Sales = () => {
         totalPrice?: number;
         descripcion: string;
         precioUnitario: number;
+        codigoProductoSin: number;
+        codigo: string;
+        unidadMedida: number;
     }
 
 
@@ -92,12 +98,15 @@ const Sales = () => {
                         id: item.id,
                         name: item.descripcion,
                         price: item.precioUnitario,
-                        discount: item.discount,
+                        discount: item.discount || 0,
                         img: '/images/apple-watch.png',
                         descripcion: item.descripcion,
                         precioUnitario: item.precioUnitario,
+                        codigoProductoSin: item.codigoProductoSin,
                         quantity: 1,
-                        totalPrice: item.precioUnitario
+                        totalPrice: item.precioUnitario,
+                        codigo: item.codigo,
+                        unidadMedida: item.unidadMedida,
                     }));
 
                     setProducts(formattedProducts);
@@ -111,6 +120,7 @@ const Sales = () => {
 
         fetchProducts();
     }, []);
+
 
     const updateDiscount = (id: number, value: string) => {
         console.log(`Actualizando descuento del producto con id: ${id}, nuevo valor: ${value}`);
@@ -132,11 +142,27 @@ const Sales = () => {
         calculateTotal(updatedProducts);
     };
 
+    const updateProductInList = (updatedProduct: Product) => {
+        const updatedProducts = products.map((item) =>
+            item.id === updatedProduct.id ? updatedProduct : item
+        );
+        setProducts(updatedProducts);
+        const updatedSelectedProducts = selectedProducts.map((item) =>
+            item.id === updatedProduct.id ? { ...item, price: updatedProduct.price, totalPrice: item.quantity! * updatedProduct.price } : item
+        );
+        setSelectedProducts(updatedSelectedProducts);
+        calculateTotal(updatedSelectedProducts);
+    };
 
     const calculateTotal = (updatedProducts: Product[]) => {
         const subtotal = updatedProducts.reduce((acc, curr) => acc + (curr.totalPrice ?? 0), 0);
         const totalWithGlobalDiscount = subtotal - globalDiscountApplied;
         setTotal(totalWithGlobalDiscount > 0 ? totalWithGlobalDiscount : 0);
+    };
+
+    const handleEditProduct = (product: Product) => {
+        setProductToEdit(product);
+        setIsEditModalOpen(true);
     };
 
     const applyGlobalDiscount = () => {
@@ -559,7 +585,7 @@ const Sales = () => {
                                     <div
                                         key={product.id}
                                         onClick={() => addProduct(product)}
-                                        className="cursor-pointer bg-white border rounded-lg p-2 shadow hover:bg-gray-100"
+                                        className="relative cursor-pointer bg-white border rounded-lg p-2 shadow hover:bg-gray-100"
                                     >
                                         <img
                                             src={product.img}
@@ -568,6 +594,12 @@ const Sales = () => {
                                         />
                                         <h3 className="text-xs font-semibold truncate">{product.name}</h3>
                                         <p className="text-sm font-bold">Bs {product.price}</p>
+                                        <button
+                                            className="absolute top-2 right-2 text-blue-500 hover:text-blue-700 z-10"
+                                            onClick={(e) => { e.stopPropagation(); handleEditProduct(product); }}
+                                        >
+                                            <FaEdit />
+                                        </button>
                                     </div>
                                 ))}
                             </div>
@@ -584,11 +616,23 @@ const Sales = () => {
                                             <h3 className="text-sm font-semibold">{product.name}</h3>
                                             <p className="text-sm font-bold">Bs {product.price}</p>
                                         </div>
+                                        <button
+                                            className="ml-4 text-blue-500 hover:text-blue-700 z-10"
+                                            onClick={(e) => { e.stopPropagation(); handleEditProduct(product); }}
+                                        >
+                                            <FaEdit />
+                                        </button>
                                     </div>
                                 ))}
                             </div>
                         )}
                     </div>
+                    <ModalCreateProduct
+                        isOpen={isEditModalOpen}
+                        onClose={() => setIsEditModalOpen(false)}
+                        onProductCreated={updateProductInList}
+                        product={productToEdit}
+                    />
 
                     <ModalVerifySale
                         isOpen={isModalOpen}
