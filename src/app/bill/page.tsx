@@ -27,28 +27,31 @@ const BillList = () => {
   const [rowsPerPage, setRowsPerPage] = useState<number>(10);
   const [estadoFilter, setEstadoFilter] = useState('TODAS');
   const [motivosAnulacion, setMotivosAnulacion] = useState([]);
+  const [fechaDesde, setFechaDesde] = useState<string | null>(null);
+  const [fechaHasta, setFechaHasta] = useState<string | null>(null);
 
   const fetchBills = async (estado?: string) => {
     try {
-      const estadoParam = estado === 'TODAS' ? '' : (estado === 'VALIDA' ? '1' : '0');
+      const estadoParam = estadoFilter === 'TODAS' ? '' : (estadoFilter === 'VALIDA' ? '1' : '0');
       const endpoint = estadoParam ? `${PATH_URL_BACKEND}/factura/estado?estado=${estadoParam}` : `${PATH_URL_BACKEND}/factura`;
+
       const response = await fetch(endpoint);
+
       if (response.ok) {
         const data = await response.json();
-        const formattedData = data
-          .filter((bill: any) => estado === 'TODAS' || bill.estado !== null)
-          .map((bill: any) => ({
-            documentNumber: bill.numeroDocumento,
-            client: bill.nombreRazonSocial,
-            date: new Date(bill.fechaEmision),
-            total: bill.montoTotal.toFixed(2),
-            estado: bill.estado || '-',
-            codigoSucursal: bill.codigoSucursal,
-            codigoPuntoVenta: bill.codigoPuntoVenta,
-            cuf: bill.cuf,
-            puntoVenta: bill.puntoVenta,
-            id: bill.id
-          }));
+
+        const formattedData = data.map((bill: any) => ({
+          documentNumber: bill.numeroDocumento,
+          client: bill.nombreRazonSocial,
+          date: new Date(bill.fechaEmision),
+          total: bill.montoTotal.toFixed(2),
+          estado: bill.estado || '-',
+          codigoSucursal: bill.codigoSucursal,
+          codigoPuntoVenta: bill.codigoPuntoVenta,
+          cuf: bill.cuf,
+          puntoVenta: bill.puntoVenta,
+          id: bill.id,
+        }));
 
         const sortedData = formattedData.sort((a, b) => b.date - a.date);
         setBills(sortedData);
@@ -60,8 +63,9 @@ const BillList = () => {
     }
   };
 
+
   useEffect(() => {
-    fetchBills(estadoFilter);
+    fetchBills();
   }, [estadoFilter]);
 
   useEffect(() => {
@@ -101,7 +105,7 @@ const BillList = () => {
       console.error('Error fetching motivos de anulación:', error);
     }
   };
-  
+
   useEffect(() => {
     fetchMotivosAnulacion();
   }, []);
@@ -127,11 +131,25 @@ const BillList = () => {
   };
 
   const filteredBills = useMemo(() => {
-    return bills.filter((bill) =>
-      bill.documentNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      bill.client.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-  }, [bills, searchQuery]);
+    return bills.filter((bill) => {
+      const matchesSearch =
+        bill.documentNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        bill.client.toLowerCase().includes(searchQuery.toLowerCase());
+  
+      const matchesEstado =
+        estadoFilter === 'TODAS' ||
+        (estadoFilter === 'VALIDA' && bill.estado.toUpperCase() === 'VALIDA') ||
+        (estadoFilter === 'ANULADO' && bill.estado.toUpperCase() === 'ANULADO');
+  
+      const matchesFecha =
+        (!fechaDesde || new Date(bill.date) >= new Date(fechaDesde)) &&
+        (!fechaHasta || new Date(bill.date) <= new Date(fechaHasta));
+  
+      return matchesSearch && matchesEstado && matchesFecha;
+    });
+  }, [bills, searchQuery, estadoFilter, fechaDesde, fechaHasta]);
+
+
 
   const totalPages = Math.ceil(filteredBills.length / rowsPerPage);
 
@@ -172,84 +190,85 @@ const BillList = () => {
     let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
 
     if (endPage - startPage + 1 < maxVisiblePages) {
-        startPage = Math.max(1, endPage - maxVisiblePages + 1);
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
 
     for (let i = startPage; i <= endPage; i++) {
-        pageNumbers.push(i);
+      pageNumbers.push(i);
     }
 
     return pageNumbers;
-};
+  };
 
-const handleAnularFactura = async (bill: any) => {
-  console.log('Factura seleccionada para anulación:', bill);
+  const handleAnularFactura = async (bill: any) => {
+    console.log('Factura seleccionada para anulación:', bill);
 
-  if (!bill.cuf) {
-    Swal.fire('Error', 'No se encontró el CUF de la factura', 'error');
-    return;
-  }
-
-  const { value: motivo } = await Swal.fire({
-    title: 'Selecciona el motivo de anulación',
-    input: 'select',
-    inputOptions: motivosAnulacion.reduce((options: any, motivo: any) => {
-      options[motivo.codigoClasificador] = motivo.descripcion;
-      return options;
-    }, {}),
-    inputPlaceholder: 'Selecciona un motivo',
-    showCancelButton: true,
-    
-    inputValidator: (value) => {
-      return new Promise((resolve) => {
-        if (value) {
-          resolve(null);
-        } else {
-          resolve('Debes seleccionar un motivo de anulación');
-        }
-      });
+    if (!bill.cuf) {
+      Swal.fire('Error', 'No se encontró el CUF de la factura', 'error');
+      return;
     }
-  });
 
-  if (motivo) {
-    try {
-      const body = {
-        cuf: bill.cuf,
-        anulacionMotivo: motivo,
-        idPuntoVenta: bill.puntoVenta.id
-      };
+    const { value: motivo } = await Swal.fire({
+      title: 'Selecciona el motivo de anulación',
+      input: 'select',
+      inputOptions: motivosAnulacion.reduce((options: any, motivo: any) => {
+        options[motivo.codigoClasificador] = motivo.descripcion;
+        return options;
+      }, {}),
+      inputPlaceholder: 'Selecciona un motivo',
+      showCancelButton: true,
 
-      console.log('Body que se enviará al POST:', body);
-
-      const response = await fetch(`${PATH_URL_BACKEND}/factura/anular`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
-      });
-
-      if (response.ok) {
-        Swal.fire(
-          'Anulada!',
-          'La factura ha sido anulada correctamente.',
-          'success'
-        );
-
-        fetchBills(estadoFilter);
-      } else {
-        Swal.fire(
-          'Error!',
-          'No se pudo anular la factura.',
-          'error'
-        );
+      inputValidator: (value) => {
+        return new Promise((resolve) => {
+          if (value) {
+            resolve(null);
+          } else {
+            resolve('Debes seleccionar un motivo de anulación');
+          }
+        });
       }
-    } catch (error) {
-      console.error('Error al anular factura:', error);
-      Swal.fire('Error', 'No se pudo conectar con el servidor.', 'error');
+    });
+
+    if (motivo) {
+      try {
+        const body = {
+          cuf: bill.cuf,
+          anulacionMotivo: motivo,
+          idPuntoVenta: bill.puntoVenta.id
+        };
+
+        console.log('Body que se enviará al POST:', body);
+
+        const response = await fetch(`${PATH_URL_BACKEND}/factura/anular`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(body),
+        });
+
+        if (response.ok) {
+          Swal.fire(
+            'Anulada!',
+            'La factura ha sido anulada correctamente.',
+            'success'
+          );
+
+          fetchBills(estadoFilter);
+        } else {
+          Swal.fire(
+            'Error!',
+            'No se pudo anular la factura.',
+            'error'
+          );
+        }
+      } catch (error) {
+        console.error('Error al anular factura:', error);
+        Swal.fire('Error', 'No se pudo conectar con el servidor.', 'error');
+      }
     }
-  }
-};
+  };
+
 
 
   return (
@@ -260,7 +279,53 @@ const handleAnularFactura = async (bill: any) => {
         <div className="flex-grow overflow-auto bg-gray-50 p-6">
           <h1 className="text-2xl font-bold mb-6 text-gray-700">Lista de Facturas</h1>
           <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-4 w-full">
+              <input
+                type="text"
+                placeholder="Buscar por número de factura o cliente"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="border border-gray-300 px-2 py-2 rounded-lg w-1/2"
+              />
+
+              <select
+                value={estadoFilter}
+                onChange={(e) => setEstadoFilter(e.target.value)}
+                className="border border-gray-300 rounded-lg py-2 px-4"
+              >
+                <option value="TODAS">Todas</option>
+                <option value="VALIDA">Válidas</option>
+                <option value="ANULADO">Anuladas</option>
+              </select>
+
+              <div className="flex items-center space-x-4">
+                <div className="flex flex-col">
+                  <label htmlFor="fechaDesde" className="text-sm font-medium text-gray-700">Fecha desde:</label>
+                  <input
+                    id="fechaDesde"
+                    type="date"
+                    value={fechaDesde || ''}
+                    onChange={(e) => setFechaDesde(e.target.value)}
+                    className="border border-gray-300 px-4 py-2 rounded-lg"
+                  />
+                </div>
+
+                <div className="flex flex-col">
+                  <label htmlFor="fechaHasta" className="text-sm font-medium text-gray-700">Fecha hasta:</label>
+                  <input
+                    id="fechaHasta"
+                    type="date"
+                    value={fechaHasta || ''}
+                    onChange={(e) => setFechaHasta(e.target.value)}
+                    className="border border-gray-300 px-4 py-2 rounded-lg"
+                  />
+                </div>
+
+              </div>
+            </div>
+
           </div>
+
 
           <div className="flex space-x-6">
             <div className={`${selectedBill ? 'w-2/3' : 'w-full'} transition-all duration-300`}>
