@@ -64,7 +64,7 @@ const CodeReceipt = () => {
                     const uniqueSucursales = Array.from(
                         new Set(formattedData.map((code: Code) => code.puntoVenta.sucursal.nombre))
                     );
-                    setSucursales(uniqueSucursales);             
+                    setSucursales(uniqueSucursales);
                 } else {
                     console.error('Error fetching codes');
                 }
@@ -114,14 +114,6 @@ const CodeReceipt = () => {
         currentPage * rowsPerPage
     );
 
-    const handleEditCode = (id: number) => {
-        console.log(`Editar código con id: ${id}`);
-    };
-
-    const handleDeleteCode = (id: number) => {
-        console.log(`Eliminar código con id: ${id}`);
-    };
-
     const getPageNumbers = () => {
         const pageNumbers = [];
         const maxVisiblePages = 4;
@@ -152,7 +144,7 @@ const CodeReceipt = () => {
         if (!vigente) {
             return (
                 <span className="px-2 py-1 rounded-full bg-red-100 text-red-600">
-                    Vencido 
+                    Vencido
                 </span>
             );
         } else {
@@ -172,7 +164,7 @@ const CodeReceipt = () => {
                 <div className="flex-grow overflow-auto bg-gray-50">
                     <div className="p-6">
                         <h1 className="text-2xl font-bold mb-6 text-gray-700">CUIS</h1>
-                        
+
                         <div>
                             <label htmlFor="itemsPerPage" className="mr-2 text-sm">Elementos por página:</label>
                             <select
@@ -185,7 +177,7 @@ const CodeReceipt = () => {
                                 <option value={50}>50</option>
                             </select>
                         </div>
-                        
+
                         <div className="mb-4 flex space-x-4 text-black items-center">
                             <label htmlFor="itemsPerPage" className="mr-2 text-sm">Filtro por estado de codigo:</label>
                             <select
@@ -215,12 +207,12 @@ const CodeReceipt = () => {
                             )}
 
                             <label htmlFor="itemsPerPage" className="mr-2 text-sm">Filtro por Sucursales:</label>
-                            
+
                             <select
                                 value={selectedSucursal}
                                 onChange={(e) => setSelectedSucursal(e.target.value)}
                                 className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            > 
+                            >
                                 <option value="Todos">Todas las sucursales</option>
                                 {sucursales.map((sucursal, index) => (
                                     <option key={index} value={sucursal}>
@@ -245,7 +237,7 @@ const CodeReceipt = () => {
                             <table className="table-auto w-full bg-white">
                                 <thead>
                                     <tr className="bg-fourthColor text-left text-gray-700">
-                                        
+
                                         <th className="px-6 py-4 font-bold">Departamento</th>
                                         <th className="px-6 py-4 font-bold">Municipio</th>
                                         <th className="px-6 py-4 font-bold">Punto de venta</th>

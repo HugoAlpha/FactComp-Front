@@ -243,7 +243,7 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
             />
             {Number(paymentAmount) > total && (
               <p className="text-green-500 mt-2">
-                Cambio: ${(Number(paymentAmount) - total).toFixed(2)}
+                Cambio: Bs.{(Number(paymentAmount) - total).toFixed(2)}
               </p>
             )}
           </div>
@@ -285,7 +285,7 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
         </div>
 
         <div className="mb-4">
-          <h3 className="text-lg font-bold">Total: ${total.toFixed(2)}</h3>
+          <h3 className="text-lg font-bold">Total: Bs.{total.toFixed(2)}</h3>
         </div>
 
         <div className="flex justify-end space-x-4">

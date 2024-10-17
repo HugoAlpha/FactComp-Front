@@ -17,7 +17,7 @@ interface Branch {
     razonSocial: string;
     empresaId: number;
     codigo: string;
-    
+
 }
 
 const Branches: React.FC = () => {
@@ -68,9 +68,63 @@ const Branches: React.FC = () => {
         }
     };
 
+    const checkServerCommunication = async () => {
+        try {
+            const response = await fetch(`${PATH_URL_BACKEND}/codigos/cuis/activo/1`);
+            if (!response.ok) {
+                if (response.status === 500) {
+                    Swal.fire({
+                        title: 'La comunicación con impuestos falló',
+                        text: '¿Desea entrar en modo de contingencia?',
+                        icon: 'error',
+                        showCancelButton: true,
+                        confirmButtonText: 'Aceptar',
+                        cancelButtonText: 'Cancelar',
+                        reverseButtons: true,
+                        customClass: {
+                            confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md',
+                            cancelButton: 'bg-blue-500 text-white px-4 py-2 rounded-md',
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            console.log('Modo de contingencia aceptado.');
+                        } else {
+                            console.log('Modo de contingencia cancelado.');
+                        }
+                    });
+                } else {
+                    console.error("Error de comunicación con el servidor:", response.statusText);
+                }
+            } else {
+                fetchBranches();
+            }
+        } catch (error) {
+            console.error("Error al conectar con el servidor:", error);
+            Swal.fire({
+                title: 'La comunicación con impuestos falló',
+                text: '¿Desea entrar en modo de contingencia?',
+                icon: 'error',
+                showCancelButton: true,
+                confirmButtonText: 'Aceptar',
+                cancelButtonText: 'Cancelar',
+                reverseButtons: true,
+                customClass: {
+                    confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md',
+                    cancelButton: 'bg-blue-500 text-white px-4 py-2 rounded-md',
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    console.log('Modo de contingencia aceptado.');
+                } else {
+                    console.log('Modo de contingencia cancelado.');
+                }
+            });
+        }
+    };
 
     useEffect(() => {
         fetchBranches();
+        checkServerCommunication();
     }, []);
 
     useEffect(() => {
@@ -200,7 +254,7 @@ const Branches: React.FC = () => {
                             </button>
                         </div>
                         <div className="mb-4">
-                            
+
                         </div>
                         <div className="flex justify-between mb-4">
                             <div>
@@ -233,20 +287,20 @@ const Branches: React.FC = () => {
                                 </div>
 
                                 <div className="relative flex items-center w-full max-w-md">
-                               
-                                <input
-                                    type="text"
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    placeholder="Buscar por nombre, ciudad, departamento o razón social"
-                                    className="border border-gray-300 focus:border-firstColor focus:ring-firstColor focus:outline-none px-4 py-2 rounded-lg w-full shadow-sm text-sm placeholder-gray-400 ml-2"
-                                    style={{width:'600px'}}
-                                />
-                            <FaSearch className="absolute right-4 text-gray-500 text-xl pointer-events-none" />
-                            </div>
+
+                                    <input
+                                        type="text"
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        placeholder="Buscar por nombre, ciudad, departamento o razón social"
+                                        className="border border-gray-300 focus:border-firstColor focus:ring-firstColor focus:outline-none px-4 py-2 rounded-lg w-full shadow-sm text-sm placeholder-gray-400 ml-2"
+                                        style={{ width: '600px' }}
+                                    />
+                                    <FaSearch className="absolute right-4 text-gray-500 text-xl pointer-events-none" />
+                                </div>
                             </div>
 
-                        
+
                         </div>
 
                         <div className="overflow-x-auto shadow-lg rounded-lg border border-gray-200">
