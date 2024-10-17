@@ -2,8 +2,10 @@
 import { FaTrashAlt, FaEdit, FaSearch } from 'react-icons/fa';
 import Sidebar from '@/components/commons/sidebar';
 import Header from '@/components/commons/header';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ModalCreateUser from "../../components/layouts/modalCreateUser";
+import Swal from 'sweetalert2';
+import { PATH_URL_BACKEND } from '@/utils/constants';
 
 const UserList = () => {
     const [users, setUsers] = useState([
@@ -15,27 +17,76 @@ const UserList = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
-
-    // Filtrar usuarios
     const filteredUsers = users.filter(user =>
         user.fullname.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    const checkServerCommunication = async () => {
+        try {
+            const response = await fetch(`${PATH_URL_BACKEND}/codigos/cuis/activo/1`);
+            if (!response.ok) {
+                if (response.status === 500) {
+                    Swal.fire({
+                        title: 'La comunicación con impuestos falló',
+                        text: '¿Desea entrar en modo de contingencia?',
+                        icon: 'error',
+                        showCancelButton: true,
+                        confirmButtonText: 'Aceptar',
+                        cancelButtonText: 'Cancelar',
+                        reverseButtons: true,
+                        customClass: {
+                            confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md',
+                            cancelButton: 'bg-blue-500 text-white px-4 py-2 rounded-md',
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            console.log('Modo de contingencia aceptado.');
+                        } else {
+                            console.log('Modo de contingencia cancelado.');
+                        }
+                    });
+                } else {
+                    console.error("Error de comunicación con el servidor:", response.statusText);
+                }
+            }
+        } catch (error) {
+            console.error("Error al conectar con el servidor:", error);
+            Swal.fire({
+                title: 'La comunicación con impuestos falló',
+                text: '¿Desea entrar en modo de contingencia?',
+                icon: 'error',
+                showCancelButton: true,
+                confirmButtonText: 'Aceptar',
+                cancelButtonText: 'Cancelar',
+                reverseButtons: true,
+                customClass: {
+                    confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md',
+                    cancelButton: 'bg-blue-500 text-white px-4 py-2 rounded-md',
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    console.log('Modo de contingencia aceptado.');
+                } else {
+                    console.log('Modo de contingencia cancelado.');
+                }
+            });
+        }
+    };
+
+    useEffect(() => {
+        checkServerCommunication();
+    }, []);
 
     const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setRowsPerPage(parseInt(e.target.value));
         setCurrentPage(1);
     };
 
-    // Calcular número total de páginas
     const totalPages = Math.ceil(filteredUsers.length / rowsPerPage);
-
-    // Obtener los usuarios paginados
     const paginatedUsers = filteredUsers.slice(
         (currentPage - 1) * rowsPerPage,
         currentPage * rowsPerPage
     );
-
-    // Función para obtener los números de página visibles
     const getPageNumbers = () => {
         const pageNumbers = [];
         const maxVisiblePages = 4;
@@ -71,32 +122,32 @@ const UserList = () => {
                         {/* Barra de búsqueda */}
                         <div className="flex justify-between mb-4">
 
-                        <div>
+                            <div>
                                 <label htmlFor="itemsPerPage" className="mr-2 text-sm">Elementos por página:</label>
                                 <select
-                                value={rowsPerPage}
-                                onChange={handleRowsPerPageChange}
-                                className="border p-2 rounded-lg w-20"
-                            >
-                                <option value={10}>10</option>
-                                <option value={20}>20</option>
-                                <option value={30}>30</option>
-                                <option value={40}>40</option>
-                                <option value={50}>50</option>
-                            </select>
+                                    value={rowsPerPage}
+                                    onChange={handleRowsPerPageChange}
+                                    className="border p-2 rounded-lg w-20"
+                                >
+                                    <option value={10}>10</option>
+                                    <option value={20}>20</option>
+                                    <option value={30}>30</option>
+                                    <option value={40}>40</option>
+                                    <option value={50}>50</option>
+                                </select>
 
                             </div>
 
                             <div className="relative flex items-center w-full max-w-md">
                                 <input
-                                type="text"
-                                placeholder="Buscar usuario por nombre completo..."
-                                className="border border-gray-300 focus:border-firstColor focus:ring-firstColor focus:outline-none px-4 py-2 rounded-lg w-full shadow-sm text-sm placeholder-gray-400"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
-                            
-                            <FaSearch className="absolute right-4 text-gray-500 text-xl pointer-events-none" />
+                                    type="text"
+                                    placeholder="Buscar usuario por nombre completo..."
+                                    className="border border-gray-300 focus:border-firstColor focus:ring-firstColor focus:outline-none px-4 py-2 rounded-lg w-full shadow-sm text-sm placeholder-gray-400"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+
+                                <FaSearch className="absolute right-4 text-gray-500 text-xl pointer-events-none" />
                             </div>
                             <button
                                 className="bg-sixthColor text-white py-2 px-4 rounded-lg hover:bg-fourthColor text-lg"
@@ -137,7 +188,7 @@ const UserList = () => {
                                                     <button className="bg-red-200 hover:bg-red-300 p-2 rounded-l-lg flex items-center justify-center border border-red-300">
                                                         <FaTrashAlt className="text-black" />
                                                     </button>
-                                                    
+
                                                     {/* Botón de Editar */}
                                                     <button className="bg-blue-200 hover:bg-blue-300 p-2 rounded-r-lg flex items-center justify-center border border-blue-300">
                                                         <FaEdit className="text-black" />

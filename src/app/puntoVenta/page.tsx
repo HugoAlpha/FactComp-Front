@@ -4,6 +4,8 @@ import Header from "@/components/commons/header";
 import Sidebar from "@/components/commons/sidebar";
 import { FaEdit, FaSearch, FaTrashAlt } from 'react-icons/fa';
 import ModalCreatePos from '@/components/layouts/modalCreatePos';
+import Swal from 'sweetalert2';
+import { PATH_URL_BACKEND } from '@/utils/constants';
 
 interface PuntoVenta {
     id: number;
@@ -28,10 +30,65 @@ const PuntoVenta: React.FC = () => {
         const data: PuntoVenta[] = [
             { id: 1, descripcion: 'Punto 1', sucursal: 'Sucursal A', nombrePuntoVenta: 'PV 1', cuis: '123', tipoPuntoVenta: 'Físico', estado: 'Activo' },
             { id: 2, descripcion: 'Punto 2', sucursal: 'Sucursal B', nombrePuntoVenta: 'PV 2', cuis: '124', tipoPuntoVenta: 'Virtual', estado: 'Inactivo' },
-            // Agrega más puntos de venta si es necesario
         ];
         setCustomers(data);
         setFilteredCustomers(data);
+    }, []);
+
+    const checkServerCommunication = async () => {
+        try {
+            const response = await fetch(`${PATH_URL_BACKEND}/codigos/cuis/activo/1`);
+            if (!response.ok) {
+                if (response.status === 500) {
+                    Swal.fire({
+                        title: 'La comunicación con impuestos falló',
+                        text: '¿Desea entrar en modo de contingencia?',
+                        icon: 'error',
+                        showCancelButton: true,
+                        confirmButtonText: 'Aceptar',
+                        cancelButtonText: 'Cancelar',
+                        reverseButtons: true,
+                        customClass: {
+                            confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md',
+                            cancelButton: 'bg-blue-500 text-white px-4 py-2 rounded-md',
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            console.log('Modo de contingencia aceptado.');
+                        } else {
+                            console.log('Modo de contingencia cancelado.');
+                        }
+                    });
+                } else {
+                    console.error("Error de comunicación con el servidor:", response.statusText);
+                }
+            }
+        } catch (error) {
+            console.error("Error al conectar con el servidor:", error);
+            Swal.fire({
+                title: 'La comunicación con impuestos falló',
+                text: '¿Desea entrar en modo de contingencia?',
+                icon: 'error',
+                showCancelButton: true,
+                confirmButtonText: 'Aceptar',
+                cancelButtonText: 'Cancelar',
+                reverseButtons: true,
+                customClass: {
+                    confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md',
+                    cancelButton: 'bg-blue-500 text-white px-4 py-2 rounded-md',
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    console.log('Modo de contingencia aceptado.');
+                } else {
+                    console.log('Modo de contingencia cancelado.');
+                }
+            });
+        }
+    };
+
+    useEffect(() => {
+        checkServerCommunication();
     }, []);
 
     useEffect(() => {
@@ -119,7 +176,7 @@ const PuntoVenta: React.FC = () => {
                             >
                                 Agregar Punto de Venta
                             </button>
-                            
+
                         </div>
 
                         <div className="flex items-center mb-4 justify-between">
@@ -156,10 +213,10 @@ const PuntoVenta: React.FC = () => {
                                         onChange={(e) => setSearchTerm(e.target.value)}
                                         placeholder="Buscar por descripción, nombre o CUIS..."
                                         className="border border-gray-300 focus:border-firstColor focus:ring-firstColor focus:outline-none px-4 py-2 rounded-lg w-full shadow-sm text-sm placeholder-gray-400 ml-3"
-                                        style={{width:"400px"}}
+                                        style={{ width: "400px" }}
                                     />
                                     <FaSearch className="absolute right-3 text-gray-500 text-xl" />
-                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -196,15 +253,15 @@ const PuntoVenta: React.FC = () => {
                                             <td className="px-6 py-4">
                                                 <div className="flex">
                                                     {/* Botón de Borrar */}
-                                                    <button 
-                                                        className="bg-red-200 hover:bg-red-300 p-2 rounded-l-lg flex items-center justify-center border border-red-300" 
+                                                    <button
+                                                        className="bg-red-200 hover:bg-red-300 p-2 rounded-l-lg flex items-center justify-center border border-red-300"
                                                         onClick={() => handleDeletePuntoVenta(customer.id)}>
                                                         <FaTrashAlt className="text-black" />
                                                     </button>
-                                                    
+
                                                     {/* Botón de Editar */}
-                                                    <button 
-                                                        className="bg-blue-200 hover:bg-blue-300 p-2 rounded-r-lg flex items-center justify-center border border-blue-300" 
+                                                    <button
+                                                        className="bg-blue-200 hover:bg-blue-300 p-2 rounded-r-lg flex items-center justify-center border border-blue-300"
                                                         onClick={() => handleEditPuntoVenta(customer.id)}>
                                                         <FaEdit className="text-black" />
                                                     </button>

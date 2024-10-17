@@ -38,6 +38,62 @@ const Legends: React.FC = () => {
         fetchLegends();
     }, []);
 
+    const checkServerCommunication = async () => {
+        try {
+            const response = await fetch(`${PATH_URL_BACKEND}/codigos/cuis/activo/1`);
+            if (!response.ok) {
+                if (response.status === 500) {
+                    Swal.fire({
+                        title: 'La comunicación con impuestos falló',
+                        text: '¿Desea entrar en modo de contingencia?',
+                        icon: 'error',
+                        showCancelButton: true,
+                        confirmButtonText: 'Aceptar',
+                        cancelButtonText: 'Cancelar',
+                        reverseButtons: true,
+                        customClass: {
+                            confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md',
+                            cancelButton: 'bg-blue-500 text-white px-4 py-2 rounded-md',
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            console.log('Modo de contingencia aceptado.');
+                        } else {
+                            console.log('Modo de contingencia cancelado.');
+                        }
+                    });
+                } else {
+                    console.error("Error de comunicación con el servidor:", response.statusText);
+                }
+            }
+        } catch (error) {
+            console.error("Error al conectar con el servidor:", error);
+            Swal.fire({
+                title: 'La comunicación con impuestos falló',
+                text: '¿Desea entrar en modo de contingencia?',
+                icon: 'error',
+                showCancelButton: true,
+                confirmButtonText: 'Aceptar',
+                cancelButtonText: 'Cancelar',
+                reverseButtons: true,
+                customClass: {
+                    confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md',
+                    cancelButton: 'bg-blue-500 text-white px-4 py-2 rounded-md',
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    console.log('Modo de contingencia aceptado.');
+                } else {
+                    console.log('Modo de contingencia cancelado.');
+                }
+            });
+        }
+    };
+
+    useEffect(() => {
+        checkServerCommunication();
+    }, []);
+
     useEffect(() => {
         let filtered = legends;
 
@@ -57,31 +113,9 @@ const Legends: React.FC = () => {
         currentPage * rowsPerPage
     );
 
-    const handleEditLegend = (id: number) => {
-        console.log(`Editar leyenda con id: ${id}`);
-        Swal.fire("Función no implementada", "Edición de leyendas no disponible", "info");
-    };
-
     const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setRowsPerPage(parseInt(e.target.value));
         setCurrentPage(1);
-    };
-
-    const handleDeleteLegend = (id: number) => {
-        Swal.fire({
-            title: "¿Estás seguro?",
-            text: "No podrás revertir esto",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Sí, eliminarla",
-        }).then((result) => {
-            if (result.isConfirmed) {
-                console.log(`Eliminar leyenda con id: ${id}`);
-                Swal.fire("Eliminada!", "La leyenda ha sido eliminada.", "success");
-            }
-        });
     };
 
     const getPageNumbers = () => {
@@ -116,29 +150,29 @@ const Legends: React.FC = () => {
                             </h2>
                         </div>
                         <div className="flex justify-between mb-4">
-                        <div>
+                            <div>
                                 <label htmlFor="itemsPerPage" className="mr-2 text-sm">Elementos por página:</label>
                                 <select
-                                value={rowsPerPage}
-                                onChange={handleRowsPerPageChange}
-                                className="border p-2 rounded-lg w-20"
-                            >
-                                <option value={10}>10</option>
-                                <option value={20}>20</option>
-                                
-                                <option value={50}>50</option>
-                            </select>
+                                    value={rowsPerPage}
+                                    onChange={handleRowsPerPageChange}
+                                    className="border p-2 rounded-lg w-20"
+                                >
+                                    <option value={10}>10</option>
+                                    <option value={20}>20</option>
+
+                                    <option value={50}>50</option>
+                                </select>
                             </div>
                             <div className="relative flex items-center w-full max-w-md">
-                                
-                            <input
-                                type="text"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                placeholder="Buscar Registro"
-                                className="border p-2 w-full rounded-lg"
-                            />
-                            <FaSearch className="absolute right-4 text-gray-500 text-xl pointer-events-none" />
+
+                                <input
+                                    type="text"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    placeholder="Buscar Registro"
+                                    className="border p-2 w-full rounded-lg"
+                                />
+                                <FaSearch className="absolute right-4 text-gray-500 text-xl pointer-events-none" />
                             </div>
                         </div>
 

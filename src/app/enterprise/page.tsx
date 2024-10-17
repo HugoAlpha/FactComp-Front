@@ -38,6 +38,64 @@ const EnterpriseList = () => {
         }
     };
 
+    const checkServerCommunication = async () => {
+        try {
+            const response = await fetch(`${PATH_URL_BACKEND}/codigos/cuis/activo/1`);
+            if (!response.ok) {
+                if (response.status === 500) {
+                    Swal.fire({
+                        title: 'La comunicación con impuestos falló',
+                        text: '¿Desea entrar en modo de contingencia?',
+                        icon: 'error',
+                        showCancelButton: true,
+                        confirmButtonText: 'Aceptar',
+                        cancelButtonText: 'Cancelar',
+                        reverseButtons: true,
+                        customClass: {
+                            confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md',
+                            cancelButton: 'bg-blue-500 text-white px-4 py-2 rounded-md',
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            console.log('Modo de contingencia aceptado.');
+                        } else {
+                            console.log('Modo de contingencia cancelado.');
+                        }
+                    });
+                } else {
+                    console.error("Error de comunicación con el servidor:", response.statusText);
+                }
+            } else {
+                fetchEnterprises();
+            }
+        } catch (error) {
+            console.error("Error al conectar con el servidor:", error);
+            Swal.fire({
+                title: 'La comunicación con impuestos falló',
+                text: '¿Desea entrar en modo de contingencia?',
+                icon: 'error',
+                showCancelButton: true,
+                confirmButtonText: 'Aceptar',
+                cancelButtonText: 'Cancelar',
+                reverseButtons: true,
+                customClass: {
+                    confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md',
+                    cancelButton: 'bg-blue-500 text-white px-4 py-2 rounded-md',
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    console.log('Modo de contingencia aceptado.');
+                } else {
+                    console.log('Modo de contingencia cancelado.');
+                }
+            });
+        }
+    };
+
+    useEffect(() => {
+        checkServerCommunication();
+    }, []);
+
     const createEnterprise = async (enterprise: Omit<Enterprise, 'id'>) => {
         try {
             const response = await fetch(`${PATH_URL_BACKEND}/empresa`, {
@@ -53,7 +111,7 @@ const EnterpriseList = () => {
                     title: "La empresa fue creada con éxito.",
                     showConfirmButton: false,
                     timer: 1500
-                  });
+                });
             }
         } catch (error) {
             console.error('Error creating enterprise:', error);
@@ -63,7 +121,7 @@ const EnterpriseList = () => {
                 title: "No se pudo crear la empresa",
                 showConfirmButton: false,
                 timer: 1500
-              });
+            });
         }
     };
 
@@ -75,14 +133,14 @@ const EnterpriseList = () => {
                 body: JSON.stringify(enterprise),
             });
             if (response.ok) {
-                fetchEnterprises(); 
+                fetchEnterprises();
                 Swal.fire({
                     position: "center",
                     icon: "success",
                     title: "La empresa fue actualizada con éxito.",
                     showConfirmButton: false,
                     timer: 1500
-                  });
+                });
             }
         } catch (error) {
             console.error('Error updating enterprise:', error);
@@ -92,7 +150,7 @@ const EnterpriseList = () => {
                 title: "No se pudo actualizar la empresa",
                 showConfirmButton: false,
                 timer: 1500
-              });
+            });
         }
     };
 
@@ -119,7 +177,7 @@ const EnterpriseList = () => {
                             title: "La empresa fue eliminada.",
                             showConfirmButton: false,
                             timer: 1500
-                          });
+                        });
                     }
                 } catch (error) {
                     console.error('Error deleting enterprise:', error);
@@ -129,7 +187,7 @@ const EnterpriseList = () => {
                         title: "No se pudo eliminar la empresa",
                         showConfirmButton: false,
                         timer: 1500
-                      });
+                    });
                 }
             }
         });
@@ -199,15 +257,15 @@ const EnterpriseList = () => {
                         <h1 className="text-2xl font-bold mb-6 text-gray-700">Gestión de Empresas</h1>
                         <div className="flex justify-between items-center mb-4">
                             <div className="flex items-center">
-                                <label htmlFor="itemsPerPage" className="mr-2 text-sm">Elementos por página:</label>    
+                                <label htmlFor="itemsPerPage" className="mr-2 text-sm">Elementos por página:</label>
                                 <select
-                                value={rowsPerPage}
-                                onChange={handleRowsPerPageChange}
-                                className="border p-2 rounded-lg w-20"
+                                    value={rowsPerPage}
+                                    onChange={handleRowsPerPageChange}
+                                    className="border p-2 rounded-lg w-20"
                                 >
-                                <option value={10}>10</option>
-                                <option value={20}>20</option>
-                                <option value={50}>50</option>
+                                    <option value={10}>10</option>
+                                    <option value={20}>20</option>
+                                    <option value={50}>50</option>
                                 </select>
                             </div>
 
@@ -266,38 +324,38 @@ const EnterpriseList = () => {
                         />
                     </div>
                     <div className="flex space-x-1 justify-center mt-6">
+                        <button
+                            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                            disabled={currentPage === 1}
+                            className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+                        >
+                            Ant.
+                        </button>
+
+                        {getPageNumbers().map((page) => (
                             <button
-                                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                                disabled={currentPage === 1}
-                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+                                key={page}
+                                onClick={() => setCurrentPage(page)}
+                                className={`min-w-9 rounded-full border py-2 px-3.5 text-center text-sm transition-all shadow-sm ${page === currentPage ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-800 hover:text-white hover:border-slate-800'} focus:bg-slate-800 focus:text-white active:border-slate-800 active:bg-slate-800`}
                             >
-                                Ant.
+                                {page}
                             </button>
+                        ))}
 
-                            {getPageNumbers().map((page) => (
-                                <button
-                                    key={page}
-                                    onClick={() => setCurrentPage(page)}
-                                    className={`min-w-9 rounded-full border py-2 px-3.5 text-center text-sm transition-all shadow-sm ${page === currentPage ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-800 hover:text-white hover:border-slate-800'} focus:bg-slate-800 focus:text-white active:border-slate-800 active:bg-slate-800`}
-                                >
-                                    {page}
-                                </button>
-                            ))}
+                        <button
+                            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                            disabled={currentPage === totalPages}
+                            className="min-w-9 rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+                        >
+                            Sig.
+                        </button>
+                    </div>
 
-                            <button
-                                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                                disabled={currentPage === totalPages}
-                                className="min-w-9 rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
-                            >
-                                Sig.
-                            </button>
-                        </div>
-
-                        <div className="flex space-x-1 justify-center mt-2">
-                            <span className="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">
-                                Mostrando página <span className="font-semibold text-gray-900 dark:text-black">{currentPage}</span> de <span className="font-semibold text-gray-900 dark:text-black">{totalPages}</span>
-                            </span>
-                        </div>
+                    <div className="flex space-x-1 justify-center mt-2">
+                        <span className="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">
+                            Mostrando página <span className="font-semibold text-gray-900 dark:text-black">{currentPage}</span> de <span className="font-semibold text-gray-900 dark:text-black">{totalPages}</span>
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
