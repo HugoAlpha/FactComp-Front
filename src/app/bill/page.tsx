@@ -135,16 +135,16 @@ const BillList = () => {
       const matchesSearch =
         bill.documentNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
         bill.client.toLowerCase().includes(searchQuery.toLowerCase());
-  
+
       const matchesEstado =
         estadoFilter === 'TODAS' ||
         (estadoFilter === 'VALIDA' && bill.estado.toUpperCase() === 'VALIDA') ||
         (estadoFilter === 'ANULADO' && bill.estado.toUpperCase() === 'ANULADO');
-  
+
       const matchesFecha =
         (!fechaDesde || new Date(bill.date) >= new Date(fechaDesde)) &&
         (!fechaHasta || new Date(bill.date) <= new Date(fechaHasta));
-  
+
       return matchesSearch && matchesEstado && matchesFecha;
     });
   }, [bills, searchQuery, estadoFilter, fechaDesde, fechaHasta]);
@@ -373,7 +373,6 @@ const BillList = () => {
                 </table>
               </div>
 
-              Paginación
               <div className="flex space-x-1 justify-center mt-6">
                 <button
                   onClick={handlePrevPage}
