@@ -224,7 +224,6 @@ const PuntoVenta: React.FC = () => {
                             isOpen={isModalOpen}
                             onClose={handleCloseModal}
                             onSave={(newPos) => {
-                                // lógica para guardar nuevo punto de venta
                             }}
                         />
 
