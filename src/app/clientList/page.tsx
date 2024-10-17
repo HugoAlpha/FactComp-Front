@@ -6,6 +6,7 @@ import { FaEdit, FaTrashAlt, FaPlus, FaSearch } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import CreateEditClientModal from '@/components/layouts/modalCreateEditClient';
 import { PATH_URL_BACKEND } from '@/utils/constants';
+import CashierSidebar from '@/components/commons/cashierSidebar';
 
 interface Customer {
     id: number;
@@ -15,6 +16,10 @@ interface Customer {
     complemento: string | null;
     codigoCliente: string;
     email: string;
+}
+
+interface UserRole {
+   role: 'ADMIN' | 'CAJERO';
 }
 
 const ClientList = () => {
@@ -32,6 +37,17 @@ const ClientList = () => {
     });
     const [rowsPerPage, setRowsPerPage] = useState<number>(10);
     const [currentPage, setCurrentPage] = useState<number>(1);
+    const [userRole, setUserRole] = useState<UserRole['role']>('CAJERO');
+
+    useEffect(() => {
+        const fetchUserRole = () => {
+        const storedRole = localStorage.getItem('userRole');
+        if (storedRole === 'ADMIN' || storedRole === 'CAJERO') {
+            setUserRole(storedRole);
+        }
+        };
+        fetchUserRole();
+    }, []);
 
     useEffect(() => {
         const fetchCustomers = async () => {
@@ -135,9 +151,33 @@ const ClientList = () => {
         return pageNumbers;
     };
 
+    const renderOperationButtons = (customer: Customer) => {
+        return (
+            <div className="flex">
+                {userRole === 'ADMIN' && (
+                    <button 
+                        className="bg-red-200 hover:bg-red-300 p-2 rounded-l-lg flex items-center justify-center border border-red-300"
+                        onClick={() => handleDeleteCustomer(customer.id)}
+                    >
+                        <FaTrashAlt className="text-black" />
+                    </button>
+                )}
+                <button 
+                    className={`${
+                        userRole === 'ADMIN' ? 'rounded-r-lg' : 'rounded-lg'
+                    } bg-blue-200 hover:bg-blue-300 p-2 flex items-center justify-center border border-blue-300`}
+                    onClick={() => handleEditCustomer(customer.id)}
+                >
+                    <FaEdit className="text-black" />
+                </button>
+            </div>
+        );
+    };
+    
+
     return (
         <div className="flex min-h-screen">
-            <Sidebar />
+            {userRole === 'ADMIN' ? <Sidebar /> : <CashierSidebar />}
             <div className="flex flex-col w-full min-h-screen">
                 <Header />
 
@@ -223,20 +263,7 @@ const ClientList = () => {
                                             <td className="px-6 py-4">{customer.codigoCliente}</td>
                                             <td className="px-6 py-4">{customer.email}</td>
                                             <td className="px-6 py-4">
-                                                <div className="flex">
-                                                    <button 
-                                                        className="bg-red-200 hover:bg-red-300 p-2 rounded-l-lg flex items-center justify-center border border-red-300"
-                                                        onClick={() => handleDeleteCustomer(customer.id)}
-                                                    >
-                                                        <FaTrashAlt className="text-black" />
-                                                    </button>
-                                                    <button 
-                                                        className="bg-blue-200 hover:bg-blue-300 p-2 rounded-r-lg flex items-center justify-center border border-blue-300"
-                                                        onClick={() => handleEditCustomer(customer.id)}
-                                                    >
-                                                        <FaEdit className="text-black" />
-                                                    </button>
-                                                </div>
+                                                {renderOperationButtons(customer)}
                                             </td>
                                         </tr>
                                     ))}

@@ -7,6 +7,7 @@ import Header from '@/components/commons/header';
 import { PATH_URL_BACKEND } from '@/utils/constants';
 import Swal from 'sweetalert2';
 import ModalContingencyPackage from "@/components/layouts/modalContingencyPackage"
+import CashierSidebar from '@/components/commons/cashierSidebar';
 
 interface FormattedBill {
   id: string;
@@ -20,6 +21,10 @@ interface FormattedBill {
   cuf: string;
 }
 
+interface UserRole {
+  role: 'ADMIN' | 'CAJERO';
+}
+
 const BillList = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedBill, setSelectedBill] = useState<FormattedBill | null>(null);
@@ -31,6 +36,18 @@ const BillList = () => {
   const [fechaDesde, setFechaDesde] = useState<string | null>(null);
   const [fechaHasta, setFechaHasta] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const [userRole, setUserRole] = useState<UserRole['role']>('CAJERO');
+
+    useEffect(() => {
+        const fetchUserRole = () => {
+        const storedRole = localStorage.getItem('userRole');
+        if (storedRole === 'ADMIN' || storedRole === 'CAJERO') {
+            setUserRole(storedRole);
+        }
+        };
+        fetchUserRole();
+    }, []);
 
   const fetchBills = async (estado?: string) => {
     try {
@@ -276,7 +293,7 @@ const openModal = () => setIsModalOpen(true);
 
   return (
     <div className="flex min-h-screen">
-      <Sidebar />
+      {userRole === 'ADMIN' ? <Sidebar /> : <CashierSidebar />}
       <div className="flex flex-col w-full min-h-screen">
         <Header />
         <div className="flex-grow overflow-auto bg-gray-50 p-6">
@@ -377,7 +394,7 @@ const openModal = () => setIsModalOpen(true);
                               <FaEye className="text-black" />
                             </button>
                             <button
-                              className="bg-red-200 hover:bg-red-300 p-2 rounded-r-lg flex items-center justify-center border border-red-300"
+                              className="bg-blue-200 hover:bg-blue-300 p-2 rounded-r-lg flex items-center justify-center border border-blue-300"
                               onClick={() => handleAnularFactura(bill)}
                             >
                               <HiReceiptRefund className="text-black" />

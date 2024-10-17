@@ -1,7 +1,5 @@
 "use client";
 import React from 'react';
-import Swal from 'sweetalert2';
-
 interface Bill {
     codigoSucursal: number;
     direccion?: string;

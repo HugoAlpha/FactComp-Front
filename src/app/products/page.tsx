@@ -6,6 +6,7 @@ import Header from '@/components/commons/header';
 import { PATH_URL_BACKEND } from "@/utils/constants";
 import ModalCreateProduct from '@/components/layouts/modalCreateProduct';
 import Swal from 'sweetalert2';
+import CashierSidebar from '@/components/commons/cashierSidebar';
 
 interface Product {
     id: number;
@@ -15,12 +16,27 @@ interface Product {
     codigoProductoSin: string;
 }
 
+interface UserRole {
+    role: 'ADMIN' | 'CAJERO';
+}
+
 const ProductList = () => {
     const [products, setProducts] = useState<Product[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState<number>(10);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
+    const [userRole, setUserRole] = useState<UserRole['role']>('CAJERO');
+
+    useEffect(() => {
+        const fetchUserRole = () => {
+        const storedRole = localStorage.getItem('userRole');
+        if (storedRole === 'ADMIN' || storedRole === 'CAJERO') {
+            setUserRole(storedRole);
+        }
+        };
+        fetchUserRole();
+    }, []);
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -97,9 +113,30 @@ const ProductList = () => {
         setCurrentPage(1);
     };
 
+    const renderOperationButtons = (product : Product) => {
+        return (
+            <div className="flex">
+                {userRole === 'ADMIN' && (
+                    <button
+                        className="bg-red-200 hover:bg-red-300 p-2 rounded-l-lg flex items-center justify-center border border-red-300"
+                    >
+                        <FaTrashAlt className="text-black" />
+                    </button>
+                )}
+                <button
+                    className="bg-blue-200 hover:bg-blue-300 p-2 rounded-r-lg flex items-center justify-center border border-blue-300"
+                    onClick={() => handleOpenModal(product)} 
+                >
+                    <FaEdit className="text-black" />
+                </button>
+            </div>
+        );
+    };
+
     return (
         <div className="flex min-h-screen">
-            <Sidebar />
+            {userRole === 'ADMIN' ? <Sidebar /> : <CashierSidebar />}
+
             <div className="flex flex-col w-full min-h-screen">
                 <Header />
                 <div className="flex-grow overflow-auto bg-gray-50">
@@ -161,19 +198,8 @@ const ProductList = () => {
                                             <td className="px-6 py-4">{product.precioUnitario} Bs.</td>
                                             <td className="px-6 py-4">{product.codigoProductoSin}</td>
                                             <td className="px-6 py-4">
-                                                <div className="flex">
-                                                    <button
-                                                        className="bg-red-200 hover:bg-red-300 p-2 rounded-l-lg flex items-center justify-center border border-red-300"
-                                                    >
-                                                        <FaTrashAlt className="text-black" />
-                                                    </button>
-                                                    <button
-                                                        className="bg-blue-200 hover:bg-blue-300 p-2 rounded-r-lg flex items-center justify-center border border-blue-300"
-                                                        onClick={() => handleOpenModal(product)} // Abrir modal para editar producto
-                                                    >
-                                                        <FaEdit className="text-black" />
-                                                    </button>
-                                                </div>
+                                                {renderOperationButtons(product)}
+
                                             </td>
                                         </tr>
                                     ))}

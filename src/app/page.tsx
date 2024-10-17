@@ -24,6 +24,18 @@ const Login = () => {
       }).then(() => {
         router.push('/dashboard');
       });
+
+    } else if (email === "cajero@gmail.com" && password === "Cashier123!") {
+      Swal.fire({
+        position: "center",
+        icon: 'success',
+        title: 'Logeo Exitoso',
+        text: 'Bienvenido, Cajero',
+        showConfirmButton: false,
+        timer: 3500
+      }).then(() => {
+        router.push('/dashboardCashier');
+      });
     } else {
       Swal.fire({
         icon: 'error',
