@@ -373,6 +373,7 @@ const BillList = () => {
                 </table>
               </div>
 
+              Paginación
               <div className="flex space-x-1 justify-center mt-6">
                 <button
                   onClick={handlePrevPage}
