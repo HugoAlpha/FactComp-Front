@@ -6,6 +6,7 @@ import Sidebar from '@/components/commons/sidebar';
 import Header from '@/components/commons/header';
 import { PATH_URL_BACKEND } from '@/utils/constants';
 import Swal from 'sweetalert2';
+import ModalContingencyPackage from "@/components/layouts/modalContingencyPackage"
 
 interface FormattedBill {
   id: string;
@@ -29,6 +30,7 @@ const BillList = () => {
   const [motivosAnulacion, setMotivosAnulacion] = useState([]);
   const [fechaDesde, setFechaDesde] = useState<string | null>(null);
   const [fechaHasta, setFechaHasta] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fetchBills = async (estado?: string) => {
     try {
@@ -268,7 +270,8 @@ const BillList = () => {
       }
     }
   };
-
+const openModal = () => setIsModalOpen(true);
+  const closeModal = () => setIsModalOpen(false);
 
 
   return (
@@ -277,7 +280,19 @@ const BillList = () => {
       <div className="flex flex-col w-full min-h-screen">
         <Header />
         <div className="flex-grow overflow-auto bg-gray-50 p-6">
-          <h1 className="text-2xl font-bold mb-6 text-gray-700">Lista de Facturas</h1>
+          <div className='flex justify-between'>
+            <h1 className="text-2xl font-bold mb-6 text-gray-700">Lista de Facturas</h1>
+            <button
+            className="px-2 py-2 bg-fourthColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400 mb-6 "
+            onClick={openModal}
+          >
+            Enviar paquetes contingencia
+          </button>
+          {isModalOpen && (
+            <ModalContingencyPackage isOpen={isModalOpen} onClose={closeModal} />
+          )}
+          </div>
+          
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center space-x-4 w-full">
               <input
@@ -338,6 +353,7 @@ const BillList = () => {
                       <th className="px-6 py-4 font-bold">Fecha</th>
                       <th className="px-6 py-4 font-bold">Total</th>
                       <th className="px-6 py-4 font-bold">Estado</th>
+                      <th className="px-6 py-4 font-bold">Linea</th>
                       <th className="px-6 py-4 font-bold">Operaciones</th>
                     </tr>
                   </thead>
@@ -351,6 +367,7 @@ const BillList = () => {
                         </td>
                         <td className="px-6 py-4">{bill.total}</td>
                         <td className="px-6 py-4">{getStatus(bill.estado)}</td>
+                        <td className="px-6 py-4"></td>
                         <td className="px-6 py-4">
                           <div className="flex">
                             <button
