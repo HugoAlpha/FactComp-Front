@@ -9,6 +9,7 @@ import Swal from 'sweetalert2';
 import ModalContingencyPackage from "@/components/layouts/modalContingencyPackage"
 import CashierSidebar from '@/components/commons/cashierSidebar';
 import ModalContingency from '@/components/layouts/modalContingency';
+import { TbCircleCheckFilled } from "react-icons/tb";
 
 interface FormattedBill {
   id: string;
@@ -38,6 +39,7 @@ const BillList = () => {
   const [fechaHasta, setFechaHasta] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isContingencyModalOpen, setIsContingencyModalOpen] = useState(false);
+  const [isContingencyMode, setIsContingencyMode] = useState(false);
 
   const [userRole, setUserRole] = useState<UserRole['role']>('CAJERO');
 
@@ -147,6 +149,16 @@ const BillList = () => {
     fetchBills();
   }, []);
 
+  useEffect(() => {
+    const contingenciaEstado = localStorage.getItem('contingenciaEstado');
+    if (contingenciaEstado === '1') {
+      setIsContingencyMode(true);
+    } else {
+      setIsContingencyMode(false);
+    }
+  }, []);
+
+
   const closeModal2 = () => setIsContingencyModalOpen(false);
 
   const fetchBillDetails = async (id: string) => {
@@ -208,6 +220,8 @@ const BillList = () => {
   };
 
   const filteredBills = useMemo(() => {
+    const contingenciaEstado = localStorage.getItem('contingenciaEstado');
+
     return bills.filter((bill) => {
       const matchesSearch =
         bill.documentNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -221,10 +235,14 @@ const BillList = () => {
       const matchesFecha =
         (!fechaDesde || new Date(bill.date) >= new Date(fechaDesde)) &&
         (!fechaHasta || new Date(bill.date) <= new Date(fechaHasta));
+      if (contingenciaEstado === '1') {
+        return bill.estado.toUpperCase() === 'OFFLINE' && matchesSearch && matchesFecha;
+      }
 
       return matchesSearch && matchesEstado && matchesFecha;
     });
   }, [bills, searchQuery, estadoFilter, fechaDesde, fechaHasta]);
+
 
   const totalPages = Math.ceil(filteredBills.length / rowsPerPage);
 
@@ -244,18 +262,39 @@ const BillList = () => {
   const getStatus = (estado: string) => {
     if (estado === 'ANULADO') {
       return (
-        <span className="px-2 py-1 rounded-full bg-red-100 text-red-600">Anulada</span>
+        <span className="px-2 py-1 rounded-full bg-red-100 text-red-600">Anulado</span>
       );
     } else if (estado === 'VALIDA') {
       return (
-        <span className="px-2 py-1 rounded-full bg-green-100 text-green-600">Válida</span>
+        <span className="px-2 py-1 rounded-full bg-green-100 text-green-600">Válido</span>
       );
-    } else {
+    } else if (estado === 'OFFLINE') {
+      return (
+        <span className="px-2 py-1 rounded-full bg-orange-100 text-orange-600">Offline</span>
+      );
+    }
+    else {
       return (
         <span className="px-2 py-1 rounded-full bg-gray-100 text-gray-600">Desconocida</span>
       );
     }
   };
+  useEffect(() => {
+    const handleContingencyChange = () => {
+      const contingenciaEstado = localStorage.getItem('contingenciaEstado');
+      setIsContingencyMode(contingenciaEstado === '1');
+      fetchBills(); 
+    };
+  
+    window.addEventListener('contingencyActivated', handleContingencyChange);
+    window.addEventListener('contingencyDeactivated', handleContingencyChange);
+
+    return () => {
+      window.removeEventListener('contingencyActivated', handleContingencyChange);
+      window.removeEventListener('contingencyDeactivated', handleContingencyChange);
+    };
+  }, []);
+  
 
   const getPageNumbers = (currentPage: number, totalPages: number) => {
     const pageNumbers = [];
@@ -343,9 +382,42 @@ const BillList = () => {
       }
     }
   };
-  const openModal = () => setIsModalOpen(true);
-  const closeModal = () => setIsModalOpen(false);
+  // const openModal = () => setIsModalOpen(true);
+  // const closeModal = () => setIsModalOpen(false);
 
+  const handleSendContingencyPackages = () => {
+    Swal.fire({
+      title: '¿Está seguro de enviar los paquetes de contingencia?',
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, enviar',
+      cancelButtonText: 'Cancelar',
+    }).then((result) => {
+      if (result.isConfirmed) {
+        let timerInterval;
+        Swal.fire({
+          title: 'Enviando paquetes...',
+          html: 'Completando en <b></b> segundos.',
+          timer: 5000, 
+          timerProgressBar: true,
+          didOpen: () => {
+            Swal.showLoading();
+            const b = Swal.getHtmlContainer().querySelector('b');
+            timerInterval = setInterval(() => {
+              b.textContent = Math.ceil(Swal.getTimerLeft() / 1000).toString();
+            }, 1000);
+          },
+          willClose: () => {
+            clearInterval(timerInterval);
+          }
+        }).then(() => {
+          localStorage.clear();
+          window.location.reload();
+        });
+      }
+    });
+  };
+  
 
   return (
     <div className="flex min-h-screen">
@@ -355,15 +427,7 @@ const BillList = () => {
         <div className="flex-grow overflow-auto bg-gray-50 p-6">
           <div className='flex justify-between'>
             <h1 className="text-2xl font-bold mb-6 text-gray-700">Lista de Facturas</h1>
-            <button
-              className="px-2 py-2 bg-fourthColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400 mb-6 "
-              onClick={openModal}
-            >
-              Enviar paquetes contingencia
-            </button>
-            {isModalOpen && (
-              <ModalContingencyPackage isOpen={isModalOpen} onClose={closeModal} />
-            )}
+
           </div>
 
           <div className="flex items-center justify-between mb-6">
@@ -373,7 +437,7 @@ const BillList = () => {
                 placeholder="Buscar por número de factura o cliente"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="border border-gray-300 px-2 py-2 rounded-lg w-1/2"
+                className="border border-gray-300 px-2 py-2 rounded-lg w-1/4"
               />
 
               <select
@@ -382,8 +446,8 @@ const BillList = () => {
                 className="border border-gray-300 rounded-lg py-2 px-4"
               >
                 <option value="TODAS">Todas</option>
-                <option value="VALIDA">Válidas</option>
-                <option value="ANULADO">Anuladas</option>
+                <option value="VALIDA">Válido</option>
+                <option value="ANULADO">Anulado</option>
               </select>
 
               <div className="flex items-center space-x-4">
@@ -408,6 +472,17 @@ const BillList = () => {
                     className="border border-gray-300 px-4 py-2 rounded-lg"
                   />
                 </div>
+                {isContingencyMode && (
+                  <button
+                    className="px-2 py-2 bg-firstColor text-white rounded-lg font-bold hover:bg-fourthColor"
+                    onClick={handleSendContingencyPackages}
+                  >
+                    Enviar paquetes contingencia
+                  </button>
+                )}
+                {/* {isModalOpen && (
+                  <ModalContingencyPackage isOpen={isModalOpen} onClose={closeModal} />
+                )} */}
 
               </div>
             </div>
@@ -425,8 +500,8 @@ const BillList = () => {
                       <th className="px-6 py-4 font-bold">Cliente</th>
                       <th className="px-6 py-4 font-bold">Fecha</th>
                       <th className="px-6 py-4 font-bold">Total</th>
-                      <th className="px-6 py-4 font-bold">Estado</th>
-                      <th className="px-6 py-4 font-bold">Linea</th>
+                      <th className="px-6 py-4 font-bold">Formato</th>
+                      <th className="px-6 py-4 font-bold">Comprobado</th>
                       <th className="px-6 py-4 font-bold">Operaciones</th>
                     </tr>
                   </thead>
@@ -440,7 +515,10 @@ const BillList = () => {
                         </td>
                         <td className="px-6 py-4">{bill.total}</td>
                         <td className="px-6 py-4">{getStatus(bill.estado)}</td>
-                        <td className="px-6 py-4"></td>
+                        <td className="px-6 py-4">
+                          <TbCircleCheckFilled
+                            className='text-5xl text-green-600' />
+                        </td>
                         <td className="px-6 py-4">
                           <div className="flex">
                             <button
