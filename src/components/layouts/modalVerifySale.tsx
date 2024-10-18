@@ -121,60 +121,64 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
         },
       });
 
+
+
+      const contingenciaEstado = localStorage.getItem('contingenciaEstado');
       const body = {
-        usuario:
-          clients.find((client) => client.nombreRazonSocial === selectedClient)?.codigoCliente ||
-          '',
-        idPuntoVenta: '1',
-        idCliente: clients.find((client) => client.nombreRazonSocial === selectedClient)?.id || '',
-        nitInvalido: true,
-        codigoMetodoPago: paymentMethod,
-        detalle: products.map((product) => ({
-          idProducto: product.id,
-          cantidad: product.cantidad.toString(),
-          montoDescuento: product.discount ? product.discount.toFixed(2) : '00.0',
-        })),
-      };
+      usuario:
+        clients.find((client) => client.nombreRazonSocial === selectedClient)?.codigoCliente ||
+        '',
+      idPuntoVenta: '1',
+      idCliente: clients.find((client) => client.nombreRazonSocial === selectedClient)?.id || '',
+      nitInvalido: true,
+      codigoMetodoPago: paymentMethod,
+      activo: contingenciaEstado === '1' ? false : true,
+      detalle: products.map((product) => ({
+        idProducto: product.id,
+        cantidad: product.cantidad.toString(),
+        montoDescuento: product.discount ? product.discount.toFixed(2) : '00.0',
+      })),
+    };
 
-      const response = await fetch(`${PATH_URL_BACKEND}/factura/emitir`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
+    const response = await fetch(`${PATH_URL_BACKEND}/factura/emitir`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+    Swal.close();
+
+    if (response.ok) {
+      const data = await response.json();
+      Swal.fire({
+        icon: 'success',
+        title: 'Factura emitida con éxito',
+        text: `CUF: ${data.cuf}, Número de factura: ${data.numeroFactura}`,
+      }).then(() => {
+        onSuccess({
+          client: selectedClient,
+          total: Number(paymentAmount) || total,
+          numeroFactura: data.numeroFactura,
+        });
       });
-
-      await new Promise((resolve) => setTimeout(resolve, 5000));
-      Swal.close();
-
-      if (response.ok) {
-        const data = await response.json();
-        Swal.fire({
-          icon: 'success',
-          title: 'Factura emitida con éxito',
-          text: `CUF: ${data.cuf}, Número de factura: ${data.numeroFactura}`,
-        }).then(() => {
-          onSuccess({
-            client: selectedClient,
-            total: Number(paymentAmount) || total,
-            numeroFactura: data.numeroFactura,
-          });
-        });
-      } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error al emitir factura',
-          text: 'No se pudo emitir la factura, intenta de nuevo.',
-        });
-      }
-    } catch (error) {
-      Swal.close();
+    } else {
       Swal.fire({
         icon: 'error',
-        title: 'Error de conexión',
-        text: 'No se pudo conectar con el servidor.',
+        title: 'Error al emitir factura',
+        text: 'No se pudo emitir la factura, intenta de nuevo.',
       });
     }
+  } catch (error) {
+    Swal.close();
+    Swal.fire({
+      icon: 'error',
+      title: 'Error de conexión',
+      text: 'No se pudo conectar con el servidor.',
+    });
+   }
   };
 
   if (!isOpen) return null;
