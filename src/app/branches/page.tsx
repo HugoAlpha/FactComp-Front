@@ -6,6 +6,7 @@ import { FaEdit, FaSearch, FaTrashAlt } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import ModalCreateBranch from '@/components/layouts/modalCreateBranches';
 import { PATH_URL_BACKEND } from '@/utils/constants';
+import ModalContingency from '@/components/layouts/modalContingency';
 
 interface Branch {
     id: number;
@@ -29,6 +30,7 @@ const Branches: React.FC = () => {
     const [selectedCity, setSelectedCity] = useState<string>('');
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null);
+    const [isContingencyModalOpen, setIsContingencyModalOpen] = useState<boolean>(false);
 
     const handleOpenModal = (branch: Branch | null = null) => {
         setSelectedBranch(branch);
@@ -87,7 +89,7 @@ const Branches: React.FC = () => {
                         }
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            console.log('Modo de contingencia aceptado.');
+                            setIsContingencyModalOpen(true); // Abre el modal si se confirma
                         } else {
                             console.log('Modo de contingencia cancelado.');
                         }
@@ -114,7 +116,7 @@ const Branches: React.FC = () => {
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    console.log('Modo de contingencia aceptado.');
+                    setIsContingencyModalOpen(true);
                 } else {
                     console.log('Modo de contingencia cancelado.');
                 }
@@ -392,6 +394,12 @@ const Branches: React.FC = () => {
                 onBranchCreated={handleBranchCreatedOrUpdated}
                 branchToEdit={selectedBranch}
             />
+            {isContingencyModalOpen && (
+                <ModalContingency
+                    isOpen={isContingencyModalOpen}
+                    onClose={() => setIsContingencyModalOpen(false)}
+                />
+            )}
         </div>
     );
 };

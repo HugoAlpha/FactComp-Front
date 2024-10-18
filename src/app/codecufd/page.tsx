@@ -5,6 +5,7 @@ import Header from '@/components/commons/header';
 import { FaPlus, FaSearch } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import { PATH_URL_BACKEND } from '@/utils/constants';
+import ModalContingency from '@/components/layouts/modalContingency';
 
 interface CUFD {
     id: number;
@@ -19,6 +20,7 @@ const CUFDList = () => {
     const [filter, setFilter] = useState<string>('');
     const [rowsPerPage, setRowsPerPage] = useState<number>(10);
     const [currentPage, setCurrentPage] = useState<number>(1);
+    const [isContingencyModalOpen, setIsContingencyModalOpen] = useState<boolean>(false);
 
     const fetchCUFDs = async () => {
         try {
@@ -53,7 +55,7 @@ const CUFDList = () => {
                         }
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            console.log('Modo de contingencia aceptado.');
+                            setIsContingencyModalOpen(true); // Abre el modal si se confirma
                         } else {
                             console.log('Modo de contingencia cancelado.');
                         }
@@ -80,7 +82,7 @@ const CUFDList = () => {
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    console.log('Modo de contingencia aceptado.');
+                    setIsContingencyModalOpen(true); // Abre el modal si se confirma
                 } else {
                     console.log('Modo de contingencia cancelado.');
                 }
@@ -185,7 +187,12 @@ const CUFDList = () => {
             <Sidebar />
             <div className="flex flex-col w-full min-h-screen">
                 <Header />
-
+                {isContingencyModalOpen && (
+                    <ModalContingency
+                        isOpen={isContingencyModalOpen}
+                        onClose={() => setIsContingencyModalOpen(false)}
+                    />
+                )}
                 <div className="flex-grow overflow-auto bg-gray-50">
                     <div className="p-6">
                         <h2 className="text-xl font-bold mb-6 text-gray-700">Registros de CUFD</h2>

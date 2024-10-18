@@ -8,6 +8,7 @@ import { PATH_URL_BACKEND } from '@/utils/constants';
 import Swal from 'sweetalert2';
 import ModalContingencyPackage from "@/components/layouts/modalContingencyPackage"
 import CashierSidebar from '@/components/commons/cashierSidebar';
+import ModalContingency from '@/components/layouts/modalContingency';
 
 interface FormattedBill {
   id: string;
@@ -36,18 +37,19 @@ const BillList = () => {
   const [fechaDesde, setFechaDesde] = useState<string | null>(null);
   const [fechaHasta, setFechaHasta] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isContingencyModalOpen, setIsContingencyModalOpen] = useState(false);
 
   const [userRole, setUserRole] = useState<UserRole['role']>('CAJERO');
 
-    useEffect(() => {
-        const fetchUserRole = () => {
-        const storedRole = localStorage.getItem('userRole');
-        if (storedRole === 'ADMIN' || storedRole === 'CAJERO') {
-            setUserRole(storedRole);
-        }
-        };
-        fetchUserRole();
-    }, []);
+  useEffect(() => {
+    const fetchUserRole = () => {
+      const storedRole = localStorage.getItem('userRole');
+      if (storedRole === 'ADMIN' || storedRole === 'CAJERO') {
+        setUserRole(storedRole);
+      }
+    };
+    fetchUserRole();
+  }, []);
 
   const fetchBills = async (estado?: string) => {
     try {
@@ -82,14 +84,70 @@ const BillList = () => {
     }
   };
 
+  const checkServerCommunication = async () => {
+    try {
+      const response = await fetch(`${PATH_URL_BACKEND}/codigos/cuis/activo/1`);
+      if (!response.ok) {
+        if (response.status === 500) {
+          Swal.fire({
+            title: 'La comunicación con impuestos falló',
+            text: '¿Desea entrar en modo de contingencia?',
+            icon: 'error',
+            showCancelButton: true,
+            confirmButtonText: 'Aceptar',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true,
+            customClass: {
+              confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md',
+              cancelButton: 'bg-blue-500 text-white px-4 py-2 rounded-md',
+            }
+          }).then((result) => {
+            if (result.isConfirmed) {
+              setIsContingencyModalOpen(true);
+            } else {
+              console.log('Modo de contingencia cancelado.');
+            }
+          });
+        } else {
+          console.error("Error de comunicación con el servidor:", response.statusText);
+        }
+      } else {
+        fetchBills();
+      }
+    } catch (error) {
+      console.error("Error al conectar con el servidor:", error);
+      Swal.fire({
+        title: 'La comunicación con impuestos falló',
+        text: '¿Desea entrar en modo de contingencia?',
+        icon: 'error',
+        showCancelButton: true,
+        confirmButtonText: 'Aceptar',
+        cancelButtonText: 'Cancelar',
+        reverseButtons: true,
+        customClass: {
+          confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md',
+          cancelButton: 'bg-blue-500 text-white px-4 py-2 rounded-md',
+        }
+      }).then((result) => {
+        if (result.isConfirmed) {
+          setIsContingencyModalOpen(true);
+        } else {
+          console.log('Modo de contingencia cancelado.');
+        }
+      });
+    }
+  };
 
   useEffect(() => {
     fetchBills();
+    checkServerCommunication();
   }, [estadoFilter]);
 
   useEffect(() => {
     fetchBills();
   }, []);
+
+  const closeModal2 = () => setIsContingencyModalOpen(false);
 
   const fetchBillDetails = async (id: string) => {
     try {
@@ -167,8 +225,6 @@ const BillList = () => {
       return matchesSearch && matchesEstado && matchesFecha;
     });
   }, [bills, searchQuery, estadoFilter, fechaDesde, fechaHasta]);
-
-
 
   const totalPages = Math.ceil(filteredBills.length / rowsPerPage);
 
@@ -287,7 +343,7 @@ const BillList = () => {
       }
     }
   };
-const openModal = () => setIsModalOpen(true);
+  const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
 
@@ -300,16 +356,16 @@ const openModal = () => setIsModalOpen(true);
           <div className='flex justify-between'>
             <h1 className="text-2xl font-bold mb-6 text-gray-700">Lista de Facturas</h1>
             <button
-            className="px-2 py-2 bg-fourthColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400 mb-6 "
-            onClick={openModal}
-          >
-            Enviar paquetes contingencia
-          </button>
-          {isModalOpen && (
-            <ModalContingencyPackage isOpen={isModalOpen} onClose={closeModal} />
-          )}
+              className="px-2 py-2 bg-fourthColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400 mb-6 "
+              onClick={openModal}
+            >
+              Enviar paquetes contingencia
+            </button>
+            {isModalOpen && (
+              <ModalContingencyPackage isOpen={isModalOpen} onClose={closeModal} />
+            )}
           </div>
-          
+
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center space-x-4 w-full">
               <input
@@ -443,6 +499,9 @@ const openModal = () => setIsModalOpen(true);
           </div>
         </div>
       </div>
+      {isContingencyModalOpen && (
+        <ModalContingency isOpen={isContingencyModalOpen} onClose={closeModal2} />
+      )}
     </div>
   );
 };

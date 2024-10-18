@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { FaEdit, FaSearch, FaTrashAlt } from 'react-icons/fa';
 import { PATH_URL_BACKEND } from '@/utils/constants';
 import Swal from 'sweetalert2';
+import ModalContingency from '@/components/layouts/modalContingency';
 
 interface PuntoVenta {
     id: number;
@@ -46,6 +47,10 @@ const CodeReceipt = () => {
     const [daysToExpire, setDaysToExpire] = useState<number | null>(null);
     const [rowsPerPage, setRowsPerPage] = useState<number>(10);
     const [currentPage, setCurrentPage] = useState<number>(1);
+    const [isContingencyModalOpen, setIsContingencyModalOpen] = useState<boolean>(false);
+
+    const openContingencyModal = () => setIsContingencyModalOpen(true);
+    const closeContingencyModal = () => setIsContingencyModalOpen(false);
 
     useEffect(() => {
         const fetchCodes = async () => {
@@ -95,7 +100,7 @@ const CodeReceipt = () => {
                         }
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            console.log('Modo de contingencia aceptado.');
+                            setIsContingencyModalOpen(true);
                         } else {
                             console.log('Modo de contingencia cancelado.');
                         }
@@ -120,7 +125,7 @@ const CodeReceipt = () => {
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    console.log('Modo de contingencia aceptado.');
+                    setIsContingencyModalOpen(true);
                 } else {
                     console.log('Modo de contingencia cancelado.');
                 }
@@ -366,6 +371,12 @@ const CodeReceipt = () => {
                     </div>
                 </div>
             </div>
+            {isContingencyModalOpen && (
+                <ModalContingency
+                    isOpen={isContingencyModalOpen}
+                    onClose={closeContingencyModal}
+                />
+            )}
         </div>
     );
 };

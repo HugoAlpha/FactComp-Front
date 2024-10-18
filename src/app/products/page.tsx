@@ -7,6 +7,7 @@ import { PATH_URL_BACKEND } from "@/utils/constants";
 import ModalCreateProduct from '@/components/layouts/modalCreateProduct';
 import Swal from 'sweetalert2';
 import CashierSidebar from '@/components/commons/cashierSidebar';
+import ModalContingency from '@/components/layouts/modalContingency';
 
 interface Product {
     id: number;
@@ -27,13 +28,14 @@ const ProductList = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [userRole, setUserRole] = useState<UserRole['role']>('CAJERO');
+    const [isContingencyModalOpen, setIsContingencyModalOpen] = useState(false);
 
     useEffect(() => {
         const fetchUserRole = () => {
-        const storedRole = localStorage.getItem('userRole');
-        if (storedRole === 'ADMIN' || storedRole === 'CAJERO') {
-            setUserRole(storedRole);
-        }
+            const storedRole = localStorage.getItem('userRole');
+            if (storedRole === 'ADMIN' || storedRole === 'CAJERO') {
+                setUserRole(storedRole);
+            }
         };
         fetchUserRole();
     }, []);
@@ -46,11 +48,66 @@ const ProductList = () => {
                 setProducts(data);
             } catch (error) {
                 console.error('Error al obtener los productos:', error);
-                Swal.fire('Error', 'Error al obtener los productos', 'error');
             }
         };
 
         fetchProducts();
+    }, []);
+
+    const checkServerCommunication = async () => {
+        try {
+            const response = await fetch(`${PATH_URL_BACKEND}/codigos/cuis/activo/1`);
+            if (!response.ok) {
+                if (response.status === 500) {
+                    Swal.fire({
+                        title: 'La comunicación con impuestos falló',
+                        text: '¿Desea entrar en modo de contingencia?',
+                        icon: 'error',
+                        showCancelButton: true,
+                        confirmButtonText: 'Aceptar',
+                        cancelButtonText: 'Cancelar',
+                        reverseButtons: true,
+                        customClass: {
+                            confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md',
+                            cancelButton: 'bg-blue-500 text-white px-4 py-2 rounded-md',
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            setIsContingencyModalOpen(true);
+                        } else {
+                            console.log('Modo de contingencia cancelado.');
+                        }
+                    });
+                } else {
+                    console.error("Error de comunicación con el servidor:", response.statusText);
+                }
+            }
+        } catch (error) {
+            console.error("Error al conectar con el servidor:", error);
+            Swal.fire({
+                title: 'La comunicación con impuestos falló',
+                text: '¿Desea entrar en modo de contingencia?',
+                icon: 'error',
+                showCancelButton: true,
+                confirmButtonText: 'Aceptar',
+                cancelButtonText: 'Cancelar',
+                reverseButtons: true,
+                customClass: {
+                    confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md',
+                    cancelButton: 'bg-blue-500 text-white px-4 py-2 rounded-md',
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    setIsContingencyModalOpen(true);
+                } else {
+                    console.log('Modo de contingencia cancelado.');
+                }
+            });
+        }
+    };
+
+    useEffect(() => {
+        checkServerCommunication();
     }, []);
 
     const totalPages = Math.ceil(products.length / rowsPerPage);
@@ -113,7 +170,7 @@ const ProductList = () => {
         setCurrentPage(1);
     };
 
-    const renderOperationButtons = (product : Product) => {
+    const renderOperationButtons = (product: Product) => {
         return (
             <div className="flex">
                 {userRole === 'ADMIN' && (
@@ -125,13 +182,15 @@ const ProductList = () => {
                 )}
                 <button
                     className="bg-blue-200 hover:bg-blue-300 p-2 rounded-r-lg flex items-center justify-center border border-blue-300"
-                    onClick={() => handleOpenModal(product)} 
+                    onClick={() => handleOpenModal(product)}
                 >
                     <FaEdit className="text-black" />
                 </button>
             </div>
         );
     };
+
+    const closeModal = () => setIsContingencyModalOpen(false);
 
     return (
         <div className="flex min-h-screen">
@@ -250,6 +309,9 @@ const ProductList = () => {
                     onProductCreated={handleProductCreatedOrUpdated}
                 />
             </div>
+            {isContingencyModalOpen && (
+                <ModalContingency isOpen={isContingencyModalOpen} onClose={closeModal} />
+            )}
         </div>
     );
 };

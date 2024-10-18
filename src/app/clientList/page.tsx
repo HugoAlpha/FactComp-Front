@@ -7,6 +7,7 @@ import Swal from 'sweetalert2';
 import CreateEditClientModal from '@/components/layouts/modalCreateEditClient';
 import { PATH_URL_BACKEND } from '@/utils/constants';
 import CashierSidebar from '@/components/commons/cashierSidebar';
+import ModalContingency from '@/components/layouts/modalContingency';
 
 interface Customer {
     id: number;
@@ -19,7 +20,7 @@ interface Customer {
 }
 
 interface UserRole {
-   role: 'ADMIN' | 'CAJERO';
+    role: 'ADMIN' | 'CAJERO';
 }
 
 const ClientList = () => {
@@ -38,13 +39,14 @@ const ClientList = () => {
     const [rowsPerPage, setRowsPerPage] = useState<number>(10);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [userRole, setUserRole] = useState<UserRole['role']>('CAJERO');
+    const [isContingencyModalOpen, setIsContingencyModalOpen] = useState<boolean>(false);
 
     useEffect(() => {
         const fetchUserRole = () => {
-        const storedRole = localStorage.getItem('userRole');
-        if (storedRole === 'ADMIN' || storedRole === 'CAJERO') {
-            setUserRole(storedRole);
-        }
+            const storedRole = localStorage.getItem('userRole');
+            if (storedRole === 'ADMIN' || storedRole === 'CAJERO') {
+                setUserRole(storedRole);
+            }
         };
         fetchUserRole();
     }, []);
@@ -57,12 +59,69 @@ const ClientList = () => {
                 setCustomers(data);
             } catch (error) {
                 console.error('Error fetching customers:', error);
-                Swal.fire('Error', 'Error al obtener los clientes', 'error');
             }
         };
 
         fetchCustomers();
     }, []);
+
+    const checkServerCommunication = async () => {
+        try {
+            const response = await fetch(`${PATH_URL_BACKEND}/codigos/cuis/activo/1`);
+            if (!response.ok) {
+                if (response.status === 500) {
+                    Swal.fire({
+                        title: 'La comunicación con impuestos falló',
+                        text: '¿Desea entrar en modo de contingencia?',
+                        icon: 'error',
+                        showCancelButton: true,
+                        confirmButtonText: 'Aceptar',
+                        cancelButtonText: 'Cancelar',
+                        reverseButtons: true,
+                        customClass: {
+                            confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md',
+                            cancelButton: 'bg-blue-500 text-white px-4 py-2 rounded-md',
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            setIsContingencyModalOpen(true);
+                        } else {
+                            console.log('Modo de contingencia cancelado.');
+                        }
+                    });
+                } else {
+                    console.error("Error de comunicación con el servidor:", response.statusText);
+                }
+            }
+        } catch (error) {
+            console.error("Error al conectar con el servidor:", error);
+            Swal.fire({
+                title: 'La comunicación con impuestos falló',
+                text: '¿Desea entrar en modo de contingencia?',
+                icon: 'error',
+                showCancelButton: true,
+                confirmButtonText: 'Aceptar',
+                cancelButtonText: 'Cancelar',
+                reverseButtons: true,
+                customClass: {
+                    confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md',
+                    cancelButton: 'bg-blue-500 text-white px-4 py-2 rounded-md',
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    setIsContingencyModalOpen(true);
+                } else {
+                    console.log('Modo de contingencia cancelado.');
+                }
+            });
+        }
+    };
+
+
+    useEffect(() => {
+        checkServerCommunication();
+    }, []);
+    const closeModal = () => setIsContingencyModalOpen(false);
 
     const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFilter(e.target.value);
@@ -155,17 +214,16 @@ const ClientList = () => {
         return (
             <div className="flex">
                 {userRole === 'ADMIN' && (
-                    <button 
+                    <button
                         className="bg-red-200 hover:bg-red-300 p-2 rounded-l-lg flex items-center justify-center border border-red-300"
                         onClick={() => handleDeleteCustomer(customer.id)}
                     >
                         <FaTrashAlt className="text-black" />
                     </button>
                 )}
-                <button 
-                    className={`${
-                        userRole === 'ADMIN' ? 'rounded-r-lg' : 'rounded-lg'
-                    } bg-blue-200 hover:bg-blue-300 p-2 flex items-center justify-center border border-blue-300`}
+                <button
+                    className={`${userRole === 'ADMIN' ? 'rounded-r-lg' : 'rounded-lg'
+                        } bg-blue-200 hover:bg-blue-300 p-2 flex items-center justify-center border border-blue-300`}
                     onClick={() => handleEditCustomer(customer.id)}
                 >
                     <FaEdit className="text-black" />
@@ -173,7 +231,7 @@ const ClientList = () => {
             </div>
         );
     };
-    
+
 
     return (
         <div className="flex min-h-screen">
@@ -215,29 +273,29 @@ const ClientList = () => {
                             <div>
                                 <label htmlFor="itemsPerPage" className="mr-2 text-sm">Elementos por página:</label>
                                 <select
-                                            value={rowsPerPage}
-                                            onChange={handleRowsPerPageChange}
-                                            className="border p-2 rounded-lg w-20"
-                                        >
-                                            <option value={10}>10</option>
-                                            <option value={20}>20</option>
-                                            <option value={30}>30</option>
-                                            <option value={40}>40</option>
-                                            <option value={50}>50</option>
-                                        </select>
+                                    value={rowsPerPage}
+                                    onChange={handleRowsPerPageChange}
+                                    className="border p-2 rounded-lg w-20"
+                                >
+                                    <option value={10}>10</option>
+                                    <option value={20}>20</option>
+                                    <option value={30}>30</option>
+                                    <option value={40}>40</option>
+                                    <option value={50}>50</option>
+                                </select>
                             </div>
 
                             <div className="relative flex items-center w-full max-w-md">
-                            <input
-                                type="text"
-                                placeholder="Buscar cliente por nombre o documento..."
-                                className="border border-gray-300 focus:border-firstColor focus:ring-firstColor focus:outline-none px-4 py-2 rounded-lg w-full shadow-sm text-sm placeholder-gray-400"
-                                value={filter}
-                                onChange={handleFilterChange}
-                            /> 
-                            <FaSearch className="absolute right-4 text-gray-500 text-xl pointer-events-none" />
+                                <input
+                                    type="text"
+                                    placeholder="Buscar cliente por nombre o documento..."
+                                    className="border border-gray-300 focus:border-firstColor focus:ring-firstColor focus:outline-none px-4 py-2 rounded-lg w-full shadow-sm text-sm placeholder-gray-400"
+                                    value={filter}
+                                    onChange={handleFilterChange}
+                                />
+                                <FaSearch className="absolute right-4 text-gray-500 text-xl pointer-events-none" />
                             </div>
-                            
+
                         </div>
 
                         <div className="overflow-x-auto shadow-lg rounded-lg border border-gray-200">
@@ -307,6 +365,9 @@ const ClientList = () => {
                     </div>
                 </div>
             </div>
+            {isContingencyModalOpen && (
+                <ModalContingency isOpen={isContingencyModalOpen} onClose={closeModal} />
+            )}
         </div>
     );
 };
