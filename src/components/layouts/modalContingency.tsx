@@ -1,6 +1,5 @@
 import { PATH_URL_BACKEND } from '@/utils/constants';
 import React, { useEffect, useState } from 'react';
-import Swal from 'sweetalert2';
 
 interface Evento {
     id: number;
@@ -38,44 +37,12 @@ const ModalContingency: React.FC<ModalContingencyProps> = ({ onClose, onConfirm 
         fetchEventos();
     }, [PATH_URL_BACKEND]);
 
-    const handleConfirm = async () => {
+    const handleConfirm = () => {
         if (!eventoSeleccionado) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'Selecciona un evento',
-                text: 'Por favor, selecciona un evento antes de continuar.',
-            });
+            alert('Por favor, selecciona un evento antes de continuar.');
             return;
         }
-
-        try {
-            const response = await fetch(`${PATH_URL_BACKEND}/codigos/obtener-cufd/1`, {
-                method: 'POST',
-            });
-
-            if (response.ok) {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'CUFD obtenido',
-                    text: 'El CUFD para contingencia se obtuvo correctamente.',
-                });
-                onConfirm(eventoSeleccionado);
-            } else {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error al obtener CUFD',
-                    text: `No se pudo obtener el CUFD: ${response.statusText}`,
-                });
-                return;
-            }
-        } catch (error) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error de conexión',
-                text: 'No se pudo conectar con el servidor. Intente nuevamente más tarde.',
-            });
-            return;
-        }
+        onConfirm(eventoSeleccionado);
     };
 
     return (
