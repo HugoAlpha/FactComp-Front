@@ -13,6 +13,12 @@ import { PATH_URL_BACKEND } from '@/utils/constants';
 import { GrDocumentConfig } from "react-icons/gr";
 import CreateEditClientModal from '@/components/layouts/modalCreateEditClient';
 import ModalCreateProduct from '@/components/layouts/modalCreateProduct';
+import CashierSidebar from '@/components/commons/cashierSidebar';
+
+
+interface UserRole {
+    role: 'ADMIN' | 'CAJERO';
+}
 
 const Sales = () => {
     const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
@@ -42,7 +48,19 @@ const Sales = () => {
         email: '',
     });
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+    const [userRole, setUserRole] = useState<UserRole['role']>('CAJERO');
+    const [isContingencyModalOpen, setIsContingencyModalOpen] = useState(false);
 
+    useEffect(() => {
+        const fetchUserRole = () => {
+            const storedRole = localStorage.getItem('userRole');
+            if (storedRole === 'ADMIN' || storedRole === 'CAJERO') {
+                setUserRole(storedRole);
+            }
+        };
+        fetchUserRole();
+    }, []);
+    
     interface Product {
         id: number;
         name: string;
@@ -58,6 +76,7 @@ const Sales = () => {
         unidadMedida: number;
     }
 
+    
 
     interface SaleDetails {
         total: number;
@@ -87,6 +106,8 @@ const Sales = () => {
         total: number;
         numeroFactura: number;
     }
+
+    
 
     useEffect(() => {
         const fetchProducts = async () => {
@@ -320,7 +341,8 @@ const Sales = () => {
     };
 
     const handleGoToDashboard = () => {
-        window.location.href = '/dashboard';
+        const route = userRole === 'ADMIN' ? '/dashboard' : '/dashboardCashier';
+        window.location.href = route;
     };
 
     const handleOpenReceiptModal = () => {
@@ -373,6 +395,58 @@ const Sales = () => {
         cantidad: product.quantity ?? 1,
         discount: product.discount
     }));
+
+    const renderRoleBasedMenu = () => {
+        if (userRole === 'ADMIN') {
+            return (
+                <div className="flex flex-col items-center hidden mt-4 space-y-2 group-hover:flex">
+                    <Link
+                        href="/dashboard"
+                        className="flex justify-center items-center w-[52px] h-[52px] text-gray-500 hover:text-gray-900 bg-white rounded-full border border-gray-200 dark:border-gray-600 shadow-sm dark:hover:text-white dark:text-gray-400 hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 focus:ring-4 focus:ring-gray-300 focus:outline-none dark:focus:ring-gray-400"
+                    >
+                        <FaHome className="w-5 h-5" />
+                        <span className="sr-only">Dashboard</span>
+                    </Link>
+
+                    <Link
+                        href="/clientList"
+                        className="flex justify-center items-center w-[52px] h-[52px] text-gray-500 hover:text-gray-900 bg-white rounded-full border border-gray-200 dark:border-gray-600 shadow-sm dark:hover:text-white dark:text-gray-400 hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 focus:ring-4 focus:ring-gray-300 focus:outline-none dark:focus:ring-gray-400"
+                    >
+                        <FaUsers className="w-5 h-5" />
+                        <span className="sr-only">Client List</span>
+                    </Link>
+
+                    <Link
+                        href="/products"
+                        className="flex justify-center items-center w-[52px] h-[52px] text-gray-500 hover:text-gray-900 bg-white rounded-full border border-gray-200 dark:border-gray-600 shadow-sm dark:hover:text-white dark:text-gray-400 hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 focus:ring-4 focus:ring-gray-300 focus:outline-none dark:focus:ring-gray-400"
+                    >
+                        <MdInventory className="w-5 h-5" />
+                        <span className="sr-only">Products</span>
+                    </Link>
+                </div>
+            );
+        } else {
+            return (
+                <div className="flex flex-col items-center hidden mt-4 space-y-2 group-hover:flex">
+                    <Link
+                        href="/dashboardCashier"
+                        className="flex justify-center items-center w-[52px] h-[52px] text-gray-500 hover:text-gray-900 bg-white rounded-full border border-gray-200 dark:border-gray-600 shadow-sm dark:hover:text-white dark:text-gray-400 hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 focus:ring-4 focus:ring-gray-300 focus:outline-none dark:focus:ring-gray-400"
+                    >
+                        <FaHome className="w-5 h-5" />
+                        <span className="sr-only">Cashier Dashboard</span>
+                    </Link>
+
+                    <Link
+                        href="/sales"
+                        className="flex justify-center items-center w-[52px] h-[52px] text-gray-500 hover:text-gray-900 bg-white rounded-full border border-gray-200 dark:border-gray-600 shadow-sm dark:hover:text-white dark:text-gray-400 hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 focus:ring-4 focus:ring-gray-300 focus:outline-none dark:focus:ring-gray-400"
+                    >
+                        <FaCartPlus className="w-5 h-5" />
+                        <span className="sr-only">New Sale</span>
+                    </Link>
+                </div>
+            );
+        }
+    };
 
     return (
         <div className="bg-white flex p-6 space-x-6 h-screen">
@@ -511,34 +585,7 @@ const Sales = () => {
                                 <span className="sr-only">Open actions menu</span>
                             </button>
 
-                            <div className="flex flex-col items-center hidden mt-4 space-y-2 group-hover:flex">
-                                {/* Enlace a Dashboard */}
-                                <Link
-                                    href="/dashboard"
-                                    className="flex justify-center items-center w-[52px] h-[52px] text-gray-500 hover:text-gray-900 bg-white rounded-full border border-gray-200 dark:border-gray-600 shadow-sm dark:hover:text-white dark:text-gray-400 hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 focus:ring-4 focus:ring-gray-300 focus:outline-none dark:focus:ring-gray-400"
-                                >
-                                    <FaHome className="w-5 h-5" />
-                                    <span className="sr-only">Dashboard</span>
-                                </Link>
-
-                                {/* Enlace a Client List */}
-                                <Link
-                                    href="/clientList"
-                                    className="flex justify-center items-center w-[52px] h-[52px] text-gray-500 hover:text-gray-900 bg-white rounded-full border border-gray-200 dark:border-gray-600 shadow-sm dark:hover:text-white dark:text-gray-400 hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 focus:ring-4 focus:ring-gray-300 focus:outline-none dark:focus:ring-gray-400"
-                                >
-                                    <FaUsers className="w-5 h-5" />
-                                    <span className="sr-only">Client List</span>
-                                </Link>
-
-                                {/* Enlace a Products */}
-                                <Link
-                                    href="/products"
-                                    className="flex justify-center items-center w-[52px] h-[52px] text-gray-500 hover:text-gray-900 bg-white rounded-full border border-gray-200 dark:border-gray-600 shadow-sm dark:hover:text-white dark:text-gray-400 hover:bg-gray-50 dark:bg-gray-700 dark:hover:bg-gray-600 focus:ring-4 focus:ring-gray-300 focus:outline-none dark:focus:ring-gray-400"
-                                >
-                                    <MdInventory className="w-5 h-5" />
-                                    <span className="sr-only">Products</span>
-                                </Link>
-                            </div>
+                            {renderRoleBasedMenu()}
                         </div>
                         {/* Barra de búsqueda */}
                         <input

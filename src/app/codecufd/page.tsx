@@ -6,6 +6,7 @@ import { FaPlus, FaSearch } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import { PATH_URL_BACKEND } from '@/utils/constants';
 import ModalContingency from '@/components/layouts/modalContingency';
+import CashierSidebar from '@/components/commons/cashierSidebar';
 
 interface CUFD {
     id: number;
@@ -15,12 +16,28 @@ interface CUFD {
     vigente: boolean;
 }
 
+
+interface UserRole {
+    role: 'ADMIN' | 'CAJERO';
+}
+
 const CUFDList = () => {
     const [cufds, setCUFDs] = useState<CUFD[]>([]);
     const [filter, setFilter] = useState<string>('');
     const [rowsPerPage, setRowsPerPage] = useState<number>(10);
     const [currentPage, setCurrentPage] = useState<number>(1);
+    const [userRole, setUserRole] = useState<UserRole['role']>('CAJERO');
     const [isContingencyModalOpen, setIsContingencyModalOpen] = useState<boolean>(false);
+
+    useEffect(() => {
+        const fetchUserRole = () => {
+            const storedRole = localStorage.getItem('userRole');
+            if (storedRole === 'ADMIN' || storedRole === 'CAJERO') {
+                setUserRole(storedRole);
+            }
+        };
+        fetchUserRole();
+    }, []);
 
     const fetchCUFDs = async () => {
         try {
@@ -184,15 +201,10 @@ const CUFDList = () => {
 
     return (
         <div className="flex min-h-screen">
-            <Sidebar />
+            {userRole === 'ADMIN' ? <Sidebar /> : <CashierSidebar />}
+
             <div className="flex flex-col w-full min-h-screen">
                 <Header />
-                {isContingencyModalOpen && (
-                    <ModalContingency
-                        isOpen={isContingencyModalOpen}
-                        onClose={() => setIsContingencyModalOpen(false)}
-                    />
-                )}
                 <div className="flex-grow overflow-auto bg-gray-50">
                     <div className="p-6">
                         <h2 className="text-xl font-bold mb-6 text-gray-700">Registros de CUFD</h2>
@@ -289,6 +301,9 @@ const CUFDList = () => {
                     </div>
                 </div>
             </div>
+            {isContingencyModalOpen && (
+                <ModalContingency isOpen={isContingencyModalOpen} onClose={closeModal} />
+            )}
         </div>
     );
 };

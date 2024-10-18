@@ -5,6 +5,8 @@ import Sidebar from '@/components/commons/sidebar';
 import { useEffect, useState } from 'react';
 import { FaEdit, FaSearch, FaTrashAlt } from 'react-icons/fa';
 import { PATH_URL_BACKEND } from '@/utils/constants';
+import CashierSidebar from '@/components/commons/cashierSidebar';
+
 import Swal from 'sweetalert2';
 import ModalContingency from '@/components/layouts/modalContingency';
 
@@ -37,6 +39,10 @@ interface Code {
     puntoVenta: PuntoVenta;
 }
 
+interface UserRole {
+    role: 'ADMIN' | 'CAJERO';
+}
+
 const CodeReceipt = () => {
     const [codes, setCodes] = useState<Code[]>([]);
     const [searchTerm, setSearchTerm] = useState<string>("");
@@ -47,10 +53,20 @@ const CodeReceipt = () => {
     const [daysToExpire, setDaysToExpire] = useState<number | null>(null);
     const [rowsPerPage, setRowsPerPage] = useState<number>(10);
     const [currentPage, setCurrentPage] = useState<number>(1);
+    const [userRole, setUserRole] = useState<UserRole['role']>('CAJERO');
     const [isContingencyModalOpen, setIsContingencyModalOpen] = useState<boolean>(false);
 
     const openContingencyModal = () => setIsContingencyModalOpen(true);
     const closeContingencyModal = () => setIsContingencyModalOpen(false);
+    useEffect(() => {
+        const fetchUserRole = () => {
+            const storedRole = localStorage.getItem('userRole');
+            if (storedRole === 'ADMIN' || storedRole === 'CAJERO') {
+                setUserRole(storedRole);
+            }
+        };
+        fetchUserRole();
+    }, []);
 
     useEffect(() => {
         const fetchCodes = async () => {
@@ -150,9 +166,9 @@ const CodeReceipt = () => {
             const currentDate = new Date();
             filtered = filtered.filter(code => {
                 const expirationDate = new Date(code.fechaVigencia);
-                if (filterStatus === "Vencidos") {
+                if (filterStatus === "Vencido") {
                     return expirationDate < currentDate && !code.vigente;
-                } else if (filterStatus === "No Vencidos") {
+                } else if (filterStatus === "Vigente") {
                     return expirationDate >= currentDate && code.vigente;
                 } else if (filterStatus === "Por Vencer") {
                     if (daysToExpire !== null) {
@@ -220,7 +236,7 @@ const CodeReceipt = () => {
 
     return (
         <div className="flex min-h-screen">
-            <Sidebar />
+            {userRole === 'ADMIN' ? <Sidebar /> : <CashierSidebar />}
             <div className="flex flex-col w-full min-h-screen">
                 <Header />
                 <div className="flex-grow overflow-auto bg-gray-50">
@@ -248,8 +264,8 @@ const CodeReceipt = () => {
                                 className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                             >
                                 <option value="Todos">Todos</option>
-                                <option value="Vencidos">Vencidos</option>
-                                <option value="No Vencidos">No Vencidos</option>
+                                <option value="Vencido">Vencidos</option>
+                                <option value="Vigente">Vigentes</option>
                                 <option value="Por Vencer">Por Vencer</option>
                             </select>
 
@@ -372,10 +388,7 @@ const CodeReceipt = () => {
                 </div>
             </div>
             {isContingencyModalOpen && (
-                <ModalContingency
-                    isOpen={isContingencyModalOpen}
-                    onClose={closeContingencyModal}
-                />
+                <ModalContingency isOpen={isContingencyModalOpen} onClose={closeModal} />
             )}
         </div>
     );
