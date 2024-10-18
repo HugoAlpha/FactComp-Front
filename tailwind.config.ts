@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 const config: Config = {
@@ -10,19 +9,20 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        principalColor: "#10314b",
-        firstColor: "#5086A8",
-        secondColor: "#F1F1F1",
-        thirdColor: "#75C4D2",
-        fourthColor: "#9CBFCF",
-        fifthColor: "#D8E3E8",
-        sixthColor: "#8C9CBC",
-        seventhColor: "#bfccdc",
-        eighthColor: "#d8e3e8",
-        ninthColor: "#bcc8d4"
+        principalColor: 'var(--principalColor)',
+        firstColor: 'var(--firstColor)',
+        secondColor: 'var(--secondColor)',
+        thirdColor: 'var(--thirdColor)',
+        fourthColor: 'var(--fourthColor)',
+        fifthColor: 'var(--fifthColor)',
+        sixthColor: 'var(--sixthColor)',
+        seventhColor: 'var(--seventhColor)',
+        eighthColor: 'var(--eighthColor)',
+        ninthColor: 'var(--ninthColor)'
       },
     },
   },
   plugins: [],
 };
+
 export default config;

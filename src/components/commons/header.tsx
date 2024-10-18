@@ -3,10 +3,43 @@ import { FaUser, FaCog } from 'react-icons/fa';
 import { IoExitOutline } from 'react-icons/io5';
 import ModalContingency from '../layouts/modalContingency';
 
+const normalColors = {
+    principalColor: "#10314b",
+    firstColor: "#5086A8",
+    secondColor: "#F1F1F1",
+    thirdColor: "#75C4D2",
+    fourthColor: "#9CBFCF",
+    fifthColor: "#D8E3E8",
+    sixthColor: "#8C9CBC",
+    seventhColor: "#bfccdc",
+    eighthColor: "#d8e3e8",
+    ninthColor: "#e8f3f5"
+};
+
+const contingencyColors = {
+    principalColor: "#254f54",
+    firstColor: "#346f76",
+    secondColor: "#3b7e86",
+    thirdColor: "#4a9ea8",
+    fourthColor: "#a2bbbe",
+    fifthColor: "#92c5cb",
+    sixthColor: "#b7d8dc",
+    seventhColor: "#c9e2e5",
+    eighthColor: "#dbecee",
+    ninthColor: "#edf5f6"
+};
+
 const Header = () => {
     const [showModal, setShowModal] = useState(false);
     const [contingencia, setContingencia] = useState(false);
     const [countdown, setCountdown] = useState(0);
+
+    const updateColors = (isContingency) => {
+        const colors = isContingency ? contingencyColors : normalColors;
+        Object.entries(colors).forEach(([key, value]) => {
+            document.documentElement.style.setProperty(`--${key}`, value);
+        });
+    };
 
     function calculateTimeLeft(activationTime) {
         const now = new Date().getTime();
@@ -15,9 +48,17 @@ const Header = () => {
     }
 
     useEffect(() => {
+        console.log('Estado de contingencia:', contingencia ? 'Activado' : 'Desactivado');
+    }, [contingencia]);
+
+    useEffect(() => {
+        updateColors(false);
+        
         if (typeof window !== 'undefined') { 
             const storedContingencia = localStorage.getItem('contingenciaEstado');
             const storedTime = localStorage.getItem('horaActivacionContingencia');
+            
+            //console.log('Hora de activación:', storedTime ? new Date(parseInt(storedTime)).toLocaleString() : 'No hay hora almacenada');
 
             if (storedContingencia && storedTime) {
                 const timeLeft = calculateTimeLeft(parseInt(storedTime));
@@ -25,20 +66,16 @@ const Header = () => {
                 if (timeLeft > 0) {
                     setContingencia(storedContingencia === '1');
                     setCountdown(timeLeft);
-                    console.log('Contingencia restaurada:', {
-                        estado: storedContingencia === '1',
-                        tiempoRestante: timeLeft,
-                        horaActivacion: new Date(parseInt(storedTime)).toLocaleString()
-                    });
+                    updateColors(storedContingencia === '1');
                 } else {
+                    console.log('El tiempo de contingencia ha expirado');
                     localStorage.removeItem('contingenciaEstado');
                     localStorage.removeItem('horaActivacionContingencia');
-                    console.log('Contingencia expirada');
+                    updateColors(false);
                 }
             }
         }
     }, []);
-
 
     useEffect(() => {
         let timer;
@@ -50,7 +87,7 @@ const Header = () => {
                         localStorage.removeItem('contingenciaEstado');
                         localStorage.removeItem('horaActivacionContingencia');
                         setContingencia(false);
-                        console.log('Contingencia finalizada por tiempo');
+                        updateColors(false);
                         return 0;
                     }
                     return newCount;
@@ -62,6 +99,7 @@ const Header = () => {
 
     const limpiarLocal = () => {
         localStorage.clear();
+        updateColors(false);  
         window.location.href = "/";
     };
 
@@ -78,23 +116,22 @@ const Header = () => {
         localStorage.removeItem('horaActivacionContingencia');
         setContingencia(false);
         setCountdown(0);
-        console.log('Contingencia desactivada');
+        updateColors(false);  
     };
 
     const confirmarContingencia = (eventoDescripcion) => {
         const horaActual = new Date().getTime();
+        console.log('Activando contingencia:', {
+            hora: new Date(horaActual).toLocaleString(),
+            descripcion: eventoDescripcion
+        });
+        
         localStorage.setItem('contingenciaEstado', '1');
         localStorage.setItem('horaActivacionContingencia', horaActual.toString());
 
         setContingencia(true);
         setCountdown(2 * 60 * 60 * 1000);
-
-        console.log('Contingencia activada:', {
-            estado: true,
-            evento: eventoDescripcion,
-            horaActivacion: new Date(horaActual).toLocaleString(),
-            tiempoTotal: '2 horas'
-        });
+        updateColors(true);  
 
         setShowModal(false);
     };
@@ -108,7 +145,7 @@ const Header = () => {
     };
 
     return (
-        <header className={`flex justify-between items-center bg-white shadow p-4 ${contingencia ? 'bg-red-100' : ''}`}>
+        <header className={`flex justify-between items-center shadow p-4 bg-ninthColor`}>
             <div className="container mx-auto px-6 flex justify-between items-center">
                 <div className="flex items-center flex-grow">
                     <div className="relative mx-2 lg:mx-0">
@@ -127,7 +164,7 @@ const Header = () => {
                             onChange={handleContingenciaChange} 
                             className="sr-only peer" 
                         />
-                        <div className="relative w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-focus:ring-4 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-teal-600"></div>
+                        <div className="relative w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-focus:ring-4 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-thirdColor"></div>
                     </label>
 
                     <button className="bg-gray-100 p-2 rounded-full hover:bg-gray-200">
