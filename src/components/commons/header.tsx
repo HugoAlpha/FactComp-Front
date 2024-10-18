@@ -28,6 +28,7 @@ const contingencyColors = {
     eighthColor: "#dbecee",
     ninthColor: "#edf5f6"
 };
+const CONTINGENCY_EVENT = 'contingencyStateChange';
 
 const Header = () => {
     const [showModal, setShowModal] = useState(false);
@@ -42,40 +43,70 @@ const Header = () => {
     };
 
     function calculateTimeLeft(activationTime) {
+        if (!activationTime) return 0;
         const now = new Date().getTime();
         const twoHours = 2 * 60 * 60 * 1000;
-        return Math.max(0, activationTime + twoHours - now);
+        return Math.max(0, parseInt(activationTime) + twoHours - now);
     }
 
-    useEffect(() => {
-        console.log('Estado de contingencia:', contingencia ? 'Activado' : 'Desactivado');
-    }, [contingencia]);
+    const syncContingencyState = () => {
+        const event = new CustomEvent(CONTINGENCY_EVENT);
+        window.dispatchEvent(event);
+    };
 
-    useEffect(() => {
-        updateColors(false);
-        
-        if (typeof window !== 'undefined') { 
+    const loadContingencyState = () => {
             const storedContingencia = localStorage.getItem('contingenciaEstado');
             const storedTime = localStorage.getItem('horaActivacionContingencia');
+            const storedFormattedTime = localStorage.getItem('fechaHoraContingencia');
             
-            //console.log('Hora de activación:', storedTime ? new Date(parseInt(storedTime)).toLocaleString() : 'No hay hora almacenada');
-
-            if (storedContingencia && storedTime) {
-                const timeLeft = calculateTimeLeft(parseInt(storedTime));
-                
-                if (timeLeft > 0) {
-                    setContingencia(storedContingencia === '1');
-                    setCountdown(timeLeft);
-                    updateColors(storedContingencia === '1');
-                } else {
-                    console.log('El tiempo de contingencia ha expirado');
-                    // localStorage.removeItem('contingenciaEstado');
-                    // localStorage.removeItem('horaActivacionContingencia');
-                    updateColors(false);
-                }
+            if (storedFormattedTime) {
+                console.log('Fecha y hora de activación:', storedFormattedTime);
             }
-        }
-    }, []);
+    
+            if (storedContingencia === '1' && storedTime) {
+                const timeLeft = calculateTimeLeft(storedTime);
+                if (timeLeft > 0) {
+                    setContingencia(true);
+                    setCountdown(timeLeft);
+                    updateColors(true);
+                    console.log('Estado de contingencia: Activado');
+                } else {
+                    clearContingencyState();
+                }
+            } else {
+                setContingencia(false);
+                updateColors(false);
+                console.log('Estado de contingencia: Desactivado');
+            }
+        };                    
+        const clearContingencyState = () => {
+            localStorage.removeItem('contingenciaEstado');
+            localStorage.removeItem('horaActivacionContingencia');
+            localStorage.removeItem('fechaHoraContingencia');
+            setContingencia(false);
+            setCountdown(0);
+            updateColors(false);
+            console.log('Estado de contingencia: Desactivado');
+            syncContingencyState();
+        };
+    
+        useEffect(() => {
+            loadContingencyState();
+    
+            // Escuchar cambios en localStorage de otras pestañas
+            window.addEventListener('storage', (e) => {
+                if (e.key && ['contingenciaEstado', 'horaActivacionContingencia', 'fechaHoraContingencia'].includes(e.key)) {
+                    loadContingencyState();
+                }
+            });
+    
+            // Escuchar el evento personalizado para sincronización
+            window.addEventListener(CONTINGENCY_EVENT, loadContingencyState);
+    
+            return () => {
+                window.removeEventListener(CONTINGENCY_EVENT, loadContingencyState);
+            };
+        }, []);
 
     useEffect(() => {
         let timer;
@@ -84,10 +115,7 @@ const Header = () => {
                 setCountdown(prev => {
                     const newCount = prev - 1000;
                     if (newCount <= 0) {
-                        localStorage.removeItem('contingenciaEstado');
-                        localStorage.removeItem('horaActivacionContingencia');
-                        setContingencia(false);
-                        updateColors(false);
+                        clearContingencyState();
                         return 0;
                     }
                     return newCount;
@@ -112,40 +140,41 @@ const Header = () => {
     };
 
     const desactivarContingencia = () => {
-        localStorage.setItem('contingenciaEstado', '0');
-        localStorage.removeItem('horaActivacionContingencia');
-        setContingencia(false);
-        setCountdown(0);
-        updateColors(false);  
-        window.dispatchEvent(new Event('contingencyDeactivated'));
+        clearContingencyState();
+        syncContingencyState();
     };
 
     const confirmarContingencia = (eventoDescripcion) => {
         const ahora = new Date();
-        const fechaFormateada = ahora.toISOString().split('T')[0];
-        const horaFormateada = ahora
-            .toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
-    
-        const fechaHoraFormateada = `${fechaFormateada} ${horaFormateada}`;
-    
+        const timestamp = ahora.getTime();
+
+        // Formatear la fecha y hora
+        const fechaHoraFormateada = ahora.toLocaleString('es-ES', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit',
+            hour: '2-digit',
+            minute: '2-digit',
+            second: '2-digit',
+            hour12: false
+        });
+        
+        localStorage.setItem('contingenciaEstado', '1');
+        localStorage.setItem('horaActivacionContingencia', timestamp.toString());
+        localStorage.setItem('fechaHoraContingencia', fechaHoraFormateada);
+
         console.log('Activando contingencia:', {
             fechaHora: fechaHoraFormateada,
+            timestamp: timestamp,
             descripcion: eventoDescripcion
         });
-    
-        localStorage.setItem('contingenciaEstado', '1');
-        localStorage.setItem('horaActivacionContingencia', fechaHoraFormateada); 
-    
+
         setContingencia(true);
         setCountdown(2 * 60 * 60 * 1000);
         updateColors(true);
-        window.dispatchEvent(new Event('contingencyActivated'));
-    
         setShowModal(false);
+        syncContingencyState();
     };
-    
-    
-    
 
     const formatTime = (milliseconds) => {
         const totalSeconds = Math.floor(milliseconds / 1000);
