@@ -120,21 +120,25 @@ const Header = () => {
     };
 
     const confirmarContingencia = (eventoDescripcion) => {
-        const horaActual = new Date().getTime();
+        const horaActual = new Date();
+        const horaFormateada = horaActual
+            .toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }); // Formato HH:MM
+    
         console.log('Activando contingencia:', {
-            hora: new Date(horaActual).toLocaleString(),
+            hora: horaFormateada,
             descripcion: eventoDescripcion
         });
-        
+    
         localStorage.setItem('contingenciaEstado', '1');
-        localStorage.setItem('horaActivacionContingencia', horaActual.toString());
-
+        localStorage.setItem('horaActivacionContingencia', horaFormateada);
+    
         setContingencia(true);
         setCountdown(2 * 60 * 60 * 1000);
-        updateColors(true);  
-
+        updateColors(true);
+    
         setShowModal(false);
     };
+    
 
     const formatTime = (milliseconds) => {
         const totalSeconds = Math.floor(milliseconds / 1000);

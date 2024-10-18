@@ -25,7 +25,7 @@ const Login = () => {
         router.push('/dashboard');
       });
 
-    } else if (email === "cajero@gmail.com" && password === "Cashier123!") {
+    } else if (email === "cajero@gmail.com" && password === "Alpha123!") {
       Swal.fire({
         position: "center",
         icon: 'success',
