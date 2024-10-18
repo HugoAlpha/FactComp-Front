@@ -40,7 +40,7 @@ const Legends: React.FC = () => {
 
     const checkServerCommunication = async () => {
         try {
-            const response = await fetch(`${PATH_URL_BACKEND}/codigos/cuis/activo/1`);
+            const response = await fetch(`${PATH_URL_BACKEND}/contingencia/verificar-comunicacion`);
             if (!response.ok) {
                 if (response.status === 500) {
                     Swal.fire({
