@@ -13,8 +13,6 @@ import { PATH_URL_BACKEND } from '@/utils/constants';
 import { GrDocumentConfig } from "react-icons/gr";
 import CreateEditClientModal from '@/components/layouts/modalCreateEditClient';
 import ModalCreateProduct from '@/components/layouts/modalCreateProduct';
-import CashierSidebar from '@/components/commons/cashierSidebar';
-
 
 interface UserRole {
     role: 'ADMIN' | 'CAJERO';
@@ -109,38 +107,39 @@ const Sales = () => {
 
     
 
-    useEffect(() => {
-        const fetchProducts = async () => {
-            try {
-                const response = await fetch(`${PATH_URL_BACKEND}/item/obtener-items`);
-                if (response.ok) {
-                    const data: Product[] = await response.json();
-                    const formattedProducts: Product[] = data.map((item) => ({
-                        id: item.id,
-                        name: item.descripcion,
-                        price: item.precioUnitario,
-                        discount: item.discount || 0,
-                        img: '/images/apple-watch.png',
-                        descripcion: item.descripcion,
-                        precioUnitario: item.precioUnitario,
-                        codigoProductoSin: item.codigoProductoSin,
-                        quantity: 1,
-                        totalPrice: item.precioUnitario,
-                        codigo: item.codigo,
-                        unidadMedida: item.unidadMedida,
-                    }));
-
-                    setProducts(formattedProducts);
-                } else {
-                    Swal.fire('Error', 'Error al obtener productos', 'error');
-                }
-            } catch (error) {
-                Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
+    const fetchProducts = async () => {
+        try {
+            const response = await fetch(`${PATH_URL_BACKEND}/item/obtener-items`);
+            if (response.ok) {
+                const data: Product[] = await response.json();
+                const formattedProducts: Product[] = data.map((item) => ({
+                    id: item.id,
+                    name: item.descripcion,
+                    price: item.precioUnitario,
+                    discount: item.discount || 0,
+                    img: '/images/apple-watch.png',
+                    descripcion: item.descripcion,
+                    precioUnitario: item.precioUnitario,
+                    codigoProductoSin: item.codigoProductoSin,
+                    quantity: 1,
+                    totalPrice: item.precioUnitario,
+                    codigo: item.codigo,
+                    unidadMedida: item.unidadMedida,
+                }));
+    
+                setProducts(formattedProducts);
+            } else {
+                Swal.fire('Error', 'Error al obtener productos', 'error');
             }
-        };
-
+        } catch (error) {
+            Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
+        }
+    };
+    
+    useEffect(() => {
         fetchProducts();
     }, []);
+    
 
 
     const updateDiscount = (id: number, value: string) => {
@@ -448,6 +447,10 @@ const Sales = () => {
         }
     };
 
+    const refreshProductList = async () => {
+        await fetchProducts();
+    };
+
     return (
         <div className="bg-white flex p-6 space-x-6 h-screen">
             {!isSaleSuccessful ? (
@@ -675,10 +678,10 @@ const Sales = () => {
                         )}
                     </div>
                     <ModalCreateProduct
-                        isOpen={isEditModalOpen}
-                        onClose={() => setIsEditModalOpen(false)}
-                        onProductCreated={updateProductInList}
-                        product={productToEdit}
+                      isOpen={isEditModalOpen}
+                      onClose={() => setIsEditModalOpen(false)}
+                      onProductCreated={() => refreshProductList()}
+                      product={productToEdit}
                     />
 
                     <ModalVerifySale

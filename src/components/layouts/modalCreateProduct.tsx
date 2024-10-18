@@ -50,7 +50,6 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
         codigoProductoSin: '',
     });
 
-    // Primer useEffect: carga productOptions y unidadMedidaOptions solo al abrir el modal
     useEffect(() => {
         if (isOpen) {
             const fetchProductOptions = async () => {
@@ -84,9 +83,8 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
             fetchProductOptions();
             fetchUnidadMedidaOptions();
         }
-    }, [isOpen]); // Solo ejecutamos cuando se abre el modal.
+    }, [isOpen]); 
 
-    // Segundo useEffect: actualiza los campos solo si hay producto y las opciones ya están cargadas
     useEffect(() => {
         if (product && productOptions.length > 0) {
             setCodigo(product.codigo);
@@ -96,15 +94,14 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
             setCodigoProductoSin(product.codigoProductoSin ? product.codigoProductoSin.toString() : '');
             setSelectedUnidadMedida(product.unidadMedida ? product.unidadMedida.toString() : '');
 
-            // Buscar y asignar la opción de homologación que corresponde al producto
             const foundOption = productOptions.find(
                 (option) => option.codigoProducto === product.codigoProductoSin
             );
             if (foundOption) {
-                setSelectedOption(foundOption);  // Asignar la opción seleccionada correctamente
+                setSelectedOption(foundOption);  
             }
         }
-    }, [product, productOptions]); // Solo se actualiza cuando el producto o las opciones cambian.
+    }, [product, productOptions]); 
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -144,7 +141,7 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
             descripcion: nombreProducto,
             unidadMedida: selectedUnidadMedida,
             precioUnitario: Number(precioUnitario),
-            codigoProductoSin: Number(selectedOption?.codigoProducto), // Usar la opción seleccionada
+            codigoProductoSin: Number(selectedOption?.codigoProducto), 
         };
 
         try {

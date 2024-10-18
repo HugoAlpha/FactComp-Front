@@ -97,9 +97,9 @@ const CashierSidebar = () => {
                                 </Link>
                             </li>
                             <li>
-                                <Link href="sales"
-                                    className={`block p-2 font-bold hover:bg-firstColor rounded-lg ${activeLink === '/sales' ? 'bg-white bg-opacity-20 text-ninthColor' : ''}`}
-                                    onClick={() => handleLinkClick('/sales')}>
+                                <Link href="salesCashier"
+                                    className={`block p-2 font-bold hover:bg-firstColor rounded-lg ${activeLink === '/salesCashier' ? 'bg-white bg-opacity-20 text-ninthColor' : ''}`}
+                                    onClick={() => handleLinkClick('/salesCashier')}>
                                     <span className="flex items-center">
                                         <div className="w-6 h-6 flex justify-center items-center">
                                             <MdOutlinePointOfSale size={20} />
