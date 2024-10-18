@@ -69,8 +69,8 @@ const Header = () => {
                     updateColors(storedContingencia === '1');
                 } else {
                     console.log('El tiempo de contingencia ha expirado');
-                    localStorage.removeItem('contingenciaEstado');
-                    localStorage.removeItem('horaActivacionContingencia');
+                    // localStorage.removeItem('contingenciaEstado');
+                    // localStorage.removeItem('horaActivacionContingencia');
                     updateColors(false);
                 }
             }
@@ -117,27 +117,34 @@ const Header = () => {
         setContingencia(false);
         setCountdown(0);
         updateColors(false);  
+        window.dispatchEvent(new Event('contingencyDeactivated'));
     };
 
     const confirmarContingencia = (eventoDescripcion) => {
-        const horaActual = new Date();
-        const horaFormateada = horaActual
-            .toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }); // Formato HH:MM
+        const ahora = new Date();
+        const fechaFormateada = ahora.toISOString().split('T')[0];
+        const horaFormateada = ahora
+            .toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+    
+        const fechaHoraFormateada = `${fechaFormateada} ${horaFormateada}`;
     
         console.log('Activando contingencia:', {
-            hora: horaFormateada,
+            fechaHora: fechaHoraFormateada,
             descripcion: eventoDescripcion
         });
     
         localStorage.setItem('contingenciaEstado', '1');
-        localStorage.setItem('horaActivacionContingencia', horaFormateada);
+        localStorage.setItem('horaActivacionContingencia', fechaHoraFormateada); 
     
         setContingencia(true);
         setCountdown(2 * 60 * 60 * 1000);
         updateColors(true);
+        window.dispatchEvent(new Event('contingencyActivated'));
     
         setShowModal(false);
     };
+    
+    
     
 
     const formatTime = (milliseconds) => {
