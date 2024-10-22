@@ -40,17 +40,23 @@ const BillList = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isContingencyModalOpen, setIsContingencyModalOpen] = useState(false);
   const [isContingencyMode, setIsContingencyMode] = useState(false);
-
+  const [contingencyState, setContingencyState] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<UserRole['role']>('CAJERO');
 
   useEffect(() => {
-    const fetchUserRole = () => {
+    if (typeof window !== "undefined") {
       const storedRole = localStorage.getItem('userRole');
       if (storedRole === 'ADMIN' || storedRole === 'CAJERO') {
         setUserRole(storedRole);
       }
-    };
-    fetchUserRole();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const contingenciaEstado = localStorage.getItem('contingenciaEstado');
+      setIsContingencyMode(contingenciaEstado === '1');
+    }
   }, []);
 
   const fetchBills = async (estado?: string) => {
@@ -220,28 +226,33 @@ const BillList = () => {
   };
 
   const filteredBills = useMemo(() => {
-    const contingenciaEstado = localStorage.getItem('contingenciaEstado');
-
-    return bills.filter((bill) => {
-      const matchesSearch =
-        bill.documentNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        bill.client.toLowerCase().includes(searchQuery.toLowerCase());
-
-      const matchesEstado =
-        estadoFilter === 'TODAS' ||
-        (estadoFilter === 'VALIDA' && bill.estado.toUpperCase() === 'VALIDA') ||
-        (estadoFilter === 'ANULADO' && bill.estado.toUpperCase() === 'ANULADO');
-
-      const matchesFecha =
-        (!fechaDesde || new Date(bill.date) >= new Date(fechaDesde)) &&
-        (!fechaHasta || new Date(bill.date) <= new Date(fechaHasta));
-      if (contingenciaEstado === '1') {
-        return bill.estado.toUpperCase() === 'OFFLINE' && matchesSearch && matchesFecha;
-      }
-
-      return matchesSearch && matchesEstado && matchesFecha;
-    });
+    if (typeof window !== "undefined") {
+      const contingenciaEstado = localStorage.getItem('contingenciaEstado');
+  
+      return bills.filter((bill) => {
+        const matchesSearch =
+          bill.documentNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          bill.client.toLowerCase().includes(searchQuery.toLowerCase());
+  
+        const matchesEstado =
+          estadoFilter === 'TODAS' ||
+          (estadoFilter === 'VALIDA' && bill.estado.toUpperCase() === 'VALIDA') ||
+          (estadoFilter === 'ANULADO' && bill.estado.toUpperCase() === 'ANULADO');
+  
+        const matchesFecha =
+          (!fechaDesde || new Date(bill.date) >= new Date(fechaDesde)) &&
+          (!fechaHasta || new Date(bill.date) <= new Date(fechaHasta));
+  
+        if (contingenciaEstado === '1') {
+          return bill.estado.toUpperCase() === 'OFFLINE' && matchesSearch && matchesFecha;
+        }
+  
+        return matchesSearch && matchesEstado && matchesFecha;
+      });
+    }
+    return [];
   }, [bills, searchQuery, estadoFilter, fechaDesde, fechaHasta]);
+  
 
 
   const totalPages = Math.ceil(filteredBills.length / rowsPerPage);
@@ -585,3 +596,4 @@ const BillList = () => {
 };
 
 export default BillList;
+
