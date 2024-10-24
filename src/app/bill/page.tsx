@@ -462,8 +462,8 @@ const BillList = () => {
               </select>
 
               <div className="flex items-center space-x-4">
-                <div className="flex flex-col">
-                  <label htmlFor="fechaDesde" className="text-sm font-medium text-gray-700">Fecha desde:</label>
+                <div className="flex">
+                  <label htmlFor="fechaDesde" className="text-sm font-medium text-gray-700 place-content-center m-1">Fecha desde:</label>
                   <input
                     id="fechaDesde"
                     type="date"
@@ -473,8 +473,8 @@ const BillList = () => {
                   />
                 </div>
 
-                <div className="flex flex-col">
-                  <label htmlFor="fechaHasta" className="text-sm font-medium text-gray-700">Fecha hasta:</label>
+                <div className="flex ">
+                  <label htmlFor="fechaHasta" className="text-sm font-medium text-gray-700 place-content-center m-1">Fecha hasta:</label>
                   <input
                     id="fechaHasta"
                     type="date"
@@ -551,8 +551,6 @@ const BillList = () => {
                   </tbody>
                 </table>
               </div>
-
-              Paginación
               <div className="flex space-x-1 justify-center mt-6">
                 <button
                   onClick={handlePrevPage}
