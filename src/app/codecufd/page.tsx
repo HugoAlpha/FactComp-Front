@@ -208,14 +208,7 @@ const CUFDList = () => {
                 <div className="flex-grow overflow-auto bg-gray-50">
                     <div className="p-6">
                         <h2 className="text-xl font-bold mb-6 text-gray-700">Registros de CUFD</h2>
-                        <div className="flex justify-end items-center mb-4">
-                            <button
-                                className="bg-sixthColor text-white py-2 px-4 rounded-lg hover:bg-thirdColor text-lg"
-                                onClick={handleEmitCUFD}
-                            >
-                                Emitir CUFD <FaPlus className="inline-block ml-2" />
-                            </button>
-                        </div>
+                        
                         <div className="flex items-center mb-4 justify-between">
                             <div>
                                 <label htmlFor="itemsPerPage" className="mr-2 text-sm">Elementos por página:</label>
@@ -240,6 +233,12 @@ const CUFDList = () => {
                                 />
                                 <FaSearch className="absolute right-4 text-gray-500 text-xl pointer-events-none" />
                             </div>
+                            <button
+                                className="bg-principalColor text-white py-2 px-4 rounded-lg hover:bg-firstColor text-lg"
+                                onClick={handleEmitCUFD}
+                            >
+                                Emitir CUFD <FaPlus className="inline-block ml-2" />
+                            </button>
                         </div>
 
                         <div className="overflow-x-auto shadow-lg rounded-lg border border-gray-200">
