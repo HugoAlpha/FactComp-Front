@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { FaUser, FaCog } from 'react-icons/fa';
 import { IoExitOutline } from 'react-icons/io5';
 import ModalContingency from '../layouts/modalContingency';
@@ -34,6 +34,12 @@ const Header = () => {
     const [showModal, setShowModal] = useState(false);
     const [contingencia, setContingencia] = useState(false);
     const [countdown, setCountdown] = useState(0);
+    const [showUserMenu, setShowUserMenu] = useState(false);
+    const [showSettingsMenu, setShowSettingsMenu] = useState(false);
+
+    const userMenuRef = useRef(null);
+    const settingsMenuRef = useRef(null);
+
 
     const updateColors = (isContingency) => {
         const colors = isContingency ? contingencyColors : normalColors;
@@ -92,15 +98,11 @@ const Header = () => {
     
         useEffect(() => {
             loadContingencyState();
-    
-            // Escuchar cambios en localStorage de otras pestañas
             window.addEventListener('storage', (e) => {
                 if (e.key && ['contingenciaEstado', 'horaActivacionContingencia', 'fechaHoraContingencia'].includes(e.key)) {
                     loadContingencyState();
                 }
             });
-    
-            // Escuchar el evento personalizado para sincronización
             window.addEventListener(CONTINGENCY_EVENT, loadContingencyState);
     
             return () => {
@@ -147,8 +149,6 @@ const Header = () => {
     const confirmarContingencia = (eventoDescripcion) => {
         const ahora = new Date();
         const timestamp = ahora.getTime();
-
-        // Formatear la fecha y hora
         const fechaHoraFormateada = ahora.toLocaleString('es-ES', {
             year: 'numeric',
             month: '2-digit',
@@ -184,6 +184,33 @@ const Header = () => {
         return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
     };
 
+    const handleUserMenuToggle = () => {
+        setShowUserMenu((prev) => !prev);
+        if (showSettingsMenu) setShowSettingsMenu(false);
+    };
+
+    const handleSettingsMenuToggle = () => {
+        setShowSettingsMenu((prev) => !prev);
+        if (showUserMenu) setShowUserMenu(false);
+    };
+
+    const handleOutsideClick = (event) => {
+        if (
+            userMenuRef.current && !userMenuRef.current.contains(event.target) &&
+            settingsMenuRef.current && !settingsMenuRef.current.contains(event.target)
+        ) {
+            setShowUserMenu(false);
+            setShowSettingsMenu(false);
+        }
+    };
+
+    useEffect(() => {
+        document.addEventListener('click', handleOutsideClick);
+        return () => {
+            document.removeEventListener('click', handleOutsideClick);
+        };
+    }, []);
+
     return (
         <header className={`flex justify-between items-center shadow p-4 bg-ninthColor`}>
             <div className="container mx-auto px-6 flex justify-between items-center">
@@ -207,13 +234,60 @@ const Header = () => {
                         <div className="relative w-11 h-6 bg-gray-200 rounded-full peer dark:bg-gray-700 peer-focus:ring-4 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-thirdColor"></div>
                     </label>
 
-                    <button className="bg-gray-100 p-2 rounded-full hover:bg-gray-200">
-                        <FaCog className="text-principalColor text-xl" />
-                    </button>
+                    <div className="relative" ref={settingsMenuRef}>
+                        <button 
+                            onClick={handleSettingsMenuToggle} 
+                            className="bg-gray-100 p-2 rounded-full hover:bg-gray-200"
+                        >
+                            <FaCog className="text-principalColor text-xl" />
+                        </button>
 
-                    <button className="bg-gray-100 p-2 rounded-full hover:bg-gray-200">
-                        <FaUser className="text-principalColor text-xl" />
-                    </button>
+                        {showSettingsMenu && (
+                            <div className="absolute right-0 mt-2 w-44 bg-white rounded-lg shadow z-50 divide-y divide-gray-100">
+                                <ul className="py-2 text-sm text-gray-700">
+                                    <li>
+                                        <a href="#" className="block px-4 py-2 hover:bg-gray-100">Editar perfil</a>
+                                    </li>
+                                    <li>
+                                        <a href="#" className="block px-4 py-2 hover:bg-gray-100">Cambio de contraseña</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Botón de usuario con menú desplegable */}
+                    <div className="relative" ref={userMenuRef}>
+                        <button 
+                            onClick={handleUserMenuToggle} 
+                            className="bg-gray-100 p-2 rounded-full hover:bg-gray-200"
+                        >
+                            <FaUser className="text-principalColor text-xl" />
+                        </button>
+
+                        {showUserMenu && (
+                            <div className="absolute right-0 mt-2 w-44 bg-white rounded-lg shadow z-50 divide-y divide-gray-100">
+                                <div className="px-4 py-3 text-sm text-gray-900">
+                                    <div>Usuario</div>
+                                    <div className="font-medium truncate">email@example.com</div>
+                                </div>
+                                <ul className="py-2 text-sm text-gray-700">
+                                    <li>
+                                        <a href="#" className="block px-4 py-2 hover:bg-gray-100">Dashboard</a>
+                                    </li>
+                                    <li>
+                                        <a href="#" className="block px-4 py-2 hover:bg-gray-100">Settings</a>
+                                    </li>
+                                    <li>
+                                        <a href="#" className="block px-4 py-2 hover:bg-gray-100">Earnings</a>
+                                    </li>
+                                </ul>
+                                <div className="py-2">
+                                    <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign out</a>
+                                </div>
+                            </div>
+                        )}
+                    </div>
 
                     <button onClick={limpiarLocal} className="flex items-center bg-gray-100 rounded-full p-1 text-principalColor">
                         <IoExitOutline className="w-7 h-7 pl-1" />
