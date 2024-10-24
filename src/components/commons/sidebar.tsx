@@ -18,10 +18,6 @@ const Sidebar = () => {
         }
     }, []);
 
-    const toggleMenu = (menuName) => {
-        setOpenMenu(prev => (prev === menuName ? null : menuName));
-    };
-
     const toggleSidebar = () => {
         setIsOpen(!isOpen);
     };
@@ -64,24 +60,23 @@ const Sidebar = () => {
                 { name: 'CUFD', href: 'codecufd' }
             ]
         },
-        //{
-        //  name: 'Parámetros',
-        //icon: <FaFileInvoice size={20} />,
-        //subItems: [
-        //    { name: 'Submenú 1', href: '#' },
-        //  { name: 'Submenú 2', href: '#' }
-        //]
-        //},
         {
             name: 'Configuración SIAT',
             icon: <HiDocumentCheck size={20} />,
             subItems: [
-                //{ name: 'Actividades', href: 'activities' },
                 { name: 'Leyendas', href: 'legends' },
                 { name: 'Parámetros', href: 'parameters' }
             ]
         }
     ];
+
+    const handleMouseEnter = (menuName) => {
+        setOpenMenu(menuName);
+    };
+
+    const handleMouseLeave = () => {
+        setOpenMenu(null);
+    };
 
     return (
         <div className="flex min-h-screen">
@@ -93,13 +88,11 @@ const Sidebar = () => {
 
             <aside className={`bg-principalColor text-white min-h-screen fixed md:relative z-10 transition-all duration-300 ${isOpen ? 'w-64' : 'w-0 md:w-16 overflow-hidden'}`}>
                 <div className="p-4 flex flex-col h-full">
-                    {/* Botón para colapsar la barra lateral */}
                     <div className={`flex ${isOpen ? 'justify-end' : 'justify-center'} mb-2`}>
                         <button className='text-white' onClick={toggleSidebar}>
                             <FaBars size={24} />
                         </button>
                     </div>
-                    {/* Imagen del logo */}
                     <div className={`mb-6 ${isOpen ? 'block' : 'hidden'}`}>
                         <Image
                             src="/images/LogoIdAlpha2.png"
@@ -109,10 +102,8 @@ const Sidebar = () => {
                             className="mx-auto"
                         />
                     </div>
-                    {/* Menú de navegación */}
                     <nav className="flex-grow">
                         <ul className="space-y-2">
-                            {/* Enlace al dashboard */}
                             <li>
                                 <Link href="dashboard"
                                     className={`block p-2 font-bold hover:bg-firstColor rounded-lg ${activeLink === '/dashboard' ? 'bg-white bg-opacity-20 text-ninthColor' : ''}`}
@@ -125,7 +116,6 @@ const Sidebar = () => {
                                     </span>
                                 </Link>
                             </li>
-                            {/* Enlace a Nueva Venta */}
                             <li>
                                 <Link href="sales"
                                     className={`block p-2 font-bold hover:bg-firstColor rounded-lg ${activeLink === '/sales' ? 'bg-white bg-opacity-20 text-ninthColor' : ''}`}
@@ -140,9 +130,12 @@ const Sidebar = () => {
                             </li>
 
                             {menuItems.map((item, index) => (
-                                <li key={index}>
+                                <li
+                                    key={index}
+                                    onMouseEnter={() => handleMouseEnter(item.name)}
+                                    onMouseLeave={handleMouseLeave}
+                                >
                                     <button
-                                        onClick={() => toggleMenu(item.name)}
                                         className="flex items-center justify-between w-full p-2 text-left font-bold hover:bg-firstColor rounded-lg"
                                     >
                                         <span className="flex items-center">
@@ -169,7 +162,6 @@ const Sidebar = () => {
                                 </li>
                             ))}
 
-                            {/* Enlace a Usuarios */}
                             <li>
                                 <Link href="users"
                                     className={`block p-2 font-bold hover:bg-firstColor rounded-lg ${activeLink === '/users' ? 'bg-white bg-opacity-20 text-ninthColor' : ''}`}
@@ -183,7 +175,6 @@ const Sidebar = () => {
                                 </Link>
                             </li>
 
-                            {/* Enlace a Empresa */}
                             <li>
                                 <Link href="enterprise"
                                     className={`block p-2 font-bold hover:bg-firstColor rounded-lg ${activeLink === '/enterprise' ? 'bg-white bg-opacity-20 text-ninthColor' : ''}`}
@@ -198,7 +189,6 @@ const Sidebar = () => {
                             </li>
                         </ul>
                     </nav>
-                    {/* Botón de Logout */}
                     <div className="mt-auto">
                         <button className="flex items-center text-white font-bold hover:bg-firstColor p-2 w-full rounded-lg">
                             <div className="w-6 h-6 flex justify-center items-center">
