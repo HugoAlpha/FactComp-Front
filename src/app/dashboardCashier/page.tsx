@@ -1,11 +1,13 @@
 "use client";
-
-import Header from "@/components/commons/header";
-import CashierSidebar from "@/components/commons/cashierSidebar";
-import { PATH_URL_BACKEND } from "@/utils/constants";
-import CreateEditClientModal from "@/components/layouts/modalCreateEditClient";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { FaCircle } from "react-icons/fa";
+import { IoMdPersonAdd } from "react-icons/io";
+import { MdPointOfSale } from "react-icons/md";
+import CashierSidebar from "@/components/commons/cashierSidebar";
+import Header from "@/components/commons/header";
+import CreateEditClientModal from "@/components/layouts/modalCreateEditClient";
+import { PATH_URL_BACKEND } from "@/utils/constants";
+import Swal from "sweetalert2";
 
 const DashboardCashier = () => {
     const [isClientModalOpen, setIsClientModalOpen] = useState(false);
@@ -38,24 +40,19 @@ const DashboardCashier = () => {
             try {
                 const dailySalesResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/ventas-diarias-monto?fecha=2024-10-03`);
                 const dailySalesData = await dailySalesResponse.json();
-                console.log("Respuesta completa de ventas diarias:", dailySalesData);
                 setDailySales(dailySalesData || 0);
-
+    
                 const monthlySalesResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/ventas-mensuales-montos?fechaInicio=2024-10-01&fechaFin=2024-10-03`);
                 const monthlySalesData = await monthlySalesResponse.json();
-                console.log("Respuesta completa de ventas mensuales:", monthlySalesData);
                 setMonthlySales(monthlySalesData || 0);
-
+    
                 const totalOrdersResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/ventas-cantidad/1`);
                 const totalOrdersData = await totalOrdersResponse.json();
-                console.log("Respuesta completa de total de órdenes:", totalOrdersData);
                 setTotalOrders(totalOrdersData || 0);
-
+    
                 const totalClientsResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/clientes-registrados`);
                 const totalClientsData = await totalClientsResponse.json();
-                console.log("Respuesta completa de clientes registrados:", totalClientsData);
                 setTotalClients(totalClientsData || 0);
-
                 const response = await fetch(`${PATH_URL_BACKEND}/factura`);
                 if (response.ok) {
                     const data = await response.json();
@@ -70,24 +67,38 @@ const DashboardCashier = () => {
                         date: new Date(invoice.fechaEmision).toLocaleDateString(),
                         company: invoice.razonSocialEmisor,
                     }));
-
-                    const formattedClients = lastFourInvoices.map(invoice => ({
-                        id: invoice.id,
-                        name: invoice.nombreRazonSocial ? invoice.nombreRazonSocial : "Sin Nombre",
-                        amount: `Bs ${invoice.montoTotal.toFixed(2)}`,
-                        location: `${invoice.numeroDocumento}`,
-                    }));
-
                     setRecentInvoices(formattedInvoices);
-                    setRecentClients(formattedClients);
                 } else {
                     console.error("Error al obtener los datos de las facturas");
+                }
+    
+                const clientsResponse = await fetch(`${PATH_URL_BACKEND}/api/clientes/`);
+                if (clientsResponse.ok) {
+                    const clientsData = await clientsResponse.json();
+                    const sortedClients = clientsData.sort((a, b) => b.id - a.id).slice(0, 4);
+                    const documentTypes = {
+                        1: "CI",
+                        2: "CEX",
+                        5: "NIT",
+                        3: "PAS",
+                        4: "OD"
+                    };
+    
+                    const formattedClients = sortedClients.map(client => ({
+                        id: client.id,
+                        name: client.nombreRazonSocial,
+                        document: `${documentTypes[client.codigoTipoDocumentoIdentidad] || 'Documento Desconocido'} - ${client.numeroDocumento}`,
+                        code: client.codigoCliente || "Sin Código"
+                    }));
+                    setRecentClients(formattedClients);
+                } else {
+                    console.error("Error al obtener los datos de los clientes");
                 }
             } catch (error) {
                 console.error("Error al conectar con el servidor", error);
             }
         };
-
+    
         fetchData();
     }, []);
 
@@ -231,52 +242,54 @@ const DashboardCashier = () => {
                                     </div>
                                     <p className="text-sm text-slate-500 px-4">Resumen de clientes</p>
                                     <div className="overflow-x-auto px-4">
-                                        <table className="w-full text-sm text-left text-gray-500">
-                                            <tbody>
-                                                {recentClients.map((client) => (
-                                                    <tr className="bg-white border-b hover:bg-gray-50" key={client.id}>
-                                                        <th scope="row" className="flex items-center px-6 py-4 whitespace-nowrap">
-                                                            <img className="w-10 h-10 rounded-full" src={`https://cdn.pixabay.com/photo/2017/11/10/05/48/user-2935527_1280.png`} alt={client.name} />
-                                                            <div className="ps-3">
-                                                                <div className="text-base font-semibold">{client.name}</div>
-                                                                <div className="font-normal text-gray-500">{client.location}</div>
-                                                            </div>
-                                                        </th>
-                                                        <td className="px-6 py-4 text-right">{client.amount}</td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
+                                    <table className="w-full text-sm text-left text-gray-500">
+                                        <tbody>
+                                        {recentClients.map((client) => (
+                                        <tr className="bg-white border-b hover:bg-gray-50" key={client.id}>
+                                        <th scope="row" className="flex items-center px-6 py-4 whitespace-nowrap">
+                                        <img className="w-10 h-10 rounded-full" src={`https://cdn.pixabay.com/photo/2017/11/10/05/48/user-2935527_1280.png`} alt={client.name} />
+                                        <div className="ps-3">
+                                        <div className="text-base font-semibold">{client.name}</div>
+                                        <div className="font-normal text-gray-500">{client.document}</div>
+                                        </div>
+                                        </th>
+                                        <td className="px-6 py-4 text-right">{client.code}</td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                    </table>    
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         <section className="bg-white mt-8">
-                            <div className="py-8 px-4 mx-auto max-w-screen-xl sm:py-16 lg:px-6">
+                        <div className="py-6 px-4 mx-auto max-w-screen-xl sm:py-10 lg:px-6">
                                 <div className="mx-auto max-w-screen-sm text-center">
-                                    <h2 className="mb-4 text-4xl tracking-tight font-extrabold leading-tight text-gray-900">
+                                    <h2 className="text-4xl tracking-tight font-extrabold leading-tight text-gray-900">
                                         Realiza una nueva acción
                                     </h2>
                                     <p className="mb-6 font-light text-gray-500 md:text-lg">
                                         Inicia una nueva venta o agrega un cliente nuevo para continuar con tus operaciones.
                                     </p>
                                     <div className="flex justify-center space-x-4">
-                                        {/* Botón para nueva venta */}
-                                        <a
+                                         {/* Botón para nueva venta */}
+                                         <a
                                             href="/sales"
-                                            className="text-white bg-firstColor hover:bg-fourthColor focus:ring-4 focus:ring-primary-300 font-bold rounded-lg text-sm px-5 py-2.5 dark:bg-primary-600 dark:hover:bg-[#2C3E50] focus:outline-none dark:focus:ring-primary-800"
+                                            className=" flex items-center text-white bg-firstColor hover:bg-fourthColor focus:ring-4 focus:ring-primary-300 font-bold rounded-lg text-sm px-5 py-2.5 dark:bg-primary-600 dark:hover:bg-[#2C3E50] focus:outline-none dark:focus:ring-primary-800"
                                         >
-                                            Iniciar una nueva Venta
+                                            <MdPointOfSale className="text-xl mr-2" />
+                                            <span>Iniciar nueva venta</span>
                                         </a>
                                         {/* Botón para nuevo cliente */}
                                         <a
-                                            href="#"
-                                            onClick={handleOpenClientModal}
-                                            className="text-white bg-thirdColor hover:bg-fourthColor focus:ring-4 focus:ring-green-300 font-bold rounded-lg text-sm px-5 py-2.5 dark:bg-green-500 dark:hover:bg-green-600 focus:outline-none dark:focus:ring-green-800"
-                                        >
-                                            Agregar un Nuevo Cliente
-                                        </a>
+                                      href="#"
+                                     onClick={handleOpenClientModal}
+                                     className="flex items-center text-white bg-thirdColor hover:bg-fourthColor focus:ring-4 focus:ring-green-300 font-bold rounded-lg text-sm px-5 py-2.5 dark:bg-green-500 dark:hover:bg-green-600 focus:outline-none dark:focus:ring-green-800"
+                                    >
+                                     <IoMdPersonAdd className="text-xl mr-2" />
+                                     <span>Agregar un nuevo cliente</span>
+                                     </a>
                                     </div>
                                 </div>
                             </div>
