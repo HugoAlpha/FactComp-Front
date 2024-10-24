@@ -21,6 +21,10 @@ const Dashboard = () => {
     const [totalOrders, setTotalOrders] = useState(0);
     const [totalClients, setTotalClients] = useState(0);
 
+    const formatCurrency = (value) => {
+        return new Intl.NumberFormat('es-BO', { style: 'currency', currency: 'BOB', minimumFractionDigits: 2 }).format(value);
+    };
+
     const handleOpenClientModal = () => {
         setSelectedClient(null);
         setIsClientModalOpen(true);
@@ -38,11 +42,11 @@ const Dashboard = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const dailySalesResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/ventas-diarias-monto?fecha=2024-10-03`);
+                const dailySalesResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/ventas-diarias-monto?fecha=2024-10-24`);
                 const dailySalesData = await dailySalesResponse.json();
                 setDailySales(dailySalesData || 0);
-    
-                const monthlySalesResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/ventas-mensuales-montos?fechaInicio=2024-10-01&fechaFin=2024-10-03`);
+
+                const monthlySalesResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/ventas-mensuales-montos?fechaInicio=2024-10-01&fechaFin=2024-10-31`);
                 const monthlySalesData = await monthlySalesResponse.json();
                 setMonthlySales(monthlySalesData || 0);
     
@@ -169,13 +173,13 @@ const Dashboard = () => {
                             {/* Ventas de Hoy */}
                             <div className="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg p-4">
                                 <h3 className="text-lg font-semibold text-slate-800">Ventas de Hoy</h3>
-                                <p className="text-2xl font-bold text-slate-800">Bs {dailySales ? dailySales.toFixed(2) : 'Cargando...'}</p>
+                                <p className="text-2xl font-bold text-slate-800">{dailySales ? formatCurrency(dailySales) : 'Cargando...'}</p>
                             </div>
 
                             {/* Total Mensual */}
                             <div className="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg p-4">
                                 <h3 className="text-lg font-semibold text-slate-800">Total Mensual</h3>
-                                <p className="text-2xl font-bold text-slate-800">Bs {monthlySales ? monthlySales.toFixed(2) : 'Cargando...'}</p>
+                                <p className="text-2xl font-bold text-slate-800">{monthlySales ? formatCurrency(monthlySales) : 'Cargando...'}</p>
                             </div>
 
                             {/* Total de Facturas */}
@@ -263,8 +267,8 @@ const Dashboard = () => {
                             </div>
                         </div>
 
-                        <section className="bg-white mt-8">
-                            <div className="py-6 px-4 mx-auto max-w-screen-xl sm:py-10 lg:px-6">
+                        <section className="bg-white ">
+                            <div className="px-4 mx-auto max-w-screen-xl sm:py-10 lg:px-6">
                                 <div className="mx-auto max-w-screen-sm text-center">
                                     <h2 className="text-4xl tracking-tight font-extrabold leading-tight text-gray-900">
                                         Realiza una nueva acción
