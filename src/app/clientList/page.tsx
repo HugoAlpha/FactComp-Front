@@ -244,29 +244,7 @@ const ClientList = () => {
                         <h2 className="text-2xl font-bold mb-6 text-gray-700">Gestión de Clientes</h2>
 
                         <div className="flex justify-end my-2">
-                            <button
-                                className="bg-sixthColor text-white py-2 px-4 rounded-lg hover:bg-thirdColor text-lg"
-                                onClick={() => {
-                                    setCurrentCustomer({
-                                        id: 0,
-                                        nombreRazonSocial: '',
-                                        codigoTipoDocumentoIdentidad: 0,
-                                        numeroDocumento: '',
-                                        complemento: '',
-                                        codigoCliente: '',
-                                        email: '',
-                                    });
-                                    setIsModalOpen(true);
-                                }}
-                            >
-                                Agregar Cliente <FaPlus className="inline-block ml-2" />
-                            </button>
-                            <CreateEditClientModal
-                                isOpen={isModalOpen}
-                                onClose={() => setIsModalOpen(false)}
-                                onSave={handleAddOrEditCustomer}
-                                customer={currentCustomer}
-                            />
+                            
                         </div>
                         {/* Barra de búsqueda */}
                         <div className="flex justify-between mb-4">
@@ -295,6 +273,30 @@ const ClientList = () => {
                                 />
                                 <FaSearch className="absolute right-4 text-gray-500 text-xl pointer-events-none" />
                             </div>
+
+                            <button
+                                className="bg-principalColor text-white py-2 px-4 rounded-lg hover:bg-firstColor text-lg"
+                                onClick={() => {
+                                    setCurrentCustomer({
+                                        id: 0,
+                                        nombreRazonSocial: '',
+                                        codigoTipoDocumentoIdentidad: 0,
+                                        numeroDocumento: '',
+                                        complemento: '',
+                                        codigoCliente: '',
+                                        email: '',
+                                    });
+                                    setIsModalOpen(true);
+                                }}
+                            >
+                                Agregar Cliente <FaPlus className="inline-block ml-2" />
+                            </button>
+                            <CreateEditClientModal
+                                isOpen={isModalOpen}
+                                onClose={() => setIsModalOpen(false)}
+                                onSave={handleAddOrEditCustomer}
+                                customer={currentCustomer}
+                            />
 
                         </div>
 
