@@ -38,18 +38,9 @@ const ClientList = () => {
     });
     const [rowsPerPage, setRowsPerPage] = useState<number>(10);
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [userRole, setUserRole] = useState<UserRole['role']>('CAJERO');
+    const [userRole, setUserRole] = useState<string | null>(null);
     const [isContingencyModalOpen, setIsContingencyModalOpen] = useState<boolean>(false);
 
-    useEffect(() => {
-        const fetchUserRole = () => {
-            const storedRole = localStorage.getItem('userRole');
-            if (storedRole === 'ADMIN' || storedRole === 'CAJERO') {
-                setUserRole(storedRole);
-            }
-        };
-        fetchUserRole();
-    }, []);
 
     useEffect(() => {
         const fetchCustomers = async () => {
@@ -117,6 +108,11 @@ const ClientList = () => {
         }
     };
 
+    useEffect(() => {
+        const role = localStorage.getItem("role");
+        setUserRole(role);
+        console.log("User Role:", role); // Para depuración
+    }, []);
 
     useEffect(() => {
         checkServerCommunication();
@@ -235,7 +231,7 @@ const ClientList = () => {
 
     return (
         <div className="flex min-h-screen">
-            {userRole === 'ADMIN' ? <Sidebar /> : <CashierSidebar />}
+            {userRole === 'admin' ? <Sidebar /> : <CashierSidebar />}
             <div className="flex flex-col w-full min-h-screen">
                 <Header />
 

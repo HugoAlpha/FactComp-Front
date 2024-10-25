@@ -16,6 +16,7 @@ const Login = () => {
   const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (email === "admin@gmail.com" && password === "Alpha123!") {
+      localStorage.setItem("role","admin");
       Swal.fire({
         position: "center",
         icon: 'success',
@@ -28,6 +29,8 @@ const Login = () => {
       });
 
     } else if (email === "cajero@gmail.com" && password === "Alpha123!") {
+      
+      localStorage.setItem("role", "cashier");
       Swal.fire({
         position: "center",
         icon: 'success',

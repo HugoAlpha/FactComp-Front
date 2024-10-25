@@ -39,10 +39,6 @@ interface Code {
     puntoVenta: PuntoVenta;
 }
 
-interface UserRole {
-    role: 'ADMIN' | 'CAJERO';
-}
-
 const CodeReceipt = () => {
     const [codes, setCodes] = useState<Code[]>([]);
     const [searchTerm, setSearchTerm] = useState<string>("");
@@ -53,20 +49,17 @@ const CodeReceipt = () => {
     const [daysToExpire, setDaysToExpire] = useState<number | null>(null);
     const [rowsPerPage, setRowsPerPage] = useState<number>(10);
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [userRole, setUserRole] = useState<UserRole['role']>('CAJERO');
+    const [userRole, setUserRole] = useState<string | null>(null);
     const [isContingencyModalOpen, setIsContingencyModalOpen] = useState<boolean>(false);
 
     const openContingencyModal = () => setIsContingencyModalOpen(true);
     const closeContingencyModal = () => setIsContingencyModalOpen(false);
+    
     useEffect(() => {
-        const fetchUserRole = () => {
-            const storedRole = localStorage.getItem('userRole');
-            if (storedRole === 'ADMIN' || storedRole === 'CAJERO') {
-                setUserRole(storedRole);
-            }
-        };
-        fetchUserRole();
+        const role = localStorage.getItem("role");
+        setUserRole(role);
     }, []);
+
 
     useEffect(() => {
         const fetchCodes = async () => {
@@ -236,7 +229,7 @@ const CodeReceipt = () => {
 
     return (
         <div className="flex min-h-screen">
-            {userRole === 'ADMIN' ? <Sidebar /> : <CashierSidebar />}
+            {userRole === 'admin' ? <Sidebar /> : <CashierSidebar />}
             <div className="flex flex-col w-full min-h-screen">
                 <Header />
                 <div className="flex-grow overflow-auto bg-gray-50">

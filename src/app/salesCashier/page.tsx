@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { FaUser, FaCreditCard, FaCartPlus, FaEdit, FaTrash, FaList, FaTable } from 'react-icons/fa';
+import { FaUser, FaCreditCard, FaCartPlus, FaEdit, FaList, FaTable } from 'react-icons/fa';
 import { IoReturnDownBack } from "react-icons/io5";
 import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
@@ -12,9 +12,6 @@ import { GrDocumentConfig } from "react-icons/gr";
 import CreateEditClientModal from '@/components/layouts/modalCreateEditClient';
 import ModalCreateProduct from '@/components/layouts/modalCreateProduct';
 
-interface UserRole {
-    role: 'ADMIN' | 'CAJERO';
-}
 
 const Sales = () => {
     const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
@@ -44,18 +41,7 @@ const Sales = () => {
         email: '',
     });
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-    const [userRole, setUserRole] = useState<UserRole['role']>('CAJERO');
     const [isContingencyModalOpen, setIsContingencyModalOpen] = useState(false);
-
-    useEffect(() => {
-        const fetchUserRole = () => {
-            const storedRole = localStorage.getItem('userRole');
-            if (storedRole === 'ADMIN' || storedRole === 'CAJERO') {
-                setUserRole(storedRole);
-            }
-        };
-        fetchUserRole();
-    }, []);
     
     interface Product {
         id: number;

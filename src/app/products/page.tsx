@@ -27,7 +27,7 @@ const ProductList = () => {
     const [rowsPerPage, setRowsPerPage] = useState<number>(10);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
-    const [userRole, setUserRole] = useState<UserRole['role']>('CAJERO');
+    const [userRole, setUserRole] = useState<string | null>(null);
     const [isContingencyModalOpen, setIsContingencyModalOpen] = useState(false);
 
     useEffect(() => {
@@ -110,6 +110,11 @@ const ProductList = () => {
         checkServerCommunication();
     }, []);
 
+    useEffect(() => {
+        const role = localStorage.getItem("role");
+        setUserRole(role);
+    },[]);
+
     const totalPages = Math.ceil(products.length / rowsPerPage);
     const paginatedProducts = products.slice(
         (currentPage - 1) * rowsPerPage,
@@ -173,7 +178,7 @@ const ProductList = () => {
     const renderOperationButtons = (product: Product) => {
         return (
             <div className="flex">
-                {userRole === 'ADMIN' && (
+                {userRole === 'admin' && (
                     <button
                         className="bg-red-200 hover:bg-red-300 p-2 rounded-l-lg flex items-center justify-center border border-red-300"
                     >
@@ -194,7 +199,7 @@ const ProductList = () => {
 
     return (
         <div className="flex min-h-screen">
-            {userRole === 'ADMIN' ? <Sidebar /> : <CashierSidebar />}
+            {userRole === 'admin' ? <Sidebar /> : <CashierSidebar />}
 
             <div className="flex flex-col w-full min-h-screen">
                 <Header />
@@ -258,7 +263,6 @@ const ProductList = () => {
                                             <td className="px-6 py-4">{product.codigoProductoSin}</td>
                                             <td className="px-6 py-4">
                                                 {renderOperationButtons(product)}
-
                                             </td>
                                         </tr>
                                     ))}

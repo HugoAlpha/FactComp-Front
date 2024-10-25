@@ -17,26 +17,18 @@ interface CUFD {
 }
 
 
-interface UserRole {
-    role: 'ADMIN' | 'CAJERO';
-}
 
 const CUFDList = () => {
     const [cufds, setCUFDs] = useState<CUFD[]>([]);
     const [filter, setFilter] = useState<string>('');
     const [rowsPerPage, setRowsPerPage] = useState<number>(10);
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [userRole, setUserRole] = useState<UserRole['role']>('CAJERO');
+    const [userRole, setUserRole] = useState<string | null>(null);
     const [isContingencyModalOpen, setIsContingencyModalOpen] = useState<boolean>(false);
 
     useEffect(() => {
-        const fetchUserRole = () => {
-            const storedRole = localStorage.getItem('userRole');
-            if (storedRole === 'ADMIN' || storedRole === 'CAJERO') {
-                setUserRole(storedRole);
-            }
-        };
-        fetchUserRole();
+        const role = localStorage.getItem("role");
+        setUserRole(role);
     }, []);
 
     const fetchCUFDs = async () => {
@@ -201,7 +193,7 @@ const CUFDList = () => {
 
     return (
         <div className="flex min-h-screen">
-            {userRole === 'ADMIN' ? <Sidebar /> : <CashierSidebar />}
+            {userRole === 'admin' ? <Sidebar /> : <CashierSidebar />}
 
             <div className="flex flex-col w-full min-h-screen">
                 <Header />

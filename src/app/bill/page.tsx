@@ -41,16 +41,9 @@ const BillList = () => {
   const [isContingencyModalOpen, setIsContingencyModalOpen] = useState(false);
   const [isContingencyMode, setIsContingencyMode] = useState(false);
   const [contingencyState, setContingencyState] = useState<string | null>(null);
-  const [userRole, setUserRole] = useState<UserRole['role']>('CAJERO');
+  const [userRole, setUserRole] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedRole = localStorage.getItem('userRole');
-      if (storedRole === 'ADMIN' || storedRole === 'CAJERO') {
-        setUserRole(storedRole);
-      }
-    }
-  }, []);
+  
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -203,6 +196,12 @@ const BillList = () => {
 
   useEffect(() => {
     fetchMotivosAnulacion();
+  }, []);
+
+  useEffect(() => {
+    const role = localStorage.getItem("role");
+    setUserRole(role);
+    console.log("User Role:", role); // Para depuración
   }, []);
 
   const handleViewRollo = async (id: string) => {
@@ -432,7 +431,7 @@ const BillList = () => {
 
   return (
     <div className="flex min-h-screen">
-      {userRole === 'ADMIN' ? <Sidebar /> : <CashierSidebar />}
+      {userRole === 'admin' ? <Sidebar /> : <CashierSidebar />}
       <div className="flex flex-col w-full min-h-screen">
         <Header />
         <div className="flex-grow overflow-auto bg-gray-50 p-6">
