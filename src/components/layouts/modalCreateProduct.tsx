@@ -41,6 +41,8 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
     const [unidadMedidaOptions, setUnidadMedidaOptions] = useState<UnidadMedidaOption[]>([]);
     const [selectedOption, setSelectedOption] = useState<ProductOption | null>(null);
     const [selectedUnidadMedida, setSelectedUnidadMedida] = useState<string>('');
+    const [searchTerm, setSearchTerm] = useState('');
+    const [dropdownOpen, setDropdownOpen] = useState(false);
 
     const [errors, setErrors] = useState({
         codigo: '',
@@ -114,19 +116,27 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
         }
     };
 
-    const handleSelectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const selectedId = parseInt(e.target.value);
-        const selectedProduct = productOptions.find(option => option.id === selectedId);
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchTerm(e.target.value);
+    };
 
-        if (selectedProduct) {
-            setSelectedOption(selectedProduct);
-            setCodigoProductoSin(selectedProduct.codigoProducto.toString());
-        }
+    const filteredProductOptions = productOptions.filter((option) =>
+        option.descripcionProducto.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
+    const handleSelectOption = (option: ProductOption) => {
+        setSelectedOption(option);
+        setCodigoProductoSin(option.codigoProducto.toString());
+        setDropdownOpen(false);
     };
 
     const handleUnidadMedidaChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedCodigo = e.target.value;
         setSelectedUnidadMedida(selectedCodigo);
+    };
+
+    const handleDropdownToggle = () => {
+        setDropdownOpen(!dropdownOpen);
     };
 
     const handleSubmitProduct = async (e: React.FormEvent) => {
@@ -202,25 +212,40 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                         </label>
                     </div>
 
-                    {/* Dropdown para seleccionar la homologación */}
-                    <div className="relative z-0 w-full mb-5 group">
-                        <select
-                            className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                            onChange={handleSelectChange}
-                            value={selectedOption ? selectedOption.id : ''}
-                            required
+                    {/* Dropdown con búsqueda para seleccionar la homologación */}
+                    <div className="relative z-50 w-full mb-5 group">
+                        <button
+                            type="button"
+                            onClick={handleDropdownToggle}
+                            className="block w-full text-left py-2.5 px-0 text-sm text-gray-900 border-b-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-blue-600"
                         >
-                            <option value="">Selecciona una descripción del producto</option>
-                            {productOptions.map((option) => (
-                                <option key={option.id} value={option.id}>
-                                    {option.descripcionProducto}
-                                </option>
-                            ))}
-                        </select>
-                        <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
-                            Homologación
-                        </label>
-                    </div>
+                            {selectedOption ? selectedOption.descripcionProducto : 'Selecciona una descripción del producto'}
+                        </button>
+                        {dropdownOpen && (
+                            <div className="absolute z-50 bg-white shadow-lg rounded mt-2 w-full">
+                                <input
+                                    type="text"
+                                    value={searchTerm}
+                                    onChange={handleSearchChange}
+                                    placeholder="Buscar productos"
+                                    className="block w-full p-2 text-sm border-gray-300"
+                                />
+                                <ul className="max-h-48 overflow-y-auto bg-white border border-gray-300 rounded-b">
+                                    {filteredProductOptions.map((option) => (
+                                        <li key={option.id}>
+                                            <button
+                                                type="button"
+                                                className="block px-2 py-1 text-left w-full hover:bg-gray-100"
+                                                onClick={() => handleSelectOption(option)}
+                                            >
+                                                {option.descripcionProducto}
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                    </div>       
 
                     {/* Dropdown para seleccionar la unidad de medida */}
                     <div className="relative z-0 w-full mb-5 group">
