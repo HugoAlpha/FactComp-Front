@@ -36,7 +36,7 @@ const Login = () => {
         showConfirmButton: false,
         timer: 3500
       }).then(() => {
-        router.push('/dashboardCashier');
+        router.push('/selectionPOS');
       });
     } else {
       Swal.fire({

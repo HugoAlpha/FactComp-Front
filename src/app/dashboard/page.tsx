@@ -42,7 +42,7 @@ const Dashboard = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const dailySalesResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/ventas-diarias-monto?fecha=2024-10-24`);
+                const dailySalesResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/ventas-diarias-monto?fecha=2024-10-25`);
                 const dailySalesData = await dailySalesResponse.json();
                 setDailySales(dailySalesData || 0);
 

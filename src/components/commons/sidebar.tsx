@@ -33,7 +33,7 @@ const Sidebar = () => {
             icon: <FaFileInvoice size={20} />,
             subItems: [
                 { name: 'Factura', href: 'bill' },
-                { name: 'Nota DC', href: '#' }
+                //{ name: 'Nota DC', href: '#' }
             ]
         },
         {
