@@ -1,155 +1,35 @@
-"use client";
-import { FaUserAlt, FaLock } from "react-icons/fa";
-import { AiFillEye, AiFillEyeInvisible } from "react-icons/ai";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Image from 'next/image';
-import Swal from 'sweetalert2';
-import 'sweetalert2/dist/sweetalert2.min.css';
+import type { Metadata } from "next";
+import localFont from "next/font/local";
+import "./globals.css";
 
-const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const router = useRouter();
+const geistSans = localFont({
+  src: "./fonts/GeistVF.woff",
+  variable: "--font-geist-sans",
+  weight: "100 900",
+});
+const geistMono = localFont({
+  src: "./fonts/GeistMonoVF.woff",
+  variable: "--font-geist-mono",
+  weight: "100 900",
+});
 
-  const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (email === "admin@gmail.com" && password === "Alpha123!") {
-
-      localStorage.setItem("role","admin");
-      Swal.fire({
-        position: "center",
-        icon: 'success',
-        title: 'Logeo Exitoso',
-        text: 'Bienvenido a Alpha E-Facturación',
-        showConfirmButton: false,
-        timer: 3500
-      }).then(() => {
-        router.push('/dashboard');
-      });
-
-    } else if (email === "cajero@gmail.com" && password === "Alpha123!") {
-      localStorage.setItem("role", "cashier");
-      Swal.fire({
-        position: "center",
-        icon: 'success',
-        title: 'Logeo Exitoso',
-        text: 'Bienvenido, Cajero',
-        showConfirmButton: false,
-        timer: 3500
-      }).then(() => {
-        router.push('/dashboardCashier');
-      });
-    } else {
-      Swal.fire({
-        icon: 'error',
-        title: 'Credenciales Incorrectas',
-        text: 'Por favor, verifica tu correo y contraseña',
-        showConfirmButton: false,
-        timer: 1500
-      });
-    }
-  };
-
-  return (
-
-    <div className="flex items-center justify-center h-screen bg-gradient-to-r from-[#E6EFF7] to-[#F0F0F0]">
-      <div className="bg-white shadow-2xl rounded-lg flex w-5/6 h-5/6 max-w-6xl overflow-hidden">
-        <div className="md:w-1/2 p-6 md:p-10 flex flex-col justify-center bg-white">
-          <div className="mx-auto mb-4">
-
-            <Image
-              src="/images/LogoIdAlpha.png"
-              alt="Logo ID"
-              width={300}
-              height={300}
-              priority
-              className="max-w-full h-auto"
-            />
-          </div>
-
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-6 text-center">Inicio de Sesión</h2>
-
-          <form onSubmit={handleLogin} className="space-y-4 md:space-y-6">
-            <div>
-              <label htmlFor="email" className="block text-gray-700 mb-2">
-                Correo
-              </label>
-              <div className="flex items-center border border-gray-300 rounded-lg px-4 py-3 bg-[#F9F9F9]">
-                <FaUserAlt className="text-gray-400 mr-3" />
-                <input
-                  type="email"
-                  id="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="alpha@example.com"
-                  className="bg-transparent outline-none w-full text-sm md:text-lg text-black"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-gray-700 mb-2">
-                Contraseña
-              </label>
-              <div className="flex items-center border border-gray-300 rounded-lg px-4 py-3 bg-[#F9F9F9] relative">
-                <FaLock className="text-gray-400 mr-3" />
-                <input
-                  type={showPassword ? "text" : "password"}
-                  id="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Ingresa tu Contraseña"
-                  className="bg-transparent outline-none w-full text-sm md:text-lg text-gray-800"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 text-gray-500 hover:text-gray-700"
-                >
-                  {showPassword ? <AiFillEyeInvisible /> : <AiFillEye />}
-                </button>
-              </div>
-            </div>
-
-            <div className="flex flex-col md:flex-row justify-between items-center mb-6">
-              <label className="flex items-center text-sm md:text-lg text-gray-600 mb-2 md:mb-0">
-                <input type="checkbox" className="mr-2" />
-                Recuérdame
-              </label>
-              <a href="#" className="text-sm md:text-lg text-[#10314b] hover:text-gray-500">
-                ¿Olvidaste tu Password?
-              </a>
-            </div>
-
-            <button
-              type="submit"
-              className="w-full bg-[#10314b] text-white font-semibold py-3 rounded-lg text-sm md:text-lg hover:bg-[#10314b] transition"
-            >
-              Ingresar
-            </button>
-          </form>
-          
-        </div>
-
-        {/* Logo y Recuadro */}
-        <div className="hidden md:flex md:w-1/2 bg-[#10314b] flex-col items-center justify-center p-12">
-          <div className="bg-white p-8 shadow-lg rounded-lg flex flex-col items-center">
-
-            <Image
-              src="/images/efactu2.png"
-              alt="Logo"
-
-              width={260}
-              height={260}
-            />
-            <h2 className="text-2xl md:text-3xl font-bold text-[#10314b] mt-4 md:mt-6">Alpha E-Facturación</h2>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+export const metadata: Metadata = {
+  title: "E-BILL 2.0",
+  description: "Generated by create next app",
 };
 
-export default Login;
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
+  return (
+    <html lang="en">
+      <body
+        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+      >
+        {children}
+      </body>
+    </html>
+  );
+}
