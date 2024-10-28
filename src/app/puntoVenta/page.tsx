@@ -17,6 +17,12 @@ interface PuntoVenta {
     estado: string;
 }
 
+interface TipoPuntoVenta {
+    id: number;
+    codigoClasificador: string;
+    descripcion: string;
+}
+
 const PuntoVenta: React.FC = () => {
     const [customers, setCustomers] = useState<PuntoVenta[]>([]);
     const [searchTerm, setSearchTerm] = useState<string>('');
@@ -25,6 +31,7 @@ const PuntoVenta: React.FC = () => {
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [selectedSucursal, setSelectedSucursal] = useState<string>('');
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [tiposPuntoVenta, setTiposPuntoVenta] = useState<TipoPuntoVenta[]>([]);
 
     useEffect(() => {
         const data: PuntoVenta[] = [
@@ -84,6 +91,38 @@ const PuntoVenta: React.FC = () => {
                     console.log('Modo de contingencia cancelado.');
                 }
             });
+        }
+    };
+    useEffect(() => {
+        const fetchTiposPuntoVenta = async () => {
+            try {
+                const response = await fetch(`${PATH_URL_BACKEND}/parametro/tipo-punto-venta`);
+                const data = await response.json();
+                setTiposPuntoVenta(data);
+            } catch (error) {
+                console.error("Error al obtener tipos de punto de venta:", error);
+            }
+        };
+        fetchTiposPuntoVenta();
+    }, []);
+
+    const handleCreatePos = async (newPos) => {
+        try {
+            const response = await fetch(`${PATH_URL_BACKEND}/operaciones/punto-venta/registrar`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(newPos),
+            });
+
+            if (response.ok) {
+                const createdPos = await response.json();
+                setCustomers([...customers, createdPos]);
+                Swal.fire('Punto de Venta creado', 'El nuevo punto de venta ha sido registrado con éxito', 'success');
+            } else {
+                throw new Error('Error al registrar el punto de venta');
+            }
+        } catch (error) {
+            Swal.fire('Error', error.message, 'error');
         }
     };
 
@@ -170,12 +209,17 @@ const PuntoVenta: React.FC = () => {
 
                         {/* Filtro por Sucursal */}
                         <div className="flex justify-end mb-2">
-                            <button
-                                className="bg-sixthColor text-white py-2 px-4 rounded-lg hover:bg-thirdColor text-lg"
-                                onClick={handleOpenModal}
-                            >
-                                Agregar Punto de Venta
-                            </button>
+                        <button className="bg-sixthColor text-white py-2 px-4 rounded-lg hover:bg-thirdColor text-lg"
+                            onClick={() => setIsModalOpen(true)}>
+                            Agregar Punto de Venta
+                        </button>
+
+                        <ModalCreatePos
+                            isOpen={isModalOpen}
+                            onClose={() => setIsModalOpen(false)}
+                            onPosCreated={handleCreatePos}
+                            tiposPuntoVenta={tiposPuntoVenta}
+                        />
 
                         </div>
 
@@ -220,12 +264,6 @@ const PuntoVenta: React.FC = () => {
                             </div>
                         </div>
 
-                        <ModalCreatePos
-                            isOpen={isModalOpen}
-                            onClose={handleCloseModal}
-                            onSave={(newPos) => {
-                            }}
-                        />
 
                         <div className="overflow-x-auto shadow-lg rounded-lg border border-gray-200">
                             <table className="table-auto w-full bg-white">
