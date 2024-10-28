@@ -11,6 +11,7 @@ import { PATH_URL_BACKEND } from '@/utils/constants';
 import { GrDocumentConfig } from "react-icons/gr";
 import CreateEditClientModal from '@/components/layouts/modalCreateEditClient';
 import ModalCreateProduct from '@/components/layouts/modalCreateProduct';
+import { GoHomeFill } from "react-icons/go";
 
 
 const Sales = () => {
@@ -396,7 +397,7 @@ const Sales = () => {
                                     onClick={handleGoToDashboard}
                                     className="bg-gray-300 hover:bg-gray-400 text-black font-bold py-1 px-2 rounded-lg flex items-center space-x-2"
                                 >
-                                    <IoReturnDownBack className="text-xl" />
+                                    <GoHomeFill className="text-xl" />
                                 <span>Volver al inicio</span>
                             </button> 
                         </div>
