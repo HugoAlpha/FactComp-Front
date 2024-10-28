@@ -40,9 +40,11 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
     const [productOptions, setProductOptions] = useState<ProductOption[]>([]);
     const [unidadMedidaOptions, setUnidadMedidaOptions] = useState<UnidadMedidaOption[]>([]);
     const [selectedOption, setSelectedOption] = useState<ProductOption | null>(null);
-    const [selectedUnidadMedida, setSelectedUnidadMedida] = useState<string>('');
     const [searchTerm, setSearchTerm] = useState('');
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [selectedUnidadMedida, setSelectedUnidadMedida] = useState<UnidadMedidaOption | null>(null);
+    const [searchTermUnidadMedida, setSearchTermUnidadMedida] = useState('');
+    const [dropdownOpenUnidadMedida, setDropdownOpenUnidadMedida] = useState(false);
 
     const [errors, setErrors] = useState({
         codigo: '',
@@ -67,13 +69,21 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                     Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
                 }
             };
-
+    
             const fetchUnidadMedidaOptions = async () => {
                 try {
                     const response = await fetch(`${PATH_URL_BACKEND}/parametro/unidad-medida`);
                     if (response.ok) {
                         const data: UnidadMedidaOption[] = await response.json();
                         setUnidadMedidaOptions(data);
+    
+                        // Establece la unidad de medida del producto si está disponible
+                        if (product?.unidadMedida) {
+                            const unidadEncontrada = data.find(
+                                (u) => u.codigoClasificador === product.unidadMedida.toString()
+                            );
+                            setSelectedUnidadMedida(unidadEncontrada || null);
+                        }
                     } else {
                         Swal.fire('Error', 'Error al obtener las opciones de unidad de medida', 'error');
                     }
@@ -81,11 +91,14 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                     Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
                 }
             };
-
+    
             fetchProductOptions();
             fetchUnidadMedidaOptions();
         }
-    }, [isOpen]); 
+    }, [isOpen, product]);
+
+    
+    
 
     useEffect(() => {
         if (product && productOptions.length > 0) {
@@ -120,9 +133,27 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
         setSearchTerm(e.target.value);
     };
 
+    const handleSearchChangeUnidadMedida = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchTermUnidadMedida(e.target.value);
+    };
+
+    const filteredUnidadMedidaOptions = unidadMedidaOptions.filter(option =>
+        option.descripcion.toLowerCase().includes(searchTermUnidadMedida.toLowerCase())
+    );
+
+    const handleDropdownToggleUnidadMedida = () => {
+        setDropdownOpenUnidadMedida((prev) => !prev);
+    };
+
+    const handleSelectUnidadMedida = (option: UnidadMedidaOption) => {
+        setSelectedUnidadMedida(option);
+        setDropdownOpenUnidadMedida(false);
+    };
+
     const filteredProductOptions = productOptions.filter((option) =>
         option.descripcionProducto.toLowerCase().includes(searchTerm.toLowerCase())
     );
+    
 
     const handleSelectOption = (option: ProductOption) => {
         setSelectedOption(option);
@@ -141,7 +172,7 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
 
     const handleSubmitProduct = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (Object.values(errors).some((error) => error !== '') || !selectedOption || !nombreProducto || !selectedUnidadMedida || !precioUnitario) {
+        if (!selectedOption || !selectedUnidadMedida || !nombreProducto || !precioUnitario) {
             Swal.fire('Error', 'Por favor corrige los errores en el formulario', 'error');
             return;
         }
@@ -149,7 +180,7 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
         const productData = {
             codigo,
             descripcion: nombreProducto,
-            unidadMedida: selectedUnidadMedida,
+            unidadMedida: selectedUnidadMedida.codigoClasificador,
             precioUnitario: Number(precioUnitario),
             codigoProductoSin: Number(selectedOption?.codigoProducto), 
         };
@@ -245,25 +276,46 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                                 </ul>
                             </div>
                         )}
+                        <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                            Homologación
+                        </label>
                     </div>       
 
-                    {/* Dropdown para seleccionar la unidad de medida */}
-                    <div className="relative z-0 w-full mb-5 group">
-                        <select
-                            className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                            onChange={handleUnidadMedidaChange}
-                            value={selectedUnidadMedida}
-                            required
+                    {/* Dropdown para seleccionar la unidad de medida con barra de búsqueda */}
+                    <div className="relative z-50 w-full mb-5 group">
+                        <button
+                            type="button"
+                            onClick={handleDropdownToggleUnidadMedida}
+                            className="block w-full text-left py-2.5 px-0 text-sm text-gray-900 border-b-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-blue-600"
                         >
-                            <option value="">Selecciona una unidad de medida</option>
-                            {unidadMedidaOptions.map((option) => (
-                                <option key={option.codigoClasificador} value={option.codigoClasificador}>
-                                    {option.descripcion}
-                                </option>
-                            ))}
-                        </select>
+                            {selectedUnidadMedida ? selectedUnidadMedida.descripcion : 'Selecciona una unidad de medida'}
+                        </button>
+                        {dropdownOpenUnidadMedida && (
+                            <div className="absolute z-50 bg-white shadow-lg rounded mt-2 w-full">
+                                <input
+                                    type="text"
+                                    value={searchTermUnidadMedida}
+                                    onChange={handleSearchChangeUnidadMedida}
+                                    placeholder="Buscar unidad de medida"
+                                    className="block w-full p-2 text-sm border-gray-300"
+                                />
+                                <ul className="max-h-48 overflow-y-auto bg-white border border-gray-300 rounded-b">
+                                {filteredUnidadMedidaOptions.map((option) => (
+                                        <li key={option.codigoClasificador}>
+                                            <button
+                                                type="button"
+                                                className="block px-2 py-1 text-left w-full hover:bg-gray-100"
+                                                onClick={() => handleSelectUnidadMedida(option)}
+                                            >
+                                                {option.descripcion}
+                                            </button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
                         <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
-                            Unidad de Medida
+                            Unidad de medida
                         </label>
                     </div>
 

@@ -29,6 +29,7 @@ const ProductList = () => {
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [userRole, setUserRole] = useState<string | null>(null);
     const [isContingencyModalOpen, setIsContingencyModalOpen] = useState(false);
+    const [searchTerm, setSearchTerm] = useState('');
 
     useEffect(() => {
         const fetchUserRole = () => {
@@ -115,8 +116,19 @@ const ProductList = () => {
         setUserRole(role);
     },[]);
 
-    const totalPages = Math.ceil(products.length / rowsPerPage);
-    const paginatedProducts = products.slice(
+     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchTerm(e.target.value);
+        setCurrentPage(1);
+    };
+
+    const filteredProducts = products.filter((product) =>
+        (product.descripcion?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        product.codigo?.toLowerCase().includes(searchTerm.toLowerCase()))
+    );
+    
+
+    const totalPages = Math.ceil(filteredProducts.length / rowsPerPage);
+    const paginatedProducts = filteredProducts.slice(
         (currentPage - 1) * rowsPerPage,
         currentPage * rowsPerPage
     );
@@ -227,6 +239,8 @@ const ProductList = () => {
                                 <input
                                     type="text"
                                     placeholder="Buscar producto..."
+                                    value={searchTerm}
+                                    onChange={handleSearchChange}
                                     className="border border-gray-300 focus:border-firstColor focus:ring-firstColor focus:outline-none px-4 py-2 rounded-lg w-full shadow-sm text-sm placeholder-gray-400"
                                 />
                                 <FaSearch className="absolute right-4 text-gray-500 text-xl pointer-events-none" />
@@ -238,7 +252,6 @@ const ProductList = () => {
                                 Agregar Producto <FaPlus className="inline-block ml-2" />
                             </button>
                         </div>
-
 
                         <div className="overflow-x-auto shadow-lg rounded-lg border border-gray-200">
                             <table className="table-auto w-full bg-white">
