@@ -76,8 +76,6 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                     if (response.ok) {
                         const data: UnidadMedidaOption[] = await response.json();
                         setUnidadMedidaOptions(data);
-    
-                        // Establece la unidad de medida del producto si está disponible
                         if (product?.unidadMedida) {
                             const unidadEncontrada = data.find(
                                 (u) => u.codigoClasificador === product.unidadMedida.toString()
