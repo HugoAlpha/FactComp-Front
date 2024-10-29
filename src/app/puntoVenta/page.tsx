@@ -229,7 +229,7 @@ const PuntoVenta: React.FC = () => {
                                 <select
                                     value={rowsPerPage}
                                     onChange={handleRowsPerPageChange}
-                                    className="border p-2 rounded-lg w-20"
+                                    className="border px-4  h-10 rounded-lg w-20"
                                 >
                                     <option value={10}>10</option>
                                     <option value={20}>20</option>
@@ -242,7 +242,7 @@ const PuntoVenta: React.FC = () => {
                                     <select
                                         value={selectedSucursal}
                                         onChange={(e) => setSelectedSucursal(e.target.value)}
-                                        className="border p-2"
+                                        className="border px-4 h-10 rounded-lg"
                                     >
                                         <option value="">Todas</option>
                                         <option value="Sucursal A">Sucursal A</option>
@@ -256,7 +256,7 @@ const PuntoVenta: React.FC = () => {
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
                                         placeholder="Buscar por descripción, nombre o CUIS..."
-                                        className="border border-gray-300 focus:border-firstColor focus:ring-firstColor focus:outline-none px-4 py-2 rounded-lg w-full shadow-sm text-sm placeholder-gray-400 ml-3"
+                                        className="px-4 border border-gray-300 focus:border-firstColor focus:ring-firstColor focus:outline-none h-10 rounded-lg w-full shadow-sm text-sm placeholder-gray-400 ml-3"
                                         style={{ width: "400px" }}
                                     />
                                     <FaSearch className="absolute right-3 text-gray-500 text-xl" />

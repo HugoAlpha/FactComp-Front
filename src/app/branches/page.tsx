@@ -155,6 +155,18 @@ const Branches: React.FC = () => {
         currentPage * rowsPerPage
     );
 
+    const handleFirstPage = () => {
+        setCurrentPage(1);
+      };
+    
+      const handleLastPage = () => {
+        setCurrentPage(totalPages);
+      };
+    
+      const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+      };
+
     const getPageNumbers = () => {
         const totalPages = Math.ceil(filteredBranches.length / rowsPerPage);
         const pageNumbers = [];
@@ -258,26 +270,29 @@ const Branches: React.FC = () => {
                         <div className="mb-4">
 
                         </div>
-                        <div className="flex justify-between mb-4">
-                            <div>
+                        
+                        <div className="flex justify-between mb-4 items-center">
+                            <div className="flex items-center">
                                 <label htmlFor="itemsPerPage" className="mr-2 text-sm">Elementos por página:</label>
                                 <select
-                                    value={rowsPerPage}
-                                    onChange={handleRowsPerPageChange}
-                                    className="border px-2 rounded-lg w-20"
+                                value={rowsPerPage}
+                                onChange={handleRowsPerPageChange}
+                                className="border rounded-lg px-3 py-2 text-sm w-20 h-10 focus:outline-none focus:ring-2 focus:ring-firstColor"
                                 >
-                                    <option value={10}>10</option>
-                                    <option value={20}>20</option>
-                                    <option value={50}>50</option>
+                                <option value={10}>10</option>
+                                <option value={20}>20</option>
+                                <option value={50}>50</option>
                                 </select>
                             </div>
-                            <div className='flex justify-center'>
-                                <div className="flex items-center">
-                                    <label className="mr-2 text-black">Filtrar por Ciudad:</label>
+
+                            {/* Contenedor para "Filtrar por Ciudad" y campo de búsqueda */}
+                            <div className="flex items-center mb-4">
+                                <div className="flex items-center mr-3">
+                                <label className="text-black mr-4 whitespace-nowrap">Filtrar por Ciudad:</label> {/* Cambié px-10 por mr-2 */}
                                     <select
                                         value={selectedCity}
                                         onChange={(e) => setSelectedCity(e.target.value)}
-                                        className="border p-2"
+                                        className="border rounded-lg p-2 text-sm h-10 focus:outline-none focus:ring-2 focus:ring-firstColor"
                                     >
                                         <option value="">Todas</option>
                                         {branches.map((branch) => (
@@ -289,21 +304,19 @@ const Branches: React.FC = () => {
                                 </div>
 
                                 <div className="relative flex items-center w-full max-w-md">
-
                                     <input
                                         type="text"
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
                                         placeholder="Buscar por nombre, ciudad, departamento o razón social"
-                                        className="border border-gray-300 focus:border-firstColor focus:ring-firstColor focus:outline-none px-4 py-2 rounded-lg w-full shadow-sm text-sm placeholder-gray-400 ml-2"
-                                        style={{ width: '600px' }}
+                                        className="border rounded-lg border-gray-300 focus:border-firstColor focus:ring-firstColor focus:outline-none px-4 py-2 text-sm w-full h-10 shadow-sm placeholder-gray-400 pr-10" // Asegúrate de añadir padding-right
                                     />
-                                    <FaSearch className="absolute right-4 text-gray-500 text-xl pointer-events-none" />
+                                    <FaSearch className="absolute right-3 text-gray-500 text-xl pointer-events-none" /> 
                                 </div>
                             </div>
 
-
                         </div>
+
 
                         <div className="overflow-x-auto shadow-lg rounded-lg border border-gray-200">
                             <table className="table-auto w-full bg-white">
@@ -351,7 +364,48 @@ const Branches: React.FC = () => {
                             </table>
                         </div>
 
-                        <div className="flex space-x-1 justify-center mt-6">
+                        
+                        <div className="flex items-center justify-between h-full">
+                <div className="flex items-center space-x-1 justify-start mt-6">
+                  <span className="text-slate-600">Ir a la página:</span>
+
+                  <input
+                    type="number"
+                    value={currentPage}
+                    onChange={(e) => {
+                      const page = parseInt(e.target.value, 10);
+                      if (!isNaN(page) && page >= 1 && page <= totalPages) {
+                        setCurrentPage(page);
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        const page = parseInt(e.target.value, 10);
+                        if (!isNaN(page) && page >= 1 && page <= totalPages) {
+                          setCurrentPage(page);
+                        }
+                      }
+                    }}
+                    className="w-20 h-10 rounded-md border py-2 text-center transition-all shadow-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-800"
+                  />
+
+                  <div className="flex pl-10">
+                    <button
+                      onClick={handleFirstPage}
+                      className="min-w-9 rounded-l-md border-r-0 border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800"
+                    >
+                      Primero
+                    </button>
+                    <button
+                      onClick={handleLastPage}
+                      className="min-w-9 rounded-r-md border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800"
+                    >
+                      Último
+                    </button>
+                  </div>
+                </div>
+                <div>
+                <div className="flex space-x-1  justify-center mt-6">
                             <button
                                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                                 disabled={currentPage === 1}
@@ -387,6 +441,8 @@ const Branches: React.FC = () => {
                     </div>
                 </div>
             </div>
+            </div>
+        </div>
 
             <ModalCreateBranch
                 isOpen={isModalOpen}

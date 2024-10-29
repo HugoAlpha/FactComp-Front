@@ -303,7 +303,7 @@ const Parameters = () => {
                                     id="itemsPerPage"
                                     value={itemsPerPage}
                                     onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                                    className="border px-2 py-1 rounded"
+                                    className="border px-2 h-10 rounded-lg"
                                 >
                                     <option value={10}>10</option>
                                     <option value={20}>20</option>
@@ -317,7 +317,7 @@ const Parameters = () => {
                                     placeholder="Buscar por Descripción o Código Clasificador"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="border border-gray-300 focus:border-firstColor focus:ring-firstColor focus:outline-none px-4 py-2 rounded-lg w-full shadow-sm text-sm placeholder-gray-400"
+                                    className="border border-gray-300 focus:border-firstColor focus:ring-firstColor focus:outline-none px-4 h-10 rounded-lg w-full shadow-sm text-sm placeholder-gray-400"
                                 />
                                 <FaSearch className="absolute right-4 text-gray-500 text-xl pointer-events-none" />
                             </div>

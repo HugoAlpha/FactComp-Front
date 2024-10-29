@@ -206,27 +206,46 @@ const ClientList = () => {
         return pageNumbers;
     };
 
+    const handleFirstPage = () => {
+        setCurrentPage(1); 
+    };
+
+    const handleLastPage = () => {
+        setCurrentPage(totalPages); 
+    };
+    
+
+
     const renderOperationButtons = (customer: Customer) => {
         return (
             <div className="flex">
-                {userRole === 'ADMIN' && (
+                {userRole === 'admin' ? (
+                    <>
+                        <button
+                            className="bg-red-200 hover:bg-red-300 p-2 rounded-l-lg flex items-center justify-center border border-red-300"
+                            onClick={() => handleDeleteCustomer(customer.id)}
+                        >
+                            <FaTrashAlt className="text-black" />
+                        </button>
+                        <button
+                            className="bg-blue-200 hover:bg-blue-300 p-2 rounded-r-lg flex items-center justify-center border border-blue-300"
+                            onClick={() => handleEditCustomer(customer.id)}
+                        >
+                            <FaEdit className="text-black" />
+                        </button>
+                    </>
+                ) : (
                     <button
-                        className="bg-red-200 hover:bg-red-300 p-2 rounded-l-lg flex items-center justify-center border border-red-300"
-                        onClick={() => handleDeleteCustomer(customer.id)}
+                        className="bg-blue-200 hover:bg-blue-300 p-2 rounded-lg flex items-center justify-center border border-blue-300"
+                        onClick={() => handleEditCustomer(customer.id)}
                     >
-                        <FaTrashAlt className="text-black" />
+                        <FaEdit className="text-black" />
                     </button>
                 )}
-                <button
-                    className={`${userRole === 'ADMIN' ? 'rounded-r-lg' : 'rounded-lg'
-                        } bg-blue-200 hover:bg-blue-300 p-2 flex items-center justify-center border border-blue-300`}
-                    onClick={() => handleEditCustomer(customer.id)}
-                >
-                    <FaEdit className="text-black" />
-                </button>
             </div>
         );
     };
+    
 
 
     return (
@@ -242,14 +261,14 @@ const ClientList = () => {
                         <div className="flex justify-end my-2">
                             
                         </div>
-                        {/* Barra de búsqueda */}
-                        <div className="flex justify-between mb-4">
-                            <div>
+                        
+                        <div className="flex justify-between mb-4 items-center"> 
+                            <div className="flex items-center"> 
                                 <label htmlFor="itemsPerPage" className="mr-2 text-sm">Elementos por página:</label>
                                 <select
                                     value={rowsPerPage}
                                     onChange={handleRowsPerPageChange}
-                                    className="border p-2 rounded-lg w-20"
+                                    className="border p-2 rounded-lg h-10 text-sm"
                                 >
                                     <option value={10}>10</option>
                                     <option value={20}>20</option>
@@ -263,15 +282,15 @@ const ClientList = () => {
                                 <input
                                     type="text"
                                     placeholder="Buscar cliente por nombre o documento..."
-                                    className="border border-gray-300 focus:border-firstColor focus:ring-firstColor focus:outline-none px-4 py-2 rounded-lg w-full shadow-sm text-sm placeholder-gray-400"
+                                    className="border border-gray-300 focus:border-firstColor focus:ring-firstColor focus:outline-none px-4 py-2 rounded-lg h-10 shadow-sm text-sm placeholder-gray-400 w-full"
                                     value={filter}
                                     onChange={handleFilterChange}
                                 />
-                                <FaSearch className="absolute right-4 text-gray-500 text-xl pointer-events-none" />
+                                <FaSearch className="absolute right-3 text-gray-500 text-xl pointer-events-none" />
                             </div>
 
                             <button
-                                className="bg-principalColor text-white py-2 px-4 rounded-lg hover:bg-firstColor text-lg"
+                                className="bg-principalColor text-white py-2 px-4 rounded-lg hover:bg-firstColor text-lg h-10 flex items-center justify-center"
                                 onClick={() => {
                                     setCurrentCustomer({
                                         id: 0,
@@ -287,14 +306,15 @@ const ClientList = () => {
                             >
                                 Agregar Cliente <FaPlus className="inline-block ml-2" />
                             </button>
+
                             <CreateEditClientModal
                                 isOpen={isModalOpen}
                                 onClose={() => setIsModalOpen(false)}
                                 onSave={handleAddOrEditCustomer}
                                 customer={currentCustomer}
                             />
-
                         </div>
+
 
                         <div className="overflow-x-auto shadow-lg rounded-lg border border-gray-200">
                             <table className="table-auto w-full bg-white">
@@ -327,40 +347,60 @@ const ClientList = () => {
                             </table>
                         </div>
 
-                        {/* Paginación */}
-                        <div className="flex space-x-1 justify-center mt-6">
-                            <button
-                                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                                disabled={currentPage === 1}
-                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-                            >
-                                Ant.
-                            </button>
-
-                            {getPageNumbers().map((number) => (
+        
+                        <div className="flex justify-between items-center mt-6"> {/* Flex container para alinear elementos */}
+                            <div className="flex flex-grow justify-center space-x-1"> {/* Asegura que este contenedor ocupe el espacio disponible */}
                                 <button
-                                    key={number}
-                                    onClick={() => setCurrentPage(number)}
-                                    className={`rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 ${currentPage === number ? 'bg-slate-800 text-white' : ''}`}
+                                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                                    disabled={currentPage === 1}
+                                    className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                                 >
-                                    {number}
+                                    Ant.
                                 </button>
-                            ))}
 
-                            <button
-                                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                                disabled={currentPage === totalPages}
-                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-                            >
-                                Sig.
-                            </button>
+                                {getPageNumbers().map((number) => (
+                                    <button
+                                        key={number}
+                                        onClick={() => setCurrentPage(number)}
+                                        className={`rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 ${currentPage === number ? 'bg-slate-800 text-white' : ''}`}
+                                    >
+                                        {number}
+                                    </button>
+                                ))}
+
+                                <button
+                                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                                    disabled={currentPage === totalPages}
+                                    className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                                >
+                                    Sig.
+                                </button>
+                            </div>
+
+                            <div className="flex pl-10 items-center"> {/* Flex container para los botones "Primero" y "Último" */}
+                                <button
+                                    onClick={handleFirstPage}
+                                    className="min-w-9 rounded-l-md border-r-0 border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800"
+                                >
+                                    Primero
+                                </button>
+                                <button
+                                    onClick={handleLastPage}
+                                    className="min-w-9 rounded-r-md border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800"
+                                >
+                                    Último
+                                </button>
+                            </div>
                         </div>
+
                         <div className="flex space-x-1 justify-center mt-2">
-                            <span className="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">
+                            <span className="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0  mr-40 block w-full md:inline md:w-auto">
                                 Mostrando página <span className="font-semibold text-gray-900 dark:text-black">{currentPage}</span> de <span className="font-semibold text-gray-900 dark:text-black">{totalPages}</span>
                             </span>
                         </div>
+
                     </div>
+
                 </div>
             </div>
             {isContingencyModalOpen && (

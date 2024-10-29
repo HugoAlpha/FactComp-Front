@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useMemo } from 'react';
-import { FaSearch, FaEye, FaTimes } from 'react-icons/fa';
+import { FaSearch, FaEye, FaTimes, FaAngleRight, FaAngleLeft } from 'react-icons/fa';
 import { HiReceiptRefund } from "react-icons/hi2";
 import Sidebar from '@/components/commons/sidebar';
 import Header from '@/components/commons/header';
@@ -21,10 +21,6 @@ interface FormattedBill {
   codigoSucursal: number;
   codigoPuntoVenta: number;
   cuf: string;
-}
-
-interface UserRole {
-  role: 'ADMIN' | 'CAJERO';
 }
 
 const BillList = () => {
@@ -269,6 +265,18 @@ const BillList = () => {
     if (currentPage < totalPages) setCurrentPage((prev) => prev + 1);
   };
 
+  const handleFirstPage = () => {
+    setCurrentPage(1);
+  };
+
+  const handleLastPage = () => {
+    setCurrentPage(totalPages);
+  };
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
   const getStatus = (estado: string) => {
     if (estado === 'ANULADO') {
       return (
@@ -447,13 +455,13 @@ const BillList = () => {
                 placeholder="Buscar por número de factura o cliente"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="border border-gray-300 px-2 py-2 rounded-lg w-1/4"
+                className="border border-gray-300 rounded-lg w-1/4 h-10 px-3"
               />
 
               <select
                 value={estadoFilter}
                 onChange={(e) => setEstadoFilter(e.target.value)}
-                className="border border-gray-300 rounded-lg py-2 px-4"
+                className="border border-gray-300 rounded-lg  h-10 px-3"
               >
                 <option value="TODAS">Todas</option>
                 <option value="VALIDA">Válido</option>
@@ -461,44 +469,39 @@ const BillList = () => {
               </select>
 
               <div className="flex items-center space-x-4">
-                <div className="flex">
-                  <label htmlFor="fechaDesde" className="text-sm font-medium text-gray-700 place-content-center m-1">Fecha desde:</label>
+                <div className="flex items-center">
+                  <label htmlFor="fechaDesde" className="text-sm font-medium text-gray-700 place-content-center mr-2">Fecha desde:</label>
                   <input
                     id="fechaDesde"
                     type="date"
                     value={fechaDesde || ''}
                     onChange={(e) => setFechaDesde(e.target.value)}
-                    className="border border-gray-300 px-4 py-2 rounded-lg"
+                    className="border border-gray-300 rounded-lg h-10 px-3"
                   />
                 </div>
 
-                <div className="flex ">
-                  <label htmlFor="fechaHasta" className="text-sm font-medium text-gray-700 place-content-center m-1">Fecha hasta:</label>
+                <div className="flex items-center">
+                  <label htmlFor="fechaHasta" className="text-sm font-medium text-gray-700 place-content-center mr-2">Fecha hasta:</label>
                   <input
                     id="fechaHasta"
                     type="date"
                     value={fechaHasta || ''}
                     onChange={(e) => setFechaHasta(e.target.value)}
-                    className="border border-gray-300 px-4 py-2 rounded-lg"
+                    className="border border-gray-300 rounded-lg  h-10 px-3"
                   />
                 </div>
+                
                 {isContingencyMode && (
                   <button
-                    className="px-2 py-2 bg-firstColor text-white rounded-lg font-bold hover:bg-fourthColor"
+                    className="bg-firstColor text-white rounded-lg font-bold hover:bg-fourthColor  h-10 px-3"
                     onClick={handleSendContingencyPackages}
                   >
                     Enviar paquetes contingencia
                   </button>
                 )}
-                {/* {isModalOpen && (
-                  <ModalContingencyPackage isOpen={isModalOpen} onClose={closeModal} />
-                )} */}
-
               </div>
             </div>
-
           </div>
-
 
           <div className="flex space-x-6">
             <div className={`${selectedBill ? 'w-2/3' : 'w-full'} transition-all duration-300`}>
@@ -550,44 +553,88 @@ const BillList = () => {
                   </tbody>
                 </table>
               </div>
-              <div className="flex space-x-1 justify-center mt-6">
-                <button
-                  onClick={handlePrevPage}
-                  disabled={currentPage === 1}
-                  className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-                >
-                  Ant.
-                </button>
-                {getPageNumbers(currentPage, totalPages).map((page) => (
-                  <button
-                    key={page}
-                    onClick={() => setCurrentPage(page)}
-                    className={`min-w-9 rounded-full border py-2 px-3.5 text-center text-sm transition-all shadow-sm ${page === currentPage ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-800 hover:text-white hover:border-slate-800'} focus:bg-slate-800 focus:text-white active:border-slate-800 active:bg-slate-800`}
-                  >
-                    {page}
-                  </button>
-                ))}
-                <button
-                  onClick={handleNextPage}
-                  disabled={currentPage === totalPages}
-                  className="min-w-9 rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-                >
-                  Sig.
-                </button>
-              </div>
 
-              <div className="flex space-x-1 justify-center mt-2">
-                <span className="text-sm font-normal text-gray-500 mb-4 md:mb-0 block w-full md:inline md:w-auto">
-                  Mostrando página <span className="font-semibold text-gray-900">{currentPage}</span> de <span className="font-semibold text-gray-900">{totalPages}</span>
-                </span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-1 justify-start">
+                  <span className="text-slate-600">Ir a la página:</span>
+
+                  <input
+                    type="number"
+                    value={currentPage}
+                    onChange={(e) => {
+                      const page = parseInt(e.target.value, 10);
+                      if (!isNaN(page) && page >= 1 && page <= totalPages) {
+                        setCurrentPage(page);
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        const page = parseInt(e.target.value, 10);
+                        if (!isNaN(page) && page >= 1 && page <= totalPages) {
+                          setCurrentPage(page);
+                        }
+                      }
+                    }}
+                    className="w-20 h-10 rounded-md border py-2 text-center transition-all shadow-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-800"
+                  />
+
+                  <div className="flex pl-10">
+                    <button
+                      onClick={handleFirstPage}
+                      className="min-w-9 rounded-l-md border-r-0 border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800"
+                    >
+                      Primero
+                    </button>
+                    <button
+                      onClick={handleLastPage}
+                      className="min-w-9 rounded-r-md border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800"
+                    >
+                      Último
+                    </button>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex space-x-1  justify-center mt-6">
+                    <button
+                      onClick={handlePrevPage}
+                      disabled={currentPage === 1}
+                      className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                    >
+                      Ant.
+                    </button>
+                    {getPageNumbers(currentPage, totalPages).map((page) => (
+                      <button
+                        key={page}
+                        onClick={() => setCurrentPage(page)}
+                        className={`min-w-9 rounded-full border py-2 px-3.5 text-center text-sm transition-all shadow-sm ${page === currentPage ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-800 hover:text-white hover:border-slate-800'} focus:bg-slate-800 focus:text-white active:border-slate-800 active:bg-slate-800`}
+                      >
+                        {page}
+                      </button>
+                    ))}
+                    <button
+                      onClick={handleNextPage}
+                      disabled={currentPage === totalPages}
+                      className="min-w-9 rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                    >
+                      Sig.
+                    </button>
+                  </div>
+
+                  <div className="flex space-x-1 justify-center mt-2">
+                    <span className="text-sm font-normal text-gray-500 mb-4 md:mb-0 block w-full md:inline md:w-auto">
+                      Mostrando página <span className="font-semibold text-gray-900">{currentPage}</span> de <span className="font-semibold text-gray-900">{totalPages}</span>
+                    </span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
+        {isContingencyModalOpen && (
+          <ModalContingency isOpen={isContingencyModalOpen} onClose={closeModal2} />
+        )}
       </div>
-      {isContingencyModalOpen && (
-        <ModalContingency isOpen={isContingencyModalOpen} onClose={closeModal2} />
-      )}
     </div>
   );
 };

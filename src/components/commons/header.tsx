@@ -212,7 +212,7 @@ const Header = () => {
     }, []);
 
     return (
-        <header className={`flex justify-between items-center shadow p-4 bg-ninthColor`}>
+        <header className={`flex justify-between items-center shadow p-4 bg-seventhColor`}>
             <div className="container mx-auto px-6 flex justify-between items-center">
                 <div className="flex items-center flex-grow">
                     <div className="relative mx-2 lg:mx-0">

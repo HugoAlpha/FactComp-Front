@@ -246,11 +246,13 @@ const ProductList = () => {
                                 <FaSearch className="absolute right-4 text-gray-500 text-xl pointer-events-none" />
                             </div>
                             <button
-                                className="bg-principalColor text-white py-2 px-4 rounded-lg hover:bg-firstColor text-lg"
+                                className="bg-principalColor text-white py-2 px-4 rounded-lg hover:bg-firstColor text-lg  h-10 flex items-center justify-center"
                                 onClick={() => handleOpenModal()}
                             >
-                                Agregar Producto <FaPlus className="inline-block ml-2" />
-                            </button>
+                                <span className="flex items-center">
+                                    Agregar Producto <FaPlus className="inline-block ml-2" />
+                                </span>                               
+                             </button>
                         </div>
 
                         <div className="overflow-x-auto shadow-lg rounded-lg border border-gray-200">

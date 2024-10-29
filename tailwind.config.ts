@@ -10,15 +10,15 @@ const config: Config = {
     extend: {
       colors: {
         principalColor: "#10314b",
-    firstColor: "#5086A8",
-    secondColor: "#F1F1F1",
-    thirdColor: "#75C4D2",
-    fourthColor: "#9CBFCF",
-    fifthColor: "#D8E3E8",
-    sixthColor: "#8C9CBC",
-    seventhColor: "#bfccdc",
-    eighthColor: "#d8e3e8",
-    ninthColor: "#e8f3f5"
+        firstColor: "#5086A8",
+        secondColor: "#F1F1F1",
+        thirdColor: "#75C4D2",
+        fourthColor: "#9CBFCF",
+        fifthColor: "#D8E3E8",
+        sixthColor: "#8C9CBC",
+        seventhColor: "#bfccdc",
+        eighthColor: "#d8e3e8",
+        ninthColor: "#e8f3f5"
       },
     },
   },

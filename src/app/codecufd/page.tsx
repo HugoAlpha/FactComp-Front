@@ -202,36 +202,42 @@ const CUFDList = () => {
                         <h2 className="text-xl font-bold mb-6 text-gray-700">Registros de CUFD</h2>
                         
                         <div className="flex items-center mb-4 justify-between">
-                            <div>
+                            <div className="flex items-center">
                                 <label htmlFor="itemsPerPage" className="mr-2 text-sm">Elementos por página:</label>
                                 <select
                                     value={rowsPerPage}
                                     onChange={handleRowsPerPageChange}
-                                    className="border p-2 rounded-lg w-20"
+                                    className="border p-2 rounded-lg w-20 h-10"
                                 >
                                     <option value={10}>10</option>
                                     <option value={20}>20</option>
                                     <option value={50}>50</option>
                                 </select>
                             </div>
-                            <div className="relative flex items-center w-full max-w-md mb-2">
+
+                            <div className="relative flex items-center w-full max-w-md">
                                 <input
                                     type="text"
                                     placeholder="Buscar CUFD por id o estado..."
-                                    className="border border-gray-300 focus:border-firstColor focus:ring-firstColor focus:outline-none px-4 py-2 rounded-lg w-full shadow-sm text-sm placeholder-gray-400"
+                                    className="border border-gray-300 focus:border-firstColor focus:ring-firstColor focus:outline-none px-4 py-2 rounded-lg w-full shadow-sm text-sm placeholder-gray-400 h-10"
                                     value={filter}
                                     onChange={handleFilterChange}
-
                                 />
                                 <FaSearch className="absolute right-4 text-gray-500 text-xl pointer-events-none" />
                             </div>
+
                             <button
-                                className="bg-principalColor text-white py-2 px-4 rounded-lg hover:bg-firstColor text-lg"
+                                className="bg-principalColor text-white py-2 px-4 rounded-lg hover:bg-firstColor text-lg h-10 flex items-center justify-center"
                                 onClick={handleEmitCUFD}
                             >
-                                Emitir CUFD <FaPlus className="inline-block ml-2" />
+                                <span className="flex items-center"> {/* Añadir un contenedor flex para centrar el contenido */}
+                                    Emitir CUFD 
+                                    <FaPlus className="inline-block ml-2" />
+                                </span>
                             </button>
+
                         </div>
+
 
                         <div className="overflow-x-auto shadow-lg rounded-lg border border-gray-200">
                             <table className="table-auto w-full bg-white">

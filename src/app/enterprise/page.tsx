@@ -261,7 +261,7 @@ const EnterpriseList = () => {
                                 <select
                                     value={rowsPerPage}
                                     onChange={handleRowsPerPageChange}
-                                    className="border p-2 rounded-lg w-20"
+                                    className="border px-2 h-10 rounded-lg w-20"
                                 >
                                     <option value={10}>10</option>
                                     <option value={20}>20</option>
@@ -271,7 +271,7 @@ const EnterpriseList = () => {
 
                             <button
                                 onClick={() => openModal()}
-                                className="bg-sixthColor text-white py-2 px-4 rounded-lg hover:bg-thirdColor text-lg"
+                                className="bg-sixthColor text-white h-10 px-4 rounded-lg hover:bg-thirdColor text-lg"
                             >
                                 Agregar Empresa
                             </button>

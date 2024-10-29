@@ -127,7 +127,7 @@ const UserList = () => {
                                 <select
                                     value={rowsPerPage}
                                     onChange={handleRowsPerPageChange}
-                                    className="border p-2 rounded-lg w-20"
+                                    className="border px-2 h-10 rounded-lg w-20"
                                 >
                                     <option value={10}>10</option>
                                     <option value={20}>20</option>
@@ -142,7 +142,7 @@ const UserList = () => {
                                 <input
                                     type="text"
                                     placeholder="Buscar usuario por nombre completo..."
-                                    className="border border-gray-300 focus:border-firstColor focus:ring-firstColor focus:outline-none px-4 py-2 rounded-lg w-full shadow-sm text-sm placeholder-gray-400"
+                                    className="border border-gray-300 focus:border-firstColor focus:ring-firstColor focus:outline-none px-4 h-10 rounded-lg w-full shadow-sm text-sm placeholder-gray-400"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                 />
@@ -150,7 +150,7 @@ const UserList = () => {
                                 <FaSearch className="absolute right-4 text-gray-500 text-xl pointer-events-none" />
                             </div>
                             <button
-                                className="bg-sixthColor text-white py-2 px-4 rounded-lg hover:bg-fourthColor text-lg"
+                                className="bg-sixthColor text-white h-10 px-4 rounded-lg hover:bg-fourthColor text-lg"
                                 onClick={() => setIsModalOpen(true)}
                             >
                                 Agregar Usuario

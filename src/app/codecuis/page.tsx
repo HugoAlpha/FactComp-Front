@@ -236,73 +236,77 @@ const CodeReceipt = () => {
                     <div className="p-6">
                         <h1 className="text-2xl font-bold mb-6 text-gray-700">CUIS</h1>
 
-                        <div>
-                            <label htmlFor="itemsPerPage" className="mr-2 text-sm">Elementos por página:</label>
-                            <select
-                                value={rowsPerPage}
-                                onChange={handleRowsPerPageChange}
-                                className="border p-2 rounded-lg w-20"
-                            >
-                                <option value={10}>10</option>
-                                <option value={20}>20</option>
-                                <option value={50}>50</option>
-                            </select>
-                        </div>
-
-                        <div className="mb-4 flex space-x-4 text-black items-center">
-                            <label htmlFor="itemsPerPage" className="mr-2 text-sm">Filtro por estado de codigo:</label>
-                            <select
-                                value={filterStatus}
-                                onChange={(e) => setFilterStatus(e.target.value)}
-                                className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            >
-                                <option value="Todos">Todos</option>
-                                <option value="Vencido">Vencidos</option>
-                                <option value="Vigente">Vigentes</option>
-                                <option value="Por Vencer">Por Vencer</option>
-                            </select>
-
-                            {filterStatus === "Por Vencer" && (
+                        <div className="flex justify-between items-center mb-4 text-black">
+                            <div className="flex items-center space-x-4">
                                 <div className="flex items-center">
-                                    <p className="mr-2">Dentro de:</p>
+                                    <label htmlFor="itemsPerPage" className="mr-2 text-sm">Elementos por página:</label>
                                     <select
-                                        value={daysToExpire || ""}
-                                        onChange={(e) => setDaysToExpire(e.target.value ? Number(e.target.value) : null)}
-                                        className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        value={rowsPerPage}
+                                        onChange={handleRowsPerPageChange}
+                                        className="border p-2 rounded-lg w-20 h-10"
                                     >
-                                        <option value="5">5 días</option>
-                                        <option value="10">10 días</option>
-                                        <option value="15">15 días</option>
+                                        <option value={10}>10</option>
+                                        <option value={20}>20</option>
+                                        <option value={50}>50</option>
                                     </select>
                                 </div>
-                            )}
 
-                            <label htmlFor="itemsPerPage" className="mr-2 text-sm">Filtro por Sucursales:</label>
+                                <div className="flex items-center">
+                                    <label htmlFor="filterStatus" className="mr-2 text-sm ml-2">Filtro por estado de código:</label>
+                                    <select
+                                        value={filterStatus}
+                                        onChange={(e) => setFilterStatus(e.target.value)}
+                                        className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-10"
+                                    >
+                                        <option value="Todos">Todos</option>
+                                        <option value="Vencido">Vencidos</option>
+                                        <option value="Vigente">Vigentes</option>
+                                        <option value="Por Vencer">Por Vencer</option>
+                                    </select>
 
-                            <select
-                                value={selectedSucursal}
-                                onChange={(e) => setSelectedSucursal(e.target.value)}
-                                className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            >
-                                <option value="Todos">Todas las sucursales</option>
-                                {sucursales.map((sucursal, index) => (
-                                    <option key={index} value={sucursal}>
-                                        {sucursal}
-                                    </option>
-                                ))}
-                            </select>
+                                    {filterStatus === "Por Vencer" && (
+                                        <div className="flex items-center ml-4">
+                                            <p className="mr-2">Dentro de:</p>
+                                            <select
+                                                value={daysToExpire || ""}
+                                                onChange={(e) => setDaysToExpire(e.target.value ? Number(e.target.value) : null)}
+                                                className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-10"
+                                            >
+                                                <option value="5">5 días</option>
+                                                <option value="10">10 días</option>
+                                                <option value="15">15 días</option>
+                                            </select>
+                                        </div>
+                                    )}
+
+                                    <label htmlFor="selectedSucursal" className="mr-2 text-sm ml-6">Filtro por Sucursales:</label>
+                                    <select
+                                        value={selectedSucursal}
+                                        onChange={(e) => setSelectedSucursal(e.target.value)}
+                                        className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-10"
+                                    >
+                                        <option value="Todos">Todas las sucursales</option>
+                                        {sucursales.map((sucursal, index) => (
+                                            <option key={index} value={sucursal}>
+                                                {sucursal}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
 
                             <div className="relative flex items-center w-full max-w-md">
                                 <input
                                     type="text"
-                                    placeholder="Buscar por codigo..."
+                                    placeholder="Buscar por código..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="border border-gray-300 focus:border-firstColor focus:ring-firstColor focus:outline-none px-4 py-2 rounded-lg w-full shadow-sm text-sm placeholder-gray-400"
+                                    className="border border-gray-300 focus:border-firstColor focus:ring-firstColor focus:outline-none px-4 py-2 rounded-lg w-full shadow-sm text-sm placeholder-gray-400 h-10"
                                 />
-                                <FaSearch className="absolute right-4 text-gray-500 text-xl pointer-events-none" />
+                                <FaSearch className="absolute right-3 text-gray-500 text-xl pointer-events-none" />
                             </div>
                         </div>
+
 
                         <div className="overflow-x-auto shadow-lg rounded-lg border border-gray-200">
                             <table className="table-auto w-full bg-white">

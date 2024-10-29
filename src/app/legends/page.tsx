@@ -151,11 +151,11 @@ const Legends: React.FC = () => {
                         </div>
                         <div className="flex justify-between mb-4">
                             <div>
-                                <label htmlFor="itemsPerPage" className="mr-2 text-sm">Elementos por página:</label>
+                                <label htmlFor="itemsPerPage" className="mr-2 text-sm h-10">Elementos por página:</label>
                                 <select
                                     value={rowsPerPage}
                                     onChange={handleRowsPerPageChange}
-                                    className="border p-2 rounded-lg w-20"
+                                    className="border px-2  h-10 rounded-lg w-20"
                                 >
                                     <option value={10}>10</option>
                                     <option value={20}>20</option>
@@ -170,9 +170,9 @@ const Legends: React.FC = () => {
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
                                     placeholder="Buscar Registro"
-                                    className="border p-2 w-full rounded-lg"
+                                    className="border px-2 h-10 w-full rounded-lg"
                                 />
-                                <FaSearch className="absolute right-4 text-gray-500 text-xl pointer-events-none" />
+                                <FaSearch className="absolute right-4 text-gray-500 text-xl pointer-events-none " />
                             </div>
                         </div>
 
