@@ -159,7 +159,6 @@ const UserList = () => {
                                 isOpen={isModalOpen}
                                 onClose={() => setIsModalOpen(false)}
                                 onSave={(newUser) => {
-                                    // lógica para guardar nuevo usuario
                                 }}
                             />
                         </div>

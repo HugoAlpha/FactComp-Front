@@ -446,7 +446,7 @@ const Sales = () => {
                                                 <input
                                                     type="number"
                                                     className="w-16 text-center border rounded-md hover:border-gray-200"
-                                                    value={product.discount !== undefined ? product.discount.toString() : ''} // Mostramos el descuento actual
+                                                    value={product.discount !== undefined ? product.discount.toString() : ''} 
                                                     min="0"
                                                     onChange={(e) => updateDiscount(product.id, e.target.value)}
                                                 />

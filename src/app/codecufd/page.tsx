@@ -64,7 +64,7 @@ const CUFDList = () => {
                         }
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            setIsContingencyModalOpen(true); // Abre el modal si se confirma
+                            setIsContingencyModalOpen(true); 
                         } else {
                             console.log('Modo de contingencia cancelado.');
                         }
@@ -91,7 +91,7 @@ const CUFDList = () => {
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    setIsContingencyModalOpen(true); // Abre el modal si se confirma
+                    setIsContingencyModalOpen(true); 
                 } else {
                     console.log('Modo de contingencia cancelado.');
                 }

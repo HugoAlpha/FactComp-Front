@@ -197,7 +197,7 @@ const BillList = () => {
   useEffect(() => {
     const role = localStorage.getItem("role");
     setUserRole(role);
-    console.log("User Role:", role); // Para depuración
+    console.log("User Role:", role); 
   }, []);
 
   const handleViewRollo = async (id: string) => {

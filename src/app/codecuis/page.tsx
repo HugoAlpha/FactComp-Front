@@ -75,6 +75,7 @@ const CodeReceipt = () => {
                         vigente: code.vigente,
                         puntoVenta: code.puntoVenta
                     }));
+                    formattedData.sort((a: Code, b: Code) => b.id - a.id);
                     setCodes(formattedData);
                     const uniqueSucursales = Array.from(
                         new Set(formattedData.map((code: Code) => code.puntoVenta.sucursal.nombre))

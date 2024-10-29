@@ -309,7 +309,7 @@ const Branches: React.FC = () => {
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
                                         placeholder="Buscar por nombre, ciudad, departamento o razón social"
-                                        className="border rounded-lg border-gray-300 focus:border-firstColor focus:ring-firstColor focus:outline-none px-4 py-2 text-sm w-full h-10 shadow-sm placeholder-gray-400 pr-10" // Asegúrate de añadir padding-right
+                                        className="border rounded-lg border-gray-300 focus:border-firstColor focus:ring-firstColor focus:outline-none px-4 py-2 text-sm w-full h-10 shadow-sm placeholder-gray-400 pr-10" 
                                     />
                                     <FaSearch className="absolute right-3 text-gray-500 text-xl pointer-events-none" /> 
                                 </div>
