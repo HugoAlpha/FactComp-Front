@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import { FaUser, FaIdCard, FaEnvelope, FaFileAlt } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import { PATH_URL_BACKEND } from '@/utils/constants';
 
@@ -90,7 +89,6 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
             try {
                 let response;
                 if (customer.id) {
-                    // PUT
                     response = await fetch(`${PATH_URL_BACKEND}/api/clientes/${customer.id}`, {
                         method: 'PUT',
                         headers: {
@@ -99,7 +97,6 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
                         body: JSON.stringify(formData),
                     });
                 } else {
-                    // POST
                     response = await fetch(`${PATH_URL_BACKEND}/api/clientes`, {
                         method: 'POST',
                         headers: {

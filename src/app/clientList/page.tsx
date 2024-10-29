@@ -23,6 +23,14 @@ interface UserRole {
     role: 'ADMIN' | 'CAJERO';
 }
 
+const documentTypes = {
+    1: "CI",
+    2: "CEX",
+    5: "NIT",
+    3: "PAS",
+    4: "OD"
+};
+
 const ClientList = () => {
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [filter, setFilter] = useState<string>('');
@@ -42,17 +50,18 @@ const ClientList = () => {
     const [isContingencyModalOpen, setIsContingencyModalOpen] = useState<boolean>(false);
 
 
-    useEffect(() => {
-        const fetchCustomers = async () => {
-            try {
-                const response = await fetch(`${PATH_URL_BACKEND}/api/clientes`);
-                const data = await response.json();
-                setCustomers(data);
-            } catch (error) {
-                console.error('Error fetching customers:', error);
-            }
-        };
+    const fetchCustomers = async () => {
+        try {
+            const response = await fetch(`${PATH_URL_BACKEND}/api/clientes`);
+            const data = await response.json();
+            const sortedData = data.sort((a: Customer, b: Customer) => b.id - a.id);
+            setCustomers(sortedData);
+        } catch (error) {
+            console.error('Error fetching customers:', error);
+        }
+    };
 
+    useEffect(() => {
         fetchCustomers();
     }, []);
 
@@ -111,7 +120,7 @@ const ClientList = () => {
     useEffect(() => {
         const role = localStorage.getItem("role");
         setUserRole(role);
-        console.log("User Role:", role); // Para depuración
+        console.log("User Role:", role); 
     }, []);
 
     useEffect(() => {
@@ -166,8 +175,7 @@ const ClientList = () => {
             );
             Swal.fire('¡Actualizado!', 'El cliente ha sido actualizado.', 'success');
         } else {
-            const newId = customers.length > 0 ? Math.max(...customers.map(c => c.id)) + 1 : 1;
-            setCustomers([...customers, { ...customer, id: newId }]);
+            fetchCustomers();
             Swal.fire('¡Agregado!', 'El cliente ha sido agregado exitosamente.', 'success');
         }
         setIsModalOpen(false);
@@ -333,7 +341,7 @@ const ClientList = () => {
                                     {paginatedCustomers.map((customer) => (
                                         <tr key={customer.id} className="border-b hover:bg-gray-50 text-black">
                                             <td className="px-6 py-4">{customer.nombreRazonSocial}</td>
-                                            <td className="px-6 py-4">{customer.codigoTipoDocumentoIdentidad}</td>
+                                            <td className="px-6 py-4">{documentTypes[customer.codigoTipoDocumentoIdentidad] || 'Desconocido'}</td>
                                             <td className="px-6 py-4">{customer.numeroDocumento}</td>
                                             <td className="px-6 py-4">{customer.complemento}</td>
                                             <td className="px-6 py-4">{customer.codigoCliente}</td>
@@ -348,8 +356,8 @@ const ClientList = () => {
                         </div>
 
         
-                        <div className="flex justify-between items-center mt-6"> {/* Flex container para alinear elementos */}
-                            <div className="flex flex-grow justify-center space-x-1"> {/* Asegura que este contenedor ocupe el espacio disponible */}
+                        <div className="flex justify-between items-center mt-6"> 
+                            <div className="flex flex-grow justify-center space-x-1"> 
                                 <button
                                     onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                                     disabled={currentPage === 1}
@@ -377,7 +385,7 @@ const ClientList = () => {
                                 </button>
                             </div>
 
-                            <div className="flex pl-10 items-center"> {/* Flex container para los botones "Primero" y "Último" */}
+                            <div className="flex pl-10 items-center"> 
                                 <button
                                     onClick={handleFirstPage}
                                     className="min-w-9 rounded-l-md border-r-0 border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800"
