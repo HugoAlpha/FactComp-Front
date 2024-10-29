@@ -33,8 +33,8 @@ const KanbanView = () => {
     }, []);
 
     const handleSelectSalesPoint = (id, codigo) => {
-        localStorage.setItem('selectedSalesPointId', id);
-        localStorage.setItem('selectedSalesPointCode', codigo);
+        localStorage.setItem('idPOS', id);
+        localStorage.setItem('CodigoPOS', codigo);
         window.location.href = "/dashboardCashier";
     };
 

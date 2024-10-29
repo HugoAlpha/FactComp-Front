@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Image from 'next/image';
 import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
+import { PATH_URL_SECURITY } from "@/utils/constants";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -13,44 +14,67 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
-  const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (email === "admin@gmail.com" && password === "Alpha123!") {
-      localStorage.setItem("role","admin");
-      Swal.fire({
-        position: "center",
-        icon: 'success',
-        title: 'Logeo Exitoso',
-        text: 'Bienvenido a Alpha E-Facturación',
-        showConfirmButton: false,
-        timer: 3500
-      }).then(() => {
-        router.push('/dashboard');
-      });
+    try {
+        const response = await fetch(`${PATH_URL_SECURITY}/api/usuarios/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, password })
+        });
 
-    } else if (email === "cajero@gmail.com" && password === "Alpha123!") {
-      
-      localStorage.setItem("role", "cashier");
-      Swal.fire({
-        position: "center",
-        icon: 'success',
-        title: 'Logeo Exitoso',
-        text: 'Bienvenido, Cajero',
-        showConfirmButton: false,
-        timer: 3500
-      }).then(() => {
-        router.push('/selectionPOS');
-      });
-    } else {
-      Swal.fire({
-        icon: 'error',
-        title: 'Credenciales Incorrectas',
-        text: 'Por favor, verifica tu correo y contraseña',
-        showConfirmButton: false,
-        timer: 1500
-      });
+        if (response.ok) {
+            const data = await response.json();
+            if (data.response === "200") {
+                localStorage.setItem("role", data.role);
+                localStorage.setItem("tokenJWT", data.tokenJWT);
+
+                Swal.fire({
+                    position: "center",
+                    icon: 'success',
+                    title: data.message,
+                    text: 'Bienvenido a Alpha E-Facturación',
+                    showConfirmButton: false,
+                    timer: 3500
+                }).then(() => {
+                    if (data.role === "ROLE_ADMIN") {
+                        router.push('/dashboard');
+                    } else if (data.role === "ROLE_USER") {
+                        router.push('/selectionPOS');
+                    }
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Usuario no encontrado',
+                    text: 'Por favor, verifica tus credenciales',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            }
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error de servidor',
+                text: 'No se pudo conectar con el servidor',
+                showConfirmButton: false,
+                timer: 1500
+            });
+        }
+    } catch (error) {
+        console.error("Error de conexión:", error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Error de conexión',
+            text: 'Hubo un problema al conectar con el servidor',
+            showConfirmButton: false,
+            timer: 1500
+        });
     }
-  };
+};
+
 
   return (
 
