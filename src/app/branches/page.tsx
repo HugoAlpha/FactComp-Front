@@ -364,48 +364,14 @@ const Branches: React.FC = () => {
                             </table>
                         </div>
 
-                        
-                        <div className="flex items-center justify-between h-full">
-                <div className="flex items-center space-x-1 justify-start mt-6">
-                  <span className="text-slate-600">Ir a la página:</span>
-
-                  <input
-                    type="number"
-                    value={currentPage}
-                    onChange={(e) => {
-                      const page = parseInt(e.target.value, 10);
-                      if (!isNaN(page) && page >= 1 && page <= totalPages) {
-                        setCurrentPage(page);
-                      }
-                    }}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        const page = parseInt(e.target.value, 10);
-                        if (!isNaN(page) && page >= 1 && page <= totalPages) {
-                          setCurrentPage(page);
-                        }
-                      }
-                    }}
-                    className="w-20 h-10 rounded-md border py-2 text-center transition-all shadow-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-slate-800"
-                  />
-
-                  <div className="flex pl-10">
-                    <button
-                      onClick={handleFirstPage}
-                      className="min-w-9 rounded-l-md border-r-0 border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800"
-                    >
-                      Primero
-                    </button>
-                    <button
-                      onClick={handleLastPage}
-                      className="min-w-9 rounded-r-md border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800"
-                    >
-                      Último
-                    </button>
-                  </div>
-                </div>
-                <div>
-                <div className="flex space-x-1  justify-center mt-6">
+                        <div className="flex flex-col items-center mt-6">
+                            <div className="flex justify-center space-x-1 mb-2">
+                            <button
+                                onClick={handleFirstPage}
+                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                            >
+                                Primero
+                            </button>
                             <button
                                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                                 disabled={currentPage === 1}
@@ -431,6 +397,13 @@ const Branches: React.FC = () => {
                             >
                                 Sig.
                             </button>
+                            <button
+                             onClick={handleLastPage}
+                             className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                            >
+                            Último
+                            </button>
+                         </div>
                         </div>
 
                         <div className="flex space-x-1 justify-center mt-2">
@@ -440,8 +413,6 @@ const Branches: React.FC = () => {
                         </div>
                     </div>
                 </div>
-            </div>
-            </div>
         </div>
 
             <ModalCreateBranch

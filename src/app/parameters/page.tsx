@@ -288,6 +288,14 @@ const Parameters = () => {
         checkServerCommunication();
     }, []);
 
+    const handleFirstPage = () => {
+        setCurrentPage(1);
+      };
+    
+      const handleLastPage = () => {
+        setCurrentPage(totalPages);
+      };
+
     return (
         <div className="flex min-h-screen">
             <Sidebar />
@@ -368,7 +376,14 @@ const Parameters = () => {
                         </div>
 
 
-                        <div className="flex space-x-1 justify-center mt-6">
+                        <div className="flex flex-col items-center mt-6">
+                            <div className="flex justify-center space-x-1 mb-2">
+                            <button
+                                onClick={handleFirstPage}
+                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                            >
+                                Primero
+                            </button>
                             <button
                                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                                 disabled={currentPage === 1}
@@ -394,6 +409,14 @@ const Parameters = () => {
                             >
                                 Sig.
                             </button>
+                            <button
+                             onClick={handleLastPage}
+                             className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                            >
+                            Último
+                            </button>
+                            
+                         </div>
                         </div>
 
                         <div className="flex space-x-1 justify-center mt-2">
@@ -401,6 +424,7 @@ const Parameters = () => {
                                 Mostrando página <span className="font-semibold text-gray-900 dark:text-black">{currentPage}</span> de <span className="font-semibold text-gray-900 dark:text-black">{totalPages}</span>
                             </span>
                         </div>
+
                     </div>
                 </div>
             </div>

@@ -16,8 +16,6 @@ interface CUFD {
     vigente: boolean;
 }
 
-
-
 const CUFDList = () => {
     const [cufds, setCUFDs] = useState<CUFD[]>([]);
     const [filter, setFilter] = useState<string>('');
@@ -191,6 +189,14 @@ const CUFDList = () => {
         setCurrentPage(1);
     };
 
+    const handleFirstPage = () => {
+        setCurrentPage(1);
+      };
+    
+      const handleLastPage = () => {
+        setCurrentPage(totalPages);
+      };
+
     return (
         <div className="flex min-h-screen">
             {userRole === 'admin' ? <Sidebar /> : <CashierSidebar />}
@@ -230,7 +236,7 @@ const CUFDList = () => {
                                 className="bg-principalColor text-white py-2 px-4 rounded-lg hover:bg-firstColor text-lg h-10 flex items-center justify-center"
                                 onClick={handleEmitCUFD}
                             >
-                                <span className="flex items-center"> {/* Añadir un contenedor flex para centrar el contenido */}
+                                <span className="flex items-center"> 
                                     Emitir CUFD 
                                     <FaPlus className="inline-block ml-2" />
                                 </span>
@@ -263,33 +269,48 @@ const CUFDList = () => {
                                 </tbody>
                             </table>
                         </div>
-                        <div className="flex space-x-1 justify-center mt-6">
+                        <div className="flex flex-col items-center mt-6">
+                            <div className="flex justify-center space-x-1 mb-2">
+                            <button
+                                onClick={handleFirstPage}
+                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                            >
+                                Primero
+                            </button>  
                             <button
                                 onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                                 disabled={currentPage === 1}
-                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
                             >
                                 Ant.
                             </button>
 
-                            {getPageNumbers().map((number) => (
+                            {getPageNumbers().map((page) => (
                                 <button
-                                    key={number}
-                                    onClick={() => setCurrentPage(number)}
-                                    className={`min-w-9 rounded-full border py-2 px-3.5 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 ${currentPage === number ? 'bg-slate-800 text-white' : ''}`}
+                                    key={page}
+                                    onClick={() => setCurrentPage(page)}
+                                    className={`min-w-9 rounded-full border py-2 px-3.5 text-center text-sm transition-all shadow-sm ${page === currentPage ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-800 hover:text-white hover:border-slate-800'} focus:bg-slate-800 focus:text-white active:border-slate-800 active:bg-slate-800`}
                                 >
-                                    {number}
+                                    {page}
                                 </button>
                             ))}
 
                             <button
                                 onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
                                 disabled={currentPage === totalPages}
-                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                                className="min-w-9 rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
                             >
                                 Sig.
                             </button>
+                            <button
+                             onClick={handleLastPage}
+                             className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                            >
+                            Último
+                            </button>
+                         </div>
                         </div>
+
                         <div className="flex space-x-1 justify-center mt-2">
                             <span className="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">
                                 Mostrando página <span className="font-semibold text-gray-900 dark:text-black">{currentPage}</span> de <span className="font-semibold text-gray-900 dark:text-black">{totalPages}</span>
