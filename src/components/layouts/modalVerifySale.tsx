@@ -16,6 +16,7 @@ interface ModalVerifySaleProps {
   onClose: () => void;
   products: Product[];
   total: number;
+  client: Client | null;
   onSuccess: (data: { client: string; total: number; numeroFactura: number }) => void;
 }
 
@@ -31,13 +32,13 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
   onClose,
   products,
   total,
+  client,
   onSuccess,
 }) => {
   const [paymentMethod, setPaymentMethod] = useState('1');
   const [paymentAmount, setPaymentAmount] = useState('');
   const [cashAmount, setCashAmount] = useState('');
   const [cardAmount, setCardAmount] = useState('');
-  const [selectedClient, setSelectedClient] = useState('');
   const [clients, setClients] = useState<Client[]>([]);
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   const [showAllMethods, setShowAllMethods] = useState(false);
@@ -56,25 +57,6 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
     };
     fetchPaymentMethods();
   }, []);
-
-  useEffect(() => {
-    if (isOpen) {
-      const fetchClients = async () => {
-        try {
-          const response = await fetch(`${PATH_URL_BACKEND}/api/clientes`);
-          if (response.ok) {
-            const data = await response.json();
-            setClients(data);
-          } else {
-            Swal.fire('Error', 'Error al obtener la lista de clientes', 'error');
-          }
-        } catch (error) {
-          Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
-        }
-      };
-      fetchClients();
-    }
-  }, [isOpen]);
 
   const handleValidate = async () => {
     if (paymentMethod === '1' && Number(paymentAmount) < total) {
@@ -125,11 +107,9 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
 
       const contingenciaEstado = localStorage.getItem('contingenciaEstado');
       const body = {
-      usuario:
-        clients.find((client) => client.nombreRazonSocial === selectedClient)?.codigoCliente ||
-        '',
+        usuario: client?.codigoCliente || '',
       idPuntoVenta: '1',
-      idCliente: clients.find((client) => client.nombreRazonSocial === selectedClient)?.id || '',
+      idCliente: client?.id || '',
       nitInvalido: true,
       codigoMetodoPago: paymentMethod,
       activo: contingenciaEstado === '1' ? false : true,
@@ -159,7 +139,7 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
         text: `CUF: ${data.cuf}, Número de factura: ${data.numeroFactura}`,
       }).then(() => {
         onSuccess({
-          client: selectedClient,
+          client: client?.nombreRazonSocial || '',
           total: Number(paymentAmount) || total,
           numeroFactura: data.numeroFactura,
         });
@@ -271,22 +251,6 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
             />
           </div>
         )}
-
-        <div className="mb-4">
-          <label className="block mb-2 font-semibold">Cliente</label>
-          <select
-            className="border p-2 w-full"
-            value={selectedClient}
-            onChange={(e) => setSelectedClient(e.target.value)}
-          >
-            <option value="">Selecciona un cliente</option>
-            {clients.map((client) => (
-              <option key={client.id} value={client.nombreRazonSocial}>
-                {client.nombreRazonSocial} - {client.numeroDocumento}
-              </option>
-            ))}
-          </select>
-        </div>
 
         <div className="mb-4">
           <h3 className="text-lg font-bold">Total: Bs.{total.toFixed(2)}</h3>

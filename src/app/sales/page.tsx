@@ -6,7 +6,6 @@ import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
 import ModalVerifySale from "../../components/layouts/modalVerifySale";
 import ReceiptOptionsModal from "../../components/layouts/modalReceiptOptions";
-import Link from 'next/link';
 import { PATH_URL_BACKEND } from '@/utils/constants';
 import { GrDocumentConfig } from "react-icons/gr";
 import CreateEditClientModal from '@/components/layouts/modalCreateEditClient';
@@ -31,6 +30,7 @@ const Sales = () => {
     const [isClientModalOpen, setIsClientModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [productToEdit, setProductToEdit] = useState<Product | null>(null);
+    const [clients, setClients] = useState([]); 
     const [currentCustomer, setCurrentCustomer] = useState<Customer>({
         id: 0,
         nombreRazonSocial: '',
@@ -41,8 +41,6 @@ const Sales = () => {
         email: '',
     });
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
-    const [isContingencyModalOpen, setIsContingencyModalOpen] = useState(false);
-
     
     interface Product {
         id: number;
@@ -90,7 +88,19 @@ const Sales = () => {
         numeroFactura: number;
     }
 
-    
+    const fetchClients = async () => {
+        try {
+            const response = await fetch(`${PATH_URL_BACKEND}/api/clientes`);
+            if (response.ok) {
+                const data = await response.json();
+                setClients(data);
+            } else {
+                Swal.fire('Error', 'Error al obtener la lista de clientes', 'error');
+            }
+        } catch (error) {
+            Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
+        }
+    };
 
     const fetchProducts = async () => {
         try {
@@ -122,10 +132,16 @@ const Sales = () => {
     };
     
     useEffect(() => {
+        fetchClients();
         fetchProducts();
     }, []);
-    
 
+    const handleClientSelect = (clientId: string) => {
+        const selectedClient = clients.find(client => client.id === parseInt(clientId));
+        if (selectedClient) {
+            setCurrentCustomer(selectedClient);
+        }
+    };    
 
     const updateDiscount = (id: number, value: string) => {
         console.log(`Actualizando descuento del producto con id: ${id}, nuevo valor: ${value}`);
@@ -474,12 +490,17 @@ const Sales = () => {
                                 ))}
                             </div>
                             <div className="mt-4 space-y-3 w-full">
-                                <button
-                                    className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-black font-bold py-3 px-4 rounded-lg w-full"
-                                    onClick={handleOpenClientModal}
-                                    >
-                                    <FaUser className="mr-2" /> Agregar nuevo cliente
-                                </button>
+                                <select
+                    className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-black font-bold py-3 px-4 rounded-lg w-full"
+                    onChange={(e) => handleClientSelect(e.target.value)}
+                        >
+                       <option value="">Selecciona un cliente</option>
+                       {clients.map((client) => (
+                        <option key={client.id} value={client.id}>
+                            {client.nombreRazonSocial} - {client.numeroDocumento}
+                           </option>
+                                ))}
+                               </select>
 
                                 <button
                                     onClick={handleOpenModal}
@@ -630,6 +651,7 @@ const Sales = () => {
                         onClose={() => setIsModalOpen(false)}
                         products={formattedSelectedProducts}
                         total={total}
+                        client={currentCustomer}
                         onSuccess={(data) => handleSaleSuccess({
                             client: data.client,
                             total: data.total,

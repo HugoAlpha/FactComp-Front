@@ -15,8 +15,8 @@ const UserList = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const filteredUsers = users.filter(user =>
-        user.fullname.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+        user.fullname?.toLowerCase().includes(searchTerm.toLowerCase())
+    );    
 
     useEffect(() => {
         const fetchUsersAndCompanies = async () => {
@@ -114,6 +114,7 @@ const UserList = () => {
         setRowsPerPage(parseInt(e.target.value));
         setCurrentPage(1);
     };
+    
 
     const totalPages = Math.ceil(filteredUsers.length / rowsPerPage);
     const paginatedUsers = filteredUsers.slice(

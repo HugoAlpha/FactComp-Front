@@ -20,9 +20,12 @@ const Login = () => {
       const response = await fetch(`${PATH_URL_SECURITY}/api/usuarios/login`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/x-www-form-urlencoded'
         },
-        body: JSON.stringify({ username, password })
+        body: new URLSearchParams({
+          username,
+          password
+        }).toString()
       });
 
       if (response.ok) {
