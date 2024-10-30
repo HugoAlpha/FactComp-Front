@@ -60,7 +60,7 @@ const BillDetailsModal: React.FC<BillDetailsModalProps> = ({ isOpen, onClose, bi
                         </div>
                         <div className="flex justify-between">
                             <span className="font-semibold">Fecha de Emisión:</span>
-                            <span>{bill.fechaEmision ? new Date(bill.fechaEmision).toLocaleString() : 'N/A'}</span>  {/* Formatea la fecha aquí */}
+                            <span>{bill.fechaEmision ? new Date(bill.fechaEmision).toLocaleString() : 'N/A'}</span>  
                         </div>
                         <div className="flex justify-between">
                             <span className="font-semibold">Razón Social:</span>

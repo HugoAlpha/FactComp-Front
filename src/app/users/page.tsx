@@ -5,14 +5,11 @@ import Header from '@/components/commons/header';
 import { useEffect, useState } from 'react';
 import ModalCreateUser from "../../components/layouts/modalCreateUser";
 import Swal from 'sweetalert2';
-import { PATH_URL_BACKEND } from '@/utils/constants';
+import { PATH_URL_BACKEND, PATH_URL_SECURITY } from '@/utils/constants';
 
 const UserList = () => {
-    const [users, setUsers] = useState([
-        { id: 1, username: 'juanp', fullname: 'Juan Pérez', companyId: 'Empresa 1', branch: 'Sucursal 1' },
-        { id: 2, username: 'marial', fullname: 'Maria Lopez', companyId: 'Empresa 2', branch: 'Sucursal 2' },
-        { id: 3, username: 'pedros', fullname: 'Pedro Sanchez', companyId: 'Empresa 3', branch: 'Sucursal 3' },
-    ]);
+    const [users, setUsers] = useState<User[]>([]);
+    const [companies, setCompanies] = useState<Company[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
@@ -20,6 +17,42 @@ const UserList = () => {
     const filteredUsers = users.filter(user =>
         user.fullname.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    useEffect(() => {
+        const fetchUsersAndCompanies = async () => {
+            try {
+                const token = localStorage.getItem("tokenJWT");
+
+                const userResponse = await fetch(`${PATH_URL_SECURITY}/api/usuarios`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+                const usersData = await userResponse.json();
+
+                const companyResponse = await fetch(`${PATH_URL_BACKEND}/empresa`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                });
+                const companiesData = await companyResponse.json();
+
+                setUsers(usersData);
+                setCompanies(companiesData);
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        };
+
+        fetchUsersAndCompanies();
+    }, []);
+
+    const getCompanyName = (companyId: number) => {
+        const company = companies.find(c => c.id === companyId);
+        return company ? company.razonSocial : "Empresa no encontrada";
+    };
 
     const checkServerCommunication = async () => {
         try {
@@ -46,7 +79,7 @@ const UserList = () => {
                         }
                     });
                 } else {
-                    console.error("Error de comunicación con el servidor:", response.statusText);
+                   
                 }
             }
         } catch (error) {
@@ -169,18 +202,18 @@ const UserList = () => {
                                     <tr className="bg-fourthColor text-left text-gray-700">
                                         <th className="px-6 py-4 font-bold">Nombre de Usuario</th>
                                         <th className="px-6 py-4 font-bold">Nombre completo</th>
-                                        <th className="px-6 py-4 font-bold">Id empresa</th>
-                                        <th className="px-6 py-4 font-bold">Sucursal</th>
+                                        <th className="px-6 py-4 font-bold">Email</th>
+                                        <th className="px-6 py-4 font-bold">Empresa</th>
                                         <th className="px-6 py-4 font-bold">Operaciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {paginatedUsers.map((user) => (
-                                        <tr key={user.id} className="border-b hover:bg-gray-50 text-black">
+                                        <tr key={user.id_user} className="border-b hover:bg-gray-50 text-black">
                                             <td className="px-6 py-4">{user.username}</td>
-                                            <td className="px-6 py-4">{user.fullname}</td>
-                                            <td className="px-6 py-4">{user.companyId}</td>
-                                            <td className="px-6 py-4">{user.branch}</td>
+                                            <td className="px-6 py-4">{user.nombre} {user.apellidos}</td>
+                                            <td className="px-6 py-4">{user.email}</td>
+                                            <td className="px-6 py-4">{getCompanyName(user.id_empresa)}</td>
                                             <td className="px-6 py-4">
                                                 <div className="flex">
                                                     {/* Botón de Borrar */}
