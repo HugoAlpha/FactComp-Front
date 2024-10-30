@@ -12,14 +12,14 @@ const UserList = () => {
     const [companies, setCompanies] = useState<Company[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [currentUser, setCurrentUser] = useState<User | undefined>(undefined);
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
     const filteredUsers = users.filter(user =>
-        user.fullname?.toLowerCase().includes(searchTerm.toLowerCase())
-    );    
-
-    useEffect(() => {
-        const fetchUsersAndCompanies = async () => {
+        `${user.nombre} ${user.apellidos}`.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+       
+    const fetchUsers = async () => {
             try {
                 const token = localStorage.getItem("tokenJWT");
 
@@ -46,19 +46,20 @@ const UserList = () => {
             }
         };
 
-        fetchUsersAndCompanies();
-    }, []);
-
+        useEffect(() => {
+            fetchUsers();
+        }, []);
     const getCompanyName = (companyId: number) => {
         const company = companies.find(c => c.id === companyId);
         return company ? company.razonSocial : "Empresa no encontrada";
     };
 
+    
+
     const checkServerCommunication = async () => {
         try {
             const response = await fetch(`${PATH_URL_BACKEND}/contingencia/verificar-comunicacion`);
-            if (!response.ok) {
-                if (response.status === 500) {
+            if (!response.ok && response.status === 500) {
                     Swal.fire({
                         title: 'La comunicación con impuestos falló',
                         text: '¿Desea entrar en modo de contingencia?',
@@ -78,9 +79,7 @@ const UserList = () => {
                             console.log('Modo de contingencia cancelado.');
                         }
                     });
-                } else {
-                   
-                }
+
             }
         } catch (error) {
             console.error("Error al conectar con el servidor:", error);
@@ -121,6 +120,18 @@ const UserList = () => {
         (currentPage - 1) * rowsPerPage,
         currentPage * rowsPerPage
     );
+
+    const openCreateUserModal = () => {
+        setCurrentUser(undefined); 
+        setIsModalOpen(true);
+    };
+
+    const handleSaveUser = () => {
+        fetchUsers(); 
+        setIsModalOpen(false);
+        setCurrentUser(undefined); 
+    };
+
     const getPageNumbers = () => {
         const pageNumbers = [];
         const maxVisiblePages = 4;
@@ -185,15 +196,15 @@ const UserList = () => {
                             </div>
                             <button
                                 className="bg-sixthColor text-white h-10 px-4 rounded-lg hover:bg-fourthColor text-lg"
-                                onClick={() => setIsModalOpen(true)}
+                                onClick={openCreateUserModal}
                             >
                                 Agregar Usuario
                             </button>
                             <ModalCreateUser
                                 isOpen={isModalOpen}
                                 onClose={() => setIsModalOpen(false)}
-                                onSave={(newUser) => {
-                                }}
+                                onSave={handleSaveUser}
+                                user={currentUser}
                             />
                         </div>
 
@@ -223,7 +234,13 @@ const UserList = () => {
                                                     </button>
 
                                                     {/* Botón de Editar */}
-                                                    <button className="bg-blue-200 hover:bg-blue-300 p-2 rounded-r-lg flex items-center justify-center border border-blue-300">
+                                                    <button
+                                                        className="bg-blue-200 hover:bg-blue-300 p-2 rounded-r-lg flex items-center justify-center border border-blue-300"
+                                                        onClick={() => {
+                                                            setCurrentUser(user);
+                                                            setIsModalOpen(true);
+                                                        }}
+                                                    >
                                                         <FaEdit className="text-black" />
                                                     </button>
                                                 </div>

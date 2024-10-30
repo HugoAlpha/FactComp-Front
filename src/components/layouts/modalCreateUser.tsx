@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaUser, FaIdCard, FaPhone, FaEnvelope, FaBriefcase, FaLock } from 'react-icons/fa';
+import { FaUser, FaIdCard, FaPhone, FaEnvelope, FaLock } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import { PATH_URL_SECURITY } from '@/utils/constants';
 
@@ -55,7 +55,7 @@ const ModalCreateUser: React.FC<ModalCreateUserProps> = ({ isOpen, onClose, onSa
         setErrors({});
     }, [user, isOpen]);
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
         setErrors(prev => ({ ...prev, [name]: '' }));
@@ -80,6 +80,7 @@ const ModalCreateUser: React.FC<ModalCreateUserProps> = ({ isOpen, onClose, onSa
                 let response;
 
                 if (user?.id) {
+                    const { username, nombre, apellidos, email, id_empresa, celular, rol } = formData;
                     response = await fetch(`${PATH_URL_SECURITY}/api/usuarios/update/${user.id}`, {
                         method: 'PUT',
                         headers: {
@@ -87,13 +88,13 @@ const ModalCreateUser: React.FC<ModalCreateUserProps> = ({ isOpen, onClose, onSa
                             'Authorization': `Bearer ${token}`,
                         },
                         body: JSON.stringify({
-                            username: formData.username,
-                            nombre: formData.nombre,
-                            apellidos: formData.apellidos,
-                            email: formData.email,
-                            id_empresa: formData.id_empresa,
-                            celular: formData.celular,
-                            rol: formData.rol,
+                            username,
+                            nombre,
+                            apellidos,
+                            email,
+                            id_empresa,
+                            celular,
+                            rol,
                         }),
                     });
                 } else {
@@ -103,16 +104,7 @@ const ModalCreateUser: React.FC<ModalCreateUserProps> = ({ isOpen, onClose, onSa
                             'Content-Type': 'application/json',
                             'Authorization': `Bearer ${token}`,
                         },
-                        body: JSON.stringify({
-                            username: formData.username,
-                            nombre: formData.nombre,
-                            apellidos: formData.apellidos,
-                            password: formData.password,  
-                            email: formData.email,
-                            id_empresa: formData.id_empresa,
-                            celular: formData.celular,
-                            rol: formData.rol,
-                        }),
+                        body: JSON.stringify(formData),
                     });
                 }
 
@@ -151,14 +143,31 @@ const ModalCreateUser: React.FC<ModalCreateUserProps> = ({ isOpen, onClose, onSa
                         {renderInputField("apellidos", "Apellidos", formData.apellidos, handleInputChange, <FaIdCard />, errors.apellidos)}
                         {renderInputField("email", "Correo", formData.email, handleInputChange, <FaEnvelope />, errors.email)}
                         {renderInputField("celular", "Teléfono", formData.celular.toString(), handleInputChange, <FaPhone />, errors.celular)}
-                        {renderInputField("password", "Contraseña", formData.password || '', handleInputChange, <FaLock />, errors.password)}
+                        
+                        {/* Campo de contraseña solo visible en creación */}
+                        {!user && renderInputField("password", "Contraseña", formData.password || '', handleInputChange, <FaLock />, errors.password)}
+                        
+                        <div className="relative z-0 w-full mb-5 group">
+                            <select
+                                name="rol"
+                                value={formData.rol}
+                                onChange={handleInputChange}
+                                className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                            >
+                                <option value="ROLE_USER">Cajero</option>
+                                <option value="ROLE_ADMIN">Administrador</option>
+                            </select>
+                            <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                                Rol de Usuario
+                            </label>
+                        </div>
                     </form>
                     <div className="flex justify-end mt-6">
-                    <button onClick={onClose} className="px-6 py-2 bg-sixthColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400 mr-2">
+                        <button onClick={onClose} className="px-6 py-2 bg-sixthColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400 mr-2">
                             Cancelar
                         </button>
                         <button onClick={handleSubmit} className="px-6 py-2 bg-thirdColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400 ml-2">
-                            {user? 'Actualizar' : 'Agregar'}
+                            {user ? 'Actualizar' : 'Agregar'}
                         </button>
                     </div>
                 </div>
