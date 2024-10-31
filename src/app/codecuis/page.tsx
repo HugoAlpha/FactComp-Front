@@ -238,7 +238,7 @@ const CodeReceipt = () => {
 
     return (
         <div className="flex min-h-screen">
-            {userRole === 'admin' ? <Sidebar /> : <CashierSidebar />}
+            {userRole === 'ROLE_ADMIN' ? <Sidebar /> : <CashierSidebar />}
             <div className="flex flex-col w-full min-h-screen">
                 <Header />
                 <div className="flex-grow overflow-auto bg-gray-50">
