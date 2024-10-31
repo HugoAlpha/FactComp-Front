@@ -6,7 +6,7 @@ import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
 import ModalVerifySale from "../../components/layouts/modalVerifySale";
 import ReceiptOptionsModal from "../../components/layouts/modalReceiptOptions";
-import { PATH_URL_BACKEND } from '@/utils/constants';
+import { PATH_URL_BACKEND, PATH_URL_IMAGES } from '@/utils/constants';
 import { GrDocumentConfig } from "react-icons/gr";
 import CreateEditClientModal from '@/components/layouts/modalCreateEditClient';
 import ModalCreateProduct from '@/components/layouts/modalCreateProduct';
@@ -104,15 +104,25 @@ const Sales = () => {
 
     const fetchProducts = async () => {
         try {
-            const response = await fetch(`${PATH_URL_BACKEND}/item/obtener-items`);
-            if (response.ok) {
-                const data: Product[] = await response.json();
-                const formattedProducts: Product[] = data.map((item) => ({
+            const productResponse = await fetch(`${PATH_URL_BACKEND}/item/obtener-items`);
+            const productsData: Product[] = await productResponse.json();
+    
+            const imageResponse = await fetch(`${PATH_URL_IMAGES}/images`);
+            const imagesData = await imageResponse.json();
+    
+            const unidadMedidaResponse = await fetch(`${PATH_URL_BACKEND}/parametro/unidad-medida`);
+            const unidadMedidaData = await unidadMedidaResponse.json();
+    
+            const formattedProducts: Product[] = productsData.map((item) => {
+                const image = imagesData.find((img) => img.itemId === item.id);
+                const unidadMedida = unidadMedidaData.find((um) => String(um.codigoClasificador) === String(item.unidadMedida));
+    
+                return {
                     id: item.id,
                     name: item.descripcion,
                     price: item.precioUnitario,
                     discount: item.discount || 0,
-                    img: '/images/apple-watch.png',
+                    img: image ? `${PATH_URL_IMAGES}/images/${image.id}` : '/images/caja.png',
                     descripcion: item.descripcion,
                     precioUnitario: item.precioUnitario,
                     codigoProductoSin: item.codigoProductoSin,
@@ -120,16 +130,16 @@ const Sales = () => {
                     totalPrice: item.precioUnitario,
                     codigo: item.codigo,
                     unidadMedida: item.unidadMedida,
-                }));
+                    unidadMedidaDescripcion: unidadMedida ? unidadMedida.descripcion : 'No disponible'
+                };
+            });
     
-                setProducts(formattedProducts);
-            } else {
-                Swal.fire('Error', 'Error al obtener productos', 'error');
-            }
+            setProducts(formattedProducts);
         } catch (error) {
             Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
         }
     };
+    
     
     useEffect(() => {
         fetchClients();
@@ -462,7 +472,7 @@ const Sales = () => {
                                                 <input
                                                     type="number"
                                                     className="w-16 text-center border rounded-md hover:border-gray-200"
-                                                    value={product.discount !== undefined ? product.discount.toString() : ''} // Mostramos el descuento actual
+                                                    value={product.discount !== undefined ? product.discount.toString() : ''} 
                                                     min="0"
                                                     onChange={(e) => updateDiscount(product.id, e.target.value)}
                                                 />
@@ -643,6 +653,7 @@ const Sales = () => {
                         isOpen={isEditModalOpen}
                         onClose={() => setIsEditModalOpen(false)}
                         onProductCreated={() => refreshProductList()}
+                        refreshProducts={refreshProductList}
                         product={productToEdit}
                     />
 
