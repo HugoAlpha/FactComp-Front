@@ -110,6 +110,7 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
         usuario: client?.codigoCliente || '',
       idPuntoVenta: '1',
       idCliente: client?.id || '',
+      idSucursal: 1,
       nitInvalido: true,
       codigoMetodoPago: paymentMethod,
       activo: contingenciaEstado === '1' ? false : true,
@@ -119,7 +120,7 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
         montoDescuento: product.discount ? product.discount.toFixed(2) : '00.0',
       })),
     };
-
+    
     const response = await fetch(`${PATH_URL_BACKEND}/factura/emitir-computarizada`, {
       method: 'POST',
       headers: {
