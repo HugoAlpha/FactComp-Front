@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { FaFileInvoice, FaUser, FaSignOutAlt, FaChevronDown, FaBars, FaHome} from 'react-icons/fa';
+import { FaFileInvoice, FaUser, FaSignOutAlt, FaChevronDown, FaBars, FaHome } from 'react-icons/fa';
 import { MdOutlinePointOfSale, MdVerified } from "react-icons/md";
 
 const CashierSidebar = () => {
@@ -46,7 +46,7 @@ const CashierSidebar = () => {
                 { name: 'Productos', href: 'products' }
             ]
         },
-    
+
         {
             name: 'Certificación',
             icon: <MdVerified size={20} />,
@@ -55,7 +55,7 @@ const CashierSidebar = () => {
                 { name: 'CUFD', href: 'codecufd' }
             ]
         },
-        
+
     ];
 
     return (
@@ -97,7 +97,7 @@ const CashierSidebar = () => {
                                 </Link>
                             </li>
                             <li>
-                                <Link href="salesCashier"
+                                <Link href="sales"
                                     className={`block p-2 font-bold hover:bg-firstColor rounded-lg ${activeLink === '/salesCashier' ? 'bg-white bg-opacity-20 text-ninthColor' : ''}`}
                                     onClick={() => handleLinkClick('/salesCashier')}>
                                     <span className="flex items-center">

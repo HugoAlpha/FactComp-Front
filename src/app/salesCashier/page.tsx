@@ -43,7 +43,7 @@ const Sales = () => {
     });
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
     const [isContingencyModalOpen, setIsContingencyModalOpen] = useState(false);
-    
+
     interface Product {
         id: number;
         name: string;
@@ -59,7 +59,7 @@ const Sales = () => {
         unidadMedida: number;
     }
 
-    
+
 
     interface SaleDetails {
         total: number;
@@ -90,7 +90,7 @@ const Sales = () => {
         numeroFactura: number;
     }
 
-    
+
 
     const fetchProducts = async () => {
         try {
@@ -111,7 +111,7 @@ const Sales = () => {
                     codigo: item.codigo,
                     unidadMedida: item.unidadMedida,
                 }));
-    
+
                 setProducts(formattedProducts);
             } else {
                 Swal.fire('Error', 'Error al obtener productos', 'error');
@@ -120,11 +120,11 @@ const Sales = () => {
             Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
         }
     };
-    
+
     useEffect(() => {
         fetchProducts();
     }, []);
-    
+
 
 
     const updateDiscount = (id: number, value: string) => {
@@ -380,7 +380,7 @@ const Sales = () => {
         discount: product.discount
     }));
 
-    
+
     const refreshProductList = async () => {
         await fetchProducts();
     };
@@ -394,15 +394,15 @@ const Sales = () => {
                         <div className='flex justify-between mb-6'>
                             <h2 className="text-xl font-bold mr-5 place-content-center">Productos Seleccionados</h2>
                             <button
-                                    onClick={handleGoToDashboard}
-                                    className="bg-gray-300 hover:bg-gray-400 text-black font-bold py-1 px-2 rounded-lg flex items-center space-x-2"
-                                >
-                                    <GoHomeFill className="text-xl" />
+                                onClick={handleGoToDashboard}
+                                className="bg-gray-300 hover:bg-gray-400 text-black font-bold py-1 px-2 rounded-lg flex items-center space-x-2"
+                            >
+                                <GoHomeFill className="text-xl" />
                                 <span>Volver al inicio</span>
-                            </button> 
+                            </button>
                         </div>
                         <div className="text-black h-3/5 overflow-y-auto">
-                            
+
                             <table className="min-w-full bg-white ">
                                 <thead>
                                     <tr>
@@ -418,27 +418,27 @@ const Sales = () => {
                                         <tr key={product.id} className="text-sm">
                                             <td className="px-4 py-2">{product.name}</td>
                                             <td className="px-4 py-2">
-                                            <div className="flex items-center justify-center space-x-2">
-                                                <button 
-                                                    onClick={() => decreaseQuantity(product.id)} 
-                                                    className="bg-gray-100 hover:bg-slate-300 text-gray-700 font-bold w-7 h-7 rounded-full focus:outline-none flex items-center justify-center"
-                                                >
-                                                    -
-                                                </button>
-                                                
-                                                <input
-                                                    type="text"
-                                                    className="w-12 text-center border border-gray-200 rounded-md bg-transparent focus:outline-none"
-                                                    value={product.quantity}
-                                                    readOnly
-                                                />
-                                                
-                                                <button 
-                                                    onClick={() => increaseQuantity(product.id)} 
-                                                    className="bg-gray-100 hover:bg-slate-300 text-gray-700 font-bold w-7 h-7 rounded-full focus:outline-none flex items-center justify-center"
-                                                >
-                                                    +
-                                                </button>
+                                                <div className="flex items-center justify-center space-x-2">
+                                                    <button
+                                                        onClick={() => decreaseQuantity(product.id)}
+                                                        className="bg-gray-100 hover:bg-slate-300 text-gray-700 font-bold w-7 h-7 rounded-full focus:outline-none flex items-center justify-center"
+                                                    >
+                                                        -
+                                                    </button>
+
+                                                    <input
+                                                        type="text"
+                                                        className="w-12 text-center border border-gray-200 rounded-md bg-transparent focus:outline-none"
+                                                        value={product.quantity}
+                                                        readOnly
+                                                    />
+
+                                                    <button
+                                                        onClick={() => increaseQuantity(product.id)}
+                                                        className="bg-gray-100 hover:bg-slate-300 text-gray-700 font-bold w-7 h-7 rounded-full focus:outline-none flex items-center justify-center"
+                                                    >
+                                                        +
+                                                    </button>
                                                 </div>
 
                                             </td>
@@ -446,7 +446,7 @@ const Sales = () => {
                                                 <input
                                                     type="number"
                                                     className="w-16 text-center border rounded-md hover:border-gray-200"
-                                                    value={product.discount !== undefined ? product.discount.toString() : ''} 
+                                                    value={product.discount !== undefined ? product.discount.toString() : ''}
                                                     min="0"
                                                     onChange={(e) => updateDiscount(product.id, e.target.value)}
                                                 />
@@ -477,7 +477,7 @@ const Sales = () => {
                                 <button
                                     className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 text-black font-bold py-3 px-4 rounded-lg w-full"
                                     onClick={handleOpenClientModal}
-                                    >
+                                >
                                     <FaUser className="mr-2" /> Agregar nuevo cliente
                                 </button>
 
@@ -516,11 +516,11 @@ const Sales = () => {
                             </div>
                         </div>
                     </div>
-                    
+
                     <div className="text-black w-2/3" style={{ maxHeight: "90vh" }}>
                         <div>
                             <h2 className="text-xl font-bold mb-8">Agregar Productos</h2>
-                            
+
                             <input
                                 type="text"
                                 placeholder="Buscar productos..."
@@ -536,11 +536,10 @@ const Sales = () => {
                                             <li className="z-30 flex-auto text-center">
                                                 <button
                                                     type="button"
-                                                    className={`py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg focus:outline-none transition-colors duration-200 ${
-                                                        viewMode === "grid" 
-                                                        ? "bg-slate-700 text-white" 
-                                                        : "bg-transparent text-gray-500 hover:bg-slate-300"
-                                                    }`}
+                                                    className={`py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg focus:outline-none transition-colors duration-200 ${viewMode === "grid"
+                                                            ? "bg-slate-700 text-white"
+                                                            : "bg-transparent text-gray-500 hover:bg-slate-300"
+                                                        }`}
                                                     onClick={() => setViewMode("grid")}
                                                 >
                                                     <FaTable className={`text-lg ${viewMode === "grid" ? "text-white" : "text-gray-500"}`} />
@@ -549,11 +548,10 @@ const Sales = () => {
                                             <li className="z-30 flex-auto text-center">
                                                 <button
                                                     type="button"
-                                                    className={`py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg focus:outline-none transition-colors duration-200 ${
-                                                        viewMode === "list" 
-                                                        ? "bg-slate-700 text-white" 
-                                                        : "bg-transparent text-gray-500 hover:bg-slate-300"
-                                                    }`}
+                                                    className={`py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg focus:outline-none transition-colors duration-200 ${viewMode === "list"
+                                                            ? "bg-slate-700 text-white"
+                                                            : "bg-transparent text-gray-500 hover:bg-slate-300"
+                                                        }`}
                                                     onClick={() => setViewMode("list")}
                                                 >
                                                     <FaList className={`text-lg ${viewMode === "list" ? "text-white" : "text-gray-500"}`} />
