@@ -1,4 +1,4 @@
-import { PATH_URL_BACKEND } from '@/utils/constants';
+import { PATH_URL_BACKEND, PATH_URL_IMAGES } from '@/utils/constants';
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
 
@@ -28,10 +28,11 @@ interface ModalCreateProductProps {
     isOpen: boolean;
     onClose: () => void;
     onProductCreated: (newProduct: any) => void;
+    refreshProducts: () => void;
     product?: Product;
 }
 
-const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose, onProductCreated, product }) => {
+const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose, onProductCreated, product, refreshProducts }) => {
     const [codigo, setCodigo] = useState('');
     const [nombreProducto, setNombreProducto] = useState('');
     const [unidadMedida, setUnidadMedida] = useState<string>('');
@@ -45,6 +46,7 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
     const [selectedUnidadMedida, setSelectedUnidadMedida] = useState<UnidadMedidaOption | null>(null);
     const [searchTermUnidadMedida, setSearchTermUnidadMedida] = useState('');
     const [dropdownOpenUnidadMedida, setDropdownOpenUnidadMedida] = useState(false);
+    const [selectedImage, setSelectedImage] = useState<File | null>(null);
 
     const [errors, setErrors] = useState({
         codigo: '',
@@ -69,7 +71,7 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                     Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
                 }
             };
-    
+
             const fetchUnidadMedidaOptions = async () => {
                 try {
                     const response = await fetch(`${PATH_URL_BACKEND}/parametro/unidad-medida`);
@@ -89,32 +91,44 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                     Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
                 }
             };
-    
+
             fetchProductOptions();
             fetchUnidadMedidaOptions();
         }
     }, [isOpen, product]);
 
-    
-    
+
+
 
     useEffect(() => {
-        if (product && productOptions.length > 0) {
-            setCodigo(product.codigo);
-            setNombreProducto(product.descripcion);
-            setUnidadMedida(product.unidadMedida ? product.unidadMedida.toString() : '');
-            setPrecioUnitario(product.precioUnitario ? product.precioUnitario.toString() : '');
-            setCodigoProductoSin(product.codigoProductoSin ? product.codigoProductoSin.toString() : '');
-            setSelectedUnidadMedida(product.unidadMedida ? product.unidadMedida.toString() : '');
-
-            const foundOption = productOptions.find(
-                (option) => option.codigoProducto === product.codigoProductoSin
-            );
-            if (foundOption) {
-                setSelectedOption(foundOption);  
+        if (isOpen) {
+            if (product) {
+                setCodigo(product.codigo);
+                setNombreProducto(product.descripcion);
+                setUnidadMedida(product.unidadMedida ? product.unidadMedida.toString() : '');
+                setPrecioUnitario(product.precioUnitario ? product.precioUnitario.toString() : '');
+                setCodigoProductoSin(product.codigoProductoSin ? product.codigoProductoSin.toString() : '');
+                const foundOption = productOptions.find(
+                    (option) => option.codigoProducto === product.codigoProductoSin
+                );
+                setSelectedOption(foundOption || null);
+                const unidadEncontrada = unidadMedidaOptions.find(
+                    (u) => u.codigoClasificador === product.unidadMedida.toString()
+                );
+                setSelectedUnidadMedida(unidadEncontrada || null);
+            } else {
+                setCodigo('');
+                setNombreProducto('');
+                setUnidadMedida('');
+                setPrecioUnitario('');
+                setCodigoProductoSin('');
+                setSelectedOption(null);
+                setSelectedImage(null);
+                setSelectedUnidadMedida(null);
             }
         }
-    }, [product, productOptions]); 
+    }, [isOpen, product, productOptions]);
+    
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -126,6 +140,31 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
             setCodigo(value);
         }
     };
+
+    const uploadImage = async (itemId: number) => {
+        if (!selectedImage) return;
+
+        const formData = new FormData();
+        formData.append("file", selectedImage);
+        formData.append("idItem", itemId.toString());
+
+        try {
+            const response = await fetch(`${PATH_URL_IMAGES}/images/upload`, {
+                method: "POST",
+                body: formData,
+            });
+            if (response.ok) {
+                Swal.fire("Éxito", "Imagen subida correctamente", "success");
+            } else {
+                Swal.fire("Error", "Error al subir la imagen", "error");
+            }
+        } catch (error) {
+            Swal.fire("Error", "No se pudo conectar con el servidor para subir la imagen", "error");
+        }
+    };
+
+
+
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(e.target.value);
@@ -151,7 +190,7 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
     const filteredProductOptions = productOptions.filter((option) =>
         option.descripcionProducto.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    
+
 
     const handleSelectOption = (option: ProductOption) => {
         setSelectedOption(option);
@@ -171,51 +210,90 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
     const handleSubmitProduct = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!selectedOption || !selectedUnidadMedida || !nombreProducto || !precioUnitario) {
-            Swal.fire('Error', 'Por favor corrige los errores en el formulario', 'error');
+            Swal.fire("Error", "Por favor corrige los errores en el formulario", "error");
             return;
         }
-
+    
         const productData = {
             codigo,
             descripcion: nombreProducto,
             unidadMedida: selectedUnidadMedida.codigoClasificador,
             precioUnitario: Number(precioUnitario),
-            codigoProductoSin: Number(selectedOption?.codigoProducto), 
+            codigoProductoSin: Number(selectedOption?.codigoProducto),
         };
-
+    
         try {
             let response;
             if (product && product.id) {
                 response = await fetch(`${PATH_URL_BACKEND}/item/actualizar-item/${product.id}`, {
-                    method: 'PUT',
+                    method: "PUT",
                     headers: {
-                        'Content-Type': 'application/json',
+                        "Content-Type": "application/json",
                     },
                     body: JSON.stringify(productData),
                 });
             } else {
                 response = await fetch(`${PATH_URL_BACKEND}/item/crear-item`, {
-                    method: 'POST',
+                    method: "POST",
                     headers: {
-                        'Content-Type': 'application/json',
+                        "Content-Type": "application/json",
                     },
                     body: JSON.stringify(productData),
                 });
             }
-
+    
             if (response.ok) {
                 const savedProduct = await response.json();
                 onProductCreated(savedProduct);
-                Swal.fire('Éxito', product ? 'Producto actualizado correctamente' : 'Producto creado correctamente', 'success');
-                onClose();
+    
+                Swal.fire({
+                    icon: "success",
+                    title: product ? "Producto actualizado correctamente" : "Producto creado correctamente",
+                    showConfirmButton: false,
+                    timer: 2000,
+                }).then(async () => {
+                    if (selectedImage) {
+                        await uploadImage(savedProduct.id);
+    
+                        let timerInterval: NodeJS.Timeout;
+                        Swal.fire({
+                            title: 'Subiendo imagen...',
+                            html: 'La imagen se subirá en <b>6</b> segundos.',
+                            timer: 6000,
+                            timerProgressBar: true,
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                                const b = Swal.getHtmlContainer()?.querySelector('b');
+                                if (b) {
+                                    timerInterval = setInterval(() => {
+                                        b.textContent = Math.ceil(Swal.getTimerLeft()! / 1000).toString();
+                                    }, 1000);
+                                }
+                            },
+                            willClose: () => {
+                                clearInterval(timerInterval);
+                            }
+                        }).then((result) => {
+                            if (result.dismiss === Swal.DismissReason.timer) {
+                                refreshProducts();
+                                onClose();
+                            }
+                        });
+                    } else {
+                        refreshProducts();
+                        onClose();
+                    }
+                });
             } else {
-                Swal.fire('Error', product ? 'Error al actualizar el producto' : 'Error al crear el producto', 'error');
+                Swal.fire("Error", product ? "Error al actualizar el producto" : "Error al crear el producto", "error");
             }
         } catch (error) {
-            Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
+            Swal.fire("Error", "No se pudo conectar con el servidor", "error");
         }
     };
-
+    
     if (!isOpen) return null;
 
     return (
@@ -225,7 +303,6 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                     {product ? 'Editar Producto' : 'Agregar Nuevo Producto'}
                 </div>
                 <form className="grid md:grid-cols-2 gap-6 mt-4" onSubmit={handleSubmitProduct}>
-                    {/* Campo para el código */}
                     <div className="relative z-0 w-full mb-5 group">
                         <input
                             type="text"
@@ -241,7 +318,6 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                         </label>
                     </div>
 
-                    {/* Dropdown con búsqueda para seleccionar la homologación */}
                     <div className="relative z-50 w-full mb-5 group">
                         <button
                             type="button"
@@ -277,9 +353,8 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                         <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
                             Homologación
                         </label>
-                    </div>       
+                    </div>
 
-                    {/* Dropdown para seleccionar la unidad de medida con barra de búsqueda */}
                     <div className="relative z-50 w-full mb-5 group">
                         <button
                             type="button"
@@ -298,7 +373,7 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                                     className="block w-full p-2 text-sm border-gray-300"
                                 />
                                 <ul className="max-h-48 overflow-y-auto bg-white border border-gray-300 rounded-b">
-                                {filteredUnidadMedidaOptions.map((option) => (
+                                    {filteredUnidadMedidaOptions.map((option) => (
                                         <li key={option.codigoClasificador}>
                                             <button
                                                 type="button"
@@ -317,7 +392,6 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                         </label>
                     </div>
 
-                    {/* Campo para Nombre/Descripción del Producto */}
                     <div className="relative z-0 w-full mb-5 group">
                         <input
                             type="text"
@@ -333,7 +407,6 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                         </label>
                     </div>
 
-                    {/* Campo para Precio Unitario */}
                     <div className="relative z-0 w-full mb-5 group">
                         <input
                             type="text"
@@ -347,8 +420,21 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                         <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
                             Precio Unitario en Bs.
                         </label>
+
+                        
                     </div>
+                    
                 </form>
+                <div className="relative z-0 w-full my-5 group">
+                            <input
+                                type="file"
+                                onChange={(e) => setSelectedImage(e.target.files?.[0] || null)}
+                                className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                            />
+                            <label className=" text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                                Selecciona una Imagen (Opcional)
+                            </label>
+                        </div>
 
                 <div className="flex justify-end mt-6">
                     <button onClick={onClose} className="px-6 py-2 bg-sixthColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400 mr-2">

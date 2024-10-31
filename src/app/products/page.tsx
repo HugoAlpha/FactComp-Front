@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { FaTrashAlt, FaEdit, FaPlus, FaSearch } from 'react-icons/fa';
 import Sidebar from '@/components/commons/sidebar';
 import Header from '@/components/commons/header';
-import { PATH_URL_BACKEND } from "@/utils/constants";
+import { PATH_URL_BACKEND, PATH_URL_IMAGES } from "@/utils/constants";
 import ModalCreateProduct from '@/components/layouts/modalCreateProduct';
 import Swal from 'sweetalert2';
 import CashierSidebar from '@/components/commons/cashierSidebar';
@@ -15,6 +15,9 @@ interface Product {
     codigo: string;
     precioUnitario: number;
     codigoProductoSin: string;
+    unidadMedida: string;
+    imageUrl?: string;
+    unidadMedidaDescripcion?: string;
 }
 
 interface UserRole {
@@ -30,11 +33,13 @@ const ProductList = () => {
     const [userRole, setUserRole] = useState<string | null>(null);
     const [isContingencyModalOpen, setIsContingencyModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [productsWithUnitDescription, setProductsWithUnitDescription] = useState<Product[]>([]);
+
 
     useEffect(() => {
         const fetchUserRole = () => {
-            const storedRole = localStorage.getItem('userRole');
-            if (storedRole === 'ADMIN' || storedRole === 'CAJERO') {
+            const storedRole = localStorage.getItem('role');
+            if (storedRole === 'ROLE_ADMIN' || storedRole === 'ROLE_USER') {
                 setUserRole(storedRole);
             }
         };
@@ -42,18 +47,38 @@ const ProductList = () => {
     }, []);
 
     useEffect(() => {
-        const fetchProducts = async () => {
+        const fetchProductsAndImages = async () => {
             try {
-                const response = await fetch(`${PATH_URL_BACKEND}/item/obtener-items`);
-                const data: Product[] = await response.json();
-                setProducts(data);
+                const productResponse = await fetch(`${PATH_URL_BACKEND}/item/obtener-items`);
+                const productsData: Product[] = await productResponse.json();
+    
+                const imageResponse = await fetch(`${PATH_URL_IMAGES}/images`);
+                const imagesData = await imageResponse.json();
+                
+                const unidadMedidaResponse = await fetch(`${PATH_URL_BACKEND}/parametro/unidad-medida`);
+                const unidadMedidaData: UnidadMedidaOption[] = await unidadMedidaResponse.json();
+    
+                const updatedProducts = productsData.map(product => {
+                    const image = imagesData.find(img => img.itemId === product.id);
+                    const unidadMedida = unidadMedidaData.find(um => String(um.codigoClasificador) === String(product.unidadMedida));
+                    
+                    return {
+                        ...product,
+                        imageUrl: image ? `${PATH_URL_IMAGES}/images/${image.id}` : '/images/caja.png',
+                        unidadMedidaDescripcion: unidadMedida ? unidadMedida.descripcion : 'No disponible'
+                    };
+                });
+    
+                setProducts(updatedProducts);
             } catch (error) {
-                console.error('Error al obtener los productos:', error);
+                console.error('Error al obtener productos, imágenes o unidades de medida:', error);
             }
         };
-
-        fetchProducts();
+    
+        fetchProductsAndImages();
     }, []);
+    
+
 
     const checkServerCommunication = async () => {
         try {
@@ -114,18 +139,19 @@ const ProductList = () => {
     useEffect(() => {
         const role = localStorage.getItem("role");
         setUserRole(role);
-    },[]);
+    }, []);
+    
 
-     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(e.target.value);
         setCurrentPage(1);
     };
 
     const filteredProducts = products.filter((product) =>
-        (product.descripcion?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    (product.descripcion?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         product.codigo?.toLowerCase().includes(searchTerm.toLowerCase()))
     );
-    
+
 
     const totalPages = Math.ceil(filteredProducts.length / rowsPerPage);
     const paginatedProducts = filteredProducts.slice(
@@ -164,9 +190,14 @@ const ProductList = () => {
     };
 
     const handleOpenModal = (product?: Product) => {
-        setSelectedProduct(product || null);
+        if (product) {
+            setSelectedProduct(product);
+        } else {
+            setSelectedProduct(null);
+        }
         setIsModalOpen(true);
     };
+
 
     const handleCloseModal = () => {
         setIsModalOpen(false);
@@ -177,10 +208,41 @@ const ProductList = () => {
         if (selectedProduct) {
             setProducts(products.map((p) => (p.id === updatedProduct.id ? updatedProduct : p)));
         } else {
-            setProducts([...products, updatedProduct]);
+            setProducts([updatedProduct, ...products]);
         }
         handleCloseModal();
+        refreshProducts();
     };
+
+    const refreshProducts = async () => {
+        try {
+            const productResponse = await fetch(`${PATH_URL_BACKEND}/item/obtener-items`);
+            const productsData: Product[] = await productResponse.json();
+    
+            const imageResponse = await fetch(`${PATH_URL_IMAGES}/images`);
+            const imagesData = await imageResponse.json();
+    
+            const unidadMedidaResponse = await fetch(`${PATH_URL_BACKEND}/parametro/unidad-medida`);
+            const unidadMedidaData: UnidadMedidaOption[] = await unidadMedidaResponse.json();
+    
+            const updatedProducts = productsData.map(product => {
+                const image = imagesData.find(img => img.itemId === product.id);
+                const unidadMedida = unidadMedidaData.find(um => String(um.codigoClasificador) === String(product.unidadMedida));
+                
+                return {
+                    ...product,
+                    imageUrl: image ? `${PATH_URL_IMAGES}/images/${image.id}` : '/images/caja.png',
+                    unidadMedidaDescripcion: unidadMedida ? unidadMedida.descripcion : 'No disponible'
+                };
+            });
+    
+            setProducts(updatedProducts);
+        } catch (error) {
+            console.error('Error al obtener productos, imágenes o unidades de medida:', error);
+        }
+    };
+    
+
 
     const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setRowsPerPage(parseInt(e.target.value));
@@ -190,7 +252,7 @@ const ProductList = () => {
     const renderOperationButtons = (product: Product) => {
         return (
             <div className="flex">
-                {userRole === 'admin' && (
+                {userRole === 'ROLE_ADMIN' && (
                     <button
                         className="bg-red-200 hover:bg-red-300 p-2 rounded-l-lg flex items-center justify-center border border-red-300"
                     >
@@ -211,8 +273,7 @@ const ProductList = () => {
 
     return (
         <div className="flex min-h-screen">
-            {userRole === 'admin' ? <Sidebar /> : <CashierSidebar />}
-
+            {userRole === 'ROLE_ADMIN' ? <Sidebar /> : <CashierSidebar />}
             <div className="flex flex-col w-full min-h-screen">
                 <Header />
                 <div className="flex-grow overflow-auto bg-gray-50">
@@ -251,23 +312,32 @@ const ProductList = () => {
                             >
                                 <span className="flex items-center">
                                     Agregar Producto <FaPlus className="inline-block ml-2" />
-                                </span>                               
-                             </button>
+                                </span>
+                            </button>
                         </div>
 
                         <div className="overflow-x-auto shadow-lg rounded-lg border border-gray-200">
                             <table className="table-auto w-full bg-white">
                                 <thead>
                                     <tr className="bg-fourthColor text-left text-gray-700">
+                                        <th className="px-6 py-4 font-bold">Imagen</th>
                                         <th className="px-6 py-4 font-bold">Descripción</th>
                                         <th className="px-6 py-4 font-bold">Precio Unitario</th>
                                         <th className="px-6 py-4 font-bold">Código Producto SIN</th>
+                                        <th className="px-6 py-4 font-bold">Unidad de Medida</th>
                                         <th className="px-6 py-4 font-bold">Operaciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {paginatedProducts.map((product) => (
                                         <tr key={product.id} className="border-b hover:bg-gray-50 text-black">
+                                            <td className="px-4 py-4">
+                                                <img
+                                                    src={product.imageUrl}
+                                                    alt={product.descripcion}
+                                                    className="w-20 h-20 object-cover rounded-lg shadow-sm"
+                                                />
+                                            </td>
                                             <td className="px-6 py-4">
                                                 <div>
                                                     <p className="font-bold text-black">{product.descripcion}</p>
@@ -276,8 +346,14 @@ const ProductList = () => {
                                             </td>
                                             <td className="px-6 py-4">{product.precioUnitario} Bs.</td>
                                             <td className="px-6 py-4">{product.codigoProductoSin}</td>
+                                            <td className="px-6 py-4">{product.unidadMedidaDescripcion}</td>
                                             <td className="px-6 py-4">
-                                                {renderOperationButtons(product)}
+                                                <button
+                                                    className="bg-blue-200 hover:bg-blue-300 p-2 rounded-lg flex items-center justify-center border border-blue-300"
+                                                    onClick={() => handleOpenModal(product)}
+                                                >
+                                                    <FaEdit className="text-black" />
+                                                </button>
                                             </td>
                                         </tr>
                                     ))}
@@ -285,7 +361,6 @@ const ProductList = () => {
                             </table>
                         </div>
 
-                        {/* Paginación */}
                         <div className="flex space-x-1 justify-center mt-6">
                             <button
                                 onClick={handlePrevPage}
@@ -324,8 +399,9 @@ const ProductList = () => {
                 <ModalCreateProduct
                     isOpen={isModalOpen}
                     onClose={handleCloseModal}
-                    product={selectedProduct}
                     onProductCreated={handleProductCreatedOrUpdated}
+                    refreshProducts={refreshProducts}
+                    product={selectedProduct}
                 />
             </div>
             {isContingencyModalOpen && (
