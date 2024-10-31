@@ -42,18 +42,18 @@ const Dashboard = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const dailySalesResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/ventas-diarias-monto?fecha=2024-10-25`);
+                const dailySalesResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/ventas-diarias-monto?fecha=2024-10-31`);
                 const dailySalesData = await dailySalesResponse.json();
                 setDailySales(dailySalesData || 0);
 
                 const monthlySalesResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/ventas-mensuales-montos?fechaInicio=2024-10-01&fechaFin=2024-10-31`);
                 const monthlySalesData = await monthlySalesResponse.json();
                 setMonthlySales(monthlySalesData || 0);
-    
+
                 const totalOrdersResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/ventas-cantidad/1`);
                 const totalOrdersData = await totalOrdersResponse.json();
                 setTotalOrders(totalOrdersData || 0);
-    
+
                 const totalClientsResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/clientes-registrados`);
                 const totalClientsData = await totalClientsResponse.json();
                 setTotalClients(totalClientsData || 0);
@@ -75,7 +75,7 @@ const Dashboard = () => {
                 } else {
                     console.error("Error al obtener los datos de las facturas");
                 }
-    
+
                 const clientsResponse = await fetch(`${PATH_URL_BACKEND}/api/clientes/`);
                 if (clientsResponse.ok) {
                     const clientsData = await clientsResponse.json();
@@ -87,7 +87,7 @@ const Dashboard = () => {
                         3: "PAS",
                         4: "OD"
                     };
-    
+
                     const formattedClients = sortedClients.map(client => ({
                         id: client.id,
                         name: client.nombreRazonSocial,
@@ -102,7 +102,7 @@ const Dashboard = () => {
                 console.error("Error al conectar con el servidor", error);
             }
         };
-    
+
         fetchData();
     }, []);
 
@@ -246,22 +246,22 @@ const Dashboard = () => {
                                     </div>
                                     <p className="text-sm text-slate-500 px-4">Resumen de clientes</p>
                                     <div className="overflow-x-auto px-4">
-                                    <table className="w-full text-sm text-left text-gray-500">
-                                        <tbody>
-                                        {recentClients.map((client) => (
-                                        <tr className="bg-white border-b hover:bg-gray-50" key={client.id}>
-                                        <th scope="row" className="flex items-center px-6 py-4 whitespace-nowrap">
-                                        <img className="w-10 h-10 rounded-full" src={`https://cdn.pixabay.com/photo/2017/11/10/05/48/user-2935527_1280.png`} alt={client.name} />
-                                        <div className="ps-3">
-                                        <div className="text-base font-semibold">{client.name}</div>
-                                        <div className="font-normal text-gray-500">{client.document}</div>
-                                        </div>
-                                        </th>
-                                        <td className="px-6 py-4 text-right">{client.code}</td>
-                                        </tr>
-                                    ))}
-                                    </tbody>
-                                    </table>    
+                                        <table className="w-full text-sm text-left text-gray-500">
+                                            <tbody>
+                                                {recentClients.map((client) => (
+                                                    <tr className="bg-white border-b hover:bg-gray-50" key={client.id}>
+                                                        <th scope="row" className="flex items-center px-6 py-4 whitespace-nowrap">
+                                                            <img className="w-10 h-10 rounded-full" src={`https://cdn.pixabay.com/photo/2017/11/10/05/48/user-2935527_1280.png`} alt={client.name} />
+                                                            <div className="ps-3">
+                                                                <div className="text-base font-semibold">{client.name}</div>
+                                                                <div className="font-normal text-gray-500">{client.document}</div>
+                                                            </div>
+                                                        </th>
+                                                        <td className="px-6 py-4 text-right">{client.code}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
                                     </div>
                                 </div>
                             </div>
@@ -287,13 +287,13 @@ const Dashboard = () => {
                                         </a>
                                         {/* Botón para nuevo cliente */}
                                         <a
-                                      href="#"
-                                     onClick={handleOpenClientModal}
-                                     className="flex items-center text-white bg-thirdColor hover:bg-fourthColor focus:ring-4 focus:ring-green-300 font-bold rounded-lg text-sm px-5 py-2.5 dark:bg-green-500 dark:hover:bg-green-600 focus:outline-none dark:focus:ring-green-800"
-                                    >
-                                     <IoMdPersonAdd className="text-xl mr-2" />
-                                     <span>Agregar un nuevo cliente</span>
-                                     </a>
+                                            href="#"
+                                            onClick={handleOpenClientModal}
+                                            className="flex items-center text-white bg-thirdColor hover:bg-fourthColor focus:ring-4 focus:ring-green-300 font-bold rounded-lg text-sm px-5 py-2.5 dark:bg-green-500 dark:hover:bg-green-600 focus:outline-none dark:focus:ring-green-800"
+                                        >
+                                            <IoMdPersonAdd className="text-xl mr-2" />
+                                            <span>Agregar un nuevo cliente</span>
+                                        </a>
 
                                     </div>
                                 </div>

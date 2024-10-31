@@ -7,20 +7,18 @@ import ModalCreatePos from '@/components/layouts/modalCreatePos';
 import Swal from 'sweetalert2';
 import { PATH_URL_BACKEND } from '@/utils/constants';
 
+
 interface PuntoVenta {
     id: number;
-    descripcion: string;
-    sucursal: string;
-    nombrePuntoVenta: string;
-    cuis: string;
-    tipoPuntoVenta: string;
-    estado: string;
-}
-
-interface TipoPuntoVenta {
-    id: number;
-    codigoClasificador: string;
-    descripcion: string;
+    nombre: string;
+    sucursal: {
+        nombre: string;
+        departamento: string;
+        direccion: string;
+        empresa: {
+            razonSocial: string;
+        };
+    };
 }
 
 const PuntoVenta: React.FC = () => {
@@ -32,15 +30,7 @@ const PuntoVenta: React.FC = () => {
     const [selectedSucursal, setSelectedSucursal] = useState<string>('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [tiposPuntoVenta, setTiposPuntoVenta] = useState<TipoPuntoVenta[]>([]);
-
-    useEffect(() => {
-        const data: PuntoVenta[] = [
-            { id: 1, descripcion: 'Punto 1', sucursal: 'Sucursal A', nombrePuntoVenta: 'PV 1', cuis: '123', tipoPuntoVenta: 'Físico', estado: 'Activo' },
-            { id: 2, descripcion: 'Punto 2', sucursal: 'Sucursal B', nombrePuntoVenta: 'PV 2', cuis: '124', tipoPuntoVenta: 'Virtual', estado: 'Inactivo' },
-        ];
-        setCustomers(data);
-        setFilteredCustomers(data);
-    }, []);
+    const [puntoVentaDetail, setPuntoVentaDetail] = useState<PuntoVentaDetail | null>(null);
 
     const checkServerCommunication = async () => {
         try {
@@ -106,6 +96,25 @@ const PuntoVenta: React.FC = () => {
         fetchTiposPuntoVenta();
     }, []);
 
+    useEffect(() => {
+        const fetchPuntoVentas = async () => {
+            try {
+                const response = await fetch(`${PATH_URL_BACKEND}/operaciones/punto-venta/lista-bd`);
+                if (response.ok) {
+                    const data = await response.json();
+                    setCustomers(data);
+                    setFilteredCustomers(data);
+                } else {
+                    throw new Error("Error al obtener la lista de puntos de venta");
+                }
+            } catch (error) {
+                console.error("Error al obtener la lista de puntos de venta:", error);
+            }
+        };
+
+        fetchPuntoVentas();
+    }, []);
+
     const handleCreatePos = async (newPos) => {
         try {
             const response = await fetch(`${PATH_URL_BACKEND}/operaciones/punto-venta/registrar`, {
@@ -135,14 +144,13 @@ const PuntoVenta: React.FC = () => {
 
         if (searchTerm) {
             filtered = filtered.filter((customer) =>
-                customer.descripcion.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                customer.nombrePuntoVenta.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                customer.cuis.includes(searchTerm)
+                customer.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                customer.sucursal.nombre.toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
 
         if (selectedSucursal) {
-            filtered = filtered.filter((customer) => customer.sucursal === selectedSucursal);
+            filtered = filtered.filter((customer) => customer.sucursal.nombre === selectedSucursal);
         }
 
         setFilteredCustomers(filtered);
@@ -179,6 +187,7 @@ const PuntoVenta: React.FC = () => {
         setCurrentPage(1);
     };
 
+
     const getPageNumbers = () => {
         const pageNumbers = [];
         const maxVisiblePages = 4;
@@ -199,11 +208,11 @@ const PuntoVenta: React.FC = () => {
 
     const handleFirstPage = () => {
         setCurrentPage(1);
-      };
-    
-      const handleLastPage = () => {
+    };
+
+    const handleLastPage = () => {
         setCurrentPage(totalPages);
-      };
+    };
 
     return (
         <div className="flex min-h-screen">
@@ -217,17 +226,17 @@ const PuntoVenta: React.FC = () => {
 
                         {/* Filtro por Sucursal */}
                         <div className="flex justify-end mb-2">
-                        <button className="bg-sixthColor text-white py-2 px-4 rounded-lg hover:bg-thirdColor text-lg"
-                            onClick={() => setIsModalOpen(true)}>
-                            Agregar Punto de Venta
-                        </button>
+                            <button className="bg-sixthColor text-white py-2 px-4 rounded-lg hover:bg-thirdColor text-lg"
+                                onClick={() => setIsModalOpen(true)}>
+                                Agregar Punto de Venta
+                            </button>
 
-                        <ModalCreatePos
-                            isOpen={isModalOpen}
-                            onClose={() => setIsModalOpen(false)}
-                            onPosCreated={handleCreatePos}
-                            tiposPuntoVenta={tiposPuntoVenta}
-                        />
+                            <ModalCreatePos
+                                isOpen={isModalOpen}
+                                onClose={() => setIsModalOpen(false)}
+                                onPosCreated={() => { }}
+                                tiposPuntoVenta={[]}
+                            />
 
                         </div>
 
@@ -253,8 +262,9 @@ const PuntoVenta: React.FC = () => {
                                         className="border px-4 h-10 rounded-lg"
                                     >
                                         <option value="">Todas</option>
-                                        <option value="Sucursal A">Sucursal A</option>
-                                        <option value="Sucursal B">Sucursal B</option>
+                                        {[...new Set(customers.map(c => c.sucursal.nombre))].map(sucursal => (
+                                            <option key={sucursal} value={sucursal}>{sucursal}</option>
+                                        ))}
                                     </select>
                                 </div>
 
@@ -277,37 +287,35 @@ const PuntoVenta: React.FC = () => {
                             <table className="table-auto w-full bg-white">
                                 <thead>
                                     <tr className="bg-fourthColor text-left text-gray-700">
-                                        <th className="px-6 py-4 font-bold">Descripción</th>
+                                        <th className="px-6 py-4 font-bold">Nombre del Punto de Venta</th>
                                         <th className="px-6 py-4 font-bold">Sucursal</th>
-                                        <th className="px-6 py-4 font-bold">Nombre</th>
-                                        <th className="px-6 py-4 font-bold">CUIS</th>
-                                        <th className="px-6 py-4 font-bold">Tipo</th>
-                                        <th className="px-6 py-4 font-bold">Estado</th>
+                                        <th className="px-6 py-4 font-bold">Departamento</th>
+                                        <th className="px-6 py-4 font-bold">Dirección</th>
+                                        <th className="px-6 py-4 font-bold">Empresa</th>
                                         <th className="px-6 py-4 font-bold">Operaciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {paginatedCustomers.map((customer) => (
                                         <tr key={customer.id} className="border-b hover:bg-gray-50 text-black">
-                                            <td className="px-6 py-4">{customer.descripcion}</td>
-                                            <td className="px-6 py-4">{customer.sucursal}</td>
-                                            <td className="px-6 py-4">{customer.nombrePuntoVenta}</td>
-                                            <td className="px-6 py-4">{customer.cuis}</td>
-                                            <td className="px-6 py-4">{customer.tipoPuntoVenta}</td>
-                                            <td className="px-6 py-4">{customer.estado}</td>
+                                            <td className="px-6 py-4">{customer.nombre}</td>
+                                            <td className="px-6 py-4">{customer.sucursal.nombre}</td>
+                                            <td className="px-6 py-4">{customer.sucursal.departamento}</td>
+                                            <td className="px-6 py-4">{customer.sucursal.direccion}</td>
+                                            <td className="px-6 py-4">{customer.sucursal.empresa.razonSocial}</td>
                                             <td className="px-6 py-4">
                                                 <div className="flex">
-                                                    {/* Botón de Borrar */}
                                                     <button
                                                         className="bg-red-200 hover:bg-red-300 p-2 rounded-l-lg flex items-center justify-center border border-red-300"
-                                                        onClick={() => handleDeletePuntoVenta(customer.id)}>
+                                                        onClick={() => console.log("Eliminar")}
+                                                    >
                                                         <FaTrashAlt className="text-black" />
                                                     </button>
-
                                                     {/* Botón de Editar */}
                                                     <button
                                                         className="bg-blue-200 hover:bg-blue-300 p-2 rounded-r-lg flex items-center justify-center border border-blue-300"
-                                                        onClick={() => handleEditPuntoVenta(customer.id)}>
+                                                        onClick={() => console.log("Editar")}
+                                                    >
                                                         <FaEdit className="text-black" />
                                                     </button>
                                                 </div>
@@ -321,44 +329,44 @@ const PuntoVenta: React.FC = () => {
                         {/* Paginación */}
                         <div className="flex flex-col items-center mt-6">
                             <div className="flex justify-center space-x-1 mb-2">
-                            <button
-                                onClick={handleFirstPage}
-                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-                            >
-                                Primero
-                            </button>
-                            <button
-                                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                                disabled={currentPage === 1}
-                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
-                            >
-                                Ant.
-                            </button>
-
-                            {getPageNumbers().map((page) => (
                                 <button
-                                    key={page}
-                                    onClick={() => setCurrentPage(page)}
-                                    className={`min-w-9 rounded-full border py-2 px-3.5 text-center text-sm transition-all shadow-sm ${page === currentPage ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-800 hover:text-white hover:border-slate-800'} focus:bg-slate-800 focus:text-white active:border-slate-800 active:bg-slate-800`}
+                                    onClick={handleFirstPage}
+                                    className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                                 >
-                                    {page}
+                                    Primero
                                 </button>
-                            ))}
+                                <button
+                                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                                    disabled={currentPage === 1}
+                                    className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+                                >
+                                    Ant.
+                                </button>
 
-                            <button
-                                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                                disabled={currentPage === totalPages}
-                                className="min-w-9 rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
-                            >
-                                Sig.
-                            </button>
-                            <button
-                             onClick={handleLastPage}
-                             className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-                            >
-                            Último
-                            </button>
-                         </div>
+                                {getPageNumbers().map((page) => (
+                                    <button
+                                        key={page}
+                                        onClick={() => setCurrentPage(page)}
+                                        className={`min-w-9 rounded-full border py-2 px-3.5 text-center text-sm transition-all shadow-sm ${page === currentPage ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-800 hover:text-white hover:border-slate-800'} focus:bg-slate-800 focus:text-white active:border-slate-800 active:bg-slate-800`}
+                                    >
+                                        {page}
+                                    </button>
+                                ))}
+
+                                <button
+                                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                                    disabled={currentPage === totalPages}
+                                    className="min-w-9 rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+                                >
+                                    Sig.
+                                </button>
+                                <button
+                                    onClick={handleLastPage}
+                                    className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                                >
+                                    Último
+                                </button>
+                            </div>
                         </div>
 
                         <div className="flex space-x-1 justify-center mt-2">
