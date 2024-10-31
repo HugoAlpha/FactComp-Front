@@ -39,26 +39,18 @@ const BillList = () => {
   const [contingencyState, setContingencyState] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
 
-  
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const contingenciaEstado = localStorage.getItem('contingenciaEstado');
-      setIsContingencyMode(contingenciaEstado === '1');
-    }
-  }, []);
 
-  const fetchBills = async (estado?: string) => {
+  const fetchBills = async () => {
     try {
-      const estadoParam = estadoFilter === 'TODAS' ? '' : (estadoFilter === 'VALIDA' ? '1' : '0');
+      const estadoParam = isContingencyMode ? 'OFFLINE' : (estadoFilter === 'TODAS' ? '' : (estadoFilter === 'VALIDA' ? '1' : '0'));
       const endpoint = estadoParam ? `${PATH_URL_BACKEND}/factura/estado?estado=${estadoParam}` : `${PATH_URL_BACKEND}/factura`;
 
       const response = await fetch(endpoint);
 
       if (response.ok) {
         const data = await response.json();
-
-        const formattedData = data.map((bill: any) => ({
+        const formattedData = data.map((bill) => ({
           documentNumber: bill.numeroDocumento,
           client: bill.nombreRazonSocial,
           date: new Date(bill.fechaEmision),
@@ -80,6 +72,24 @@ const BillList = () => {
       console.error('Error fetching bills:', error);
     }
   };
+
+  useEffect(() => {
+    fetchBills();
+  }, [isContingencyMode, estadoFilter]);
+
+  useEffect(() => {
+    const handleContingencyChange = () => {
+      const contingenciaEstado = localStorage.getItem('contingenciaEstado');
+      setIsContingencyMode(contingenciaEstado === '1');
+    };
+
+    window.addEventListener('contingencyStateChange', handleContingencyChange);
+
+    return () => {
+      window.removeEventListener('contingencyStateChange', handleContingencyChange);
+    };
+  }, []);
+
 
   const checkServerCommunication = async () => {
     try {
@@ -197,7 +207,7 @@ const BillList = () => {
   useEffect(() => {
     const role = localStorage.getItem("role");
     setUserRole(role);
-    console.log("User Role:", role); 
+    console.log("User Role:", role);
   }, []);
 
   const handleViewRollo = async (id: string) => {
@@ -223,31 +233,31 @@ const BillList = () => {
   const filteredBills = useMemo(() => {
     if (typeof window !== "undefined") {
       const contingenciaEstado = localStorage.getItem('contingenciaEstado');
-  
+
       return bills.filter((bill) => {
         const matchesSearch =
           bill.documentNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
           bill.client.toLowerCase().includes(searchQuery.toLowerCase());
-  
+
         const matchesEstado =
           estadoFilter === 'TODAS' ||
           (estadoFilter === 'VALIDA' && bill.estado.toUpperCase() === 'VALIDA') ||
           (estadoFilter === 'ANULADO' && bill.estado.toUpperCase() === 'ANULADO');
-  
+
         const matchesFecha =
           (!fechaDesde || new Date(bill.date) >= new Date(fechaDesde)) &&
           (!fechaHasta || new Date(bill.date) <= new Date(fechaHasta));
-  
+
         if (contingenciaEstado === '1') {
           return bill.estado.toUpperCase() === 'OFFLINE' && matchesSearch && matchesFecha;
         }
-  
+
         return matchesSearch && matchesEstado && matchesFecha;
       });
     }
     return [];
   }, [bills, searchQuery, estadoFilter, fechaDesde, fechaHasta]);
-  
+
 
 
   const totalPages = Math.ceil(filteredBills.length / rowsPerPage);
@@ -301,9 +311,9 @@ const BillList = () => {
     const handleContingencyChange = () => {
       const contingenciaEstado = localStorage.getItem('contingenciaEstado');
       setIsContingencyMode(contingenciaEstado === '1');
-      fetchBills(); 
+      fetchBills();
     };
-  
+
     window.addEventListener('contingencyActivated', handleContingencyChange);
     window.addEventListener('contingencyDeactivated', handleContingencyChange);
 
@@ -312,7 +322,7 @@ const BillList = () => {
       window.removeEventListener('contingencyDeactivated', handleContingencyChange);
     };
   }, []);
-  
+
 
   const getPageNumbers = (currentPage: number, totalPages: number) => {
     const pageNumbers = [];
@@ -333,7 +343,11 @@ const BillList = () => {
   };
 
   const handleAnularFactura = async (bill: any) => {
-    console.log('Factura seleccionada para anulación:', bill);
+
+    if (bill.estado === 'ANULADO') {
+      Swal.fire('Información', 'Esta factura ya fue anulada.', 'info');
+      return;
+    }
 
     if (!bill.cuf) {
       Swal.fire('Error', 'No se encontró el CUF de la factura', 'error');
@@ -416,7 +430,7 @@ const BillList = () => {
         Swal.fire({
           title: 'Enviando paquetes...',
           html: 'Completando en <b></b> segundos.',
-          timer: 5000, 
+          timer: 5000,
           timerProgressBar: true,
           didOpen: () => {
             Swal.showLoading();
@@ -435,7 +449,7 @@ const BillList = () => {
       }
     });
   };
-  
+
 
   return (
     <div className="flex min-h-screen">
@@ -490,7 +504,7 @@ const BillList = () => {
                     className="border border-gray-300 rounded-lg  h-10 px-3"
                   />
                 </div>
-                
+
                 {isContingencyMode && (
                   <button
                     className="bg-firstColor text-white rounded-lg font-bold hover:bg-fourthColor  h-10 px-3"
@@ -557,46 +571,46 @@ const BillList = () => {
               <div className="flex flex-col items-center mt-6">
                 <div className="flex justify-center space-x-1 mb-2">
                   <button
-                  onClick={handleFirstPage}
-                  className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-              >
-                  Primero
-              </button>
+                    onClick={handleFirstPage}
+                    className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                  >
+                    Primero
+                  </button>
+                  <button
+                    onClick={handlePrevPage}
+                    disabled={currentPage === 1}
+                    className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                  >
+                    Ant.
+                  </button>
+                  {getPageNumbers(currentPage, totalPages).map((page) => (
                     <button
-                      onClick={handlePrevPage}
-                      disabled={currentPage === 1}
-                      className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                      key={page}
+                      onClick={() => setCurrentPage(page)}
+                      className={`min-w-9 rounded-full border py-2 px-3.5 text-center text-sm transition-all shadow-sm ${page === currentPage ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-800 hover:text-white hover:border-slate-800'} focus:bg-slate-800 focus:text-white active:border-slate-800 active:bg-slate-800`}
                     >
-                      Ant.
+                      {page}
                     </button>
-                    {getPageNumbers(currentPage, totalPages).map((page) => (
-                      <button
-                        key={page}
-                        onClick={() => setCurrentPage(page)}
-                        className={`min-w-9 rounded-full border py-2 px-3.5 text-center text-sm transition-all shadow-sm ${page === currentPage ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-800 hover:text-white hover:border-slate-800'} focus:bg-slate-800 focus:text-white active:border-slate-800 active:bg-slate-800`}
-                      >
-                        {page}
-                      </button>
-                    ))}
-                    <button
-                      onClick={handleNextPage}
-                      disabled={currentPage === totalPages}
-                      className="min-w-9 rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-                    >
-                      Sig.
-                    </button>
-                    <button
-                        onClick={handleLastPage}
-                        className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-                    >
-                        Último
-                    </button>
+                  ))}
+                  <button
+                    onClick={handleNextPage}
+                    disabled={currentPage === totalPages}
+                    className="min-w-9 rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                  >
+                    Sig.
+                  </button>
+                  <button
+                    onClick={handleLastPage}
+                    className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                  >
+                    Último
+                  </button>
                 </div>
                 <div className="flex space-x-1 justify-center mt-2 mr-2">
-                    <span className="text-sm font-normal text-gray-500 mb-4 md:mb-0 block w-full md:inline md:w-auto">
-                      Mostrando página <span className="font-semibold text-gray-900">{currentPage}</span> de <span className="font-semibold text-gray-900">{totalPages}</span>
-                    </span>
-                  </div>
+                  <span className="text-sm font-normal text-gray-500 mb-4 md:mb-0 block w-full md:inline md:w-auto">
+                    Mostrando página <span className="font-semibold text-gray-900">{currentPage}</span> de <span className="font-semibold text-gray-900">{totalPages}</span>
+                  </span>
+                </div>
               </div>
             </div>
           </div>
@@ -610,4 +624,3 @@ const BillList = () => {
 };
 
 export default BillList;
-
