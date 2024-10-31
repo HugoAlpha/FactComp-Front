@@ -120,7 +120,7 @@ const ClientList = () => {
     useEffect(() => {
         const role = localStorage.getItem("role");
         setUserRole(role);
-        console.log("User Role:", role); 
+        console.log("User Role:", role);
     }, []);
 
     useEffect(() => {
@@ -168,16 +168,7 @@ const ClientList = () => {
         });
     };
 
-    const handleAddOrEditCustomer = (customer: Customer) => {
-        if (customer.id) {
-            setCustomers(
-                customers.map((c) => (c.id === customer.id ? { ...customer } : c))
-            );
-            Swal.fire('¡Actualizado!', 'El cliente ha sido actualizado.', 'success');
-        } else {
-            fetchCustomers();
-            Swal.fire('¡Agregado!', 'El cliente ha sido agregado exitosamente.', 'success');
-        }
+    const handleAddOrEditCustomer = async (customer: Customer) => {
         setIsModalOpen(false);
         setCurrentCustomer({
             id: 0,
@@ -188,8 +179,10 @@ const ClientList = () => {
             codigoCliente: '',
             email: '',
         });
+        await fetchCustomers();
         setCurrentPage(1);
     };
+
 
     const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setRowsPerPage(parseInt(e.target.value));
@@ -215,13 +208,13 @@ const ClientList = () => {
     };
 
     const handleFirstPage = () => {
-        setCurrentPage(1); 
+        setCurrentPage(1);
     };
 
     const handleLastPage = () => {
-        setCurrentPage(totalPages); 
+        setCurrentPage(totalPages);
     };
-    
+
 
 
     const renderOperationButtons = (customer: Customer) => {
@@ -253,7 +246,7 @@ const ClientList = () => {
             </div>
         );
     };
-    
+
 
 
     return (
@@ -267,11 +260,11 @@ const ClientList = () => {
                         <h2 className="text-2xl font-bold mb-6 text-gray-700">Gestión de Clientes</h2>
 
                         <div className="flex justify-end my-2">
-                            
+
                         </div>
-                        
-                        <div className="flex justify-between mb-4 items-center"> 
-                            <div className="flex items-center"> 
+
+                        <div className="flex justify-between mb-4 items-center">
+                            <div className="flex items-center">
                                 <label htmlFor="itemsPerPage" className="mr-2 text-sm">Elementos por página:</label>
                                 <select
                                     value={rowsPerPage}
@@ -355,52 +348,52 @@ const ClientList = () => {
                             </table>
                         </div>
 
-        
+
                         <div className="flex flex-col items-center mt-6">
                             <div className="flex justify-center space-x-1 mb-2">
-                             <button
-                             onClick={handleLastPage}
-                             className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-                            >
-                            Último
-                            </button>
-                            <button
-                                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                                disabled={currentPage === 1}
-                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-                            >
-                                Ant.
-                            </button>
-
-                            {getPageNumbers().map((number) => (
                                 <button
-                                    key={number}
-                                    onClick={() => setCurrentPage(number)}
-                                    className={`rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 ${currentPage === number ? 'bg-slate-800 text-white' : ''}`}
+                                    onClick={handleLastPage}
+                                    className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                                 >
-                                    {number}
+                                    Último
                                 </button>
-                            ))}
+                                <button
+                                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                                    disabled={currentPage === 1}
+                                    className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                                >
+                                    Ant.
+                                </button>
 
-                            <button
-                                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                                disabled={currentPage === totalPages}
-                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-                            >
-                                Sig.
-                            </button>
-                            <button
-                                onClick={handleFirstPage}
-                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-                            >
-                                Primero
-                            </button>
-                        </div>
+                                {getPageNumbers().map((number) => (
+                                    <button
+                                        key={number}
+                                        onClick={() => setCurrentPage(number)}
+                                        className={`rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 ${currentPage === number ? 'bg-slate-800 text-white' : ''}`}
+                                    >
+                                        {number}
+                                    </button>
+                                ))}
 
-                        <div className="text-sm font-normal text-gray-500 dark:text-gray-400 mr-2">
-                            Mostrando página <span className="font-semibold text-gray-900 dark:text-black">{currentPage}</span> de <span className="font-semibold text-gray-900 dark:text-black">{totalPages}</span>
+                                <button
+                                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                                    disabled={currentPage === totalPages}
+                                    className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                                >
+                                    Sig.
+                                </button>
+                                <button
+                                    onClick={handleFirstPage}
+                                    className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                                >
+                                    Primero
+                                </button>
+                            </div>
+
+                            <div className="text-sm font-normal text-gray-500 dark:text-gray-400 mr-2">
+                                Mostrando página <span className="font-semibold text-gray-900 dark:text-black">{currentPage}</span> de <span className="font-semibold text-gray-900 dark:text-black">{totalPages}</span>
+                            </div>
                         </div>
-                    </div>
                     </div>
                 </div>
             </div>

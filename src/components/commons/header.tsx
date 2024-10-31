@@ -61,54 +61,54 @@ const Header = () => {
     };
 
     const loadContingencyState = () => {
-            const storedContingencia = localStorage.getItem('contingenciaEstado');
-            const storedTime = localStorage.getItem('horaActivacionContingencia');
-            const storedFormattedTime = localStorage.getItem('fechaHoraContingencia');
-            
-            if (storedFormattedTime) {
-                console.log('Fecha y hora de activación:', storedFormattedTime);
-            }
-    
-            if (storedContingencia === '1' && storedTime) {
-                const timeLeft = calculateTimeLeft(storedTime);
-                if (timeLeft > 0) {
-                    setContingencia(true);
-                    setCountdown(timeLeft);
-                    updateColors(true);
-                    console.log('Estado de contingencia: Activado');
-                } else {
-                    clearContingencyState();
-                }
+        const storedContingencia = localStorage.getItem('contingenciaEstado');
+        const storedTime = localStorage.getItem('horaActivacionContingencia');
+        const storedFormattedTime = localStorage.getItem('fechaHoraContingencia');
+
+        if (storedFormattedTime) {
+            console.log('Fecha y hora de activación:', storedFormattedTime);
+        }
+
+        if (storedContingencia === '1' && storedTime) {
+            const timeLeft = calculateTimeLeft(storedTime);
+            if (timeLeft > 0) {
+                setContingencia(true);
+                setCountdown(timeLeft);
+                updateColors(true);
+                console.log('Estado de contingencia: Activado');
             } else {
-                setContingencia(false);
-                updateColors(false);
-                console.log('Estado de contingencia: Desactivado');
+                clearContingencyState();
             }
-        };                    
-        const clearContingencyState = () => {
-            localStorage.removeItem('contingenciaEstado');
-            localStorage.removeItem('horaActivacionContingencia');
-            localStorage.removeItem('fechaHoraContingencia');
+        } else {
             setContingencia(false);
-            setCountdown(0);
             updateColors(false);
             console.log('Estado de contingencia: Desactivado');
-            syncContingencyState();
+        }
+    };
+    const clearContingencyState = () => {
+        localStorage.removeItem('contingenciaEstado');
+        localStorage.removeItem('horaActivacionContingencia');
+        localStorage.removeItem('fechaHoraContingencia');
+        setContingencia(false);
+        setCountdown(0);
+        updateColors(false);
+        console.log('Estado de contingencia: Desactivado');
+        syncContingencyState();
+    };
+
+    useEffect(() => {
+        loadContingencyState();
+        window.addEventListener('storage', (e) => {
+            if (e.key && ['contingenciaEstado', 'horaActivacionContingencia', 'fechaHoraContingencia'].includes(e.key)) {
+                loadContingencyState();
+            }
+        });
+        window.addEventListener(CONTINGENCY_EVENT, loadContingencyState);
+
+        return () => {
+            window.removeEventListener(CONTINGENCY_EVENT, loadContingencyState);
         };
-    
-        useEffect(() => {
-            loadContingencyState();
-            window.addEventListener('storage', (e) => {
-                if (e.key && ['contingenciaEstado', 'horaActivacionContingencia', 'fechaHoraContingencia'].includes(e.key)) {
-                    loadContingencyState();
-                }
-            });
-            window.addEventListener(CONTINGENCY_EVENT, loadContingencyState);
-    
-            return () => {
-                window.removeEventListener(CONTINGENCY_EVENT, loadContingencyState);
-            };
-        }, []);
+    }, []);
 
     useEffect(() => {
         let timer;
@@ -129,7 +129,7 @@ const Header = () => {
 
     const limpiarLocal = () => {
         localStorage.clear();
-        updateColors(false);  
+        updateColors(false);
         window.location.href = "/";
     };
 
@@ -158,7 +158,7 @@ const Header = () => {
             second: '2-digit',
             hour12: false
         });
-        
+
         localStorage.setItem('contingenciaEstado', '1');
         localStorage.setItem('horaActivacionContingencia', timestamp.toString());
         localStorage.setItem('fechaHoraContingencia', fechaHoraFormateada);
@@ -217,40 +217,38 @@ const Header = () => {
                 <div className="flex items-center flex-grow">
                     <div className="relative mx-2 lg:mx-0">
                         <span className="w-96 rounded-md pl-2 text-2xl font-bold text-principalColor">
-                            Bienvenid@
+                            Sistema de facturación computarizada en línea
                         </span>
                     </div>
                 </div>
 
                 <div className="flex items-center space-x-4">
-                <label className="inline-flex items-center cursor-pointer">
-                    <span className="mr-4 text-sm font-medium text-gray-900 dark:text-black">
-                        Modo contingencia
-                    </span>
-                    <input
-                        type="checkbox"
-                        checked={contingencia}
-                        onChange={handleContingenciaChange}
-                        className="sr-only peer"
-                    />
-                    <div
-                        className={`relative w-12 h-7 rounded-full transition-all duration-300 ${
-                        contingencia ? "bg-green-500" : "bg-gray-400"
-                        }`}
-                    >
+                    <label className="inline-flex items-center cursor-pointer">
+                        <span className="mr-4 text-sm font-medium text-gray-900 dark:text-black">
+                            Modo contingencia
+                        </span>
+                        <input
+                            type="checkbox"
+                            checked={contingencia}
+                            onChange={handleContingenciaChange}
+                            className="sr-only peer"
+                        />
                         <div
-                        className={`absolute top-1 w-5 h-5 rounded-full transition-all duration-300 ${
-                            contingencia
-                            ? "transform translate-x-5 bg-white shadow-md"
-                            : "transform translate-x-1 bg-white shadow-md"
-                        }`}
-                        ></div>
-                    </div>
+                            className={`relative w-12 h-7 rounded-full transition-all duration-300 ${contingencia ? "bg-green-500" : "bg-gray-400"
+                                }`}
+                        >
+                            <div
+                                className={`absolute top-1 w-5 h-5 rounded-full transition-all duration-300 ${contingencia
+                                        ? "transform translate-x-5 bg-white shadow-md"
+                                        : "transform translate-x-1 bg-white shadow-md"
+                                    }`}
+                            ></div>
+                        </div>
                     </label>
 
                     <div className="relative" ref={settingsMenuRef}>
-                        <button 
-                            onClick={handleSettingsMenuToggle} 
+                        <button
+                            onClick={handleSettingsMenuToggle}
                             className="bg-gray-100 p-2 rounded-full hover:bg-gray-200"
                         >
                             <FaCog className="text-principalColor text-xl" />
@@ -272,8 +270,8 @@ const Header = () => {
 
                     {/* Botón de usuario con menú desplegable */}
                     <div className="relative" ref={userMenuRef}>
-                        <button 
-                            onClick={handleUserMenuToggle} 
+                        <button
+                            onClick={handleUserMenuToggle}
                             className="bg-gray-100 p-2 rounded-full hover:bg-gray-200"
                         >
                             <FaUser className="text-principalColor text-xl" />
@@ -305,14 +303,14 @@ const Header = () => {
 
                     <button onClick={limpiarLocal} className="flex items-center bg-gray-100 rounded-full p-1 text-principalColor">
                         <IoExitOutline className="w-7 h-7 pl-1" />
-                    </button>            
+                    </button>
                 </div>
             </div>
-            
+
             {showModal && (
-                <ModalContingency 
-                    onClose={() => setShowModal(false)} 
-                    onConfirm={confirmarContingencia} 
+                <ModalContingency
+                    onClose={() => setShowModal(false)}
+                    onConfirm={confirmarContingencia}
                 />
             )}
 
