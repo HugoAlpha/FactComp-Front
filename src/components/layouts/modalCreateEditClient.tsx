@@ -105,7 +105,7 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
         }
     
         if (!formData.numeroDocumento) {
-            newErrors.numeroDocumento = 'Este campo es requerido.';
+            
         } else if (!alphanumericPattern.test(formData.numeroDocumento)) {
             newErrors.numeroDocumento = 'No se permiten caracteres especiales.';
         } else if (formData.numeroDocumento.length > 15) {
@@ -125,7 +125,7 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
         }
     
         if (formData.codigoCliente) {
-            newErrors.codigoCliente = 'Este campo es requerido.';
+            
             if (!alphanumericPattern.test(formData.codigoCliente)) {
                 newErrors.codigoCliente = 'No se permiten caracteres especiales.';
             } else if (formData.codigoCliente.length > 15) {
