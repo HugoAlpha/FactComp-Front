@@ -11,6 +11,7 @@ import { GrDocumentConfig } from "react-icons/gr";
 import CreateEditClientModal from '@/components/layouts/modalCreateEditClient';
 import ModalCreateProduct from '@/components/layouts/modalCreateProduct';
 import { GoHomeFill } from "react-icons/go";
+import ModalAllClients from '@/components/layouts/modalAllClients';
 
 const Sales = () => {
     const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
@@ -34,6 +35,7 @@ const Sales = () => {
     const [clientSearchTerm, setClientSearchTerm] = useState('');
     const [filteredClients, setFilteredClients] = useState([]);
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [isAllClientsModalOpen, setIsAllClientsModalOpen] = useState(false);
     const [currentCustomer, setCurrentCustomer] = useState<Customer>({
         id: 0,
         nombreRazonSocial: '',
@@ -188,15 +190,25 @@ const Sales = () => {
 
     const updateProductInList = (updatedProduct: Product) => {
         const updatedProducts = products.map((item) =>
-            item.id === updatedProduct.id ? updatedProduct : item
+            item.id === updatedProduct.id ? { ...item, price: updatedProduct.precioUnitario } : item
         );
         setProducts(updatedProducts);
-        const updatedSelectedProducts = selectedProducts.map((item) =>
-            item.id === updatedProduct.id ? { ...item, price: updatedProduct.price, totalPrice: item.quantity! * updatedProduct.price } : item
-        );
+        const updatedSelectedProducts = selectedProducts.map((item) => {
+            if (item.id === updatedProduct.id) {
+                const newTotalPrice = (item.quantity ?? 1) * updatedProduct.precioUnitario;
+                return {
+                    ...item,
+                    price: updatedProduct.precioUnitario,
+                    totalPrice: !isNaN(newTotalPrice) ? newTotalPrice : 0,
+                };
+            }
+            return item;
+        });
         setSelectedProducts(updatedSelectedProducts);
         calculateTotal(updatedSelectedProducts);
     };
+    
+    
 
     const calculateTotal = (updatedProducts: Product[]) => {
         const subtotal = updatedProducts.reduce((acc, curr) => acc + (curr.totalPrice ?? 0), 0);
@@ -417,6 +429,12 @@ const Sales = () => {
         });
     };
 
+    const handleProductUpdate = (updatedProduct: Product) => {
+        updateProductInList(updatedProduct); 
+        setIsEditModalOpen(false);
+    };
+    
+
     const handleSaveCustomer = (savedCustomer: Customer) => {
 
         console.log('Cliente guardado:', savedCustomer);
@@ -436,13 +454,32 @@ const Sales = () => {
         await fetchProducts();
     };
 
+    const formatCurrency = (value) => {
+        return new Intl.NumberFormat('es-BO', { style: 'currency', currency: 'BOB', minimumFractionDigits: 2 }).format(value);
+    };
+
+    const handleOpenAllClientsModal = () => {
+        setIsAllClientsModalOpen(true);
+    };
+    
+    const handleCloseAllClientsModal = () => {
+        setIsAllClientsModalOpen(false);
+    };
+
+    const handleClientSelectFromModal = (selectedClient) => {
+        setCurrentCustomer(selectedClient);
+        setIsAllClientsModalOpen(false);
+    };
+
+
     return (
         <div className="flex flex-col min-h-screen">
             <div className="flex-grow flex p-6 space-x-6 bg-white">
                 {!isSaleSuccessful ? (
                     <>
                         {/* Productos Seleccionados */}
-                        <div className="flex flex-col w-1/3" style={{ maxHeight: '90vh' }}>
+                        <div className="flex flex-col w-1/3 " style={{ maxHeight: '90vh' }}>    
+                            
                             <div className='flex justify-between mb-6'>
                                 <h2 className="text-xl font-bold mr-5 place-content-center">Productos Seleccionados</h2>
                                 <button
@@ -504,7 +541,7 @@ const Sales = () => {
                                                     />
                                                 </td>
 
-                                                <td className="px-4 py-2">{product.totalPrice !== undefined ? product.totalPrice.toFixed(2) : '0.00'}</td>
+                                                <td className="px-4 py-2">{product.totalPrice !== undefined ? formatCurrency(product.totalPrice) : 'Bs. 0.00'}</td>
                                                 <td className="px-4 py-2">
                                                     <button
                                                         onClick={() => removeProduct(product.id)}
@@ -517,14 +554,15 @@ const Sales = () => {
                                     </tbody>
                                 </table>
                             </div>
-                            <div className="text-black">
-                                <div className="mt-4 text-lg font-bold">Total: Bs {total.toFixed(2)}</div>
-
-                                <div className="text-sm text-gray-500 mt-2">
+                            <div className="text-sm text-gray-500 mt-2">
                                     {globalDiscountHistory.map((discount, index) => (
                                         <div key={index}>{discount}</div>
                                     ))}
                                 </div>
+                            <div className="text-black">
+                                <div className="mt-4 text-lg font-bold">Total: {formatCurrency(total)}</div>
+
+                                
                                 <div className="mt-4 space-y-3 w-full">
 
                                     <div className="mt-4 space-y-3 w-full">
@@ -540,34 +578,33 @@ const Sales = () => {
                                             </button>
 
                                             {dropdownOpen && (
-                                                <div className="absolute z-50 bg-white shadow-lg rounded mt-2 w-full" style={{ maxHeight: '250px', overflowY: 'auto' }}>
-                                                    <input
-                                                        type="text"
-                                                        value={clientSearchTerm}
-                                                        onChange={(e) => setClientSearchTerm(e.target.value)}
-                                                        placeholder="Buscar cliente"
-                                                        className="block w-full p-2 text-sm border-gray-300"
-                                                    />
-                                                    <ul className="bg-white border border-gray-300 rounded-b">
-                                                        {filteredClients.length > 0 ? (
-                                                            filteredClients.map((client) => (
-                                                                <li key={client.id}>
-                                                                    <button
-                                                                        type="button"
-                                                                        className="block px-2 py-1 text-left w-full hover:bg-gray-100"
-                                                                        onClick={() => {
-                                                                            handleClientSelect(client.id);
-                                                                            setDropdownOpen(false);
-                                                                        }}
-                                                                    >
-                                                                        {client.nombreRazonSocial} - {client.numeroDocumento}
-                                                                    </button>
-                                                                </li>
-                                                            ))
-                                                        ) : (
-                                                            <li className="px-2 py-1 text-gray-500">No se encontraron clientes</li>
-                                                        )}
+                                                <div className="absolute z-50 bg-white shadow-lg rounded mt-2 w-full">
+                                                    <ul className="bg-white border border-gray-300 rounded-b max-h-48 overflow-y-auto">
+                                                        {clients.slice(0, 5).map((client) => (
+                                                            <li key={client.id}>
+                                                                <button
+                                                                    type="button"
+                                                                    className="block px-2 py-1 text-left w-full hover:bg-gray-100"
+                                                                    onClick={() => {
+                                                                        setCurrentCustomer(client);
+                                                                        setDropdownOpen(false);
+                                                                    }}
+                                                                >
+                                                                    {client.nombreRazonSocial} - {client.numeroDocumento}
+                                                                </button>
+                                                            </li>
+                                                        ))}
                                                     </ul>
+                                                    <button
+                                                        type="button"
+                                                        className="block w-full text-center bg-gray-200 hover:bg-gray-300 py-2"
+                                                        onClick={() => {
+                                                            setDropdownOpen(false);
+                                                            handleOpenAllClientsModal();
+                                                        }}
+                                                    >
+                                                        Buscar más
+                                                    </button>
                                                 </div>
                                             )}
                                         </div>
@@ -609,9 +646,9 @@ const Sales = () => {
                             </div>
                         </div>
 
-                        <div className="text-black w-2/3" style={{ maxHeight: "90vh" }}>
-                            <div>
-                                <h2 className="text-xl font-bold mb-8">Agregar Productos</h2>
+                        <div className="text-black w-2/3 border-l-4 border-black" style={{ maxHeight: "90vh" }}>
+                            <div className="ml-2">
+                                <h2 className="text-xl font-bold mb-8 ">Agregar Productos</h2>
                                 <input
                                     type="text"
                                     placeholder="Buscar productos..."
@@ -652,11 +689,10 @@ const Sales = () => {
                                         </div>
                                     </div>
                                 </div>
-
                             </div>
 
                             {/* Vista Grid / List */}
-                            <div className="max-h-[70vh] overflow-y-auto">
+                            <div className="max-h-[70vh] overflow-y-auto ml-2">
                                 {viewMode === "grid" ? (
                                     <div className="grid grid-cols-6 gap-4">
                                         {filteredProducts.map((product) => (
@@ -689,7 +725,6 @@ const Sales = () => {
                                                 onClick={() => addProduct(product)}
                                                 className="cursor-pointer flex items-center bg-white border rounded-lg p-2 shadow transition-all duration-300 hover:bg-gray-100"
                                             >
-
                                                 <div className="flex-grow">
                                                     <h3 className="text-sm font-semibold">{product.name}</h3>
                                                     <p className="text-sm font-bold">Bs {product.price}</p>
@@ -710,7 +745,7 @@ const Sales = () => {
                         <ModalCreateProduct
                             isOpen={isEditModalOpen}
                             onClose={() => setIsEditModalOpen(false)}
-                            onProductCreated={() => refreshProductList()}
+                            onProductCreated={handleProductUpdate}
                             refreshProducts={refreshProductList}
                             product={productToEdit}
                         />
@@ -733,6 +768,12 @@ const Sales = () => {
                             onClose={handleCloseClientModal}
                             customer={currentCustomer}
                             onSave={handleSaveCustomer}
+                        />
+
+                        <ModalAllClients
+                            isOpen={isAllClientsModalOpen}
+                            onClose={handleCloseAllClientsModal}
+                            onSelectClient={handleClientSelectFromModal} 
                         />
 
                     </>

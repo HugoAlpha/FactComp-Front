@@ -9,6 +9,7 @@ import CashierSidebar from '@/components/commons/cashierSidebar';
 
 import Swal from 'sweetalert2';
 import ModalContingency from '@/components/layouts/modalContingency';
+import Footer from '@/components/commons/footer';
 
 interface PuntoVenta {
     id: number;
@@ -36,7 +37,6 @@ interface Code {
     fechaSolicitada: string;
     fechaVigencia: string;
     vigente: boolean;
-    puntoVenta: PuntoVenta;
 }
 
 const CodeReceipt = () => {
@@ -68,33 +68,23 @@ const CodeReceipt = () => {
             const response = await fetch(`${PATH_URL_BACKEND}/codigos/cuis/activo/${idPuntoVenta}/${idSucursal}`);
             if (response.ok) {
                 const data = await response.json();
-
-                // Asegúrate de que `data` sea un array antes de mapearlo.
+    
                 const formattedData = Array.isArray(data) ? data.map((code: any) => ({
                     id: code.id,
                     codigo: code.codigo,
                     fechaSolicitada: new Date(code.fechaSolicitada).toLocaleString(),
                     fechaVigencia: new Date(code.fechaVigencia).toLocaleString(),
                     vigente: code.vigente,
-                    puntoVenta: code.puntoVenta
                 })) : [{
                     id: data.id,
                     codigo: data.codigo,
                     fechaSolicitada: new Date(data.fechaSolicitada).toLocaleString(),
                     fechaVigencia: new Date(data.fechaVigencia).toLocaleString(),
                     vigente: data.vigente,
-                    puntoVenta: data.puntoVenta
                 }];
-
-                // Ordenar los datos y actualizar el estado
+    
                 formattedData.sort((a: Code, b: Code) => b.id - a.id);
                 setCodes(formattedData);
-
-                // Filtrar y obtener sucursales únicas
-                const uniqueSucursales = Array.from(
-                    new Set(formattedData.map((code: Code) => code.puntoVenta.sucursal.nombre))
-                );
-                setSucursales(uniqueSucursales);
             } else {
                 console.error('Error fetching codes');
             }
@@ -102,6 +92,7 @@ const CodeReceipt = () => {
             console.error('Error fetching codes:', error);
         }
     };
+    
 
     useEffect(() => {
         fetchCodes();
@@ -352,10 +343,6 @@ const CodeReceipt = () => {
                                     {paginatedCodes.length > 0 ? (
                                         paginatedCodes.map(code => (
                                             <tr key={code.id} className="border-b hover:bg-gray-50 text-black">
-                                                <td className="px-6 py-4">{code.puntoVenta.sucursal.departamento}</td>
-                                                <td className="px-6 py-4">{code.puntoVenta.sucursal.municipio}</td>
-                                                <td className="px-6 py-4">{code.puntoVenta.nombre}</td>
-                                                <td className="px-6 py-4">{code.puntoVenta.sucursal.nombre}</td>
                                                 <td className="px-6 py-4">{code.codigo}</td>
                                                 <td className="px-6 py-4">{code.fechaSolicitada}</td>
                                                 <td className="px-6 py-4">{code.fechaVigencia}</td>
@@ -364,7 +351,7 @@ const CodeReceipt = () => {
                                         ))
                                     ) : (
                                         <tr>
-                                            <td colSpan={8} className="text-center py-6 text-gray-500">
+                                            <td colSpan={4} className="text-center py-6 text-gray-500">
                                                 No hay datos disponibles.
                                             </td>
                                         </tr>
@@ -422,6 +409,7 @@ const CodeReceipt = () => {
                         </div>
                     </div>
                 </div>
+                <Footer />
             </div>
             {isContingencyModalOpen && (
                 <ModalContingency isOpen={isContingencyModalOpen} onClose={closeModal} />

@@ -6,6 +6,7 @@ import { FaEdit, FaPlus, FaSearch, FaTrashAlt } from 'react-icons/fa';
 import ModalCreatePos from '@/components/layouts/modalCreatePos';
 import Swal from 'sweetalert2';
 import { PATH_URL_BACKEND } from '@/utils/constants';
+import Footer from '@/components/commons/footer';
 
 
 interface PuntoVenta {
@@ -314,7 +315,6 @@ const PuntoVenta: React.FC = () => {
                                                     >
                                                         <FaTrashAlt className="text-black" />
                                                     </button>
-                                                    
                                                 </div>
                                             </td>
                                         </tr>
@@ -372,6 +372,7 @@ const PuntoVenta: React.FC = () => {
                         </div>
                     </div>
                 </div>
+                <Footer />
             </div>
         </div>
     );

@@ -8,6 +8,7 @@ import ModalCreateProduct from '@/components/layouts/modalCreateProduct';
 import Swal from 'sweetalert2';
 import CashierSidebar from '@/components/commons/cashierSidebar';
 import ModalContingency from '@/components/layouts/modalContingency';
+import Footer from '@/components/commons/footer';
 
 interface Product {
     id: number;
@@ -421,6 +422,7 @@ const ProductList = () => {
                     refreshProducts={refreshProducts}
                     product={selectedProduct}
                 />
+                <Footer />
             </div>
             {isContingencyModalOpen && (
                 <ModalContingency isOpen={isContingencyModalOpen} onClose={closeModal} />

@@ -251,18 +251,18 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
             Swal.fire("Error", "Por favor, complete los campos obligatorios correctamente.", "error");
             return;
         }
-
+    
         const productData = {
+            id: product?.id, 
             codigo,
             descripcion: nombreProducto,
             unidadMedida: selectedUnidadMedida?.codigoClasificador,
             precioUnitario: Number(precioUnitario),
             codigoProductoSin: Number(selectedOption?.codigoProducto),
         };
-
+    
         try {
             let response;
-            let previousImageId = product?.imageId || null;
             if (product && product.id) {
                 response = await fetch(`${PATH_URL_BACKEND}/item/actualizar-item/${product.id}`, {
                     method: "PUT",
@@ -280,11 +280,11 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                     body: JSON.stringify(productData),
                 });
             }
-
+    
             if (response.ok) {
                 const savedProduct = await response.json();
-                onProductCreated(savedProduct);
-
+                onProductCreated(savedProduct); 
+    
                 Swal.fire({
                     icon: "success",
                     title: product ? "Producto actualizado correctamente" : "Producto creado correctamente",
@@ -293,37 +293,9 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                 }).then(async () => {
                     if (selectedImage) {
                         await uploadImage(savedProduct.id);
-
-                        let timerInterval: NodeJS.Timeout;
-                        Swal.fire({
-                            title: 'Subiendo imagen...',
-                            html: 'La imagen se subirá en <b>6</b> segundos.',
-                            timer: 6000,
-                            timerProgressBar: true,
-                            allowOutsideClick: false,
-                            allowEscapeKey: false,
-                            didOpen: () => {
-                                Swal.showLoading();
-                                const b = Swal.getHtmlContainer()?.querySelector('b');
-                                if (b) {
-                                    timerInterval = setInterval(() => {
-                                        b.textContent = Math.ceil(Swal.getTimerLeft()! / 1000).toString();
-                                    }, 1000);
-                                }
-                            },
-                            willClose: () => {
-                                clearInterval(timerInterval);
-                            }
-                        }).then((result) => {
-                            if (result.dismiss === Swal.DismissReason.timer) {
-                                refreshProducts();
-                                onClose();
-                            }
-                        });
-                    } else {
-                        refreshProducts();
-                        onClose();
                     }
+                    refreshProducts(); 
+                    onClose(); 
                 });
             } else {
                 Swal.fire("Error", product ? "Error al actualizar el producto" : "Error al crear el producto", "error");

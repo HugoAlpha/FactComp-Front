@@ -9,6 +9,7 @@ import ModalContingency from '@/components/layouts/modalContingency';
 import CreateEditClientModal from "@/components/layouts/modalCreateEditClient";
 import { PATH_URL_BACKEND } from "@/utils/constants";
 import Swal from "sweetalert2";
+import Footer from "@/components/commons/footer";
 
 const Dashboard = () => {
     const [isClientModalOpen, setIsClientModalOpen] = useState(false);
@@ -315,6 +316,7 @@ const Dashboard = () => {
                         </section>
                     </div>
                 </div>
+                <Footer />
             </div>
 
             <CreateEditClientModal
@@ -328,6 +330,7 @@ const Dashboard = () => {
             onClose={closeModal} 
             onConfirm={handleConfirm} 
             />
+            
         </div>
     );
 };

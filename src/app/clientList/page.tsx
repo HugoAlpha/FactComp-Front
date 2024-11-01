@@ -8,6 +8,7 @@ import CreateEditClientModal from '@/components/layouts/modalCreateEditClient';
 import { PATH_URL_BACKEND } from '@/utils/constants';
 import CashierSidebar from '@/components/commons/cashierSidebar';
 import ModalContingency from '@/components/layouts/modalContingency';
+import Footer from '@/components/commons/footer';
 
 interface Customer {
     id: number;
@@ -396,6 +397,7 @@ const ClientList = () => {
                         </div>
                     </div>
                 </div>
+                <Footer />
             </div>
             {isContingencyModalOpen && (
                 <ModalContingency isOpen={isContingencyModalOpen} onClose={closeModal} />

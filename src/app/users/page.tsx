@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import ModalCreateUser from "../../components/layouts/modalCreateUser";
 import Swal from 'sweetalert2';
 import { PATH_URL_BACKEND, PATH_URL_SECURITY } from '@/utils/constants';
+import Footer from '@/components/commons/footer';
 
 const UserList = () => {
     const [users, setUsers] = useState<User[]>([]);
@@ -353,6 +354,7 @@ const UserList = () => {
                         </div>
                     </div>
                 </div>
+                <Footer />
             </div>
             <ModalContingency 
             isOpen={isContingencyModalOpen} 

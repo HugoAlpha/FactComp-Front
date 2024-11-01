@@ -7,6 +7,7 @@ import Swal from 'sweetalert2';
 import ModalCreateBranch from '@/components/layouts/modalCreateBranches';
 import { PATH_URL_BACKEND } from '@/utils/constants';
 import ModalContingency from '@/components/layouts/modalContingency';
+import Footer from '@/components/commons/footer';
 
 interface Branch {
     id: number;
@@ -412,7 +413,8 @@ const Branches: React.FC = () => {
                         </div>
                     </div>
                 </div>
-        </div>
+                <Footer />
+            </div>
 
             <ModalCreateBranch
                 isOpen={isModalOpen}
