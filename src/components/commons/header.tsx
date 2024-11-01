@@ -3,6 +3,9 @@ import { FaUser, FaCog } from 'react-icons/fa';
 import { IoExitOutline } from 'react-icons/io5';
 import ModalContingency from '../layouts/modalContingency';
 import { PATH_URL_BACKEND } from '@/utils/constants';
+import ModalUserInfo from '@/components/layouts/modalUserInfo';
+import Swal from 'sweetalert2';
+
 
 const normalColors = {
     principalColor: "#10314b",
@@ -41,6 +44,9 @@ const Header = () => {
     const userMenuRef = useRef(null);
     const settingsMenuRef = useRef(null);
     const [isOnline, setIsOnline] = useState(true);
+    const [userName, setuserName] = useState(0);
+    const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+
 
 
     const updateColors = (isContingency) => {
@@ -61,6 +67,16 @@ const Header = () => {
         const event = new CustomEvent(CONTINGENCY_EVENT);
         window.dispatchEvent(event);
     };
+
+
+    useEffect(() => {
+
+        const nameUser = localStorage.getItem('username');
+        setuserName(nameUser);
+        if (isOnline) {
+            checkContingencyState();
+        }
+    }, [isOnline]);
 
     const loadContingencyState = () => {
         const storedContingencia = localStorage.getItem('contingenciaEstado');
@@ -129,15 +145,31 @@ const Header = () => {
         return () => clearInterval(timer);
     }, [countdown, contingencia]);
 
-    const limpiarLocal = () => {
-        localStorage.clear();
-        updateColors(false);
-        window.location.href = "/";
+    const handleLogout = () => {
+        Swal.fire({
+            title: '¿Deseas cerrar sesión?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, cerrar sesión',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true,
+            customClass: {
+                confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md',
+                cancelButton: 'bg-blue-500 text-white px-4 py-2 rounded-md',
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                localStorage.clear();
+                window.location.href = "/";
+                Swal.fire('Hasta pronto! ', 'success');
+
+            }
+        });
     };
 
     const handleContingenciaChange = () => {
         if (!contingencia) {
-            setShowModal(true); 
+            setShowModal(true);
         } else {
             desactivarContingencia();
         }
@@ -190,12 +222,17 @@ const Header = () => {
     const handleUserMenuToggle = () => {
         setShowUserMenu((prev) => !prev);
         if (showSettingsMenu) setShowSettingsMenu(false);
+        setIsUserModalOpen(!isUserModalOpen);
+    };
+    const handleUserMenuToggle2 = () => {
+        setIsUserModalOpen(!isUserModalOpen);
     };
 
     const handleSettingsMenuToggle = () => {
         setShowSettingsMenu((prev) => !prev);
         if (showUserMenu) setShowUserMenu(false);
     };
+
 
     const handleOutsideClick = (event) => {
         if (
@@ -240,41 +277,39 @@ const Header = () => {
 
     useEffect(() => {
         checkServerCommunication();
-        const intervalId = setInterval(checkServerCommunication, 1000000); 
-        return () => clearInterval(intervalId); 
+        const intervalId = setInterval(checkServerCommunication, 1000000);
+        return () => clearInterval(intervalId);
     }, []);
 
     return (
-        <header className={`flex justify-between items-center shadow p-4 bg-seventhColor`}>
+        <header className="flex justify-between items-center shadow-md p-4 bg-seventhColor">
             <div className="container mx-auto px-6 flex justify-between items-center">
-                <div className="flex items-center flex-grow">
-                    <div className="relative mx-2 lg:mx-0">
-                        <span className="w-96 rounded-md pl-2 text-2xl font-bold text-principalColor">
-                            Sistema de facturación computarizada en línea
+                <div className="flex items-center flex-grow space-x-6">
+                    <div className="relative">
+                        <span className="rounded-md text-lg font-semibold text-principalColor whitespace-nowrap">
+                            Sistema de Facturación Computarizada en Línea
                         </span>
                     </div>
-                    <div className="flex items-center ml-40">
-                        <span className="mr-2 text-sm font-medium text-gray-900 dark:text-black">
+                    <div className="flex items-center bg-fourthColor px-3 py-1 rounded-lg space-x-2">
+                        <span className="text-sm font-medium text-black">
                             {isOnline ? "Online" : "Offline"}
                         </span>
                         <span className="relative flex h-3 w-3">
                             <span
-                                className={`animate-ping absolute inline-flex h-full w-full rounded-full ${
-                                    isOnline ? "bg-green-400" : "bg-red-400"
-                                } opacity-75`}
+                                className={`animate-ping absolute inline-flex h-full w-full rounded-full ${isOnline ? "bg-green-400" : "bg-red-400"
+                                    } opacity-75`}
                             ></span>
                             <span
-                                className={`relative inline-flex rounded-full h-3 w-3 ${
-                                    isOnline ? "bg-green-500" : "bg-red-500"
-                                }`}
+                                className={`relative inline-flex rounded-full h-3 w-3 ${isOnline ? "bg-green-500" : "bg-red-500"
+                                    }`}
                             ></span>
                         </span>
                     </div>
                 </div>
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center space-x-6">
                     <label className="inline-flex items-center cursor-pointer">
-                        <span className="mr-4 text-sm font-medium text-gray-900 dark:text-black">
-                            Modo contingencia
+                        <span className="mr-3 text-sm font-medium text-gray-800">
+                            Modo Contingencia
                         </span>
                         <input
                             type="checkbox"
@@ -283,75 +318,57 @@ const Header = () => {
                             className="sr-only peer"
                         />
                         <div
-                            className={`relative w-12 h-7 rounded-full transition-all duration-300 ${contingencia ? "bg-green-500" : "bg-gray-400"
+                            className={`relative w-12 h-6 rounded-full transition-colors duration-300 ${contingencia ? "bg-green-500" : "bg-gray-400"
                                 }`}
                         >
                             <div
-                                className={`absolute top-1 w-5 h-5 rounded-full transition-all duration-300 ${contingencia
-                                        ? "transform translate-x-5 bg-white shadow-md"
-                                        : "transform translate-x-1 bg-white shadow-md"
+                                className={`absolute top-0.5 left-1 h-5 w-5 rounded-full bg-white shadow-md transition-transform duration-300 ${contingencia ? "transform translate-x-6" : "transform translate-x-0"
                                     }`}
                             ></div>
                         </div>
                     </label>
 
-                    <div className="relative" ref={settingsMenuRef}>
-                        <button
-                            onClick={handleSettingsMenuToggle}
-                            className="bg-gray-100 p-2 rounded-full hover:bg-gray-200"
-                        >
-                            <FaCog className="text-principalColor text-xl" />
-                        </button>
-
-                        {showSettingsMenu && (
-                            <div className="absolute right-0 mt-2 w-44 bg-white rounded-lg shadow z-50 divide-y divide-gray-100">
-                                <ul className="py-2 text-sm text-gray-700">
-                                    <li>
-                                        <a href="#" className="block px-4 py-2 hover:bg-gray-100">Editar perfil</a>
-                                    </li>
-                                    <li>
-                                        <a href="#" className="block px-4 py-2 hover:bg-gray-100">Cambio de contraseña</a>
-                                    </li>
-                                </ul>
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Botón de usuario con menú desplegable */}
                     <div className="relative" ref={userMenuRef}>
                         <button
                             onClick={handleUserMenuToggle}
-                            className="bg-gray-100 p-2 rounded-full hover:bg-gray-200"
+                            className="bg-gray-200 p-2 rounded-full hover:bg-gray-300 transition duration-200"
                         >
                             <FaUser className="text-principalColor text-xl" />
                         </button>
-
                         {showUserMenu && (
-                            <div className="absolute right-0 mt-2 w-44 bg-white rounded-lg shadow z-50 divide-y divide-gray-100">
+                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50 divide-y divide-gray-100">
                                 <div className="px-4 py-3 text-sm text-gray-900">
-                                    <div>Usuario</div>
-                                    <div className="font-medium truncate">email@example.com</div>
+                                    <div>Usuario:  </div>
+                                    <div className="font-bold truncate uppercase">{userName}</div>
                                 </div>
                                 <ul className="py-2 text-sm text-gray-700">
                                     <li>
-                                        <a href="#" className="block px-4 py-2 hover:bg-gray-100">Dashboard</a>
-                                    </li>
-                                    <li>
-                                        <a href="#" className="block px-4 py-2 hover:bg-gray-100">Settings</a>
-                                    </li>
-                                    <li>
-                                        <a href="#" className="block px-4 py-2 hover:bg-gray-100">Earnings</a>
+                                        <button onClick={() => setIsUserModalOpen(true)} className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition">
+                                            Configuración
+                                        </button>{isUserModalOpen && (
+                                    <ModalUserInfo isOpen={isUserModalOpen} onClose={() => setIsUserModalOpen(false)} />
+                                )}
                                     </li>
                                 </ul>
+                                
                                 <div className="py-2">
-                                    <a href="#" className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Sign out</a>
+                                    <button
+
+                                        className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
+                                        onClick={handleLogout}
+                                    >
+                                        Cerrar sesión
+                                    </button>
                                 </div>
                             </div>
                         )}
                     </div>
 
-                    <button onClick={limpiarLocal} className="flex items-center bg-gray-100 rounded-full p-1 text-principalColor">
-                        <IoExitOutline className="w-7 h-7 pl-1" />
+                    <button
+                        onClick={handleLogout}
+                        className="bg-gray-200 p-2 rounded-full hover:bg-gray-300 transition duration-200"
+                    >
+                        <IoExitOutline className="w-6 h-6 text-principalColor" />
                     </button>
                 </div>
             </div>
@@ -365,12 +382,13 @@ const Header = () => {
             )}
 
             {contingencia && countdown > 0 && (
-                <div className="absolute top-16 bg-black/30 right-4 z-30 text-gray-200 p-2 rounded-md">
+                <div className="absolute top-16 right-4 z-30 text-gray-200 p-2 rounded-md bg-black/50">
                     Tiempo restante: {formatTime(countdown)}
                 </div>
             )}
         </header>
     );
+
 };
 
 export default Header;

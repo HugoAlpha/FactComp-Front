@@ -10,6 +10,7 @@ import ModalContingencyPackage from "@/components/layouts/modalContingencyPackag
 import CashierSidebar from '@/components/commons/cashierSidebar';
 import ModalContingency from '@/components/layouts/modalContingency';
 import { TbCircleCheckFilled } from "react-icons/tb";
+import { IoQrCode } from "react-icons/io5";
 
 interface FormattedBill {
   id: string;
@@ -21,6 +22,7 @@ interface FormattedBill {
   codigoSucursal: number;
   codigoPuntoVenta: number;
   cuf: string;
+  formato: string;
 }
 
 const BillList = () => {
@@ -57,6 +59,7 @@ const BillList = () => {
 
         const formattedData = filteredData.map((bill) => ({
           documentNumber: bill.numeroDocumento,
+          numeroFactura: bill.numeroFactura,
           client: bill.nombreRazonSocial,
           date: new Date(bill.fechaEmision),
           total: bill.montoTotal.toFixed(2),
@@ -66,6 +69,7 @@ const BillList = () => {
           cuf: bill.cuf,
           puntoVenta: bill.puntoVenta,
           id: bill.id,
+          formato: bill.formato
         }));
 
 
@@ -151,6 +155,33 @@ const BillList = () => {
       });
     }
   };
+
+  const handleViewQR = async (cuf, numeroFactura) => {
+    try {
+      const response = await fetch(`${PATH_URL_BACKEND}/images/view?cuf=${cuf}&numeroFactura=${numeroFactura}`, {
+        method: 'GET',
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+
+        Swal.fire({
+          title: 'QR de factura',
+          imageUrl: url,
+          imageAlt: 'QR Code',
+          showCloseButton: true,
+          showConfirmButton: false,
+        });
+      } else {
+        Swal.fire('Error', 'No se pudo obtener el código QR.', 'error');
+      }
+    } catch (error) {
+      console.error('Error fetching QR:', error);
+      Swal.fire('Error', 'Ocurrió un error al intentar obtener el código QR.', 'error');
+    }
+  };
+
 
   useEffect(() => {
     fetchBills();
@@ -299,23 +330,17 @@ const BillList = () => {
   };
 
   const getStatus = (estado: string) => {
-    if (estado === 'ANULADO') {
-      return (
-        <span className="px-2 py-1 rounded-full bg-red-100 text-red-600">Anulado</span>
-      );
-    } else if (estado === 'VALIDA') {
-      return (
-        <span className="px-2 py-1 rounded-full bg-green-100 text-green-600">Válido</span>
-      );
-    } else if (estado === 'OFFLINE') {
-      return (
-        <span className="px-2 py-1 rounded-full bg-orange-100 text-orange-600">Offline</span>
-      );
-    }
-    else {
-      return (
-        <span className="px-2 py-1 rounded-full bg-gray-100 text-gray-600">Desconocida</span>
-      );
+    switch (estado) {
+      case 'ONLINE':
+        return <span className="px-2 py-1 rounded-full bg-green-100 text-green-600">Online</span>;
+      case 'OFFLINE':
+        return <span className="px-2 py-1 rounded-full bg-orange-100 text-orange-600">Offline</span>;
+      case 'ANULADO':
+        return <span className="px-2 py-1 rounded-full bg-red-100 text-red-600">Anulado</span>;
+      case 'RECHAZADO':
+        return <span className="px-2 py-1 rounded-full bg-gray-100 text-gray-600">Rechazado</span>;
+      default:
+        return <span className="px-2 py-1 rounded-full bg-gray-100 text-gray-600">Desconocido</span>;
     }
   };
   useEffect(() => {
@@ -454,7 +479,6 @@ const BillList = () => {
             clearInterval(timerInterval);
           }
         }).then(() => {
-          //localStorage.clear();
           window.location.reload();
         });
       }
@@ -538,8 +562,8 @@ const BillList = () => {
                       <th className="px-6 py-4 font-bold">Cliente</th>
                       <th className="px-6 py-4 font-bold">Fecha</th>
                       <th className="px-6 py-4 font-bold">Total</th>
+                      <th className="px-6 py-4 font-bold">Estado</th>
                       <th className="px-6 py-4 font-bold">Formato</th>
-                      <th className="px-6 py-4 font-bold">Comprobado</th>
                       <th className="px-6 py-4 font-bold">Operaciones</th>
                     </tr>
                   </thead>
@@ -554,7 +578,11 @@ const BillList = () => {
                         <td className="px-6 py-4">{bill.total}</td>
                         <td className="px-6 py-4">{getStatus(bill.estado)}</td>
                         <td className="px-6 py-4">
-                          <TbCircleCheckFilled className='text-5xl text-green-600' />
+                          {bill.formato === 'VALIDA' ? (
+                            <TbCircleCheckFilled className='text-5xl text-green-600' />
+                          ) : (
+                            <FaTimes className='text-5xl text-red-600' />
+                          )}
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex">
@@ -564,6 +592,14 @@ const BillList = () => {
                             >
                               <FaEye className="text-black" />
                             </button>
+
+                            <button
+                              className="bg-yellow-200 hover:bg-yellow-300 p-2 flex items-center justify-center border border-yellow-300"
+                              onClick={() => handleViewQR(bill.cuf, bill.numeroFactura)}
+                            >
+                              <IoQrCode className="text-black" />
+                            </button>
+
                             <button
                               className="bg-blue-200 hover:bg-blue-300 p-2 rounded-r-lg flex items-center justify-center border border-blue-300"
                               onClick={() => handleAnularFactura(bill)}
