@@ -5,6 +5,7 @@ import Sidebar from "@/components/commons/sidebar";
 import { FaEdit, FaSearch, FaTrashAlt } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { PATH_URL_BACKEND } from "@/utils/constants";
+import Footer from "@/components/commons/footer";
 
 interface Legend {
     id: number;
@@ -250,6 +251,7 @@ const Legends: React.FC = () => {
                         </div>
                     </div>
                 </div>
+                <Footer />
             </div>
         </div>
     );

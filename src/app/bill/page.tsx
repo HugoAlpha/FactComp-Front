@@ -11,6 +11,7 @@ import CashierSidebar from '@/components/commons/cashierSidebar';
 import ModalContingency from '@/components/layouts/modalContingency';
 import { TbCircleCheckFilled } from "react-icons/tb";
 import { IoQrCode } from "react-icons/io5";
+import Footer from '@/components/commons/footer';
 
 interface FormattedBill {
   id: string;
@@ -665,6 +666,7 @@ const BillList = () => {
         {isContingencyModalOpen && (
           <ModalContingency isOpen={isContingencyModalOpen} onClose={closeModal2} />
         )}
+        <Footer />
       </div>
     </div>
   );

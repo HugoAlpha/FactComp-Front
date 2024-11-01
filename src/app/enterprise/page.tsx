@@ -6,6 +6,7 @@ import Header from '@/components/commons/header';
 import CreateEditEnterpriseModal from '@/components/layouts/modalCreateEnterprise';
 import Swal from 'sweetalert2';
 import { PATH_URL_BACKEND } from '@/utils/constants';
+import Footer from '@/components/commons/footer';
 
 
 interface Enterprise {
@@ -378,6 +379,7 @@ const EnterpriseList = () => {
                         </div>
                     </div>
                 </div>
+                <Footer />
             </div>
         </div>
     );

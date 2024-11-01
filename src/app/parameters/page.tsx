@@ -1,4 +1,5 @@
 "use client"
+import Footer from "@/components/commons/footer"
 import Header from "@/components/commons/header"
 import Sidebar from "@/components/commons/sidebar"
 import { PATH_URL_BACKEND } from "@/utils/constants"
@@ -427,6 +428,7 @@ const Parameters = () => {
 
                     </div>
                 </div>
+                <Footer />
             </div>
         </div>
     )

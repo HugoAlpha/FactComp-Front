@@ -329,14 +329,11 @@ const CodeReceipt = () => {
                                 <thead>
                                     <tr className="bg-fourthColor text-left text-gray-700">
 
-                                        <th className="px-6 py-4 font-bold">Departamento</th>
-                                        <th className="px-6 py-4 font-bold">Municipio</th>
-                                        <th className="px-6 py-4 font-bold">Punto de venta</th>
-                                        <th className="px-6 py-4 font-bold">Sucursal</th>
-                                        <th className="px-6 py-4 font-bold">Codigo</th>
+                                        <th className="px-6 py-4 font-bold">Código</th>
                                         <th className="px-6 py-4 font-bold">Fecha de solicitud</th>
                                         <th className="px-6 py-4 font-bold">Fecha de vigencia</th>
                                         <th className="px-6 py-4 font-bold">Estado</th>
+                                    
                                     </tr>
                                 </thead>
                                 <tbody>
