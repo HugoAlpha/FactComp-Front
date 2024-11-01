@@ -314,12 +314,7 @@ const PuntoVenta: React.FC = () => {
                                                     >
                                                         <FaTrashAlt className="text-black" />
                                                     </button>
-                                                    <button
-                                                        className="bg-blue-200 hover:bg-blue-300 p-2 rounded-r-lg flex items-center justify-center border border-blue-300"
-                                                        onClick={() => console.log("Editar")}
-                                                    >
-                                                        <FaEdit className="text-black" />
-                                                    </button>
+                                                    
                                                 </div>
                                             </td>
                                         </tr>
