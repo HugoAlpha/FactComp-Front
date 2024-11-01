@@ -136,11 +136,33 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
+
+    const validateNIT = async () => {
+        if (formData.codigoTipoDocumentoIdentidad === 5) { 
+            try {
+                const response = await fetch(`${PATH_URL_BACKEND}/codigos/verificar-nit?nit=${formData.numeroDocumento}`);
+                const result = await response.json();
+                if (result.transaccion && result.mensajesList[0].codigo === 986) {
+                    return true; 
+                } else {
+                    Swal.fire('Error', 'Ponga un NIT válido', 'error');
+                    return false; 
+                }
+            } catch (error) {
+                Swal.fire('Error', 'No se pudo conectar para verificar el NIT', 'error');
+                return false;
+            }
+        }
+        return true; 
+    };
     
 
 
     const handleSubmit = async () => {
         if (validateForm()) {
+            const isNITValid = await validateNIT();
+            if (!isNITValid) return; 
+
             try {
                 let response;
                 if (customer.id) {
@@ -177,8 +199,7 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
                 Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
             }
         } else {
-            Swal.fire('Error', 'Por favor, complete los campos obligatorios correctamente.', 'error',
-            );
+            Swal.fire('Error', 'Por favor, complete los campos obligatorios correctamente.', 'error');
         }
     };
 
