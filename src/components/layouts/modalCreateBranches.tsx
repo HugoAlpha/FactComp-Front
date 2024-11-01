@@ -34,6 +34,23 @@ const ModalCreateBranch: React.FC<ModalCreateBranchProps> = ({ isOpen, onClose, 
         empresa: ''
     });
 
+    const alphanumericPattern = /^[a-zA-Z0-9 ]*$/;
+    const numericPattern = /^[0-9]*$/;
+
+    const validateForm = () => {
+        const newErrors = {
+            codigo: codigo.length > 10 ? 'Máximo 10 caracteres' : !codigo ? 'El código es obligatorio' : '',
+            nombre: nombre.length > 30 ? 'Máximo 30 caracteres' : !alphanumericPattern.test(nombre) ? 'No se permiten caracteres especiales' : !nombre ? 'El nombre es obligatorio' : '',
+            departamento: !departamento ? 'El departamento es obligatorio' : '',
+            municipio: municipio && (!alphanumericPattern.test(municipio) || municipio.length > 30) ? 'No se permiten caracteres especiales y máximo 30 caracteres' : '',
+            direccion: direccion && (!alphanumericPattern.test(direccion) || direccion.length > 30) ? 'No se permiten caracteres especiales y máximo 30 caracteres' : '',
+            telefono: telefono.length > 10 || !numericPattern.test(telefono) ? 'Máximo 10 dígitos y solo números' : '',
+            empresa: !empresaId ? 'Debe seleccionar una empresa' : ''
+        };
+        setErrors(newErrors);
+        return !Object.values(newErrors).some(error => error);
+    };
+
     useEffect(() => {
         const fetchEmpresas = async () => {
             try {
@@ -73,6 +90,7 @@ const ModalCreateBranch: React.FC<ModalCreateBranchProps> = ({ isOpen, onClose, 
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
+
         switch (name) {
             case 'codigo':
                 setCodigo(value);
@@ -101,12 +119,8 @@ const ModalCreateBranch: React.FC<ModalCreateBranchProps> = ({ isOpen, onClose, 
     };
 
     const handleSaveBranch = async () => {
-        if (!empresaId) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Debes seleccionar una empresa.',
-            });
+        if (!validateForm()) {
+            Swal.fire("Error", "Corrige los errores en el formulario", "error");
             return;
         }
 
@@ -174,10 +188,12 @@ const ModalCreateBranch: React.FC<ModalCreateBranchProps> = ({ isOpen, onClose, 
                             className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                             placeholder=" "
                             required
+                            maxLength={10}
                         />
                         <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
                             Código
                         </label>
+                        {errors.codigo && <span className="text-red-500 text-sm">{errors.codigo}</span>}
                     </div>
 
                     <div className="relative z-0 w-full mb-5 group">
@@ -189,10 +205,12 @@ const ModalCreateBranch: React.FC<ModalCreateBranchProps> = ({ isOpen, onClose, 
                             className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                             placeholder=" "
                             required
+                            maxLength={30}
                         />
                         <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
                             Nombre
                         </label>
+                        {errors.nombre && <span className="text-red-500 text-sm">{errors.nombre}</span>}
                     </div>
 
                     <div className="relative z-0 w-full mb-5 group">
@@ -217,6 +235,7 @@ const ModalCreateBranch: React.FC<ModalCreateBranchProps> = ({ isOpen, onClose, 
                         <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
                             Departamento
                         </label>
+                        {errors.departamento && <span className="text-red-500 text-sm">{errors.departamento}</span>}
                     </div>
 
                     <div className="relative z-0 w-full mb-5 group">
@@ -227,11 +246,12 @@ const ModalCreateBranch: React.FC<ModalCreateBranchProps> = ({ isOpen, onClose, 
                             onChange={handleChange}
                             className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                             placeholder=" "
-                            required
+                            maxLength={30}
                         />
                         <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
                             Municipio
                         </label>
+                        {errors.municipio && <span className="text-red-500 text-sm">{errors.municipio}</span>}
                     </div>
 
                     <div className="relative z-0 w-full mb-5 group">
@@ -242,11 +262,12 @@ const ModalCreateBranch: React.FC<ModalCreateBranchProps> = ({ isOpen, onClose, 
                             onChange={handleChange}
                             className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                             placeholder=" "
-                            required
+                            maxLength={30}
                         />
                         <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
                             Dirección
                         </label>
+                        {errors.direccion && <span className="text-red-500 text-sm">{errors.direccion}</span>}
                     </div>
 
                     <div className="relative z-0 w-full mb-5 group">
@@ -257,11 +278,12 @@ const ModalCreateBranch: React.FC<ModalCreateBranchProps> = ({ isOpen, onClose, 
                             onChange={handleChange}
                             className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                             placeholder=" "
-                            required
+                            maxLength={10}
                         />
                         <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
                             Teléfono
                         </label>
+                        {errors.telefono && <span className="text-red-500 text-sm">{errors.telefono}</span>}
                     </div>
 
                     <div className="relative z-0 w-full mb-5 group">
@@ -282,6 +304,7 @@ const ModalCreateBranch: React.FC<ModalCreateBranchProps> = ({ isOpen, onClose, 
                         <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
                             Empresa
                         </label>
+                        {errors.empresa && <span className="text-red-500 text-sm">{errors.empresa}</span>}
                     </div>
                 </form>
 
@@ -289,7 +312,7 @@ const ModalCreateBranch: React.FC<ModalCreateBranchProps> = ({ isOpen, onClose, 
                     <button onClick={onClose} className="px-6 py-2 bg-sixthColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400 mr-2">
                         Cancelar
                     </button>
-                    <button onClick={handleSaveBranch} className="px-6 py-2 bg-thirdColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400 ml-2">
+                    <button onClick={handleSaveBranch} className="px-6 py-2 bg-principalColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400 ml-2">
                         {branchToEdit ? 'Actualizar Sucursal' : 'Crear Sucursal'}
                     </button>
                 </div>

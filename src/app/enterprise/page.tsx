@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { FaEdit, FaTrashAlt } from 'react-icons/fa';
+import { FaEdit, FaPlus, FaTrashAlt } from 'react-icons/fa';
 import Sidebar from '@/components/commons/sidebar';
 import Header from '@/components/commons/header';
 import CreateEditEnterpriseModal from '@/components/layouts/modalCreateEnterprise';
@@ -279,9 +279,9 @@ const EnterpriseList = () => {
 
                             <button
                                 onClick={() => openModal()}
-                                className="bg-sixthColor text-white py-2 px-4 rounded-lg hover:bg-thirdColor text-lg"
+                                className="bg-principalColor text-white py-2 px-4 rounded-lg hover:bg-firstColor text-lg"
                             >
-                                Agregar Empresa
+                                Agregar Empresa <FaPlus className="inline-block ml-2" />
                             </button>
                         </div>
 

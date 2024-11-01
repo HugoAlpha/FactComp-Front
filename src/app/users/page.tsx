@@ -1,5 +1,5 @@
 "use client";
-import { FaTrashAlt, FaEdit, FaSearch } from 'react-icons/fa';
+import { FaTrashAlt, FaEdit, FaSearch, FaPlus } from 'react-icons/fa';
 import Sidebar from '@/components/commons/sidebar';
 import Header from '@/components/commons/header';
 import { useEffect, useState } from 'react';
@@ -18,67 +18,107 @@ const UserList = () => {
     const filteredUsers = users.filter(user =>
         `${user.nombre} ${user.apellidos}`.toLowerCase().includes(searchTerm.toLowerCase())
     );
-       
+
     const fetchUsers = async () => {
-            try {
-                const token = localStorage.getItem("tokenJWT");
+        try {
+            const token = localStorage.getItem("tokenJWT");
 
-                const userResponse = await fetch(`${PATH_URL_SECURITY}/api/usuarios`, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
-                    },
-                });
-                const usersData = await userResponse.json();
+            const userResponse = await fetch(`${PATH_URL_SECURITY}/api/usuarios`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+            const usersData = await userResponse.json();
 
-                const companyResponse = await fetch(`${PATH_URL_BACKEND}/empresa`, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`,
-                    },
-                });
-                const companiesData = await companyResponse.json();
+            const companyResponse = await fetch(`${PATH_URL_BACKEND}/empresa`, {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`,
+                },
+            });
+            const companiesData = await companyResponse.json();
 
-                setUsers(usersData);
-                setCompanies(companiesData);
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            }
-        };
+            setUsers(usersData);
+            setCompanies(companiesData);
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+    };
 
-        useEffect(() => {
-            fetchUsers();
-        }, []);
+    useEffect(() => {
+        fetchUsers();
+    }, []);
     const getCompanyName = (companyId: number) => {
         const company = companies.find(c => c.id === companyId);
         return company ? company.razonSocial : "Empresa no encontrada";
     };
 
-    
+    const handleDeleteUser = async (userId: number) => {
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: "Esta acción no se puede deshacer.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true,
+            customClass: {
+                confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md',
+                cancelButton: 'bg-blue-500 text-white px-4 py-2 rounded-md',
+            }
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                const token = localStorage.getItem("tokenJWT");
+
+                try {
+                    const response = await fetch(`${PATH_URL_SECURITY}/api/usuarios/delete/${userId}`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Authorization': `Bearer ${token}`,
+                        },
+                    });
+
+                    if (response.ok) {
+                        setUsers(prevUsers => prevUsers.filter(user => user.id_user !== userId));
+                        Swal.fire('Eliminado', 'El usuario ha sido eliminado correctamente.', 'success');
+                    } else {
+                        Swal.fire('Error', 'No se pudo eliminar el usuario.', 'error');
+                    }
+                } catch (error) {
+                    Swal.fire('Error', 'Ocurrió un problema al intentar eliminar el usuario.', 'error');
+                    console.error("Error deleting user:", error);
+                }
+            }
+        });
+    };
+
+
+
 
     const checkServerCommunication = async () => {
         try {
             const response = await fetch(`${PATH_URL_BACKEND}/contingencia/verificar-comunicacion`);
             if (!response.ok && response.status === 500) {
-                    Swal.fire({
-                        title: 'La comunicación con impuestos falló',
-                        text: '¿Desea entrar en modo de contingencia?',
-                        icon: 'error',
-                        showCancelButton: true,
-                        confirmButtonText: 'Aceptar',
-                        cancelButtonText: 'Cancelar',
-                        reverseButtons: true,
-                        customClass: {
-                            confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md',
-                            cancelButton: 'bg-blue-500 text-white px-4 py-2 rounded-md',
-                        }
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            console.log('Modo de contingencia aceptado.');
-                        } else {
-                            console.log('Modo de contingencia cancelado.');
-                        }
-                    });
+                Swal.fire({
+                    title: 'La comunicación con impuestos falló',
+                    text: '¿Desea entrar en modo de contingencia?',
+                    icon: 'error',
+                    showCancelButton: true,
+                    confirmButtonText: 'Aceptar',
+                    cancelButtonText: 'Cancelar',
+                    reverseButtons: true,
+                    customClass: {
+                        confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md',
+                        cancelButton: 'bg-blue-500 text-white px-4 py-2 rounded-md',
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        console.log('Modo de contingencia aceptado.');
+                    } else {
+                        console.log('Modo de contingencia cancelado.');
+                    }
+                });
 
             }
         } catch (error) {
@@ -113,7 +153,7 @@ const UserList = () => {
         setRowsPerPage(parseInt(e.target.value));
         setCurrentPage(1);
     };
-    
+
 
     const totalPages = Math.ceil(filteredUsers.length / rowsPerPage);
     const paginatedUsers = filteredUsers.slice(
@@ -122,14 +162,14 @@ const UserList = () => {
     );
 
     const openCreateUserModal = () => {
-        setCurrentUser(undefined); 
+        setCurrentUser(undefined);
         setIsModalOpen(true);
     };
 
     const handleSaveUser = () => {
-        fetchUsers(); 
+        fetchUsers();
         setIsModalOpen(false);
-        setCurrentUser(undefined); 
+        setCurrentUser(undefined);
     };
 
     const getPageNumbers = () => {
@@ -150,21 +190,22 @@ const UserList = () => {
         return pageNumbers;
     };
 
+    const handleFirstPage = () => {
+        setCurrentPage(1);
+    };
+
+    const handleLastPage = () => {
+        setCurrentPage(totalPages);
+    };
+
     return (
         <div className="flex min-h-screen">
-            {/* Sidebar */}
             <Sidebar />
-            {/* Contenido principal */}
             <div className="flex flex-col w-full min-h-screen">
-                {/* Header */}
                 <Header />
-
-                {/* Contenido principal */}
                 <div className="flex-grow overflow-auto bg-gray-50">
                     <div className="p-6">
                         <h1 className="text-2xl font-bold mb-6 text-gray-700">Gestión de Usuarios</h1>
-
-                        {/* Barra de búsqueda */}
                         <div className="flex justify-between mb-4">
 
                             <div>
@@ -194,12 +235,15 @@ const UserList = () => {
 
                                 <FaSearch className="absolute right-4 text-gray-500 text-xl pointer-events-none" />
                             </div>
-                            <button
-                                className="bg-sixthColor text-white h-10 px-4 rounded-lg hover:bg-fourthColor text-lg"
-                                onClick={openCreateUserModal}
-                            >
-                                Agregar Usuario
-                            </button>
+                            <div className='flex justify-center'>
+                                <button
+                                    className="bg-principalColor text-white h-10 px-4 rounded-lg hover:bg-firstColor text-lg flex items-center justify-center"
+                                    onClick={openCreateUserModal}
+                                >
+                                    Agregar Usuario <FaPlus className="inline-block ml-2 size-3" />
+                                </button>
+                            </div>
+
                             <ModalCreateUser
                                 isOpen={isModalOpen}
                                 onClose={() => setIsModalOpen(false)}
@@ -228,12 +272,11 @@ const UserList = () => {
                                             <td className="px-6 py-4">{getCompanyName(user.id_empresa)}</td>
                                             <td className="px-6 py-4">
                                                 <div className="flex">
-                                                    {/* Botón de Borrar */}
-                                                    <button className="bg-red-200 hover:bg-red-300 p-2 rounded-l-lg flex items-center justify-center border border-red-300">
+                                                    <button className="bg-red-200 hover:bg-red-300 p-2 rounded-l-lg flex items-center justify-center border border-red-300"
+                                                        onClick={() => handleDeleteUser(user.id_user)}>
                                                         <FaTrashAlt className="text-black" />
                                                     </button>
 
-                                                    {/* Botón de Editar */}
                                                     <button
                                                         className="bg-blue-200 hover:bg-blue-300 p-2 rounded-r-lg flex items-center justify-center border border-blue-300"
                                                         onClick={() => {
@@ -254,39 +297,51 @@ const UserList = () => {
                             </table>
                         </div>
 
-                        {/* Paginación */}
-                        <div className="flex space-x-1 justify-center mt-6">
-                            <button
-                                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                                disabled={currentPage === 1}
-                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
-                            >
-                                Ant.
-                            </button>
-
-                            {getPageNumbers().map((page) => (
+                        <div className="flex flex-col items-center mt-6">
+                            <div className="flex justify-center space-x-1 mb-2">
                                 <button
-                                    key={page}
-                                    onClick={() => setCurrentPage(page)}
-                                    className={`min-w-9 rounded-full border py-2 px-3.5 text-center text-sm transition-all shadow-sm ${page === currentPage ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-800 hover:text-white hover:border-slate-800'} focus:bg-slate-800 focus:text-white active:border-slate-800 active:bg-slate-800`}
+                                    onClick={handleFirstPage}
+                                    className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                                 >
-                                    {page}
+                                    Primero
                                 </button>
-                            ))}
 
-                            <button
-                                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                                disabled={currentPage === totalPages}
-                                className="min-w-9 rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
-                            >
-                                Sig.
-                            </button>
-                        </div>
+                                <button
+                                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                                    disabled={currentPage === 1}
+                                    className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                                >
+                                    Ant.
+                                </button>
 
-                        <div className="flex space-x-1 justify-center mt-2">
-                            <span className="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">
+                                {getPageNumbers().map((number) => (
+                                    <button
+                                        key={number}
+                                        onClick={() => setCurrentPage(number)}
+                                        className={`rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 ${currentPage === number ? 'bg-slate-800 text-white' : ''}`}
+                                    >
+                                        {number}
+                                    </button>
+                                ))}
+
+                                <button
+                                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                                    disabled={currentPage === totalPages}
+                                    className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                                >
+                                    Sig.
+                                </button>
+                                <button
+                                    onClick={handleLastPage}
+                                    className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                                >
+                                    Último
+                                </button>
+                            </div>
+
+                            <div className="text-sm font-normal text-gray-500 dark:text-gray-400 mr-2">
                                 Mostrando página <span className="font-semibold text-gray-900 dark:text-black">{currentPage}</span> de <span className="font-semibold text-gray-900 dark:text-black">{totalPages}</span>
-                            </span>
+                            </div>
                         </div>
                     </div>
                 </div>

@@ -1,6 +1,6 @@
-import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import React, { useState, useEffect } from 'react';
 import { FaFileInvoice, FaUser, FaSignOutAlt, FaChevronDown, FaBars, FaHome, FaUsers, FaBuilding } from 'react-icons/fa';
 import { MdOutlinePointOfSale, MdVerified } from "react-icons/md";
 import { HiDocumentCheck } from "react-icons/hi2";
@@ -15,7 +15,7 @@ const Sidebar = () => {
         const storedActiveLink = localStorage.getItem('activeLink');
         if (storedActiveLink) {
             setActiveLink(storedActiveLink);
-            const menuItem = menuItems.find(item => 
+            const menuItem = menuItems.find(item =>
                 item.subItems && item.subItems.some(subItem => subItem.href === storedActiveLink)
             );
             if (menuItem) {
@@ -23,7 +23,7 @@ const Sidebar = () => {
             }
         }
     }, []);
-    
+
 
     const toggleSidebar = () => {
         setIsOpen(!isOpen);
@@ -32,7 +32,7 @@ const Sidebar = () => {
     const handleLinkClick = (link) => {
         setActiveLink(link);
         localStorage.setItem('activeLink', link);
-        const menuItem = menuItems.find(item => 
+        const menuItem = menuItems.find(item =>
             item.subItems && item.subItems.some(subItem => subItem.href === link)
         );
         if (menuItem) {
@@ -41,17 +41,9 @@ const Sidebar = () => {
             setOpenMenu(null);
         }
     };
-    
+
 
     const menuItems = [
-        {
-            name: 'Documentos',
-            icon: <FaFileInvoice size={20} />,
-            subItems: [
-                { name: 'Factura', href: 'bill' },
-                //{ name: 'Nota DC', href: '#' }
-            ]
-        },
         {
             name: 'Gestión POS',
             icon: <FaUser size={20} />,
@@ -85,6 +77,13 @@ const Sidebar = () => {
             ]
         }
     ];
+
+    const facturaItem = {
+        name: 'Factura',
+        icon: <FaFileInvoice size={20} />,
+        href: 'bill'
+    };
+
 
     const handleMouseEnter = (menuName) => {
         setOpenMenu(menuName);
@@ -144,6 +143,18 @@ const Sidebar = () => {
                                     </span>
                                 </Link>
                             </li>
+                            <li>
+                                <Link href={facturaItem.href}
+                                    className={`block p-2 font-bold hover:bg-firstColor rounded-lg transition-colors duration-300 ${activeLink === 'bill' ? 'bg-white bg-opacity-20 text-ninthColor' : ''}`}
+                                    onClick={() => handleLinkClick('bill')}>
+                                    <span className="flex items-center">
+                                        <div className="w-6 h-6 flex justify-center items-center">
+                                            {facturaItem.icon}
+                                        </div>
+                                        {isOpen && <span className="ml-2">{facturaItem.name}</span>}
+                                    </span>
+                                </Link>
+                            </li>
 
                             {menuItems.map((item, index) => (
                                 <li
@@ -163,7 +174,7 @@ const Sidebar = () => {
                                         {isOpen && <FaChevronDown className={`transition-transform duration-300 ${openMenu === item.name ? 'rotate-180' : ''}`} />}
                                     </button>
                                     {isOpen && openMenu === item.name && (
-                                        <ul className="ml-4 mt-2 space-y-2 transition-all duration-500 ease-in-out transform opacity-100 max-h-screen" 
+                                        <ul className="ml-4 mt-2 space-y-2 transition-all duration-500 ease-in-out transform opacity-100 max-h-screen"
                                             style={{ maxHeight: openMenu === item.name ? '500px' : '0', overflow: 'hidden' }}
                                         >
                                             {item.subItems.map((subItem, subIndex) => (

@@ -21,7 +21,7 @@ interface Product {
 }
 
 interface UserRole {
-    role: 'ADMIN' | 'CAJERO';
+    role: 'ROLE_ADMIN' | 'ROLE_USER';
 }
 
 const ProductList = () => {

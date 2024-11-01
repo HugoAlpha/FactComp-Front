@@ -58,45 +58,45 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
 
     useEffect(() => {
         if (isOpen) {
-            const fetchProductOptions = async () => {
-                try {
-                    const response = await fetch(`${PATH_URL_BACKEND}/productos`);
-                    if (response.ok) {
-                        const data: ProductOption[] = await response.json();
-                        setProductOptions(data);
-                    } else {
-                        Swal.fire('Error', 'Error al obtener las opciones de productos', 'error');
-                    }
-                } catch (error) {
-                    Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
-                }
-            };
-
-            const fetchUnidadMedidaOptions = async () => {
-                try {
-                    const response = await fetch(`${PATH_URL_BACKEND}/parametro/unidad-medida`);
-                    if (response.ok) {
-                        const data: UnidadMedidaOption[] = await response.json();
-                        setUnidadMedidaOptions(data);
-                        if (product?.unidadMedida) {
-                            const unidadEncontrada = data.find(
-                                (u) => u.codigoClasificador === product.unidadMedida.toString()
-                            );
-                            setSelectedUnidadMedida(unidadEncontrada || null);
-                        }
-                    } else {
-                        Swal.fire('Error', 'Error al obtener las opciones de unidad de medida', 'error');
-                    }
-                } catch (error) {
-                    Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
-                }
-            };
-
             fetchProductOptions();
             fetchUnidadMedidaOptions();
+            if (product) {
+                setCodigo(product.codigo);
+                setNombreProducto(product.descripcion);
+                setUnidadMedida(product.unidadMedida ? product.unidadMedida.toString() : '');
+                setPrecioUnitario(product.precioUnitario ? product.precioUnitario.toString() : '');
+                setCodigoProductoSin(product.codigoProductoSin ? product.codigoProductoSin.toString() : '');
+            }
         }
     }, [isOpen, product]);
 
+    const fetchProductOptions = async () => {
+        try {
+            const response = await fetch(`${PATH_URL_BACKEND}/productos`);
+            if (response.ok) {
+                const data: ProductOption[] = await response.json();
+                setProductOptions(data);
+            } else {
+                Swal.fire('Error', 'Error al obtener las opciones de productos', 'error');
+            }
+        } catch {
+            Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
+        }
+    };
+
+    const fetchUnidadMedidaOptions = async () => {
+        try {
+            const response = await fetch(`${PATH_URL_BACKEND}/parametro/unidad-medida`);
+            if (response.ok) {
+                const data: UnidadMedidaOption[] = await response.json();
+                setUnidadMedidaOptions(data);
+            } else {
+                Swal.fire('Error', 'Error al obtener las opciones de unidad de medida', 'error');
+            }
+        } catch {
+            Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
+        }
+    };
 
 
 
@@ -128,7 +128,7 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
             }
         }
     }, [isOpen, product, productOptions]);
-    
+
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
@@ -139,6 +139,7 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
         } else if (name === 'codigo') {
             setCodigo(value);
         }
+        setErrors((prevErrors) => ({ ...prevErrors, [name]: '' }));
     };
 
     const uploadImage = async (itemId: number) => {
@@ -163,8 +164,44 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
         }
     };
 
+    const validateForm = () => {
+        const newErrors = { codigo: '', nombreProducto: '', unidadMedida: '', precioUnitario: '', codigoProductoSin: '' };
+        const alphanumericPattern = /^[a-zA-Z0-9]+$/;
+        const numericPattern = /^[0-9]+(\.[0-9]+)?$/;
 
+        if (!codigo) {
+            newErrors.codigo = 'Este campo es requerido.';
+        } else if (!alphanumericPattern.test(codigo)) {
+            newErrors.codigo = 'Solo se permiten caracteres alfanuméricos.';
+        }else if (codigo.length > 10) {
+            newErrors.codigo = 'Máximo 10 caracteres permitidos.';
+        }
 
+        if (!nombreProducto) {
+            newErrors.nombreProducto = 'Este campo es requerido.';
+        } else if (nombreProducto.length > 25) {
+            newErrors.nombreProducto = 'Máximo 25 caracteres permitidos.';
+        }
+
+        if (!precioUnitario) {
+            newErrors.precioUnitario = 'Este campo es requerido.';
+        } else if (!numericPattern.test(precioUnitario)) {
+            newErrors.precioUnitario = 'Debe ser un número válido.';
+        }else if (precioUnitario.length > 10) {
+            newErrors.precioUnitario = 'Máximo 10 caracteres permitidos.';
+        }
+
+        if (!selectedOption) {
+            newErrors.codigoProductoSin = 'La homologación es requerida.';
+        }
+
+        if (!selectedUnidadMedida) {
+            newErrors.unidadMedida = 'La unidad de medida es requerida.';
+        }
+
+        setErrors(newErrors);
+        return !Object.values(newErrors).some(error => error);
+    };
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(e.target.value);
@@ -209,19 +246,19 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
 
     const handleSubmitProduct = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!selectedOption || !selectedUnidadMedida || !nombreProducto || !precioUnitario) {
-            Swal.fire("Error", "Por favor corrige los errores en el formulario", "error");
+        if (!validateForm()) {
+            Swal.fire("Error", "Por favor, complete los campos obligatorios correctamente.", "error");
             return;
         }
-    
+
         const productData = {
             codigo,
             descripcion: nombreProducto,
-            unidadMedida: selectedUnidadMedida.codigoClasificador,
+            unidadMedida: selectedUnidadMedida?.codigoClasificador,
             precioUnitario: Number(precioUnitario),
             codigoProductoSin: Number(selectedOption?.codigoProducto),
         };
-    
+
         try {
             let response;
             if (product && product.id) {
@@ -241,11 +278,11 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                     body: JSON.stringify(productData),
                 });
             }
-    
+
             if (response.ok) {
                 const savedProduct = await response.json();
                 onProductCreated(savedProduct);
-    
+
                 Swal.fire({
                     icon: "success",
                     title: product ? "Producto actualizado correctamente" : "Producto creado correctamente",
@@ -254,7 +291,7 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                 }).then(async () => {
                     if (selectedImage) {
                         await uploadImage(savedProduct.id);
-    
+
                         let timerInterval: NodeJS.Timeout;
                         Swal.fire({
                             title: 'Subiendo imagen...',
@@ -293,7 +330,7 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
             Swal.fire("Error", "No se pudo conectar con el servidor", "error");
         }
     };
-    
+
     if (!isOpen) return null;
 
     return (
@@ -308,14 +345,15 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                             type="text"
                             name="codigo"
                             value={codigo}
-                            onChange={handleChange}
+                            onChange={(e) => setCodigo(e.target.value)}
                             className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                             placeholder=" "
                             required
                         />
-                        <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                        <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-2 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
                             Código del Producto
                         </label>
+                        {errors.codigo && <span className="text-red-500 text-sm">{errors.codigo}</span>}
                     </div>
 
                     <div className="relative z-50 w-full mb-5 group">
@@ -350,9 +388,11 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                                 </ul>
                             </div>
                         )}
-                        <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                        
+                        <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-2 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
                             Homologación
                         </label>
+                        {errors.codigoProductoSin && <span className="text-red-500 text-sm">{errors.codigoProductoSin}</span>}
                     </div>
 
                     <div className="relative z-50 w-full mb-5 group">
@@ -387,9 +427,10 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                                 </ul>
                             </div>
                         )}
-                        <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                        <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-2 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
                             Unidad de medida
                         </label>
+                        {errors.unidadMedida && <span className="text-red-500 text-sm">{errors.unidadMedida}</span>}
                     </div>
 
                     <div className="relative z-0 w-full mb-5 group">
@@ -397,14 +438,15 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                             type="text"
                             name="nombreProducto"
                             value={nombreProducto}
-                            onChange={handleChange}
+                            onChange={(e) => setNombreProducto(e.target.value)}
                             className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                             placeholder=" "
                             required
                         />
-                        <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
-                            Nombre/Descripción del Producto
+                        <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-2 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                            Descripción del Producto
                         </label>
+                        {errors.nombreProducto && <span className="text-red-500 text-sm">{errors.nombreProducto}</span>}
                     </div>
 
                     <div className="relative z-0 w-full mb-5 group">
@@ -412,35 +454,35 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                             type="text"
                             name="precioUnitario"
                             value={precioUnitario}
-                            onChange={handleChange}
+                            onChange={(e) => setPrecioUnitario(e.target.value)}
                             className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                             placeholder=" "
                             required
                         />
-                        <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                        <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-2 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
                             Precio Unitario en Bs.
                         </label>
+                        {errors.precioUnitario && <span className="text-red-500 text-sm">{errors.precioUnitario}</span>}
 
-                        
                     </div>
-                    
+
                 </form>
                 <div className="relative z-0 w-full my-5 group">
-                            <input
-                                type="file"
-                                onChange={(e) => setSelectedImage(e.target.files?.[0] || null)}
-                                className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                            />
-                            <label className=" text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
-                                Selecciona una Imagen (Opcional)
-                            </label>
-                        </div>
+                    <input
+                        type="file"
+                        onChange={(e) => setSelectedImage(e.target.files?.[0] || null)}
+                        className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                    />
+                    <label className=" text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
+                        Selecciona una Imagen (Opcional)
+                    </label>
+                </div>
 
                 <div className="flex justify-end mt-6">
                     <button onClick={onClose} className="px-6 py-2 bg-sixthColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400 mr-2">
                         Cancelar
                     </button>
-                    <button onClick={handleSubmitProduct} className="px-6 py-2 bg-thirdColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400 ml-2">
+                    <button onClick={handleSubmitProduct} className="px-6 py-2 bg-principalColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400 ml-2">
                         {product ? 'Actualizar Producto' : 'Crear Producto'}
                     </button>
                 </div>

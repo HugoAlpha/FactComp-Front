@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from "@/components/commons/header";
 import Sidebar from "@/components/commons/sidebar";
-import { FaEdit, FaSearch, FaTrashAlt } from 'react-icons/fa';
+import { FaEdit, FaPlus, FaSearch, FaTrashAlt } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import ModalCreateBranch from '@/components/layouts/modalCreateBranches';
 import { PATH_URL_BACKEND } from '@/utils/constants';
@@ -89,7 +89,7 @@ const Branches: React.FC = () => {
                         }
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            setIsContingencyModalOpen(true); // Abre el modal si se confirma
+                            setIsContingencyModalOpen(true);
                         } else {
                             console.log('Modo de contingencia cancelado.');
                         }
@@ -259,14 +259,7 @@ const Branches: React.FC = () => {
                 <div className="flex-grow overflow-auto bg-gray-50">
                     <div className="p-6">
                         <h2 className="text-xl font-semibold text-black">Lista de Sucursales</h2>
-                        <div className="flex justify-end mb-4">
-                            <button
-                                onClick={() => handleOpenModal()}
-                                className="bg-sixthColor text-white font-bold py-2 px-4 rounded-lg hover:bg-thirdColor transition duration-200"
-                            >
-                                Agregar Sucursal
-                            </button>
-                        </div>
+                        
                         <div className="mb-4">
 
                         </div>
@@ -285,10 +278,9 @@ const Branches: React.FC = () => {
                                 </select>
                             </div>
 
-                            {/* Contenedor para "Filtrar por Ciudad" y campo de búsqueda */}
                             <div className="flex items-center mb-4">
                                 <div className="flex items-center mr-3">
-                                <label className="text-black mr-4 whitespace-nowrap">Filtrar por Ciudad:</label> {/* Cambié px-10 por mr-2 */}
+                                <label className="text-black mr-4 whitespace-nowrap">Filtrar por Ciudad:</label> 
                                     <select
                                         value={selectedCity}
                                         onChange={(e) => setSelectedCity(e.target.value)}
@@ -314,7 +306,14 @@ const Branches: React.FC = () => {
                                     <FaSearch className="absolute right-3 text-gray-500 text-xl pointer-events-none" /> 
                                 </div>
                             </div>
-
+                            <div className="flex justify-end mb-4">
+                            <button
+                                onClick={() => handleOpenModal()}
+                                className="bg-principalColor text-white font-bold py-2 px-4 rounded-lg hover:bg-firstColor transition duration-200"
+                            >
+                                Agregar Sucursal <FaPlus className="inline-block ml-2" />
+                            </button>
+                        </div>
                         </div>
 
 
@@ -432,4 +431,3 @@ const Branches: React.FC = () => {
 };
 
 export default Branches;
-

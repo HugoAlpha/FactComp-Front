@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import Header from "@/components/commons/header";
 import Sidebar from "@/components/commons/sidebar";
-import { FaEdit, FaSearch, FaTrashAlt } from 'react-icons/fa';
+import { FaEdit, FaPlus, FaSearch, FaTrashAlt } from 'react-icons/fa';
 import ModalCreatePos from '@/components/layouts/modalCreatePos';
 import Swal from 'sweetalert2';
 import { PATH_URL_BACKEND } from '@/utils/constants';
@@ -89,6 +89,9 @@ const PuntoVenta: React.FC = () => {
         };
         fetchTiposPuntoVenta();
     }, []);
+    useEffect(() => {
+        fetchPuntoVentas();
+    }, []);
 
     useEffect(() => {
         const fetchPuntoVentas = async () => {
@@ -120,6 +123,7 @@ const PuntoVenta: React.FC = () => {
             });
 
             if (response.ok) {
+                await fetchPuntoVentas();
                 const createdPos = await response.json();
                 setCustomers([...customers, createdPos]);
                 Swal.fire('Punto de Venta creado', 'El nuevo punto de venta ha sido registrado con éxito', 'success');
@@ -137,21 +141,44 @@ const PuntoVenta: React.FC = () => {
 
     useEffect(() => {
         let filtered = customers;
-
+    
         if (searchTerm) {
+            const lowerCaseSearchTerm = searchTerm.toLowerCase();
             filtered = filtered.filter((customer) =>
-                customer.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                customer.sucursal.nombre.toLowerCase().includes(searchTerm.toLowerCase())
+                (customer.codigoPuntoVenta && String(customer.codigoPuntoVenta).toLowerCase().includes(lowerCaseSearchTerm)) ||
+                (customer.nombrePuntoVenta && String(customer.nombrePuntoVenta).toLowerCase().includes(lowerCaseSearchTerm)) ||
+                (customer.tipoPuntoVenta && String(customer.tipoPuntoVenta).toLowerCase().includes(lowerCaseSearchTerm))
             );
         }
-
+    
         if (selectedSucursal) {
-            filtered = filtered.filter((customer) => customer.sucursal.nombre === selectedSucursal);
+            filtered = filtered.filter((customer) => customer.sucursal?.nombre === selectedSucursal);
         }
-
+    
         setFilteredCustomers(filtered);
         setCurrentPage(1);
     }, [searchTerm, selectedSucursal, customers]);
+    
+    
+    
+    
+    
+
+    const fetchPuntoVentas = async () => {
+        try {
+            const CodigoSucursal = localStorage.getItem('CodigoSucursal');
+            const response = await fetch(`${PATH_URL_BACKEND}/operaciones/punto-venta/lista-siat/${CodigoSucursal}`);
+            if (response.ok) {
+                const data = await response.json();
+                setCustomers(data.listaPuntosVentas || []);
+                setFilteredCustomers(data.listaPuntosVentas || []);
+            } else {
+                throw new Error("Error al obtener la lista de puntos de venta");
+            }
+        } catch (error) {
+            console.error("Error al obtener la lista de puntos de venta:", error);
+        }
+    };
 
     const totalPages = Math.ceil((filteredCustomers?.length || 0) / rowsPerPage);
     const paginatedCustomers = Array.isArray(filteredCustomers)
@@ -219,13 +246,8 @@ const PuntoVenta: React.FC = () => {
                     <div className="p-6">
                         <h2 className="text-xl font-semibold mb-4 text-black">Lista de Puntos de Venta</h2>
 
-                        {/* Filtro por Sucursal */}
                         <div className="flex justify-end mb-2">
-                            <button className="bg-sixthColor text-white py-2 px-4 rounded-lg hover:bg-thirdColor text-lg"
-                                onClick={handleOpenModal}>
-                                Agregar Punto de Venta
-                            </button>
-
+                            
                             <ModalCreatePos
                                 isOpen={isModalOpen}
                                 onClose={handleCloseModal}
@@ -256,12 +278,18 @@ const PuntoVenta: React.FC = () => {
                                         type="text"
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
-                                        placeholder="Buscar por descripción, nombre o CUIS..."
+                                        placeholder="Buscar por Codigo, Nombre o Tipo..."
                                         className="px-4 border border-gray-300 focus:border-firstColor focus:ring-firstColor focus:outline-none h-10 rounded-lg w-full shadow-sm text-sm placeholder-gray-400 ml-3"
                                         style={{ width: "400px" }}
                                     />
                                     <FaSearch className="absolute right-3 text-gray-500 text-xl" />
                                 </div>
+                            </div>
+                            <div className='flex'>
+                            <button className="bg-principalColor text-white py-2 px-4 rounded-lg hover:bg-firstColor text-lg"
+                                onClick={handleOpenModal}>
+                                Agregar Punto de Venta <FaPlus className="inline-block ml-2" />
+                            </button>
                             </div>
                         </div>
 
@@ -290,7 +318,6 @@ const PuntoVenta: React.FC = () => {
                                                     >
                                                         <FaTrashAlt className="text-black" />
                                                     </button>
-                                                    {/* Botón de Editar */}
                                                     <button
                                                         className="bg-blue-200 hover:bg-blue-300 p-2 rounded-r-lg flex items-center justify-center border border-blue-300"
                                                         onClick={() => console.log("Editar")}
@@ -305,7 +332,6 @@ const PuntoVenta: React.FC = () => {
                             </table>
                         </div>
 
-                        {/* Paginación */}
                         <div className="flex flex-col items-center mt-6">
                             <div className="flex justify-center space-x-1 mb-2">
                                 <button

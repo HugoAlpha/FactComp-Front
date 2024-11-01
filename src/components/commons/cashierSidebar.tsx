@@ -30,14 +30,7 @@ const CashierSidebar = () => {
     };
 
     const menuItems = [
-        {
-            name: 'Documentos',
-            icon: <FaFileInvoice size={20} />,
-            subItems: [
-                { name: 'Factura', href: 'bill' },
-                //{ name: 'Nota DC', href: '#' }
-            ]
-        },
+
         {
             name: 'Gestión POS',
             icon: <FaUser size={20} />,
@@ -57,6 +50,11 @@ const CashierSidebar = () => {
         },
 
     ];
+    const facturaItem = {
+        name: 'Factura',
+        icon: <FaFileInvoice size={20} />,
+        href: 'bill'
+    };
 
     return (
         <div className="flex min-h-screen">
@@ -97,14 +95,26 @@ const CashierSidebar = () => {
                                 </Link>
                             </li>
                             <li>
-                                <Link href="sales"
+                                <Link href="salesCashier"
                                     className={`block p-2 font-bold hover:bg-firstColor rounded-lg ${activeLink === '/salesCashier' ? 'bg-white bg-opacity-20 text-ninthColor' : ''}`}
-                                    onClick={() => handleLinkClick('/salesCashier')}>
+                                    onClick={() => handleLinkClick('/sales')}>
                                     <span className="flex items-center">
                                         <div className="w-6 h-6 flex justify-center items-center">
                                             <MdOutlinePointOfSale size={20} />
                                         </div>
                                         {isOpen && <span className="ml-2">Nueva Venta</span>}
+                                    </span>
+                                </Link>
+                            </li>
+                            <li>
+                                <Link href={facturaItem.href}
+                                    className={`block p-2 font-bold hover:bg-firstColor rounded-lg transition-colors duration-300 ${activeLink === 'bill' ? 'bg-white bg-opacity-20 text-ninthColor' : ''}`}
+                                    onClick={() => handleLinkClick('bill')}>
+                                    <span className="flex items-center">
+                                        <div className="w-6 h-6 flex justify-center items-center">
+                                            {facturaItem.icon}
+                                        </div>
+                                        {isOpen && <span className="ml-2">{facturaItem.name}</span>}
                                     </span>
                                 </Link>
                             </li>
