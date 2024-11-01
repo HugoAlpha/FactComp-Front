@@ -228,7 +228,7 @@ const Header = () => {
     const handleUserMenuToggle = () => {
         setShowUserMenu((prev) => !prev);
         if (showSettingsMenu) setShowSettingsMenu(false);
-        setIsUserModalOpen(!isUserModalOpen);
+        
     };
     const handleUserMenuToggle2 = () => {
         setIsUserModalOpen(!isUserModalOpen);
