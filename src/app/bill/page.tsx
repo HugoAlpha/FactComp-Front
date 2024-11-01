@@ -50,9 +50,10 @@ const BillList = () => {
         const data = await response.json();
         const idPOS = parseInt(localStorage.getItem('idPOS') || '0');
         const codigoPOS = parseInt(localStorage.getItem('CodigoPOS') || '0');
-        const filteredData = data.filter(bill =>
-          bill.codigoPuntoVenta === codigoPOS && bill.puntoVenta.id === idPOS
+        const filteredData = data.filter((bill) =>
+          bill.codigoPuntoVenta === codigoPOS && bill.puntoVenta && bill.puntoVenta.id === idPOS
         );
+
 
         const formattedData = filteredData.map((bill) => ({
           documentNumber: bill.numeroDocumento,
@@ -66,6 +67,7 @@ const BillList = () => {
           puntoVenta: bill.puntoVenta,
           id: bill.id,
         }));
+
 
         const sortedData = formattedData.sort((a, b) => b.date - a.date);
         setBills(sortedData);
@@ -269,8 +271,12 @@ const BillList = () => {
 
   const paginatedBills = useMemo(() => {
     const startIndex = (currentPage - 1) * rowsPerPage;
-    return filteredBills.slice(startIndex, startIndex + rowsPerPage);
+    const paginated = filteredBills.slice(startIndex, startIndex + rowsPerPage);
+
+    console.log("Paginated Bills:", paginated);
+    return paginated;
   }, [filteredBills, currentPage, rowsPerPage]);
+
 
   const handlePrevPage = () => {
     if (currentPage > 1) setCurrentPage((prev) => prev - 1);
@@ -548,8 +554,7 @@ const BillList = () => {
                         <td className="px-6 py-4">{bill.total}</td>
                         <td className="px-6 py-4">{getStatus(bill.estado)}</td>
                         <td className="px-6 py-4">
-                          <TbCircleCheckFilled
-                            className='text-5xl text-green-600' />
+                          <TbCircleCheckFilled className='text-5xl text-green-600' />
                         </td>
                         <td className="px-6 py-4">
                           <div className="flex">
@@ -570,6 +575,7 @@ const BillList = () => {
                       </tr>
                     ))}
                   </tbody>
+
                 </table>
               </div>
 
