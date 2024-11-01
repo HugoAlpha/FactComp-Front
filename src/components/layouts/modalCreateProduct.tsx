@@ -179,8 +179,8 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
 
         if (!nombreProducto) {
             newErrors.nombreProducto = 'Este campo es requerido.';
-        } else if (nombreProducto.length > 25) {
-            newErrors.nombreProducto = 'Máximo 25 caracteres permitidos.';
+        } else if (nombreProducto.length > 40) {
+            newErrors.nombreProducto = 'Máximo 40 caracteres permitidos.';
         }
 
         if (!precioUnitario) {
