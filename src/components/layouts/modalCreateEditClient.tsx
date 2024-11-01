@@ -124,6 +124,7 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
         }
     
         if (formData.codigoCliente) {
+            newErrors.numeroDocumento = 'Este campo es requerido.';
             if (!alphanumericPattern.test(formData.codigoCliente)) {
                 newErrors.codigoCliente = 'No se permiten caracteres especiales.';
             } else if (formData.codigoCliente.length > 15) {
