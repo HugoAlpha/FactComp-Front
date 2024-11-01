@@ -454,7 +454,7 @@ const BillList = () => {
             clearInterval(timerInterval);
           }
         }).then(() => {
-          localStorage.clear();
+          //localStorage.clear();
           window.location.reload();
         });
       }
