@@ -14,16 +14,19 @@ const ModalCreatePos: React.FC<ModalCreatePosProps> = ({ isOpen, onClose, onPosC
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         const tipoSeleccionado = tiposPuntoVenta.find(t => t.codigoClasificador === selectedTipoPuntoVenta);
-        
-        if (!tipoSeleccionado) {
-            alert('Por favor, selecciona un tipo de punto de venta.');
+        const codigoSucursal = localStorage.getItem('CodigoSucursal');
+
+        if (!tipoSeleccionado || !codigoSucursal) {
+            alert('Por favor, selecciona un tipo de punto de venta y asegúrate de que el código de sucursal esté definido.');
             return;
         }
 
         const newPos = {
             nombre,
-            codigoTipoPuntoVenta: tipoSeleccionado.codigoClasificador,
-            descripcion: tipoSeleccionado.descripcion
+            codigoTipoPuntoVenta: parseInt(tipoSeleccionado.codigoClasificador),
+            descripcion: tipoSeleccionado.descripcion,
+            codigoSucursal: parseInt(codigoSucursal),
+            idEmpresa: 1,
         };
 
         onPosCreated(newPos);

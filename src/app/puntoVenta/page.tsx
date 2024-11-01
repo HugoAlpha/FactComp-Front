@@ -10,15 +10,9 @@ import { PATH_URL_BACKEND } from '@/utils/constants';
 
 interface PuntoVenta {
     id: number;
-    nombre: string;
-    sucursal: {
-        nombre: string;
-        departamento: string;
-        direccion: string;
-        empresa: {
-            razonSocial: string;
-        };
-    };
+    nombrePuntoVenta: string;
+    tipoPuntoVenta: string;
+    codigoPuntoVenta: string;
 }
 
 const PuntoVenta: React.FC = () => {
@@ -29,8 +23,8 @@ const PuntoVenta: React.FC = () => {
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [selectedSucursal, setSelectedSucursal] = useState<string>('');
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [tiposPuntoVenta, setTiposPuntoVenta] = useState<TipoPuntoVenta[]>([]);
     const [puntoVentaDetail, setPuntoVentaDetail] = useState<PuntoVentaDetail | null>(null);
+    const [tiposPuntoVenta, setTiposPuntoVenta] = useState<{ id: number; codigoClasificador: string; descripcion: string; }[]>([]);
 
     const checkServerCommunication = async () => {
         try {
@@ -99,11 +93,12 @@ const PuntoVenta: React.FC = () => {
     useEffect(() => {
         const fetchPuntoVentas = async () => {
             try {
-                const response = await fetch(`${PATH_URL_BACKEND}/operaciones/punto-venta/lista-bd`);
+                const CodigoSucursal = localStorage.getItem('CodigoSucursal');
+                const response = await fetch(`${PATH_URL_BACKEND}/operaciones/punto-venta/lista-siat/${CodigoSucursal}`);
                 if (response.ok) {
                     const data = await response.json();
-                    setCustomers(data);
-                    setFilteredCustomers(data);
+                    setCustomers(data.listaPuntosVentas || []);
+                    setFilteredCustomers(data.listaPuntosVentas || []);
                 } else {
                     throw new Error("Error al obtener la lista de puntos de venta");
                 }
@@ -114,6 +109,7 @@ const PuntoVenta: React.FC = () => {
 
         fetchPuntoVentas();
     }, []);
+
 
     const handleCreatePos = async (newPos) => {
         try {
@@ -157,11 +153,10 @@ const PuntoVenta: React.FC = () => {
         setCurrentPage(1);
     }, [searchTerm, selectedSucursal, customers]);
 
-    const totalPages = Math.ceil(filteredCustomers.length / rowsPerPage);
-    const paginatedCustomers = filteredCustomers.slice(
-        (currentPage - 1) * rowsPerPage,
-        currentPage * rowsPerPage
-    );
+    const totalPages = Math.ceil((filteredCustomers?.length || 0) / rowsPerPage);
+    const paginatedCustomers = Array.isArray(filteredCustomers)
+        ? filteredCustomers.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage)
+        : [];
 
     const handleEditPuntoVenta = (id: number) => {
         console.log(`Editar punto de venta con id: ${id}`);
@@ -227,15 +222,15 @@ const PuntoVenta: React.FC = () => {
                         {/* Filtro por Sucursal */}
                         <div className="flex justify-end mb-2">
                             <button className="bg-sixthColor text-white py-2 px-4 rounded-lg hover:bg-thirdColor text-lg"
-                                onClick={() => setIsModalOpen(true)}>
+                                onClick={handleOpenModal}>
                                 Agregar Punto de Venta
                             </button>
 
                             <ModalCreatePos
                                 isOpen={isModalOpen}
-                                onClose={() => setIsModalOpen(false)}
-                                onPosCreated={() => { }}
-                                tiposPuntoVenta={[]}
+                                onClose={handleCloseModal}
+                                onPosCreated={handleCreatePos}
+                                tiposPuntoVenta={tiposPuntoVenta}
                             />
 
                         </div>
@@ -254,19 +249,7 @@ const PuntoVenta: React.FC = () => {
                                 </select>
                             </div>
                             <div className="flex justify-end">
-                                <div className="flex items-center">
-                                    <label className="text-black my-0 mr-2">Filtrar por Sucursal:</label>
-                                    <select
-                                        value={selectedSucursal}
-                                        onChange={(e) => setSelectedSucursal(e.target.value)}
-                                        className="border px-4 h-10 rounded-lg"
-                                    >
-                                        <option value="">Todas</option>
-                                        {[...new Set(customers.map(c => c.sucursal.nombre))].map(sucursal => (
-                                            <option key={sucursal} value={sucursal}>{sucursal}</option>
-                                        ))}
-                                    </select>
-                                </div>
+
 
                                 <div className="relative flex items-center">
                                     <input
@@ -287,22 +270,18 @@ const PuntoVenta: React.FC = () => {
                             <table className="table-auto w-full bg-white">
                                 <thead>
                                     <tr className="bg-fourthColor text-left text-gray-700">
-                                        <th className="px-6 py-4 font-bold">Nombre del Punto de Venta</th>
-                                        <th className="px-6 py-4 font-bold">Sucursal</th>
-                                        <th className="px-6 py-4 font-bold">Departamento</th>
-                                        <th className="px-6 py-4 font-bold">Dirección</th>
-                                        <th className="px-6 py-4 font-bold">Empresa</th>
+                                        <th className="px-6 py-4 font-bold">Código</th>
+                                        <th className="px-6 py-4 font-bold">Nombre del punto de venta</th>
+                                        <th className="px-6 py-4 font-bold">Tipo de punto de venta</th>
                                         <th className="px-6 py-4 font-bold">Operaciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {paginatedCustomers.map((customer) => (
                                         <tr key={customer.id} className="border-b hover:bg-gray-50 text-black">
-                                            <td className="px-6 py-4">{customer.nombre}</td>
-                                            <td className="px-6 py-4">{customer.sucursal.nombre}</td>
-                                            <td className="px-6 py-4">{customer.sucursal.departamento}</td>
-                                            <td className="px-6 py-4">{customer.sucursal.direccion}</td>
-                                            <td className="px-6 py-4">{customer.sucursal.empresa.razonSocial}</td>
+                                            <td className="px-6 py-4">{customer.codigoPuntoVenta}</td>
+                                            <td className="px-6 py-4">{customer.nombrePuntoVenta}</td>
+                                            <td className="px-6 py-4">{customer.tipoPuntoVenta}</td>
                                             <td className="px-6 py-4">
                                                 <div className="flex">
                                                     <button
