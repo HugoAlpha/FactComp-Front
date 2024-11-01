@@ -159,9 +159,15 @@ const Header = () => {
             }
         }).then((result) => {
             if (result.isConfirmed) {
-                localStorage.clear();
+                Swal.fire({
+                    position: "center",
+                    icon: 'success',
+                    text: 'Hasta Pronto!!',
+                    showConfirmButton: false,
+                    timer: 3000,
+                  });
+                  localStorage.clear();
                 window.location.href = "/";
-                Swal.fire('Hasta pronto! ', 'success');
 
             }
         });
