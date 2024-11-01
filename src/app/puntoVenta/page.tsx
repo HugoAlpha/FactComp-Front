@@ -77,7 +77,23 @@ const PuntoVenta: React.FC = () => {
             });
         }
     };
+    const fetchPuntoVentas = async () => {
+        try {
+            const CodigoSucursal = localStorage.getItem('CodigoSucursal');
+            const response = await fetch(`${PATH_URL_BACKEND}/operaciones/punto-venta/lista-siat/${CodigoSucursal}`);
+            if (response.ok) {
+                const data = await response.json();
+                setCustomers(data.listaPuntosVentas || []);
+                setFilteredCustomers(data.listaPuntosVentas || []);
+            } else {
+                throw new Error("Error al obtener la lista de puntos de venta");
+            }
+        } catch (error) {
+            console.error("Error al obtener la lista de puntos de venta:", error);
+        }
+    };
     useEffect(() => {
+        fetchPuntoVentas();
         const fetchTiposPuntoVenta = async () => {
             try {
                 const response = await fetch(`${PATH_URL_BACKEND}/parametro/tipo-punto-venta`);
@@ -89,30 +105,6 @@ const PuntoVenta: React.FC = () => {
         };
         fetchTiposPuntoVenta();
     }, []);
-    useEffect(() => {
-        fetchPuntoVentas();
-    }, []);
-
-    useEffect(() => {
-        const fetchPuntoVentas = async () => {
-            try {
-                const CodigoSucursal = localStorage.getItem('CodigoSucursal');
-                const response = await fetch(`${PATH_URL_BACKEND}/operaciones/punto-venta/lista-siat/${CodigoSucursal}`);
-                if (response.ok) {
-                    const data = await response.json();
-                    setCustomers(data.listaPuntosVentas || []);
-                    setFilteredCustomers(data.listaPuntosVentas || []);
-                } else {
-                    throw new Error("Error al obtener la lista de puntos de venta");
-                }
-            } catch (error) {
-                console.error("Error al obtener la lista de puntos de venta:", error);
-            }
-        };
-
-        fetchPuntoVentas();
-    }, []);
-
 
     const handleCreatePos = async (newPos) => {
         try {
@@ -127,6 +119,7 @@ const PuntoVenta: React.FC = () => {
                 const createdPos = await response.json();
                 setCustomers([...customers, createdPos]);
                 Swal.fire('Punto de Venta creado', 'El nuevo punto de venta ha sido registrado con éxito', 'success');
+                await fetchPuntoVentas();
             } else {
                 throw new Error('Error al registrar el punto de venta');
             }
@@ -158,27 +151,6 @@ const PuntoVenta: React.FC = () => {
         setFilteredCustomers(filtered);
         setCurrentPage(1);
     }, [searchTerm, selectedSucursal, customers]);
-    
-    
-    
-    
-    
-
-    const fetchPuntoVentas = async () => {
-        try {
-            const CodigoSucursal = localStorage.getItem('CodigoSucursal');
-            const response = await fetch(`${PATH_URL_BACKEND}/operaciones/punto-venta/lista-siat/${CodigoSucursal}`);
-            if (response.ok) {
-                const data = await response.json();
-                setCustomers(data.listaPuntosVentas || []);
-                setFilteredCustomers(data.listaPuntosVentas || []);
-            } else {
-                throw new Error("Error al obtener la lista de puntos de venta");
-            }
-        } catch (error) {
-            console.error("Error al obtener la lista de puntos de venta:", error);
-        }
-    };
 
     const totalPages = Math.ceil((filteredCustomers?.length || 0) / rowsPerPage);
     const paginatedCustomers = Array.isArray(filteredCustomers)
@@ -189,11 +161,35 @@ const PuntoVenta: React.FC = () => {
         console.log(`Editar punto de venta con id: ${id}`);
     };
 
-    const handleDeletePuntoVenta = (id: number) => {
-        const confirmDelete = window.confirm("¿Estás seguro de que deseas eliminar este punto de venta?");
-        if (confirmDelete) {
-            console.log(`Eliminar punto de venta con id: ${id}`);
-        }
+    const handleDeletePuntoVenta = async (codigoPuntoVenta: string) => {
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: "Esta acción cerrará el punto de venta y no se podrá deshacer.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, cerrar',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true,
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                const codigoSucursal = localStorage.getItem('CodigoSucursal');
+                try {
+                    const response = await fetch(`${PATH_URL_BACKEND}/operaciones/punto-venta/cierre/${codigoPuntoVenta}/${codigoSucursal}`, {
+                        method: 'POST',
+                    });
+                    
+                    if (response.ok) {
+                        setCustomers(customers.filter(customer => customer.codigoPuntoVenta !== codigoPuntoVenta));
+                        setFilteredCustomers(filteredCustomers.filter(customer => customer.codigoPuntoVenta !== codigoPuntoVenta));
+                        Swal.fire('Éxito', 'El punto de venta ha sido cerrado correctamente.', 'success');
+                    } else {
+                        throw new Error('No se pudo cerrar el punto de venta');
+                    }
+                } catch (error) {
+                    Swal.fire('Error', error.message, 'error');
+                }
+            }
+        });
     };
 
     const handleOpenModal = () => {
@@ -314,7 +310,7 @@ const PuntoVenta: React.FC = () => {
                                                 <div className="flex">
                                                     <button
                                                         className="bg-red-200 hover:bg-red-300 p-2 rounded-l-lg flex items-center justify-center border border-red-300"
-                                                        onClick={() => console.log("Eliminar")}
+                                                        onClick={() => handleDeletePuntoVenta(customer.codigoPuntoVenta)}
                                                     >
                                                         <FaTrashAlt className="text-black" />
                                                     </button>

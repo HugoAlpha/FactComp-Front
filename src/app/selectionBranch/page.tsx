@@ -14,25 +14,26 @@ const SelectionBranch = () => {
 
     const [branches, setBranches] = useState([]);
 
-    useEffect(() => {
-        const fetchBranches = async () => {
-            try {
-                const response = await fetch(`${PATH_URL_BACKEND}/sucursales`);
-                if (response.ok) {
-                    const data = await response.json();
-                    const filteredBranches = data.filter(branch => branch.empresa.id === 1);
-                    setBranches(filteredBranches);
-                } else {
-                    Swal.fire('Error', 'No se pudo obtener la lista de sucursales', 'error');
-                }
-            } catch (error) {
-                Swal.fire('Error', 'Error en la conexión con el servidor', 'error');
+    const fetchBranches = async () => {
+        try {
+            const idEmpresa = parseInt(localStorage.getItem('idEmpresa') || '0', 10); 
+            const response = await fetch(`${PATH_URL_BACKEND}/sucursales`);
+            if (response.ok) {
+                const data = await response.json();
+                const filteredBranches = data.filter(branch => branch.empresa.id === idEmpresa);
+                setBranches(filteredBranches);
+            } else {
+                Swal.fire('Error', 'No se pudo obtener la lista de sucursales', 'error');
             }
-        };
+        } catch (error) {
+            Swal.fire('Error', 'Error en la conexión con el servidor', 'error');
+        }
+    };
 
+    useEffect(() => {
         fetchBranches();
     }, []);
-
+    
     const handleSelectBranch = (id, codigo) => {
         localStorage.setItem('idSucursal', id);
         localStorage.setItem('CodigoSucursal', codigo);

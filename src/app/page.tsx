@@ -33,6 +33,7 @@ const Login = () => {
         if (data.response === "200") {
           localStorage.setItem("role", data.role);
           localStorage.setItem("tokenJWT", data.tokenJWT);
+          localStorage.setItem("idEmpresa", data.id_empresa);
 
           Swal.fire({
             position: "center",
