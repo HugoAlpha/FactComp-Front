@@ -65,6 +65,7 @@ const ProductList = () => {
                     return {
                         ...product,
                         imageUrl: image ? `${PATH_URL_IMAGES}/images/${image.id}` : '/images/caja.png',
+                        imageId: image ? image.id : null,
                         unidadMedidaDescripcion: unidadMedida ? unidadMedida.descripcion : 'No disponible'
                     };
                 });

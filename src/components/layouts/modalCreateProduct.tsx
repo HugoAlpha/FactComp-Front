@@ -47,6 +47,7 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
     const [searchTermUnidadMedida, setSearchTermUnidadMedida] = useState('');
     const [dropdownOpenUnidadMedida, setDropdownOpenUnidadMedida] = useState(false);
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
+    const [previousImageId, setPreviousImageId] = useState<number | null>(null); 
 
     const [errors, setErrors] = useState({
         codigo: '',
@@ -66,7 +67,14 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                 setUnidadMedida(product.unidadMedida ? product.unidadMedida.toString() : '');
                 setPrecioUnitario(product.precioUnitario ? product.precioUnitario.toString() : '');
                 setCodigoProductoSin(product.codigoProductoSin ? product.codigoProductoSin.toString() : '');
-            }
+                setPreviousImageId(product.imageId || null);             }
+        }else {
+            setCodigo('');
+            setNombreProducto('');
+            setUnidadMedida('');
+            setPrecioUnitario('');
+            setCodigoProductoSin('');
+            setPreviousImageId(null);
         }
     }, [isOpen, product]);
 
@@ -129,38 +137,31 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
         }
     }, [isOpen, product, productOptions]);
 
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        if (name === 'nombreProducto') {
-            setNombreProducto(value);
-        } else if (name === 'precioUnitario') {
-            setPrecioUnitario(value);
-        } else if (name === 'codigo') {
-            setCodigo(value);
-        }
-        setErrors((prevErrors) => ({ ...prevErrors, [name]: '' }));
-    };
-
     const uploadImage = async (itemId: number) => {
         if (!selectedImage) return;
-
+    
         const formData = new FormData();
         formData.append("file", selectedImage);
         formData.append("idItem", itemId.toString());
-
+    
         try {
-            const response = await fetch(`${PATH_URL_IMAGES}/images/upload`, {
-                method: "POST",
-                body: formData,
-            });
+            const response = previousImageId
+                ? await fetch(`${PATH_URL_IMAGES}/images/upload/${previousImageId}/update`, {
+                      method: "PUT",
+                      body: formData,
+                  })
+                : await fetch(`${PATH_URL_IMAGES}/images/upload`, { 
+                      method: "POST",
+                      body: formData,
+                  });
+    
             if (response.ok) {
-                Swal.fire("Éxito", "Imagen subida correctamente", "success");
+                Swal.fire("Éxito", "Imagen actualizada correctamente", "success");
             } else {
-                Swal.fire("Error", "Error al subir la imagen", "error");
+                Swal.fire("Error", "Error al actualizar la imagen", "error");
             }
         } catch (error) {
-            Swal.fire("Error", "No se pudo conectar con el servidor para subir la imagen", "error");
+            Swal.fire("Error", "No se pudo conectar con el servidor para actualizar la imagen", "error");
         }
     };
 
@@ -172,7 +173,7 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
         if (!codigo) {
             newErrors.codigo = 'Este campo es requerido.';
         } else if (!alphanumericPattern.test(codigo)) {
-            newErrors.codigo = 'Solo se permiten caracteres alfanuméricos.';
+            newErrors.codigo = 'Solo se permiten caracteres alfanuméricos y sin espacios.';
         }else if (codigo.length > 10) {
             newErrors.codigo = 'Máximo 10 caracteres permitidos.';
         }
@@ -261,6 +262,7 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
 
         try {
             let response;
+            let previousImageId = product?.imageId || null;
             if (product && product.id) {
                 response = await fetch(`${PATH_URL_BACKEND}/item/actualizar-item/${product.id}`, {
                     method: "PUT",
