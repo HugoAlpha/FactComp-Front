@@ -39,8 +39,6 @@ const BillList = () => {
   const [contingencyState, setContingencyState] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
 
-
-
   const fetchBills = async () => {
     try {
       const estadoParam = isContingencyMode ? 'OFFLINE' : (estadoFilter === 'TODAS' ? '' : (estadoFilter === 'VALIDA' ? '1' : '0'));
@@ -50,7 +48,13 @@ const BillList = () => {
 
       if (response.ok) {
         const data = await response.json();
-        const formattedData = data.map((bill) => ({
+        const idPOS = parseInt(localStorage.getItem('idPOS') || '0');
+        const codigoPOS = parseInt(localStorage.getItem('CodigoPOS') || '0');
+        const filteredData = data.filter(bill =>
+          bill.codigoPuntoVenta === codigoPOS && bill.puntoVenta.id === idPOS
+        );
+
+        const formattedData = filteredData.map((bill) => ({
           documentNumber: bill.numeroDocumento,
           client: bill.nombreRazonSocial,
           date: new Date(bill.fechaEmision),
@@ -65,6 +69,8 @@ const BillList = () => {
 
         const sortedData = formattedData.sort((a, b) => b.date - a.date);
         setBills(sortedData);
+
+        console.log('Facturas filtradas por punto de venta:', sortedData);
       } else {
         console.error('Error fetching bills');
       }
@@ -72,6 +78,7 @@ const BillList = () => {
       console.error('Error fetching bills:', error);
     }
   };
+
 
   useEffect(() => {
     fetchBills();
@@ -93,7 +100,7 @@ const BillList = () => {
 
   const checkServerCommunication = async () => {
     try {
-      const response = await fetch(`${PATH_URL_BACKEND}/codigos/cuis/activo/1`);
+      const response = await fetch(`${PATH_URL_BACKEND}/contingencia/verificar-comunicacion`);
       if (!response.ok) {
         if (response.status === 500) {
           Swal.fire({
@@ -118,8 +125,6 @@ const BillList = () => {
         } else {
           console.error("Error de comunicación con el servidor:", response.statusText);
         }
-      } else {
-        fetchBills();
       }
     } catch (error) {
       console.error("Error al conectar con el servidor:", error);
@@ -363,7 +368,6 @@ const BillList = () => {
       }, {}),
       inputPlaceholder: 'Selecciona un motivo',
       showCancelButton: true,
-
       inputValidator: (value) => {
         return new Promise((resolve) => {
           if (value) {
@@ -380,7 +384,8 @@ const BillList = () => {
         const body = {
           cuf: bill.cuf,
           anulacionMotivo: motivo,
-          idPuntoVenta: bill.puntoVenta.id
+          idPuntoVenta: bill.puntoVenta.id,
+          idSucursal: parseInt(localStorage.getItem('idSucursal') as string)
         };
 
         console.log('Body que se enviará al POST:', body);
@@ -399,7 +404,6 @@ const BillList = () => {
             'La factura ha sido anulada correctamente.',
             'success'
           );
-
           fetchBills(estadoFilter);
         } else {
           Swal.fire(
@@ -414,6 +418,7 @@ const BillList = () => {
       }
     }
   };
+
   // const openModal = () => setIsModalOpen(true);
   // const closeModal = () => setIsModalOpen(false);
 

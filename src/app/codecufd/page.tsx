@@ -31,13 +31,13 @@ const CUFDList = () => {
 
     const fetchCUFDs = async () => {
         try {
-            const response = await fetch(`${PATH_URL_BACKEND}/codigos/cufd/activo/1`);
+            const idPuntoVenta = localStorage.getItem('idPOS');
+            const response = await fetch(`${PATH_URL_BACKEND}/codigos/cufd/activo/${idPuntoVenta}`);
             const data = await response.json();
             const sortedData = data.sort((a: CUFD, b: CUFD) => new Date(b.fechaInicio).getTime() - new Date(a.fechaInicio).getTime());
             const activeCUFD = sortedData.find((cufd: CUFD) => cufd.vigente === true);
             const otherCUFDs = sortedData.filter((cufd: CUFD) => cufd.vigente !== true);
             setCUFDs([activeCUFD, ...otherCUFDs]);
-
         } catch (error) {
             console.error('Error fetching CUFDs:', error);
         }
@@ -62,7 +62,7 @@ const CUFDList = () => {
                         }
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            setIsContingencyModalOpen(true); 
+                            setIsContingencyModalOpen(true);
                         } else {
                             console.log('Modo de contingencia cancelado.');
                         }
@@ -89,7 +89,7 @@ const CUFDList = () => {
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    setIsContingencyModalOpen(true); 
+                    setIsContingencyModalOpen(true);
                 } else {
                     console.log('Modo de contingencia cancelado.');
                 }
@@ -107,16 +107,21 @@ const CUFDList = () => {
         setCurrentPage(1);
     };
 
-    const filteredCUFDs = Array.isArray(cufds) ? cufds.filter((cufd) =>
-        Object.values(cufd)
-            .some((field) => field && field.toString().toLowerCase().includes(filter.toLowerCase()))
-    ) : [];
+    const filteredCUFDs = Array.isArray(cufds)
+        ? cufds
+            .filter((cufd) => cufd != null)
+            .filter((cufd) =>
+                Object.values(cufd)
+                    .some((field) => field && field.toString().toLowerCase().includes(filter.toLowerCase()))
+            )
+        : [];
 
     const totalPages = Math.ceil(filteredCUFDs.length / rowsPerPage);
     const paginatedCUFDs = filteredCUFDs.slice(
         (currentPage - 1) * rowsPerPage,
         currentPage * rowsPerPage
     );
+
 
     const handleEmitCUFD = async () => {
         Swal.fire({
@@ -129,7 +134,9 @@ const CUFDList = () => {
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
-                    const response = await fetch(`${PATH_URL_BACKEND}/codigos/obtener-cufd/1`, {
+                    const idPuntoVenta = localStorage.getItem('idPOS');
+                    const idSucursal = localStorage.getItem('idSucursal');
+                    const response = await fetch(`${PATH_URL_BACKEND}/codigos/obtener-cufd/${idPuntoVenta}/${idSucursal}`, {
                         method: 'POST',
                     });
                     if (response.ok) {
@@ -191,11 +198,11 @@ const CUFDList = () => {
 
     const handleFirstPage = () => {
         setCurrentPage(1);
-      };
-    
-      const handleLastPage = () => {
+    };
+
+    const handleLastPage = () => {
         setCurrentPage(totalPages);
-      };
+    };
 
     return (
         <div className="flex min-h-screen">
@@ -206,7 +213,7 @@ const CUFDList = () => {
                 <div className="flex-grow overflow-auto bg-gray-50">
                     <div className="p-6">
                         <h2 className="text-xl font-bold mb-6 text-gray-700">Registros de CUFD</h2>
-                        
+
                         <div className="flex items-center mb-4 justify-between">
                             <div className="flex items-center">
                                 <label htmlFor="itemsPerPage" className="mr-2 text-sm">Elementos por página:</label>
@@ -236,8 +243,8 @@ const CUFDList = () => {
                                 className="bg-principalColor text-white py-2 px-4 rounded-lg hover:bg-firstColor text-lg h-10 flex items-center justify-center"
                                 onClick={handleEmitCUFD}
                             >
-                                <span className="flex items-center"> 
-                                    Emitir CUFD 
+                                <span className="flex items-center">
+                                    Emitir CUFD
                                     <FaPlus className="inline-block ml-2" />
                                 </span>
                             </button>
@@ -271,44 +278,44 @@ const CUFDList = () => {
                         </div>
                         <div className="flex flex-col items-center mt-6">
                             <div className="flex justify-center space-x-1 mb-2">
-                            <button
-                                onClick={handleFirstPage}
-                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-                            >
-                                Primero
-                            </button>  
-                            <button
-                                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                                disabled={currentPage === 1}
-                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
-                            >
-                                Ant.
-                            </button>
-
-                            {getPageNumbers().map((page) => (
                                 <button
-                                    key={page}
-                                    onClick={() => setCurrentPage(page)}
-                                    className={`min-w-9 rounded-full border py-2 px-3.5 text-center text-sm transition-all shadow-sm ${page === currentPage ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-800 hover:text-white hover:border-slate-800'} focus:bg-slate-800 focus:text-white active:border-slate-800 active:bg-slate-800`}
+                                    onClick={handleFirstPage}
+                                    className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                                 >
-                                    {page}
+                                    Primero
                                 </button>
-                            ))}
+                                <button
+                                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                                    disabled={currentPage === 1}
+                                    className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+                                >
+                                    Ant.
+                                </button>
 
-                            <button
-                                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                                disabled={currentPage === totalPages}
-                                className="min-w-9 rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
-                            >
-                                Sig.
-                            </button>
-                            <button
-                             onClick={handleLastPage}
-                             className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-                            >
-                            Último
-                            </button>
-                         </div>
+                                {getPageNumbers().map((page) => (
+                                    <button
+                                        key={page}
+                                        onClick={() => setCurrentPage(page)}
+                                        className={`min-w-9 rounded-full border py-2 px-3.5 text-center text-sm transition-all shadow-sm ${page === currentPage ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-800 hover:text-white hover:border-slate-800'} focus:bg-slate-800 focus:text-white active:border-slate-800 active:bg-slate-800`}
+                                    >
+                                        {page}
+                                    </button>
+                                ))}
+
+                                <button
+                                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                                    disabled={currentPage === totalPages}
+                                    className="min-w-9 rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+                                >
+                                    Sig.
+                                </button>
+                                <button
+                                    onClick={handleLastPage}
+                                    className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                                >
+                                    Último
+                                </button>
+                            </div>
                         </div>
 
                         <div className="flex space-x-1 justify-center mt-2">

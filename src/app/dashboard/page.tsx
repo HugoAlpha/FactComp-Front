@@ -42,11 +42,11 @@ const Dashboard = () => {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const dailySalesResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/ventas-diarias-monto?fecha=2024-10-31`);
+                const dailySalesResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/ventas-diarias-monto?fecha=2024-11-01`);
                 const dailySalesData = await dailySalesResponse.json();
                 setDailySales(dailySalesData || 0);
 
-                const monthlySalesResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/ventas-mensuales-montos?fechaInicio=2024-10-01&fechaFin=2024-10-31`);
+                const monthlySalesResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/ventas-mensuales-montos?fechaInicio=2024-11-01&fechaFin=2024-11-30`);
                 const monthlySalesData = await monthlySalesResponse.json();
                 setMonthlySales(monthlySalesData || 0);
 

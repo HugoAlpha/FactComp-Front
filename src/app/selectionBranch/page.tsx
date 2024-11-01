@@ -1,85 +1,63 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import { FaCashRegister } from "react-icons/fa6";
-import HeaderPOS from '@/components/commons/headerPOS';
+import { FaBuilding } from "react-icons/fa";
+import HeaderBranch from '@/components/commons/headerBranch';
 import { PATH_URL_BACKEND } from "@/utils/constants";
 import Swal from 'sweetalert2';
 
-const KanbanView = () => {
+const SelectionBranch = () => {
     const today = new Date().toLocaleDateString('es-ES', {
         year: 'numeric',
         month: '2-digit',
         day: '2-digit'
     });
 
-    const [salesPoints, setSalesPoints] = useState([]);
-    const [role, setRole] = useState<string | null>(null);
+    const [branches, setBranches] = useState([]);
 
     useEffect(() => {
-        // Solo se ejecuta en el lado del cliente
-        const userRole = localStorage.getItem("role");
-        setRole(userRole);
-
-        const fetchSalesPoints = async () => {
+        const fetchBranches = async () => {
             try {
-                const response = await fetch(`${PATH_URL_BACKEND}/operaciones/punto-venta/lista-bd`);
+                const response = await fetch(`${PATH_URL_BACKEND}/sucursales`);
                 if (response.ok) {
                     const data = await response.json();
-
-                    if (userRole === "ROLE_USER") {
-                        const companySalesPoints = data.filter(
-                            (point) => point.sucursal.empresa.id === 1
-                        );
-                        setSalesPoints(companySalesPoints);
-                    } else if (userRole === "ROLE_ADMIN") {
-                        const selectedBranchId = localStorage.getItem('idSucursal');
-                        const filteredSalesPoints = data.filter(
-                            (point) => String(point.sucursal.id) === selectedBranchId
-                        );
-                        setSalesPoints(filteredSalesPoints);
-                    }
+                    const filteredBranches = data.filter(branch => branch.empresa.id === 1);
+                    setBranches(filteredBranches);
                 } else {
-                    Swal.fire('Error', 'No se pudo obtener la lista de puntos de venta', 'error');
+                    Swal.fire('Error', 'No se pudo obtener la lista de sucursales', 'error');
                 }
             } catch (error) {
                 Swal.fire('Error', 'Error en la conexión con el servidor', 'error');
             }
         };
 
-        fetchSalesPoints();
+        fetchBranches();
     }, []);
 
-    const handleSelectSalesPoint = (id, codigo, sucursalId) => {
-        localStorage.setItem('idPOS', id);
-        localStorage.setItem('CodigoPOS', codigo);
-
-        if (role === "ROLE_USER") {
-            localStorage.setItem("idSucursal", sucursalId);
-            window.location.href = "/dashboardCashier";
-        } else if (role === "ROLE_ADMIN") {
-            window.location.href = "/dashboard";
-        }
+    const handleSelectBranch = (id, codigo) => {
+        localStorage.setItem('idSucursal', id);
+        localStorage.setItem('CodigoSucursal', codigo);
+        window.location.href = "/selectionPOS";
     };
 
     return (
         <div className="min-h-screen flex flex-col">
-            <HeaderPOS />
+            <HeaderBranch />
             <div className="flex flex-col min-h-screen bg-gray-50 p-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                    {salesPoints.map((point) => (
-                        <div key={point.id} className="bg-white border border-gray-200 rounded-lg shadow p-6">
-                            <FaCashRegister className="w-7 h-7 text-gray-500 mb-3" />
+                    {branches.map((branch) => (
+                        <div key={branch.id} className="bg-white border border-gray-200 rounded-lg shadow p-6">
+                            <FaBuilding className="w-7 h-7 text-gray-500 mb-3" />
                             <h5 className="mb-2 text-2xl font-semibold tracking-tight text-gray-900">
-                                {point.nombre}
+                                {branch.nombre}
                             </h5>
                             <p className="mb-3 font-normal text-gray-500">
-                                {point.sucursal.nombre}<br />{today}
+                                {branch.municipio}<br />{today}
                             </p>
                             <button
-                                onClick={() => handleSelectSalesPoint(point.id, point.codigo, point.sucursal.id)}
+                                onClick={() => handleSelectBranch(branch.id, branch.codigo)}
                                 className="inline-flex font-medium items-center text-blue-600 hover:underline"
                             >
-                                Ingresar a punto de venta
+                                Ingresar a sucursal
                                 <svg
                                     className="w-3 h-3 ms-2.5"
                                     aria-hidden="true"
@@ -107,4 +85,4 @@ const KanbanView = () => {
     );
 };
 
-export default KanbanView;
+export default SelectionBranch;

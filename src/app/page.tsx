@@ -43,7 +43,7 @@ const Login = () => {
             timer: 3500
           }).then(() => {
             if (data.role === "ROLE_ADMIN") {
-              router.push('/dashboard');
+              router.push('/selectionBranch');
             } else if (data.role === "ROLE_USER") {
               router.push('/selectionPOS');
             }

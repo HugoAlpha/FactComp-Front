@@ -220,6 +220,14 @@ const EnterpriseList = () => {
         setCurrentPage(1);
     };
 
+    const handleFirstPage = () => {
+        setCurrentPage(1);
+    };
+
+    const handleLastPage = () => {
+        setCurrentPage(totalPages);
+    };
+
     const getPageNumbers = () => {
         const totalPages = Math.ceil(enterprises.length / rowsPerPage);
         const pageNumbers = [];
@@ -261,7 +269,7 @@ const EnterpriseList = () => {
                                 <select
                                     value={rowsPerPage}
                                     onChange={handleRowsPerPageChange}
-                                    className="border px-2 h-10 rounded-lg w-20"
+                                    className="border p-2 rounded-lg w-20"
                                 >
                                     <option value={10}>10</option>
                                     <option value={20}>20</option>
@@ -271,7 +279,7 @@ const EnterpriseList = () => {
 
                             <button
                                 onClick={() => openModal()}
-                                className="bg-sixthColor text-white h-10 px-4 rounded-lg hover:bg-thirdColor text-lg"
+                                className="bg-sixthColor text-white py-2 px-4 rounded-lg hover:bg-thirdColor text-lg"
                             >
                                 Agregar Empresa
                             </button>
@@ -323,38 +331,51 @@ const EnterpriseList = () => {
                             enterprise={selectedEnterprise || { id: 0, nit: '', razonSocial: '' }}
                         />
                     </div>
-                    <div className="flex space-x-1 justify-center mt-6">
-                        <button
-                            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                            disabled={currentPage === 1}
-                            className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
-                        >
-                            Ant.
-                        </button>
-
-                        {getPageNumbers().map((page) => (
+                    <div className="flex flex-col items-center mt-6">
+                        <div className="flex justify-center space-x-1 mb-2">
                             <button
-                                key={page}
-                                onClick={() => setCurrentPage(page)}
-                                className={`min-w-9 rounded-full border py-2 px-3.5 text-center text-sm transition-all shadow-sm ${page === currentPage ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-800 hover:text-white hover:border-slate-800'} focus:bg-slate-800 focus:text-white active:border-slate-800 active:bg-slate-800`}
+                                onClick={handleFirstPage}
+                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                             >
-                                {page}
+                                Primero
                             </button>
-                        ))}
 
-                        <button
-                            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                            disabled={currentPage === totalPages}
-                            className="min-w-9 rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
-                        >
-                            Sig.
-                        </button>
-                    </div>
+                            <button
+                                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                                disabled={currentPage === 1}
+                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                            >
+                                Ant.
+                            </button>
 
-                    <div className="flex space-x-1 justify-center mt-2">
-                        <span className="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4 md:mb-0 block w-full md:inline md:w-auto">
+                            {getPageNumbers().map((number) => (
+                                <button
+                                    key={number}
+                                    onClick={() => setCurrentPage(number)}
+                                    className={`rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 ${currentPage === number ? 'bg-slate-800 text-white' : ''}`}
+                                >
+                                    {number}
+                                </button>
+                            ))}
+
+                            <button
+                                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                                disabled={currentPage === totalPages}
+                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                            >
+                                Sig.
+                            </button>
+                            <button
+                                onClick={handleLastPage}
+                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                            >
+                                Último
+                            </button>
+                        </div>
+
+                        <div className="text-sm font-normal text-gray-500 dark:text-gray-400 mr-2">
                             Mostrando página <span className="font-semibold text-gray-900 dark:text-black">{currentPage}</span> de <span className="font-semibold text-gray-900 dark:text-black">{totalPages}</span>
-                        </span>
+                        </div>
                     </div>
                 </div>
             </div>

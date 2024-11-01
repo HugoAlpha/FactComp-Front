@@ -51,34 +51,32 @@ const ProductList = () => {
             try {
                 const productResponse = await fetch(`${PATH_URL_BACKEND}/item/obtener-items`);
                 const productsData: Product[] = await productResponse.json();
-    
+
                 const imageResponse = await fetch(`${PATH_URL_IMAGES}/images`);
                 const imagesData = await imageResponse.json();
-                
+
                 const unidadMedidaResponse = await fetch(`${PATH_URL_BACKEND}/parametro/unidad-medida`);
                 const unidadMedidaData: UnidadMedidaOption[] = await unidadMedidaResponse.json();
-    
+
                 const updatedProducts = productsData.map(product => {
                     const image = imagesData.find(img => img.itemId === product.id);
                     const unidadMedida = unidadMedidaData.find(um => String(um.codigoClasificador) === String(product.unidadMedida));
-                    
+
                     return {
                         ...product,
                         imageUrl: image ? `${PATH_URL_IMAGES}/images/${image.id}` : '/images/caja.png',
                         unidadMedidaDescripcion: unidadMedida ? unidadMedida.descripcion : 'No disponible'
                     };
                 });
-    
+
                 setProducts(updatedProducts);
             } catch (error) {
                 console.error('Error al obtener productos, imágenes o unidades de medida:', error);
             }
         };
-    
+
         fetchProductsAndImages();
     }, []);
-    
-
 
     const checkServerCommunication = async () => {
         try {
@@ -140,7 +138,7 @@ const ProductList = () => {
         const role = localStorage.getItem("role");
         setUserRole(role);
     }, []);
-    
+
 
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(e.target.value);
@@ -218,31 +216,29 @@ const ProductList = () => {
         try {
             const productResponse = await fetch(`${PATH_URL_BACKEND}/item/obtener-items`);
             const productsData: Product[] = await productResponse.json();
-    
+
             const imageResponse = await fetch(`${PATH_URL_IMAGES}/images`);
             const imagesData = await imageResponse.json();
-    
+
             const unidadMedidaResponse = await fetch(`${PATH_URL_BACKEND}/parametro/unidad-medida`);
             const unidadMedidaData: UnidadMedidaOption[] = await unidadMedidaResponse.json();
-    
+
             const updatedProducts = productsData.map(product => {
                 const image = imagesData.find(img => img.itemId === product.id);
                 const unidadMedida = unidadMedidaData.find(um => String(um.codigoClasificador) === String(product.unidadMedida));
-                
+
                 return {
                     ...product,
                     imageUrl: image ? `${PATH_URL_IMAGES}/images/${image.id}` : '/images/caja.png',
                     unidadMedidaDescripcion: unidadMedida ? unidadMedida.descripcion : 'No disponible'
                 };
             });
-    
+
             setProducts(updatedProducts);
         } catch (error) {
             console.error('Error al obtener productos, imágenes o unidades de medida:', error);
         }
     };
-    
-
 
     const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setRowsPerPage(parseInt(e.target.value));
@@ -267,6 +263,14 @@ const ProductList = () => {
                 </button>
             </div>
         );
+    };
+
+    const handleFirstPage = () => {
+        setCurrentPage(1);
+    };
+
+    const handleLastPage = () => {
+        setCurrentPage(totalPages);
     };
 
     const closeModal = () => setIsContingencyModalOpen(false);
@@ -361,38 +365,51 @@ const ProductList = () => {
                             </table>
                         </div>
 
-                        <div className="flex space-x-1 justify-center mt-6">
-                            <button
-                                onClick={handlePrevPage}
-                                disabled={currentPage === 1}
-                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-                            >
-                                Ant.
-                            </button>
-
-                            {getPageNumbers().map((page) => (
+                        <div className="flex flex-col items-center mt-6">
+                            <div className="flex justify-center space-x-1 mb-2">
                                 <button
-                                    key={page}
-                                    onClick={() => setCurrentPage(page)}
-                                    className={`rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 ${currentPage === page ? 'bg-slate-800 text-white' : ''}`}
+                                    onClick={handleFirstPage}
+                                    className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                                 >
-                                    {page}
+                                    Primero
                                 </button>
-                            ))}
 
-                            <button
-                                onClick={handleNextPage}
-                                disabled={currentPage === totalPages}
-                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-                            >
-                                Sig.
-                            </button>
-                        </div>
+                                <button
+                                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                                    disabled={currentPage === 1}
+                                    className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                                >
+                                    Ant.
+                                </button>
 
-                        <div className="flex space-x-1 justify-center mt-2">
-                            <span className="text-sm font-normal text-gray-500 mb-4 md:mb-0 block w-full md:inline md:w-auto">
-                                Mostrando página <span className="font-semibold text-gray-900">{currentPage}</span> de <span className="font-semibold text-gray-900">{totalPages}</span>
-                            </span>
+                                {getPageNumbers().map((number) => (
+                                    <button
+                                        key={number}
+                                        onClick={() => setCurrentPage(number)}
+                                        className={`rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 ${currentPage === number ? 'bg-slate-800 text-white' : ''}`}
+                                    >
+                                        {number}
+                                    </button>
+                                ))}
+
+                                <button
+                                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                                    disabled={currentPage === totalPages}
+                                    className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                                >
+                                    Sig.
+                                </button>
+                                <button
+                                    onClick={handleLastPage}
+                                    className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                                >
+                                    Último
+                                </button>
+                            </div>
+
+                            <div className="text-sm font-normal text-gray-500 dark:text-gray-400 mr-2">
+                                Mostrando página <span className="font-semibold text-gray-900 dark:text-black">{currentPage}</span> de <span className="font-semibold text-gray-900 dark:text-black">{totalPages}</span>
+                            </div>
                         </div>
                     </div>
                 </div>

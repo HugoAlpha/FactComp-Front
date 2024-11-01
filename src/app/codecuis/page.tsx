@@ -54,40 +54,56 @@ const CodeReceipt = () => {
 
     const openContingencyModal = () => setIsContingencyModalOpen(true);
     const closeContingencyModal = () => setIsContingencyModalOpen(false);
-    
+
     useEffect(() => {
         const role = localStorage.getItem("role");
         setUserRole(role);
     }, []);
 
 
-    useEffect(() => {
-        const fetchCodes = async () => {
-            try {
-                const response = await fetch(`${PATH_URL_BACKEND}/codigos/cuis/activo/1`);
-                if (response.ok) {
-                    const data = await response.json();
-                    const formattedData = data.map((code: any) => ({
-                        id: code.id,
-                        codigo: code.codigo,
-                        fechaSolicitada: new Date(code.fechaSolicitada).toLocaleString(),
-                        fechaVigencia: new Date(code.fechaVigencia).toLocaleString(),
-                        vigente: code.vigente,
-                        puntoVenta: code.puntoVenta
-                    }));
-                    formattedData.sort((a: Code, b: Code) => b.id - a.id);
-                    setCodes(formattedData);
-                    const uniqueSucursales = Array.from(
-                        new Set(formattedData.map((code: Code) => code.puntoVenta.sucursal.nombre))
-                    );
-                    setSucursales(uniqueSucursales);
-                } else {
-                    console.error('Error fetching codes');
-                }
-            } catch (error) {
-                console.error('Error fetching codes:', error);
+    const fetchCodes = async () => {
+        try {
+            const idPuntoVenta = localStorage.getItem('idPOS');
+            const idSucursal = localStorage.getItem('idSucursal');
+            const response = await fetch(`${PATH_URL_BACKEND}/codigos/cuis/activo/${idPuntoVenta}/${idSucursal}`);
+            if (response.ok) {
+                const data = await response.json();
+
+                // Asegúrate de que `data` sea un array antes de mapearlo.
+                const formattedData = Array.isArray(data) ? data.map((code: any) => ({
+                    id: code.id,
+                    codigo: code.codigo,
+                    fechaSolicitada: new Date(code.fechaSolicitada).toLocaleString(),
+                    fechaVigencia: new Date(code.fechaVigencia).toLocaleString(),
+                    vigente: code.vigente,
+                    puntoVenta: code.puntoVenta
+                })) : [{
+                    id: data.id,
+                    codigo: data.codigo,
+                    fechaSolicitada: new Date(data.fechaSolicitada).toLocaleString(),
+                    fechaVigencia: new Date(data.fechaVigencia).toLocaleString(),
+                    vigente: data.vigente,
+                    puntoVenta: data.puntoVenta
+                }];
+
+                // Ordenar los datos y actualizar el estado
+                formattedData.sort((a: Code, b: Code) => b.id - a.id);
+                setCodes(formattedData);
+
+                // Filtrar y obtener sucursales únicas
+                const uniqueSucursales = Array.from(
+                    new Set(formattedData.map((code: Code) => code.puntoVenta.sucursal.nombre))
+                );
+                setSucursales(uniqueSucursales);
+            } else {
+                console.error('Error fetching codes');
             }
-        };
+        } catch (error) {
+            console.error('Error fetching codes:', error);
+        }
+    };
+
+    useEffect(() => {
         fetchCodes();
     }, []);
 
@@ -230,11 +246,11 @@ const CodeReceipt = () => {
 
     const handleFirstPage = () => {
         setCurrentPage(1);
-      };
-    
-      const handleLastPage = () => {
+    };
+
+    const handleLastPage = () => {
         setCurrentPage(totalPages);
-      };
+    };
 
     return (
         <div className="flex min-h-screen">
@@ -359,44 +375,44 @@ const CodeReceipt = () => {
 
                         <div className="flex flex-col items-center mt-6">
                             <div className="flex justify-center space-x-1 mb-2">
-                            <button
-                                onClick={handleFirstPage}
-                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-                            >
-                                Primero
-                            </button>
-                            <button
-                                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                                disabled={currentPage === 1}
-                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
-                            >
-                                Ant.
-                            </button>
-
-                            {getPageNumbers().map((page) => (
                                 <button
-                                    key={page}
-                                    onClick={() => setCurrentPage(page)}
-                                    className={`min-w-9 rounded-full border py-2 px-3.5 text-center text-sm transition-all shadow-sm ${page === currentPage ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-800 hover:text-white hover:border-slate-800'} focus:bg-slate-800 focus:text-white active:border-slate-800 active:bg-slate-800`}
+                                    onClick={handleFirstPage}
+                                    className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                                 >
-                                    {page}
+                                    Primero
                                 </button>
-                            ))}
+                                <button
+                                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                                    disabled={currentPage === 1}
+                                    className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+                                >
+                                    Ant.
+                                </button>
 
-                            <button
-                                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                                disabled={currentPage === totalPages}
-                                className="min-w-9 rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
-                            >
-                                Sig.
-                            </button>
-                            <button
-                             onClick={handleLastPage}
-                             className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-                            >
-                            Último
-                            </button>
-                         </div>
+                                {getPageNumbers().map((page) => (
+                                    <button
+                                        key={page}
+                                        onClick={() => setCurrentPage(page)}
+                                        className={`min-w-9 rounded-full border py-2 px-3.5 text-center text-sm transition-all shadow-sm ${page === currentPage ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-800 hover:text-white hover:border-slate-800'} focus:bg-slate-800 focus:text-white active:border-slate-800 active:bg-slate-800`}
+                                    >
+                                        {page}
+                                    </button>
+                                ))}
+
+                                <button
+                                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                                    disabled={currentPage === totalPages}
+                                    className="min-w-9 rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+                                >
+                                    Sig.
+                                </button>
+                                <button
+                                    onClick={handleLastPage}
+                                    className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                                >
+                                    Último
+                                </button>
+                            </div>
                         </div>
 
                         <div className="flex space-x-1 justify-center mt-2">
