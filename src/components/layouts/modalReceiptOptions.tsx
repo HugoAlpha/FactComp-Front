@@ -83,21 +83,21 @@ const ReceiptOptionsModal: React.FC<ReceiptOptionsModalProps> = ({ isOpen, onClo
       <div className="bg-white p-6 rounded-lg shadow-lg w-96">
         <h2 className="text-xl font-bold mb-4 text-center">Opciones de Recibo</h2>
         <div className="flex flex-col space-y-4">
-        <button
+          <button
             onClick={handlePrintRollo}
-            className="bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600"
+            className="bg-principalColor text-white font-semibold py-2 px-4 rounded-lg hover:bg-firstColor"
           >
             Impresion en rollo
           </button>
           <button
             onClick={handlePrintReceipt}
-            className="bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600"
+            className="bg-principalColor text-white font-semibold py-2 px-4 rounded-lg hover:bg-firstColor"
           >
             Impresion carta
           </button>
           <button
             onClick={handleDownloadReceipt}
-            className="bg-green-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-green-600"
+            className="bg-fourthColor text-white font-semibold py-2 px-4 rounded-lg hover:bg-firstColor"
           >
             Descargar
           </button>

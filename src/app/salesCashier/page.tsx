@@ -837,7 +837,7 @@ const Sales = () => {
 
                                 <button
                                     onClick={handleNewOrder}
-                                    className="bg-thirdColor hover:bg-fourthColor text-white font-bold py-3 px-6 rounded-lg flex items-center space-x-2"
+                                    className="bg-principalColor hover:bg-firstColor text-white font-bold py-3 px-6 rounded-lg flex items-center space-x-2"
                                 >
                                     <FaCartPlus className="text-xl" />
                                     <span>Nueva orden</span>

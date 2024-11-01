@@ -20,7 +20,7 @@ interface Customer {
 }
 
 interface UserRole {
-    role: 'ADMIN' | 'CAJERO';
+    role: 'ROLE_ADMIN' | 'ROLE_USER';
 }
 
 const documentTypes = {
@@ -220,7 +220,7 @@ const ClientList = () => {
     const renderOperationButtons = (customer: Customer) => {
         return (
             <div className="flex">
-                {userRole === 'admin' ? (
+                {userRole === 'ROLE_CLIENT' ? (
                     <>
                         <button
                             className="bg-red-200 hover:bg-red-300 p-2 rounded-l-lg flex items-center justify-center border border-red-300"
@@ -305,7 +305,7 @@ const ClientList = () => {
                                     setIsModalOpen(true);
                                 }}
                             >
-                                Agregar Cliente <FaPlus className="inline-block ml-2" />
+                                Agregar Cliente <FaPlus className="inline-block ml-2 size-3" />
                             </button>
 
                             <CreateEditClientModal
