@@ -57,31 +57,34 @@ const Dashboard = () => {
                 const monthlySalesData = await monthlySalesResponse.json();
                 setMonthlySales(monthlySalesData || 0);
 
-                const totalOrdersResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/ventas-cantidad/1`);
+                const idPOS = localStorage.getItem('idPOS');
+                const totalOrdersResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/ventas-cantidad/${idPOS}`);
                 const totalOrdersData = await totalOrdersResponse.json();
                 setTotalOrders(totalOrdersData || 0);
 
                 const totalClientsResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/clientes-registrados`);
                 const totalClientsData = await totalClientsResponse.json();
                 setTotalClients(totalClientsData || 0);
+
                 const response = await fetch(`${PATH_URL_BACKEND}/factura`);
-                if (response.ok) {
-                    const data = await response.json();
-                    const sortedData = data.sort((a, b) => new Date(b.fechaEmision) - new Date(a.fechaEmision));
-                    const lastFourInvoices = sortedData.slice(0, 4);
-                    const formattedInvoices = lastFourInvoices.map(invoice => ({
-                        id: invoice.id,
-                        status: invoice.estado === "VALIDA" ? "Fac. Válida" : "Anulada",
-                        statusColor: invoice.estado === "VALIDA" ? "green" : "red",
-                        method: invoice.codigoMetodoPago === 1 ? "Efectivo" : invoice.codigoMetodoPago === 2 ? "Tarjeta" : "Transferencia",
-                        amount: `Bs ${invoice.montoTotal.toFixed(2)}`,
-                        date: new Date(invoice.fechaEmision).toLocaleDateString(),
-                        company: invoice.razonSocialEmisor,
-                    }));
-                    setRecentInvoices(formattedInvoices);
-                } else {
-                    console.error("Error al obtener los datos de las facturas");
-                }
+            if (response.ok) {
+                const data = await response.json();
+                const filteredData = data.filter(invoice => invoice.codigoPuntoVenta === Number(idPOS));
+                const sortedData = filteredData.sort((a, b) => new Date(b.fechaEmision) - new Date(a.fechaEmision));
+                const lastFourInvoices = sortedData.slice(0, 4);
+                const formattedInvoices = lastFourInvoices.map(invoice => ({
+                    id: invoice.id,
+                    status: invoice.estado === "VALIDA" ? "Fac. Válida" : "Anulada",
+                    statusColor: invoice.estado === "VALIDA" ? "green" : "red",
+                    method: invoice.codigoMetodoPago === 1 ? "Efectivo" : invoice.codigoMetodoPago === 7 ? "Transferencia" : "Otro",
+                    amount: `Bs ${invoice.montoTotal.toFixed(2)}`,
+                    date: new Date(invoice.fechaEmision).toLocaleDateString(),
+                    company: invoice.razonSocialEmisor,
+                }));
+                setRecentInvoices(formattedInvoices);
+            } else {
+                console.error("Error al obtener los datos de las facturas");
+            }
 
                 const clientsResponse = await fetch(`${PATH_URL_BACKEND}/api/clientes/`);
                 if (clientsResponse.ok) {

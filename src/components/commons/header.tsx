@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import { FaUser, FaCog } from 'react-icons/fa';
 import { IoExitOutline } from 'react-icons/io5';
 import ModalContingency from '../layouts/modalContingency';
+import { PATH_URL_BACKEND } from '@/utils/constants';
 
 const normalColors = {
     principalColor: "#10314b",
@@ -39,6 +40,7 @@ const Header = () => {
 
     const userMenuRef = useRef(null);
     const settingsMenuRef = useRef(null);
+    const [isOnline, setIsOnline] = useState(true);
 
 
     const updateColors = (isContingency) => {
@@ -135,7 +137,7 @@ const Header = () => {
 
     const handleContingenciaChange = () => {
         if (!contingencia) {
-            setShowModal(true);
+            setShowModal(true); 
         } else {
             desactivarContingencia();
         }
@@ -174,6 +176,7 @@ const Header = () => {
         updateColors(true);
         setShowModal(false);
         syncContingencyState();
+        checkContingencyState();
     };
 
     const formatTime = (milliseconds) => {
@@ -211,6 +214,36 @@ const Header = () => {
         };
     }, []);
 
+    const checkContingencyState = () => {
+        const storedContingencyState = localStorage.getItem('contingenciaEstado');
+        return storedContingencyState === '1';
+    };
+
+    const checkServerCommunication = async () => {
+        if (checkContingencyState()) {
+            setIsOnline(false);
+            return;
+        }
+
+        try {
+            const response = await fetch(`${PATH_URL_BACKEND}/contingencia/verificar-comunicacion`);
+            if (response.ok) {
+                setIsOnline(true);
+            } else if (response.status === 500) {
+                setIsOnline(false);
+            }
+        } catch (error) {
+            console.error("Error al verificar comunicación:", error);
+            setIsOnline(false);
+        }
+    };
+
+    useEffect(() => {
+        checkServerCommunication();
+        const intervalId = setInterval(checkServerCommunication, 1000000); 
+        return () => clearInterval(intervalId); 
+    }, []);
+
     return (
         <header className={`flex justify-between items-center shadow p-4 bg-seventhColor`}>
             <div className="container mx-auto px-6 flex justify-between items-center">
@@ -220,8 +253,24 @@ const Header = () => {
                             Sistema de facturación computarizada en línea
                         </span>
                     </div>
+                    <div className="flex items-center ml-40">
+                        <span className="mr-2 text-sm font-medium text-gray-900 dark:text-black">
+                            {isOnline ? "Online" : "Offline"}
+                        </span>
+                        <span className="relative flex h-3 w-3">
+                            <span
+                                className={`animate-ping absolute inline-flex h-full w-full rounded-full ${
+                                    isOnline ? "bg-green-400" : "bg-red-400"
+                                } opacity-75`}
+                            ></span>
+                            <span
+                                className={`relative inline-flex rounded-full h-3 w-3 ${
+                                    isOnline ? "bg-green-500" : "bg-red-500"
+                                }`}
+                            ></span>
+                        </span>
+                    </div>
                 </div>
-
                 <div className="flex items-center space-x-4">
                     <label className="inline-flex items-center cursor-pointer">
                         <span className="mr-4 text-sm font-medium text-gray-900 dark:text-black">
@@ -309,6 +358,7 @@ const Header = () => {
 
             {showModal && (
                 <ModalContingency
+                    isOpen={showModal}
                     onClose={() => setShowModal(false)}
                     onConfirm={confirmarContingencia}
                 />
