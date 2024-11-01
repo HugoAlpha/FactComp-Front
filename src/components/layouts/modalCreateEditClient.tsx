@@ -96,6 +96,7 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
         }
     
         if (formData.email) {
+            newErrors.email = 'Este campo es requerido.';
             if (!emailPattern.test(formData.email)) {
                 newErrors.email = 'El formato del correo electrónico es inválido.';
             } else if (formData.email.length > 40) {
@@ -124,7 +125,7 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
         }
     
         if (formData.codigoCliente) {
-            newErrors.numeroDocumento = 'Este campo es requerido.';
+            newErrors.codigoCliente = 'Este campo es requerido.';
             if (!alphanumericPattern.test(formData.codigoCliente)) {
                 newErrors.codigoCliente = 'No se permiten caracteres especiales.';
             } else if (formData.codigoCliente.length > 15) {
