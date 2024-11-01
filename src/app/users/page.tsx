@@ -2,6 +2,7 @@
 import { FaTrashAlt, FaEdit, FaSearch, FaPlus } from 'react-icons/fa';
 import Sidebar from '@/components/commons/sidebar';
 import Header from '@/components/commons/header';
+import ModalContingency from '@/components/layouts/modalContingency';
 import { useEffect, useState } from 'react';
 import ModalCreateUser from "../../components/layouts/modalCreateUser";
 import Swal from 'sweetalert2';
@@ -15,6 +16,7 @@ const UserList = () => {
     const [currentUser, setCurrentUser] = useState<User | undefined>(undefined);
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [isContingencyModalOpen, setIsContingencyModalOpen] = useState(false);
     const filteredUsers = users.filter(user =>
         `${user.nombre} ${user.apellidos}`.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -52,6 +54,11 @@ const UserList = () => {
     const getCompanyName = (companyId: number) => {
         const company = companies.find(c => c.id === companyId);
         return company ? company.razonSocial : "Empresa no encontrada";
+    };
+
+    const handleConfirm = (eventoDescripcion: string) => {
+        console.log("Evento confirmado:", eventoDescripcion);
+        setIsContingencyModalOpen(false);
     };
 
     const handleDeleteUser = async (userId: number) => {
@@ -93,33 +100,33 @@ const UserList = () => {
         });
     };
 
-
-
-
     const checkServerCommunication = async () => {
         try {
             const response = await fetch(`${PATH_URL_BACKEND}/contingencia/verificar-comunicacion`);
-            if (!response.ok && response.status === 500) {
-                Swal.fire({
-                    title: 'La comunicación con impuestos falló',
-                    text: '¿Desea entrar en modo de contingencia?',
-                    icon: 'error',
-                    showCancelButton: true,
-                    confirmButtonText: 'Aceptar',
-                    cancelButtonText: 'Cancelar',
-                    reverseButtons: true,
-                    customClass: {
-                        confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md',
-                        cancelButton: 'bg-blue-500 text-white px-4 py-2 rounded-md',
-                    }
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        console.log('Modo de contingencia aceptado.');
-                    } else {
-                        console.log('Modo de contingencia cancelado.');
-                    }
-                });
-
+            if (!response.ok) {
+                if (response.status === 500) {
+                    Swal.fire({
+                        title: 'La comunicación con impuestos falló',
+                        text: '¿Desea entrar en modo de contingencia?',
+                        icon: 'error',
+                        showCancelButton: true,
+                        confirmButtonText: 'Aceptar',
+                        cancelButtonText: 'Cancelar',
+                        reverseButtons: true,
+                        customClass: {
+                            confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md',
+                            cancelButton: 'bg-blue-500 text-white px-4 py-2 rounded-md',
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            setIsContingencyModalOpen(true);
+                        } else {
+                            console.log('Modo de contingencia cancelado.');
+                        }
+                    });
+                } else {
+                    console.error("Error de comunicación con el servidor:", response.statusText);
+                }
             }
         } catch (error) {
             console.error("Error al conectar con el servidor:", error);
@@ -137,7 +144,7 @@ const UserList = () => {
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    console.log('Modo de contingencia aceptado.');
+                    setIsContingencyModalOpen(true);
                 } else {
                     console.log('Modo de contingencia cancelado.');
                 }
@@ -148,6 +155,10 @@ const UserList = () => {
     useEffect(() => {
         checkServerCommunication();
     }, []);
+
+    const closeModal = () => {
+        setIsContingencyModalOpen(false);
+    };
 
     const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setRowsPerPage(parseInt(e.target.value));
@@ -288,9 +299,6 @@ const UserList = () => {
                                                     </button>
                                                 </div>
                                             </td>
-
-
-
                                         </tr>
                                     ))}
                                 </tbody>
@@ -346,6 +354,11 @@ const UserList = () => {
                     </div>
                 </div>
             </div>
+            <ModalContingency 
+            isOpen={isContingencyModalOpen} 
+            onClose={closeModal} 
+            onConfirm={handleConfirm} 
+            />
         </div>
     );
 };

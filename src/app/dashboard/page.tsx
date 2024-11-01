@@ -5,6 +5,7 @@ import { IoMdPersonAdd } from "react-icons/io";
 import { MdPointOfSale } from "react-icons/md";
 import Sidebar from "@/components/commons/sidebar";
 import Header from "@/components/commons/header";
+import ModalContingency from '@/components/layouts/modalContingency';
 import CreateEditClientModal from "@/components/layouts/modalCreateEditClient";
 import { PATH_URL_BACKEND } from "@/utils/constants";
 import Swal from "sweetalert2";
@@ -20,6 +21,7 @@ const Dashboard = () => {
     const [monthlySales, setMonthlySales] = useState(0);
     const [totalOrders, setTotalOrders] = useState(0);
     const [totalClients, setTotalClients] = useState(0);
+    const [isContingencyModalOpen, setIsContingencyModalOpen] = useState(false);
 
     const formatCurrency = (value) => {
         return new Intl.NumberFormat('es-BO', { style: 'currency', currency: 'BOB', minimumFractionDigits: 2 }).format(value);
@@ -37,6 +39,11 @@ const Dashboard = () => {
     const handleSaveClient = (newClient) => {
         console.log("Cliente guardado:", newClient);
         handleCloseClientModal();
+    };
+
+    const handleConfirm = (eventoDescripcion: string) => {
+        console.log("Evento confirmado:", eventoDescripcion);
+        setIsContingencyModalOpen(false);
     };
 
     useEffect(() => {
@@ -125,7 +132,7 @@ const Dashboard = () => {
                         }
                     }).then((result) => {
                         if (result.isConfirmed) {
-                            console.log('Modo de contingencia aceptado.');
+                            setIsContingencyModalOpen(true);
                         } else {
                             console.log('Modo de contingencia cancelado.');
                         }
@@ -150,7 +157,7 @@ const Dashboard = () => {
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
-                    console.log('Modo de contingencia aceptado.');
+                    setIsContingencyModalOpen(true);
                 } else {
                     console.log('Modo de contingencia cancelado.');
                 }
@@ -161,6 +168,10 @@ const Dashboard = () => {
     useEffect(() => {
         checkServerCommunication();
     }, []);
+
+    const closeModal = () => {
+        setIsContingencyModalOpen(false);
+    };
 
     return (
         <div className="flex min-h-screen">
@@ -308,6 +319,11 @@ const Dashboard = () => {
                 onClose={handleCloseClientModal}
                 customer={selectedClient || { id: 0, nombreRazonSocial: '', numeroDocumento: '', complemento: '', codigoTipoDocumentoIdentidad: 0, codigoCliente: '', email: '' }}
                 onSave={handleSaveClient}
+            />
+             <ModalContingency 
+            isOpen={isContingencyModalOpen} 
+            onClose={closeModal} 
+            onConfirm={handleConfirm} 
             />
         </div>
     );

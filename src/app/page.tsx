@@ -27,14 +27,16 @@ const Login = () => {
           password
         }).toString()
       });
-
+  
       if (response.ok) {
         const data = await response.json();
         if (data.response === "200") {
+          localStorage.setItem("username", username);
+          
           localStorage.setItem("role", data.role);
           localStorage.setItem("tokenJWT", data.tokenJWT);
           localStorage.setItem("idEmpresa", data.id_empresa);
-
+  
           Swal.fire({
             position: "center",
             icon: 'success',

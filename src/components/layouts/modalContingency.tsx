@@ -7,11 +7,12 @@ interface Evento {
 }
 
 interface ModalContingencyProps {
+    isOpen: boolean;
     onClose: () => void;
     onConfirm: (eventoDescripcion: string) => void;
 }
 
-const ModalContingency: React.FC<ModalContingencyProps> = ({ onClose, onConfirm }) => {
+const ModalContingency: React.FC<ModalContingencyProps> = ({ isOpen, onClose, onConfirm }) => {
     const [eventos, setEventos] = useState<Evento[]>([]);
     const [eventoSeleccionado, setEventoSeleccionado] = useState<string>('');
     const [loading, setLoading] = useState<boolean>(true);
@@ -35,7 +36,7 @@ const ModalContingency: React.FC<ModalContingencyProps> = ({ onClose, onConfirm 
         };
 
         fetchEventos();
-    }, [PATH_URL_BACKEND]);
+    }, []);
 
     const handleConfirm = () => {
         if (!eventoSeleccionado) {
@@ -44,6 +45,8 @@ const ModalContingency: React.FC<ModalContingencyProps> = ({ onClose, onConfirm 
         }
         onConfirm(eventoSeleccionado);
     };
+
+    if (!isOpen) return null; // Si `isOpen` es falso, no renderizamos el modal
 
     return (
         <div className="fixed inset-0 flex items-center justify-center z-50">
