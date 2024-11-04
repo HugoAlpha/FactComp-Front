@@ -207,70 +207,70 @@ const Dashboard = () => {
     };
 
     return (
-        <div className="flex min-h-screen">
+        <div className="flex flex-col md:flex-row min-h-screen">
             <Sidebar />
             <div className="flex flex-col w-full min-h-screen">
                 <Header />
-                <div className="flex-grow overflow-auto bg-gray-50">
-                    <div className="p-6">
-                        <div className="grid grid-cols-4 gap-6 mb-6">
+                <div className="flex-grow overflow-auto bg-gray-50 mt-8">
+                    <div className="p-4 sm:p-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-4 sm:mb-6">
                             {/* Ventas de Hoy */}
                             <div className="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg p-4">
-                                <h3 className="text-lg font-semibold text-slate-800">Ventas de Hoy</h3>
-                                <p className="text-2xl font-bold text-slate-800">{dailySales ? formatCurrency(dailySales) : 'Cargando...'}</p>
+                                <h3 className="text-sm sm:text-base font-semibold text-slate-800">Ventas de Hoy</h3>
+                                <p className="text-lg sm:text-xl font-bold text-slate-800">{dailySales ? formatCurrency(dailySales) : 'Cargando...'}</p>
                             </div>
 
                             {/* Total Mensual */}
                             <div className="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg p-4">
-                                <h3 className="text-lg font-semibold text-slate-800">Total Mensual</h3>
-                                <p className="text-2xl font-bold text-slate-800">{monthlySales ? formatCurrency(monthlySales) : 'Cargando...'}</p>
+                                <h3 className="text-sm sm:text-base font-semibold text-slate-800">Total Mensual</h3>
+                                <p className="text-lg sm:text-xl font-bold text-slate-800">{monthlySales ? formatCurrency(monthlySales) : 'Cargando...'}</p>
                             </div>
 
                             {/* Total de Facturas */}
                             <div className="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg p-4">
-                                <h3 className="text-lg font-semibold text-slate-800">Total de Facturas</h3>
-                                <p className="text-2xl font-bold text-slate-800">{totalOrders ? totalOrders : 'Cargando...'}</p>
+                                <h3 className="text-sm sm:text-base font-semibold text-slate-800">Total de Facturas</h3>
+                                <p className="text-lg sm:text-xl font-bold text-slate-800">{totalOrders ? totalOrders : 'Cargando...'}</p>
                             </div>
 
                             {/* Clientes Registrados */}
                             <div className="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg p-4">
-                                <h3 className="text-lg font-semibold text-slate-800">Clientes</h3>
-                                <p className="text-2xl font-bold text-slate-800">{totalClients ? totalClients : 'Cargando...'}</p>
+                                <h3 className="text-sm sm:text-base font-semibold text-slate-800">Clientes</h3>
+                                <p className="text-lg sm:text-xl font-bold text-slate-800">{totalClients ? totalClients : 'Cargando...'}</p>
                             </div>
                         </div>
 
-                        <div className="grid grid-cols-3 gap-6">
-                            <div className="col-span-2 flex flex-col min-h-full">
+                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+                            <div className="col-span-1 lg:col-span-2 flex flex-col min-h-full">
                                 <div className="relative bg-white shadow-sm border border-slate-200 rounded-lg flex-grow">
                                     <div className="p-4 flex justify-between items-center">
-                                        <h4 className="text-lg font-semibold text-slate-800">Facturas Recientes</h4>
+                                        <h4 className="text-sm sm:text-base font-semibold text-slate-800">Facturas Recientes</h4>
                                         <a href="bill" className="font-bold text-firstColor hover:underline">
                                             Ver todas las facturas
                                         </a>
                                     </div>
-                                    <p className="text-sm text-slate-500 px-4">Puedes ver el estado de las Facturas</p>
+                                    <p className="text-xs sm:text-sm text-slate-500 px-4">Puedes ver el estado de las Facturas</p>
                                     <div className="overflow-x-auto px-4">
-                                        <table className="w-full text-sm text-left text-gray-500">
+                                        <table className="w-full text-xs sm:text-sm text-left text-gray-500">
                                             <thead className="text-xs text-gray-700 uppercase bg-gray-50">
                                                 <tr>
-                                                    <th scope="col" className="px-6 py-3">Estado</th>
-                                                    <th scope="col" className="px-6 py-3">Método</th>
-                                                    <th scope="col" className="px-6 py-3">Monto</th>
-                                                    <th scope="col" className="px-6 py-3">Fecha</th>
-                                                    <th scope="col" className="px-6 py-3">Compañía</th>
+                                                    <th scope="col" className="px-4 py-2">Estado</th>
+                                                    <th scope="col" className="px-4 py-2">Método</th>
+                                                    <th scope="col" className="px-4 py-2">Monto</th>
+                                                    <th scope="col" className="px-4 py-2">Fecha</th>
+                                                    <th scope="col" className="px-4 py-2">Compañía</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 {recentInvoices.map((invoice) => (
                                                     <tr className="bg-white border-b" key={invoice.id}>
-                                                        <td className="px-6 py-4 flex items-center space-x-2">
+                                                        <td className="px-4 py-2 flex items-center space-x-1">
                                                             <FaCircle className={`text-${invoice.statusColor}-500`} />
                                                             <span>{invoice.status}</span>
                                                         </td>
-                                                        <td className="px-6 py-4">{invoice.method}</td>
-                                                        <td className="px-6 py-4">{invoice.amount}</td>
-                                                        <td className="px-6 py-4">{invoice.date}</td>
-                                                        <td className="px-6 py-4">{invoice.company}</td>
+                                                        <td className="px-4 py-2">{invoice.method}</td>
+                                                        <td className="px-4 py-2">{invoice.amount}</td>
+                                                        <td className="px-4 py-2">{invoice.date}</td>
+                                                        <td className="px-4 py-2">{invoice.company}</td>
                                                     </tr>
                                                 ))}
                                             </tbody>
@@ -283,25 +283,25 @@ const Dashboard = () => {
                             <div className="flex flex-col min-h-full">
                                 <div className="relative bg-white shadow-sm border border-slate-200 rounded-lg flex-grow">
                                     <div className="p-4 flex justify-between items-center">
-                                        <h4 className="text-lg font-semibold text-slate-800">Clientes Recientes</h4>
+                                        <h4 className="text-sm sm:text-base font-semibold text-slate-800">Clientes Recientes</h4>
                                         <a href="clientList" className="font-bold text-firstColor hover:underline">
                                             Ver todos los clientes
                                         </a>
                                     </div>
-                                    <p className="text-sm text-slate-500 px-4">Resumen de clientes</p>
+                                    <p className="text-xs sm:text-sm text-slate-500 px-4">Resumen de clientes</p>
                                     <div className="overflow-x-auto px-4">
-                                        <table className="w-full text-sm text-left text-gray-500">
+                                        <table className="w-full text-xs sm:text-sm text-left text-gray-500">
                                             <tbody>
                                                 {recentClients.map((client) => (
                                                     <tr className="bg-white border-b hover:bg-gray-50" key={client.id}>
-                                                        <th scope="row" className="flex items-center px-6 py-4 whitespace-nowrap">
-                                                            <img className="w-10 h-10 rounded-full" src={`https://cdn.pixabay.com/photo/2017/11/10/05/48/user-2935527_1280.png`} alt={client.name} />
-                                                            <div className="ps-3">
-                                                                <div className="text-base font-semibold">{client.name}</div>
-                                                                <div className="font-normal text-gray-500">{client.document}</div>
+                                                        <th scope="row" className="flex items-center px-4 py-2 whitespace-nowrap">
+                                                            <img className="w-8 sm:w-10 h-8 sm:h-10 rounded-full" src={`https://cdn.pixabay.com/photo/2017/11/10/05/48/user-2935527_1280.png`} alt={client.name} />
+                                                            <div className="pl-2">
+                                                                <div className="text-xs sm:text-sm font-semibold">{client.name}</div>
+                                                                <div className="text-xs font-normal text-gray-500">{client.document}</div>
                                                             </div>
                                                         </th>
-                                                        <td className="px-6 py-4 text-right">{client.code}</td>
+                                                        <td className="px-4 py-2 text-right">{client.code}</td>
                                                     </tr>
                                                 ))}
                                             </tbody>
@@ -311,34 +311,33 @@ const Dashboard = () => {
                             </div>
                         </div>
 
-                        <section className="bg-white ">
-                            <div className="px-4 mx-auto max-w-screen-xl sm:py-10 lg:px-6">
+                        <section className="bg-white mt-6">
+                            <div className="px-4 mx-auto max-w-screen-xl sm:py-8 lg:px-6">
                                 <div className="mx-auto max-w-screen-sm text-center">
-                                    <h2 className="text-4xl tracking-tight font-extrabold leading-tight text-gray-900">
+                                    <h2 className="text-xl sm:text-3xl tracking-tight font-extrabold text-gray-900">
                                         Realiza una nueva acción
                                     </h2>
-                                    <p className="mb-6 font-light text-gray-500 md:text-lg">
+                                    <p className="mb-4 sm:mb-6 font-light text-gray-500 text-sm sm:text-base">
                                         Inicia una nueva venta o agrega un cliente nuevo para continuar con tus operaciones.
                                     </p>
-                                    <div className="flex justify-center space-x-4">
+                                    <div className="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-4">
                                         {/* Botón para nueva venta */}
                                         <a
                                             href="/sales"
-                                            className=" flex items-center text-white bg-firstColor hover:bg-fourthColor focus:ring-4 focus:ring-primary-300 font-bold rounded-lg text-sm px-5 py-2.5 dark:bg-primary-600 dark:hover:bg-[#2C3E50] focus:outline-none dark:focus:ring-primary-800"
+                                            className="flex items-center justify-center text-white bg-firstColor hover:bg-fourthColor focus:ring-4 focus:ring-primary-300 font-bold rounded-lg text-sm px-4 sm:px-5 py-2.5"
                                         >
-                                            <MdPointOfSale className="text-xl mr-2" />
+                                            <MdPointOfSale className="text-lg sm:text-xl mr-2" />
                                             <span>Iniciar nueva venta</span>
                                         </a>
                                         {/* Botón para nuevo cliente */}
                                         <a
                                             href="#"
                                             onClick={handleOpenClientModal}
-                                            className="flex items-center text-white bg-thirdColor hover:bg-fourthColor focus:ring-4 focus:ring-green-300 font-bold rounded-lg text-sm px-5 py-2.5 dark:bg-green-500 dark:hover:bg-green-600 focus:outline-none dark:focus:ring-green-800"
+                                            className="flex items-center justify-center text-white bg-thirdColor hover:bg-fourthColor focus:ring-4 focus:ring-green-300 font-bold rounded-lg text-sm px-4 sm:px-5 py-2.5"
                                         >
-                                            <IoMdPersonAdd className="text-xl mr-2" />
+                                            <IoMdPersonAdd className="text-lg sm:text-xl mr-2" />
                                             <span>Agregar un nuevo cliente</span>
                                         </a>
-
                                     </div>
                                 </div>
                             </div>
@@ -359,7 +358,6 @@ const Dashboard = () => {
                 onClose={closeModal}
                 onConfirm={handleConfirm}
             />
-
         </div>
     );
 };
