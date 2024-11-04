@@ -47,7 +47,7 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
     const [searchTermUnidadMedida, setSearchTermUnidadMedida] = useState('');
     const [dropdownOpenUnidadMedida, setDropdownOpenUnidadMedida] = useState(false);
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
-    const [previousImageId, setPreviousImageId] = useState<number | null>(null); 
+    const [previousImageId, setPreviousImageId] = useState<number | null>(null);
 
     const [errors, setErrors] = useState({
         codigo: '',
@@ -55,6 +55,7 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
         unidadMedida: '',
         precioUnitario: '',
         codigoProductoSin: '',
+        image:''
     });
 
     useEffect(() => {
@@ -67,8 +68,9 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                 setUnidadMedida(product.unidadMedida ? product.unidadMedida.toString() : '');
                 setPrecioUnitario(product.precioUnitario ? product.precioUnitario.toString() : '');
                 setCodigoProductoSin(product.codigoProductoSin ? product.codigoProductoSin.toString() : '');
-                setPreviousImageId(product.imageId || null);             }
-        }else {
+                setPreviousImageId(product.imageId || null);
+            }
+        } else {
             setCodigo('');
             setNombreProducto('');
             setUnidadMedida('');
@@ -139,22 +141,22 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
 
     const uploadImage = async (itemId: number) => {
         if (!selectedImage) return;
-    
+
         const formData = new FormData();
         formData.append("file", selectedImage);
         formData.append("idItem", itemId.toString());
-    
+
         try {
             const response = previousImageId
                 ? await fetch(`${PATH_URL_IMAGES}/images/upload/${previousImageId}/update`, {
-                      method: "PUT",
-                      body: formData,
-                  })
-                : await fetch(`${PATH_URL_IMAGES}/images/upload`, { 
-                      method: "POST",
-                      body: formData,
-                  });
-    
+                    method: "PUT",
+                    body: formData,
+                })
+                : await fetch(`${PATH_URL_IMAGES}/images/upload`, {
+                    method: "POST",
+                    body: formData,
+                });
+
             if (response.ok) {
                 Swal.fire("Éxito", "Imagen actualizada correctamente", "success");
             } else {
@@ -166,7 +168,7 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
     };
 
     const validateForm = () => {
-        const newErrors = { codigo: '', nombreProducto: '', unidadMedida: '', precioUnitario: '', codigoProductoSin: '' };
+        const newErrors = { codigo: '', nombreProducto: '', unidadMedida: '', precioUnitario: '', codigoProductoSin: '', image: '' };
         const alphanumericPattern = /^[a-zA-Z0-9]+$/;
         const numericPattern = /^[0-9]+(\.[0-9]+)?$/;
 
@@ -174,7 +176,7 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
             newErrors.codigo = 'Este campo es requerido.';
         } else if (!alphanumericPattern.test(codigo)) {
             newErrors.codigo = 'Solo se permiten caracteres alfanuméricos y sin espacios.';
-        }else if (codigo.length > 10) {
+        } else if (codigo.length > 10) {
             newErrors.codigo = 'Máximo 10 caracteres permitidos.';
         }
 
@@ -188,7 +190,7 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
             newErrors.precioUnitario = 'Este campo es requerido.';
         } else if (!numericPattern.test(precioUnitario)) {
             newErrors.precioUnitario = 'Debe ser un número válido.';
-        }else if (precioUnitario.length > 10) {
+        } else if (precioUnitario.length > 10) {
             newErrors.precioUnitario = 'Máximo 10 caracteres permitidos.';
         }
 
@@ -198,6 +200,12 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
 
         if (!selectedUnidadMedida) {
             newErrors.unidadMedida = 'La unidad de medida es requerida.';
+        }
+        if (selectedImage) {
+            const fileType = selectedImage.type;
+            if (fileType !== "image/jpeg" && fileType !== "image/png") {
+                newErrors.image = 'Solo se permiten archivos JPG o PNG.';
+            }
         }
 
         setErrors(newErrors);
@@ -251,16 +259,16 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
             Swal.fire("Error", "Por favor, complete los campos obligatorios correctamente.", "error");
             return;
         }
-    
+
         const productData = {
-            id: product?.id, 
+            id: product?.id,
             codigo,
             descripcion: nombreProducto,
             unidadMedida: selectedUnidadMedida?.codigoClasificador,
             precioUnitario: Number(precioUnitario),
             codigoProductoSin: Number(selectedOption?.codigoProducto),
         };
-    
+
         try {
             let response;
             if (product && product.id) {
@@ -280,11 +288,11 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                     body: JSON.stringify(productData),
                 });
             }
-    
+
             if (response.ok) {
                 const savedProduct = await response.json();
-                onProductCreated(savedProduct); 
-    
+                onProductCreated(savedProduct);
+
                 Swal.fire({
                     icon: "success",
                     title: product ? "Producto actualizado correctamente" : "Producto creado correctamente",
@@ -294,8 +302,8 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                     if (selectedImage) {
                         await uploadImage(savedProduct.id);
                     }
-                    refreshProducts(); 
-                    onClose(); 
+                    refreshProducts();
+                    onClose();
                 });
             } else {
                 Swal.fire("Error", product ? "Error al actualizar el producto" : "Error al crear el producto", "error");
@@ -362,7 +370,7 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                                 </ul>
                             </div>
                         )}
-                        
+
                         <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-2 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
                             Homologación
                         </label>
@@ -445,12 +453,14 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                     <input
                         type="file"
                         onChange={(e) => setSelectedImage(e.target.files?.[0] || null)}
-                        className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                        className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 p-2 focus:outline-none focus:ring-2 focus:ring-blue-600"
                     />
-                    <label className=" text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-3 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
-                        Selecciona una Imagen (Opcional)
+                    <label className="block text-sm text-gray-500 mt-1">
+                        Selecciona una imagen (JPG o PNG)
                     </label>
+                    {errors.image && <span className="text-red-500 text-sm">{errors.image}</span>}
                 </div>
+
 
                 <div className="flex justify-end mt-6">
                     <button onClick={onClose} className="px-6 py-2 bg-sixthColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400 mr-2">

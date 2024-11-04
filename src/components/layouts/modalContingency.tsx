@@ -61,7 +61,7 @@ const ModalContingency: React.FC<ModalContingencyProps> = ({ isOpen, onClose, on
         onClose();
     };
 
-    if (!isOpen) return null; // Si `isOpen` es falso, no renderizamos el modal
+    if (!isOpen) return null;
 
     return (
         <div className="fixed inset-0 flex items-center justify-center z-50">
@@ -79,7 +79,7 @@ const ModalContingency: React.FC<ModalContingencyProps> = ({ isOpen, onClose, on
                 ) : (
                     <div className="relative">
                         <select
-                            className="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-seventhColor"
+                            className="w-full max-w-xs p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-seventhColor truncate"
                             value={eventoSeleccionado}
                             onChange={(e) => setEventoSeleccionado(e.target.value)}
                         >

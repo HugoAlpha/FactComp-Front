@@ -68,7 +68,7 @@ const CodeReceipt = () => {
             const response = await fetch(`${PATH_URL_BACKEND}/codigos/cuis/activo/${idPuntoVenta}/${idSucursal}`);
             if (response.ok) {
                 const data = await response.json();
-    
+
                 const formattedData = Array.isArray(data) ? data.map((code: any) => ({
                     id: code.id,
                     codigo: code.codigo,
@@ -82,7 +82,7 @@ const CodeReceipt = () => {
                     fechaVigencia: new Date(data.fechaVigencia).toLocaleString(),
                     vigente: data.vigente,
                 }];
-    
+
                 formattedData.sort((a: Code, b: Code) => b.id - a.id);
                 setCodes(formattedData);
             } else {
@@ -92,7 +92,7 @@ const CodeReceipt = () => {
             console.error('Error fetching codes:', error);
         }
     };
-    
+
 
     useEffect(() => {
         fetchCodes();
@@ -251,15 +251,14 @@ const CodeReceipt = () => {
                 <div className="flex-grow overflow-auto bg-gray-50">
                     <div className="p-6">
                         <h1 className="text-2xl font-bold mb-6 text-gray-700">CUIS</h1>
-
-                        <div className="flex justify-between items-center mb-4 text-black">
-                            <div className="flex items-center space-x-4">
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-4 text-black space-y-4 md:space-y-0 md:space-x-4">
+                            <div className="flex flex-col md:flex-row items-start md:items-center space-y-2 md:space-y-0 md:space-x-4">
                                 <div className="flex items-center">
-                                    <label htmlFor="itemsPerPage" className="mr-2 text-sm">Elementos por página:</label>
+                                    <label htmlFor="itemsPerPage" className="text-sm mr-2">Elementos por página:</label>
                                     <select
                                         value={rowsPerPage}
-                                        onChange={handleRowsPerPageChange}
-                                        className="border p-2 rounded-lg w-20 h-10"
+                                        onChange={(e) => setRowsPerPage(parseInt(e.target.value))}
+                                        className="border p-2 rounded-md w-20 h-10 text-sm focus:outline-none"
                                     >
                                         <option value={10}>10</option>
                                         <option value={20}>20</option>
@@ -268,11 +267,11 @@ const CodeReceipt = () => {
                                 </div>
 
                                 <div className="flex items-center">
-                                    <label htmlFor="filterStatus" className="mr-2 text-sm ml-2">Filtro por estado de código:</label>
+                                    <label htmlFor="filterStatus" className="text-sm mr-2">Estado de código:</label>
                                     <select
                                         value={filterStatus}
                                         onChange={(e) => setFilterStatus(e.target.value)}
-                                        className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-10"
+                                        className="border p-2 rounded-md w-28 md:w-auto text-sm focus:outline-none"
                                     >
                                         <option value="Todos">Todos</option>
                                         <option value="Vencido">Vencidos</option>
@@ -282,11 +281,11 @@ const CodeReceipt = () => {
 
                                     {filterStatus === "Por Vencer" && (
                                         <div className="flex items-center ml-4">
-                                            <p className="mr-2">Dentro de:</p>
+                                            <p className="text-sm mr-2">Dentro de:</p>
                                             <select
                                                 value={daysToExpire || ""}
                                                 onChange={(e) => setDaysToExpire(e.target.value ? Number(e.target.value) : null)}
-                                                className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-10"
+                                                className="border p-2 rounded-md w-20 text-sm focus:outline-none"
                                             >
                                                 <option value="5">5 días</option>
                                                 <option value="10">10 días</option>
@@ -294,35 +293,34 @@ const CodeReceipt = () => {
                                             </select>
                                         </div>
                                     )}
+                                </div>
 
-                                    <label htmlFor="selectedSucursal" className="mr-2 text-sm ml-6">Filtro por Sucursales:</label>
+                                <div className="flex items-center">
+                                    <label htmlFor="selectedSucursal" className="text-sm mr-2">Sucursal:</label>
                                     <select
                                         value={selectedSucursal}
                                         onChange={(e) => setSelectedSucursal(e.target.value)}
-                                        className="px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 h-10"
+                                        className="border p-2 rounded-md w-40 md:w-auto text-sm focus:outline-none"
                                     >
-                                        <option value="Todos">Todas las sucursales</option>
+                                        <option value="Todos">Todas</option>
                                         {sucursales.map((sucursal, index) => (
-                                            <option key={index} value={sucursal}>
-                                                {sucursal}
-                                            </option>
+                                            <option key={index} value={sucursal}>{sucursal}</option>
                                         ))}
                                     </select>
                                 </div>
                             </div>
 
-                            <div className="relative flex items-center w-full max-w-md">
+                            <div className="relative w-full max-w-md">
                                 <input
                                     type="text"
                                     placeholder="Buscar por código..."
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
-                                    className="border border-gray-300 focus:border-firstColor focus:ring-firstColor focus:outline-none px-4 py-2 rounded-lg w-full shadow-sm text-sm placeholder-gray-400 h-10"
+                                    className="w-full border border-gray-300 px-4 py-2 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 />
-                                <FaSearch className="absolute right-3 text-gray-500 text-xl pointer-events-none" />
+                                <FaSearch className="absolute top-2.5 right-3 text-gray-500" />
                             </div>
                         </div>
-
 
                         <div className="overflow-x-auto shadow-lg rounded-lg border border-gray-200">
                             <table className="table-auto w-full bg-white">
@@ -333,7 +331,7 @@ const CodeReceipt = () => {
                                         <th className="px-6 py-4 font-bold">Fecha de solicitud</th>
                                         <th className="px-6 py-4 font-bold">Fecha de vigencia</th>
                                         <th className="px-6 py-4 font-bold">Estado</th>
-                                    
+
                                     </tr>
                                 </thead>
                                 <tbody>
