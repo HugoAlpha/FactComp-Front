@@ -168,8 +168,8 @@ const Header = () => {
                     text: 'Hasta Pronto!!',
                     showConfirmButton: false,
                     timer: 3000,
-                  });
-                  localStorage.clear();
+                });
+                localStorage.clear();
                 window.location.href = "/";
 
             }
@@ -235,10 +235,10 @@ const Header = () => {
             setContingencia(false);
             updateColors(false);
         };
-    
+
         window.addEventListener('contingencyActivated', handleContingencyActivated);
         window.addEventListener('contingencyDeactivated', handleContingencyDeactivated);
-    
+
         return () => {
             window.removeEventListener('contingencyActivated', handleContingencyActivated);
             window.removeEventListener('contingencyDeactivated', handleContingencyDeactivated);
@@ -256,7 +256,7 @@ const Header = () => {
     const handleUserMenuToggle = () => {
         setShowUserMenu((prev) => !prev);
         if (showSettingsMenu) setShowSettingsMenu(false);
-        
+
     };
     const handleUserMenuToggle2 = () => {
         setIsUserModalOpen(!isUserModalOpen);
@@ -316,16 +316,16 @@ const Header = () => {
     }, []);
 
     return (
-        <header className="flex justify-between items-center shadow-md p-4 bg-seventhColor">
-            <div className="container mx-auto px-6 flex justify-between items-center">
-                <div className="flex items-center flex-grow space-x-6">
-                    <div className="relative">
-                        <span className="rounded-md text-lg font-semibold text-principalColor whitespace-nowrap">
+        <header className="flex flex-col sm:flex-row justify-between items-center shadow-md p-4 bg-seventhColor">
+            <div className="container mx-auto px-4 sm:px-6 flex flex-col sm:flex-row justify-between items-center space-y-4 sm:space-y-0">
+                <div className="flex flex-wrap items-center justify-center sm:justify-start space-x-4 sm:space-x-6">
+                    <div className="relative text-center sm:text-left">
+                        <span className="text-base sm:text-lg font-semibold text-principalColor whitespace-nowrap">
                             Sistema de Facturación Computarizada en Línea
                         </span>
                     </div>
-                    <div className="flex items-center bg-fourthColor px-3 py-1 rounded-lg space-x-2">
-                        <span className="text-sm font-medium text-black">
+                    <div className="flex items-center bg-fourthColor px-2 sm:px-3 py-1 rounded-lg space-x-2">
+                        <span className="text-xs sm:text-sm font-medium text-black">
                             {isOnline ? "Online" : "Offline"}
                         </span>
                         <span className="relative flex h-3 w-3">
@@ -340,9 +340,9 @@ const Header = () => {
                         </span>
                     </div>
                 </div>
-                <div className="flex items-center space-x-6">
+                <div className="flex items-center space-x-4 sm:space-x-6 mt-4 sm:mt-0">
                     <label className="inline-flex items-center cursor-pointer">
-                        <span className="mr-3 text-sm font-medium text-gray-800">
+                        <span className="text-xs sm:text-sm font-medium text-gray-800 mr-2">
                             Modo Contingencia
                         </span>
                         <input
@@ -352,11 +352,11 @@ const Header = () => {
                             className="sr-only peer"
                         />
                         <div
-                            className={`relative w-12 h-6 rounded-full transition-colors duration-300 ${contingencia ? "bg-green-500" : "bg-gray-400"
+                            className={`relative w-10 sm:w-12 h-5 sm:h-6 rounded-full transition-colors duration-300 ${contingencia ? "bg-green-500" : "bg-gray-400"
                                 }`}
                         >
                             <div
-                                className={`absolute top-0.5 left-1 h-5 w-5 rounded-full bg-white shadow-md transition-transform duration-300 ${contingencia ? "transform translate-x-6" : "transform translate-x-0"
+                                className={`absolute top-0.5 left-1 h-4 w-4 sm:h-5 sm:w-5 rounded-full bg-white shadow-md transition-transform duration-300 ${contingencia ? "transform translate-x-5 sm:translate-x-6" : "transform translate-x-0"
                                     }`}
                             ></div>
                         </div>
@@ -367,24 +367,24 @@ const Header = () => {
                             onClick={handleUserMenuToggle}
                             className="bg-gray-200 p-2 rounded-full hover:bg-gray-300 transition duration-200"
                         >
-                            <FaUser className="text-principalColor text-xl" />
+                            <FaUser className="text-principalColor text-lg sm:text-xl" />
                         </button>
                         {showUserMenu && (
-                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg z-50 divide-y divide-gray-100">
-                                <div className="px-4 py-3 text-sm text-gray-900">
-                                    <div>Usuario:  </div>
+                            <div className="absolute right-0 mt-2 w-40 sm:w-48 bg-white rounded-lg shadow-lg z-50 divide-y divide-gray-100">
+                                <div className="px-3 sm:px-4 py-2 text-xs sm:text-sm text-gray-900">
+                                    <div>Usuario:</div>
                                     <div className="font-bold truncate uppercase">{userName}</div>
                                 </div>
-                                <ul className="py-2 text-sm text-gray-700">
+                                <ul className="py-2 text-xs sm:text-sm text-gray-700">
                                     <li>
-                                        <button onClick={() => setIsUserModalOpen(true)} className="w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition">
+                                        <button onClick={() => setIsUserModalOpen(true)} className="w-full px-3 sm:px-4 py-2 text-gray-700 hover:bg-gray-100 transition">
                                             Configuración
-                                        </button>{isUserModalOpen && (
-                                    <ModalUserInfo isOpen={isUserModalOpen} onClose={() => setIsUserModalOpen(false)} />
-                                )}
+                                        </button>
+                                        {isUserModalOpen && (
+                                            <ModalUserInfo isOpen={isUserModalOpen} onClose={() => setIsUserModalOpen(false)} />
+                                        )}
                                     </li>
                                 </ul>
-                                
                             </div>
                         )}
                     </div>
@@ -393,7 +393,7 @@ const Header = () => {
                         onClick={handleLogout}
                         className="bg-gray-200 p-2 rounded-full hover:bg-gray-300 transition duration-200"
                     >
-                        <IoExitOutline className="w-6 h-6 text-principalColor" />
+                        <IoExitOutline className="text-principalColor w-5 sm:w-6 h-5 sm:h-6" />
                     </button>
                 </div>
             </div>

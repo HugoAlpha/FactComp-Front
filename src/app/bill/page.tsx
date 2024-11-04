@@ -495,7 +495,7 @@ const BillList = () => {
         }).then(() => {
           const deactivationEvent = new CustomEvent('contingencyDeactivated');
           window.dispatchEvent(deactivationEvent);
-          setIsContingencyMode(false);          
+          setIsContingencyMode(false);
           fetchBills();
 
           localStorage.removeItem('contingenciaEstado');
@@ -506,7 +506,7 @@ const BillList = () => {
             title: 'Paquetes enviados',
             text: 'El modo contingencia se ha desactivado, puede volver a emitir facturas.',
             confirmButtonText: 'Aceptar'
-        });
+          });
         });
       }
     });
@@ -518,127 +518,123 @@ const BillList = () => {
       {userRole === 'ROLE_ADMIN' ? <Sidebar /> : <CashierSidebar />}
       <div className="flex flex-col w-full min-h-screen">
         <Header />
-        <div className="flex-grow overflow-auto bg-gray-50 p-6">
-          <div className='flex justify-between'>
-            <h1 className="text-2xl font-bold mb-6 text-gray-700">Lista de Facturas</h1>
-
+        <div className="flex-grow overflow-auto bg-gray-50 p-4 md:p-6">
+          <div className="flex flex-col md:flex-row justify-between mb-4">
+            <h1 className="text-xl md:text-2xl font-bold mb-4 md:mb-0 text-gray-700">Lista de Facturas</h1>
           </div>
 
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center space-x-4 w-full">
-              <input
-                type="text"
-                placeholder="Buscar por número de factura o cliente"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="border border-gray-300 rounded-lg w-1/4 h-10 px-3"
-              />
+          <div className="flex flex-col md:flex-row items-center justify-between mb-6 space-y-4 md:space-y-0 md:space-x-4">
+            <input
+              type="text"
+              placeholder="Buscar por número de factura o cliente"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="border border-gray-300 rounded-lg w-full md:w-1/4 h-10 px-3"
+            />
 
-              <select
-                value={estadoFilter}
-                onChange={(e) => setEstadoFilter(e.target.value)}
-                className="border border-gray-300 rounded-lg  h-10 px-3"
-              >
-                <option value="TODAS">Todas</option>
-                <option value="VALIDA">Válido</option>
-                <option value="ANULADO">Anulado</option>
-              </select>
+            <select
+              value={estadoFilter}
+              onChange={(e) => setEstadoFilter(e.target.value)}
+              className="border border-gray-300 rounded-lg w-full md:w-auto h-10 px-3"
+            >
+              <option value="TODAS">Todas</option>
+              <option value="VALIDA">Válido</option>
+              <option value="ANULADO">Anulado</option>
+            </select>
 
-              <div className="flex items-center space-x-4">
-                <div className="flex items-center">
-                  <label htmlFor="fechaDesde" className="text-sm font-medium text-gray-700 place-content-center mr-2">Fecha desde:</label>
-                  <input
-                    id="fechaDesde"
-                    type="date"
-                    value={fechaDesde || ''}
-                    onChange={(e) => setFechaDesde(e.target.value)}
-                    className="border border-gray-300 rounded-lg h-10 px-3"
-                  />
-                </div>
-
-                <div className="flex items-center">
-                  <label htmlFor="fechaHasta" className="text-sm font-medium text-gray-700 place-content-center mr-2">Fecha hasta:</label>
-                  <input
-                    id="fechaHasta"
-                    type="date"
-                    value={fechaHasta || ''}
-                    onChange={(e) => setFechaHasta(e.target.value)}
-                    className="border border-gray-300 rounded-lg  h-10 px-3"
-                  />
-                </div>
-
-                {isContingencyMode && (
-                  <button
-                    className="bg-firstColor text-white rounded-lg font-bold hover:bg-fourthColor  p-1"
-                    onClick={handleSendContingencyPackages}
-                  >
-                    Enviar paquetes contingencia
-                  </button>
-                )}
+            <div className="flex flex-col sm:flex-row items-center space-y-4 sm:space-y-0 sm:space-x-4 w-full md:w-auto">
+              <div className="flex items-center">
+                <label htmlFor="fechaDesde" className="text-sm font-medium text-gray-700 mr-2">Fecha desde:</label>
+                <input
+                  id="fechaDesde"
+                  type="date"
+                  value={fechaDesde || ''}
+                  onChange={(e) => setFechaDesde(e.target.value)}
+                  className="border border-gray-300 rounded-lg w-full md:w-auto h-10 px-3"
+                />
               </div>
+
+              <div className="flex items-center">
+                <label htmlFor="fechaHasta" className="text-sm font-medium text-gray-700 mr-2">Fecha hasta:</label>
+                <input
+                  id="fechaHasta"
+                  type="date"
+                  value={fechaHasta || ''}
+                  onChange={(e) => setFechaHasta(e.target.value)}
+                  className="border border-gray-300 rounded-lg w-full md:w-auto h-10 px-3"
+                />
+              </div>
+
+              {isContingencyMode && (
+                <button
+                  className="bg-firstColor text-white rounded-lg font-bold hover:bg-fourthColor p-1 md:p-2"
+                  onClick={handleSendContingencyPackages}
+                >
+                  Enviar paquetes contingencia
+                </button>
+              )}
             </div>
           </div>
 
-          <div className="flex space-x-6">
-            <div className={`${selectedBill ? 'w-2/3' : 'w-full'} transition-all duration-300`}>
+          <div className="flex flex-col md:flex-row space-y-4 md:space-y-0 md:space-x-6">
+            <div className={`${selectedBill ? 'w-full md:w-2/3' : 'w-full'} transition-all duration-300`}>
               <div className="overflow-x-auto shadow-lg rounded-lg border border-gray-200 bg-white">
                 <table className="table-auto w-full">
                   <thead>
                     <tr className="bg-fourthColor text-left text-gray-700">
-                      <th className="px-6 py-4 font-bold">Número de Documento</th>
-                      <th className="px-6 py-4 font-bold">Cliente</th>
-                      <th className="px-6 py-4 font-bold">Fecha</th>
-                      <th className="px-6 py-4 font-bold">Total</th>
-                      <th className="px-6 py-4 font-bold">Estado</th>
-                      <th className="px-6 py-4 font-bold">Formato</th>
-                      <th className="px-6 py-4 font-bold">Operaciones</th>
+                      <th className="px-4 py-2 md:px-6 md:py-4 font-bold">Número de Documento</th>
+                      <th className="px-4 py-2 md:px-6 md:py-4 font-bold">Cliente</th>
+                      <th className="px-4 py-2 md:px-6 md:py-4 font-bold">Fecha</th>
+                      <th className="px-4 py-2 md:px-6 md:py-4 font-bold">Total</th>
+                      <th className="px-4 py-2 md:px-6 md:py-4 font-bold">Estado</th>
+                      <th className="px-4 py-2 md:px-6 md:py-4 font-bold">Formato</th>
+                      <th className="px-4 py-2 md:px-6 md:py-4 font-bold">Operaciones</th>
                     </tr>
                   </thead>
                   <tbody>
                     {paginatedBills.map((bill) => (
                       <tr key={bill.id} className="border-b hover:bg-gray-50 text-black">
-                        <td className="px-6 py-4">{bill.documentNumber}</td>
-                        <td className="px-6 py-4">{bill.client}</td>
-                        <td className="px-6 py-4">
+                        <td className="px-4 py-2 md:px-6 md:py-4">{bill.documentNumber}</td>
+                        <td className="px-4 py-2 md:px-6 md:py-4">{bill.client}</td>
+                        <td className="px-4 py-2 md:px-6 md:py-4">
                           {bill.date.toLocaleDateString()} {bill.date.toLocaleTimeString()}
                         </td>
-                        <td className="px-6 py-4">{bill.total}</td>
-                        <td className="px-6 py-4">{getStatus(bill.estado)}</td>
-                        <td className="px-6 py-4">
+                        <td className="px-4 py-2 md:px-6 md:py-4">{bill.total}</td>
+                        <td className="px-4 py-2 md:px-6 md:py-4">{getStatus(bill.estado)}</td>
+                        <td className="px-4 py-2 md:px-6 md:py-4">
                           {bill.formato === 'VALIDA' ? (
-                            <TbCircleCheckFilled className='text-5xl text-green-600' />
+                            <TbCircleCheckFilled className="text-2xl md:text-5xl text-green-600" />
                           ) : (
-                            <FaTimes className='text-5xl text-red-600' />
+                            <FaTimes className="text-2xl md:text-5xl text-red-600" />
                           )}
                         </td>
-                        <td className="px-6 py-4">
-                          <div className="flex">
+                        <td className="px-4 py-2 md:px-6 md:py-4">
+                          <div className="flex space-x-2">
                             <button
-                              className="bg-green-200 hover:bg-green-300 p-2 rounded-l-lg flex items-center justify-center border border-green-300"
+                              className="bg-green-200 hover:bg-green-300 p-1 md:p-2 rounded-l-lg flex items-center justify-center border border-green-300"
                               onClick={() => handleViewRollo(bill.id)}
                             >
-                              <FaEye className="text-black" />
+                              <FaEye className="text-sm md:text-lg text-black" />
                             </button>
 
                             <button
-                              className="bg-yellow-200 hover:bg-yellow-300 p-2 flex items-center justify-center border border-yellow-300"
+                              className="bg-yellow-200 hover:bg-yellow-300 p-1 md:p-2 flex items-center justify-center border border-yellow-300"
                               onClick={() => handleViewQR(bill.cuf, bill.numeroFactura)}
                             >
-                              <BsClipboardCheck className="text-black" />
+                              <BsClipboardCheck className="text-sm md:text-lg text-black" />
                             </button>
 
                             <button
-                              className="bg-red-200 hover:bg-red-300 p-2 rounded-r-lg flex items-center justify-center border border-red-300"
+                              className="bg-red-200 hover:bg-red-300 p-1 md:p-2 rounded-r-lg flex items-center justify-center border border-red-300"
                               onClick={() => handleAnularFactura(bill)}
                             >
-                              <HiReceiptRefund className="text-black" />
+                              <HiReceiptRefund className="text-sm md:text-lg text-black" />
                             </button>
                           </div>
                         </td>
                       </tr>
                     ))}
                   </tbody>
-
                 </table>
               </div>
 
@@ -661,7 +657,7 @@ const BillList = () => {
                     <button
                       key={page}
                       onClick={() => setCurrentPage(page)}
-                      className={`min-w-9 rounded-full border py-2 px-3.5 text-center text-sm transition-all shadow-sm ${page === currentPage ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-800 hover:text-white hover:border-slate-800'} focus:bg-slate-800 focus:text-white active:border-slate-800 active:bg-slate-800`}
+                      className={`min-w-9 rounded-full border py-2 px-3.5 text-center text-sm transition-all shadow-sm ${page === currentPage ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-800 hover:text-white hover:border-slate-800'}`}
                     >
                       {page}
                     </button>
@@ -681,7 +677,7 @@ const BillList = () => {
                   </button>
                 </div>
                 <div className="flex space-x-1 justify-center mt-2 mr-2">
-                  <span className="text-sm font-normal text-gray-500 mb-4 md:mb-0 block w-full md:inline md:w-auto">
+                  <span className="text-sm font-normal text-gray-500">
                     Mostrando página <span className="font-semibold text-gray-900">{currentPage}</span> de <span className="font-semibold text-gray-900">{totalPages}</span>
                   </span>
                 </div>
