@@ -51,70 +51,73 @@ const Dashboard = () => {
         const fetchData = async () => {
             try {
                 const idPuntoVenta = localStorage.getItem('idPOS');
-                const idSucursal = localStorage.getItem('idSucursal');
-                const fechaActual = new Date().toLocaleDateString('en-CA');
+            const idSucursal = localStorage.getItem('idSucursal');
+            const fechaActual = new Date().toLocaleDateString('en-CA');
 
-                const dailySalesResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/ventas-diarias-monto`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        idPuntoVenta: parseInt(idPuntoVenta, 10),
-                        idSucursal: parseInt(idSucursal, 10),
-                        fecha: fechaActual,
-                    }),
-                });
-                const dailySalesData = await dailySalesResponse.json();
-                setDailySales(dailySalesData || 0);
+            const dailySalesResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/ventas-diarias-monto`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    idPuntoVenta: parseInt(idPuntoVenta, 10),
+                    idSucursal: parseInt(idSucursal, 10),
+                    fecha: fechaActual,
+                }),
+            });
+            const dailySalesData = await dailySalesResponse.json();
+            setDailySales(dailySalesData || 0);
 
-                const primerDiaMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
-                const ultimoDiaMes = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().split('T')[0];
+            const primerDiaMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
+            const ultimoDiaMes = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().split('T')[0];
 
-                const monthlySalesResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/ventas-mensuales-montos`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        idPuntoVenta: parseInt(idPuntoVenta, 10),
-                        idSucursal: parseInt(idSucursal, 10),
-                        fechaInicio: primerDiaMes,
-                        fechaFin: ultimoDiaMes,
-                    }),
-                });
-                const monthlySalesData = await monthlySalesResponse.json();
-                setMonthlySales(monthlySalesData || 0);
+            const monthlySalesResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/ventas-mensuales-montos`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    idPuntoVenta: parseInt(idPuntoVenta, 10),
+                    idSucursal: parseInt(idSucursal, 10),
+                    fechaInicio: primerDiaMes,
+                    fechaFin: ultimoDiaMes,
+                }),
+            });
+            const monthlySalesData = await monthlySalesResponse.json();
+            setMonthlySales(monthlySalesData || 0);
 
-                const idBranch = localStorage.getItem('idSucursal');
+            const idBranch = localStorage.getItem('idSucursal');
+            const idPOS = localStorage.getItem('idPOS');
+            const totalOrdersResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/ventas-cantidad/${idPOS}/${idBranch}`);
+            const totalOrdersData = await totalOrdersResponse.json();
+            setTotalOrders(totalOrdersData || 0);
+
+            const totalClientsResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/clientes-registrados`);
+            const totalClientsData = await totalClientsResponse.json();
+            setTotalClients(totalClientsData || 0);
+
+            const response = await fetch(`${PATH_URL_BACKEND}/factura`);
+            if (response.ok) {
+                const data = await response.json();
                 const idPOS = localStorage.getItem('idPOS');
-                const totalOrdersResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/ventas-cantidad/${idPOS}/${idBranch}`);
-                const totalOrdersData = await totalOrdersResponse.json();
-                setTotalOrders(totalOrdersData || 0);
-
-                const totalClientsResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/clientes-registrados`);
-                const totalClientsData = await totalClientsResponse.json();
-                setTotalClients(totalClientsData || 0);
-
-                const response = await fetch(`${PATH_URL_BACKEND}/factura`);
-                if (response.ok) {
-                    const data = await response.json();
-                    const filteredData = data.filter(invoice => invoice.codigoPuntoVenta === Number(idPOS));
-                    const sortedData = filteredData.sort((a, b) => new Date(b.fechaEmision) - new Date(a.fechaEmision));
-                    const lastFourInvoices = sortedData.slice(0, 4);
-                    const formattedInvoices = lastFourInvoices.map(invoice => ({
-                        id: invoice.id,
-                        status: invoice.estado === "VALIDA" ? "Fac. Válida" : "Anulada",
-                        statusColor: invoice.estado === "VALIDA" ? "green" : "red",
-                        method: invoice.codigoMetodoPago === 1 ? "Efectivo" : invoice.codigoMetodoPago === 7 ? "Transferencia" : "Otro",
-                        amount: `Bs ${invoice.montoTotal.toFixed(2)}`,
-                        date: new Date(invoice.fechaEmision).toLocaleDateString(),
-                        company: invoice.razonSocialEmisor,
-                    }));
-                    setRecentInvoices(formattedInvoices);
-                } else {
-                    console.error("Error al obtener los datos de las facturas");
-                }
+                const filteredData = data.filter(invoice => invoice.puntoVenta.id === Number(idPOS));
+                const sortedData = filteredData.sort((a, b) => b.id - a.id);
+                const lastFourInvoices = sortedData.slice(0, 4);
+                const formattedInvoices = lastFourInvoices.map(invoice => ({
+                    id: invoice.id,
+                    status: invoice.estado === "VALIDA" ? "Fac. Válida" : "Anulada",
+                    statusColor: invoice.estado === "VALIDA" ? "green" : "red",
+                    method: invoice.codigoMetodoPago === 1 ? "Efectivo" : invoice.codigoMetodoPago === 7 ? "Transferencia" : "Otro",
+                    amount: `Bs ${invoice.montoTotal.toFixed(2)}`,
+                    date: new Date(invoice.fechaEmision).toLocaleDateString(),
+                    company: invoice.razonSocialEmisor,
+                }));
+            
+                setRecentInvoices(formattedInvoices);
+            } else {
+                console.error("Error al obtener los datos de las facturas");
+            }
+            
 
                 const clientsResponse = await fetch(`${PATH_URL_BACKEND}/api/clientes/`);
                 if (clientsResponse.ok) {
@@ -215,28 +218,29 @@ const Dashboard = () => {
                     <div className="p-4 sm:p-6">
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-4 sm:mb-6">
                             {/* Ventas de Hoy */}
-                            <div className="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg p-4">
-                                <h3 className="text-sm sm:text-base font-semibold text-slate-800">Ventas de Hoy</h3>
-                                <p className="text-lg sm:text-xl font-bold text-slate-800">{dailySales ? formatCurrency(dailySales) : 'Cargando...'}</p>
-                            </div>
+                                <div className="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg p-4">
+                                    <h3 className="text-sm sm:text-base font-semibold text-slate-800">Ventas de Hoy</h3>
+                                    <p className="text-lg sm:text-xl font-bold text-slate-800">{dailySales !== null && dailySales !== undefined ? formatCurrency(dailySales) : '0'}</p>
+                                </div>
 
-                            {/* Total Mensual */}
-                            <div className="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg p-4">
-                                <h3 className="text-sm sm:text-base font-semibold text-slate-800">Total Mensual</h3>
-                                <p className="text-lg sm:text-xl font-bold text-slate-800">{monthlySales ? formatCurrency(monthlySales) : 'Cargando...'}</p>
-                            </div>
+                                {/* Total Mensual */}
+                                <div className="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg p-4">
+                                    <h3 className="text-sm sm:text-base font-semibold text-slate-800">Total Mensual</h3>
+                                    <p className="text-lg sm:text-xl font-bold text-slate-800">{monthlySales !== null && monthlySales !== undefined ? formatCurrency(monthlySales) : '0'}</p>
+                                </div>
 
-                            {/* Total de Facturas */}
-                            <div className="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg p-4">
-                                <h3 className="text-sm sm:text-base font-semibold text-slate-800">Total de Facturas</h3>
-                                <p className="text-lg sm:text-xl font-bold text-slate-800">{totalOrders ? totalOrders : 'Cargando...'}</p>
-                            </div>
+                                {/* Total de Facturas */}
+                                <div className="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg p-4">
+                                    <h3 className="text-sm sm:text-base font-semibold text-slate-800">Total de Facturas</h3>
+                                    <p className="text-lg sm:text-xl font-bold text-slate-800">{totalOrders !== null && totalOrders !== undefined ? totalOrders : '0'}</p>
+                                </div>
 
-                            {/* Clientes Registrados */}
-                            <div className="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg p-4">
-                                <h3 className="text-sm sm:text-base font-semibold text-slate-800">Clientes</h3>
-                                <p className="text-lg sm:text-xl font-bold text-slate-800">{totalClients ? totalClients : 'Cargando...'}</p>
-                            </div>
+                                {/* Clientes Registrados */}
+                                <div className="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg p-4">
+                                    <h3 className="text-sm sm:text-base font-semibold text-slate-800">Clientes</h3>
+                                    <p className="text-lg sm:text-xl font-bold text-slate-800">{totalClients !== null && totalClients !== undefined ? totalClients : '0'}</p>
+                                </div>
+
                         </div>
 
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
@@ -250,34 +254,39 @@ const Dashboard = () => {
                                     </div>
                                     <p className="text-xs sm:text-sm text-slate-500 px-4">Puedes ver el estado de las Facturas</p>
                                     <div className="overflow-x-auto px-4">
-                                        <table className="w-full text-xs sm:text-sm text-left text-gray-500">
-                                            <thead className="text-xs text-gray-700 uppercase bg-gray-50">
-                                                <tr>
-                                                    <th scope="col" className="px-4 py-2">Estado</th>
-                                                    <th scope="col" className="px-4 py-2">Método</th>
-                                                    <th scope="col" className="px-4 py-2">Monto</th>
-                                                    <th scope="col" className="px-4 py-2">Fecha</th>
-                                                    <th scope="col" className="px-4 py-2">Compañía</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {recentInvoices.map((invoice) => (
-                                                    <tr className="bg-white border-b" key={invoice.id}>
-                                                        <td className="px-4 py-2 flex items-center space-x-1">
-                                                            <FaCircle className={`text-${invoice.statusColor}-500`} />
-                                                            <span>{invoice.status}</span>
-                                                        </td>
-                                                        <td className="px-4 py-2">{invoice.method}</td>
-                                                        <td className="px-4 py-2">{invoice.amount}</td>
-                                                        <td className="px-4 py-2">{invoice.date}</td>
-                                                        <td className="px-4 py-2">{invoice.company}</td>
+                                        {recentInvoices.length > 0 ? (
+                                            <table className="w-full text-xs sm:text-sm text-left text-gray-500">
+                                                <thead className="text-xs text-gray-700 uppercase bg-gray-50">
+                                                    <tr>
+                                                        <th scope="col" className="px-4 py-2">Estado</th>
+                                                        <th scope="col" className="px-4 py-2">Método</th>
+                                                        <th scope="col" className="px-4 py-2">Monto</th>
+                                                        <th scope="col" className="px-4 py-2">Fecha</th>
+                                                        <th scope="col" className="px-4 py-2">Compañía</th>
                                                     </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
+                                                </thead>
+                                                <tbody>
+                                                    {recentInvoices.map((invoice) => (
+                                                        <tr className="bg-white border-b" key={invoice.id}>
+                                                            <td className="px-4 py-2 flex items-center space-x-1">
+                                                                <FaCircle className={`text-${invoice.statusColor}-500`} />
+                                                                <span>{invoice.status}</span>
+                                                            </td>
+                                                            <td className="px-4 py-2">{invoice.method}</td>
+                                                            <td className="px-4 py-2">{invoice.amount}</td>
+                                                            <td className="px-4 py-2">{invoice.date}</td>
+                                                            <td className="px-4 py-2">{invoice.company}</td>
+                                                        </tr>
+                                                    ))}
+                                                </tbody>
+                                            </table>
+                                        ) : (
+                                            <p className="text-center text-gray-500 py-4">No existen facturas recientes</p>
+                                        )}
                                     </div>
                                 </div>
                             </div>
+
 
                             {/* Clientes Recientes */}
                             <div className="flex flex-col min-h-full">

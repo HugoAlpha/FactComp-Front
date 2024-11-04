@@ -611,24 +611,33 @@ const BillList = () => {
                         <td className="px-4 py-2 md:px-6 md:py-4">
                           <div className="flex space-x-2">
                             <button
-                              className="bg-green-200 hover:bg-green-300 p-1 md:p-2 rounded-l-lg flex items-center justify-center border border-green-300"
+                              className="bg-green-200 hover:bg-green-300 p-1 md:p-2 rounded-l-lg flex items-center justify-center border border-green-300 relative group"
                               onClick={() => handleViewRollo(bill.id)}
                             >
                               <FaEye className="text-sm md:text-lg text-black" />
+                              <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 hidden group-hover:flex items-center justify-center bg-gray-800 text-white text-xs rounded px-2 py-1">
+                                Ver rollo
+                            </span>
                             </button>
 
                             <button
-                              className="bg-yellow-200 hover:bg-yellow-300 p-1 md:p-2 flex items-center justify-center border border-yellow-300"
+                              className="bg-yellow-200 hover:bg-yellow-300 p-1 md:p-2 flex items-center justify-center border border-yellow-300 relative group"
                               onClick={() => handleViewQR(bill.cuf, bill.numeroFactura)}
                             >
                               <BsClipboardCheck className="text-sm md:text-lg text-black" />
+                              <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 hidden group-hover:flex items-center justify-center bg-gray-800 text-white text-xs rounded px-2 py-1">
+                                Ver en SIAT
+                            </span>
                             </button>
 
                             <button
-                              className="bg-red-200 hover:bg-red-300 p-1 md:p-2 rounded-r-lg flex items-center justify-center border border-red-300"
+                              className="bg-red-200 hover:bg-red-300 p-1 md:p-2 rounded-r-lg flex items-center justify-center border border-red-300 relative group"
                               onClick={() => handleAnularFactura(bill)}
                             >
                               <HiReceiptRefund className="text-sm md:text-lg text-black" />
+                              <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 hidden group-hover:flex items-center justify-center bg-gray-800 text-white text-xs rounded px-2 py-1">
+                                  Anular
+                              </span>
                             </button>
                           </div>
                         </td>

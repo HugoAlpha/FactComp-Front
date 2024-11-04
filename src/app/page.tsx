@@ -17,7 +17,10 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    if (!username || !password) {
+    const trimmedUsername = username.trim();
+    const trimmedPassword = password.trim();
+
+    if (!trimmedUsername || !trimmedPassword) {
       Swal.fire({
         icon: 'warning',
         title: 'Campos vacíos',
@@ -35,57 +38,54 @@ const Login = () => {
           'Content-Type': 'application/x-www-form-urlencoded'
         },
         body: new URLSearchParams({
-          username,
-          password
+          username: trimmedUsername,
+          password: trimmedPassword
         }).toString()
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        if (data.response === "200") {
-          localStorage.setItem("username", username);
-          localStorage.setItem("role", data.role);
-          localStorage.setItem("tokenJWT", data.tokenJWT);
-          localStorage.setItem("idEmpresa", data.id_empresa);
-
-          Swal.fire({
-            position: "center",
-            icon: 'success',
-            title: data.message,
-            text: 'Bienvenido a Alpha E-Facturación',
-            showConfirmButton: false,
-            timer: 3500
-          }).then(() => {
-            if (data.role === "ROLE_ADMIN") {
-              router.push('/selectionBranch');
-            } else if (data.role === "ROLE_USER") {
-              router.push('/selectionPOS');
-            }
-          });
-        } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error de autenticación',
-            text: data.response || 'Usuario o contraseña incorrectos.',
-            showConfirmButton: false,
-            timer: 2000
-          });
-        }
+      let data;
+      if (response.headers.get("content-type")?.includes("application/json")) {
+        data = await response.json();
       } else {
+        data = await response.text();
+      }
+
+      if (response.ok && typeof data === "object" && data.response === "200") {
+        localStorage.setItem("username", trimmedUsername);
+        localStorage.setItem("role", data.role);
+        localStorage.setItem("tokenJWT", data.tokenJWT);
+        localStorage.setItem("idEmpresa", data.id_empresa);
+
+        Swal.fire({
+          position: "center",
+          icon: 'success',
+          title: data.message,
+          text: 'Bienvenido a Alpha E-Facturación',
+          showConfirmButton: false,
+          timer: 3500
+        }).then(() => {
+          if (data.role === "ROLE_ADMIN") {
+            router.push('/selectionBranch');
+          } else if (data.role === "ROLE_USER") {
+            router.push('/selectionPOS');
+          }
+        });
+      } else {
+        const errorMessage = typeof data === "string" ? data : data.message || 'Error de inicio de sesión.';
+        
         Swal.fire({
           icon: 'error',
-          title: 'Error de servidor',
-          text: data.response || 'No se pudo conectar con el servidor.',
+          title: 'Error de autenticación',
+          text: errorMessage,
           showConfirmButton: false,
-          timer: 2000
+          timer: 2500
         });
       }
     } catch (error) {
       console.error("Error de conexión:", error);
       Swal.fire({
         icon: 'error',
-        title: 'Error de inicio de sesion',
+        title: 'Error de inicio de sesión',
         text: 'Hubo un problema, verifica usuario y contraseña',
         showConfirmButton: false,
         timer: 2000

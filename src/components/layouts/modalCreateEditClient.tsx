@@ -80,7 +80,6 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
         }
     };
 
-
     const validateForm = () => {
         const newErrors: { [key: string]: string } = {};
         const namePattern = /^[a-zA-Z\s]+$/;
@@ -116,9 +115,7 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
         }
     
         if (formData.complemento) {
-            if (!alphanumericPattern.test(formData.complemento)) {
-                newErrors.complemento = 'No se permiten caracteres especiales.';
-            } else if (formData.complemento.length > 15) { 
+            if (formData.complemento.length > 15) { 
                 newErrors.complemento = 'Número de caracteres permitido: 15.';
             }
         }

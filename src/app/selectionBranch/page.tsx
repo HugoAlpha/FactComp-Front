@@ -14,6 +14,8 @@ const SelectionBranch = () => {
     });
 
     const [branches, setBranches] = useState([]);
+    const [filteredBranches, setFilteredBranches] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
     const [isContingencyModalOpen, setIsContingencyModalOpen] = useState(false);
 
     const fetchBranches = async () => {
@@ -24,6 +26,7 @@ const SelectionBranch = () => {
                 const data = await response.json();
                 const filteredBranches = data.filter(branch => branch.empresa.id === idEmpresa);
                 setBranches(filteredBranches);
+                setFilteredBranches(filteredBranches);
             } else {
                 Swal.fire('Error', 'No se pudo obtener la lista de sucursales', 'error');
             }
@@ -35,7 +38,14 @@ const SelectionBranch = () => {
     useEffect(() => {
         fetchBranches();
     }, []);
-    
+
+    const handleSearch = (e) => {
+        const term = e.target.value.toLowerCase();
+        setSearchTerm(term);
+        const filtered = branches.filter(branch => branch.nombre.toLowerCase().includes(term));
+        setFilteredBranches(filtered);
+    };
+
     const handleSelectBranch = (id, codigo) => {
         localStorage.setItem('idSucursal', id);
         localStorage.setItem('CodigoSucursal', codigo);
@@ -111,8 +121,17 @@ const SelectionBranch = () => {
         <div className="min-h-screen flex flex-col">
             <HeaderBranch />
             <div className="flex flex-col min-h-screen bg-gray-50 p-6">
+                <div className="mb-6">
+                    <input
+                        type="text"
+                        value={searchTerm}
+                        onChange={handleSearch}
+                        placeholder="Buscar por nombre de sucursal..."
+                        className="w-full p-2 border border-gray-300 rounded-lg"
+                    />
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                    {branches.map((branch) => (
+                    {filteredBranches.map((branch) => (
                         <div key={branch.id} className="bg-white border border-gray-200 rounded-lg shadow p-6">
                             <FaBuilding className="w-7 h-7 text-gray-500 mb-3" />
                             <h5 className="mb-2 text-2xl font-semibold tracking-tight text-gray-900">
@@ -146,13 +165,13 @@ const SelectionBranch = () => {
                     ))}
                 </div>
                 <footer className="mt-auto text-center text-gray-500 py-4 border-t border-gray-200">
-                    ALPHA SYSTEMS S.R.L. EBILL 2.0 2024 Derechos Reservados
+                    © ALPHA SYSTEMS S.R.L. EBILL 2.0 2024 Derechos Reservados
                 </footer>
             </div>
             <ModalContingency 
-            isOpen={isContingencyModalOpen} 
-            onClose={closeModal} 
-            onConfirm={handleConfirm} 
+                isOpen={isContingencyModalOpen} 
+                onClose={closeModal} 
+                onConfirm={handleConfirm} 
             />
         </div>
     );
