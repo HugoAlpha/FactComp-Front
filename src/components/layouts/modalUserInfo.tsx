@@ -18,36 +18,32 @@ const ModalUserInfo = ({ isOpen, onClose }) => {
                             className="w-full h-full object-cover"
                         />
                     </div>
-                    <h3 className="text-2xl font-semibold text-gray-800 mt-4">Stevan Dux</h3>
-                    <p className="text-sm text-gray-600">Gastro Doctor</p>
+                    <h3 className="text-2xl font-semibold text-gray-800 mt-4">Antonio Gonzales</h3>
                     <p className="text-xs text-gray-500">BOLIVIA</p>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                     <div>
-                        <p className="text-gray-500 font-medium">Name</p>
-                        <p className="text-gray-800 font-semibold">Stavn Dux</p>
+                        <p className="text-gray-500 font-medium">Nombre</p>
+                        <p className="text-gray-800 font-semibold">Antonio Gonzales</p>
                     </div>
                     <div>
-                        <p className="text-gray-500 font-medium">Date of Birth</p>
-                        <p className="text-gray-800 font-semibold">03/04/1996</p>
+                        <p className="text-gray-500 font-medium">Fecha de Nacimiento</p>
+                        <p className="text-gray-800 font-semibold">28/08/1996</p>
                     </div>
                     <div>
-                        <p className="text-gray-500 font-medium">Age</p>
-                        <p className="text-gray-800 font-semibold">56</p>
+                        <p className="text-gray-500 font-medium">Edad</p>
+                        <p className="text-gray-800 font-semibold">25</p>
                     </div>
                     <div>
-                        <p className="text-gray-500 font-medium">Phone Number</p>
+                        <p className="text-gray-500 font-medium">Numero de celular</p>
                         <p className="text-gray-800 font-semibold">+591 2387428345</p>
                     </div>
                     <div>
-                        <p className="text-gray-500 font-medium">Email Address</p>
-                        <p className="text-gray-800 font-semibold">Email@gmail.com</p>
+                        <p className="text-gray-500 font-medium">Email</p>
+                        <p className="text-gray-800 font-semibold">antonio.gonzales@gmail.com</p>
                     </div>
-                    <div>
-                        <p className="text-gray-500 font-medium">Bio</p>
-                        <p className="text-gray-800 font-semibold">Gastro Doctor</p>
-                    </div>
+                    
                 </div>
 
                 <div className="flex justify-end mt-8">

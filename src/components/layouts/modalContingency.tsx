@@ -1,5 +1,6 @@
 import { PATH_URL_BACKEND } from '@/utils/constants';
 import React, { useEffect, useState } from 'react';
+import Swal from 'sweetalert2';
 
 interface Evento {
     id: number;
@@ -43,7 +44,21 @@ const ModalContingency: React.FC<ModalContingencyProps> = ({ isOpen, onClose, on
             alert('Por favor, selecciona un evento antes de continuar.');
             return;
         }
+        const activationEvent = new CustomEvent('contingencyActivated');
+        window.dispatchEvent(activationEvent);
         onConfirm(eventoSeleccionado);
+
+        Swal.fire({
+            title: 'Modo contingencia Activado',
+            text: 'Puede emitir facturas en modo contingencia por dos horas.',
+            confirmButtonText: 'Aceptar'
+        });
+    };
+    const handleClose = () => {
+        const deactivationEvent = new CustomEvent('contingencyDeactivated');
+        window.dispatchEvent(deactivationEvent);
+    
+        onClose();
     };
 
     if (!isOpen) return null; // Si `isOpen` es falso, no renderizamos el modal
@@ -94,7 +109,7 @@ const ModalContingency: React.FC<ModalContingencyProps> = ({ isOpen, onClose, on
                 </p>
                 <div className="flex justify-between mt-6">
                     <button
-                        onClick={onClose}
+                        onClick={handleClose}
                         className="w-1/2 bg-gray-300 text-gray-800 p-2 rounded-lg mr-2 hover:bg-gray-400"
                     >
                         Cancelar

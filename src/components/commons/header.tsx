@@ -112,6 +112,9 @@ const Header = () => {
         updateColors(false);
         console.log('Estado de contingencia: Desactivado');
         syncContingencyState();
+
+        const event = new CustomEvent('contingencyDeactivated');
+        window.dispatchEvent(event);
     };
 
     useEffect(() => {
@@ -215,7 +218,32 @@ const Header = () => {
         setShowModal(false);
         syncContingencyState();
         checkContingencyState();
+
+        const event = new CustomEvent('contingencyActivated');
+        window.dispatchEvent(event);
     };
+
+    useEffect(() => {
+        const handleContingencyActivated = () => {
+            setIsOnline(false);
+            setContingencia(true);
+            updateColors(true);
+        };
+
+        const handleContingencyDeactivated = () => {
+            setIsOnline(true);
+            setContingencia(false);
+            updateColors(false);
+        };
+    
+        window.addEventListener('contingencyActivated', handleContingencyActivated);
+        window.addEventListener('contingencyDeactivated', handleContingencyDeactivated);
+    
+        return () => {
+            window.removeEventListener('contingencyActivated', handleContingencyActivated);
+            window.removeEventListener('contingencyDeactivated', handleContingencyDeactivated);
+        };
+    }, []);
 
     const formatTime = (milliseconds) => {
         const totalSeconds = Math.floor(milliseconds / 1000);
@@ -357,15 +385,6 @@ const Header = () => {
                                     </li>
                                 </ul>
                                 
-                                <div className="py-2">
-                                    <button
-
-                                        className="block w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
-                                        onClick={handleLogout}
-                                    >
-                                        Cerrar sesión
-                                    </button>
-                                </div>
                             </div>
                         )}
                     </div>

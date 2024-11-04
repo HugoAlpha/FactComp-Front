@@ -12,6 +12,9 @@ import ModalContingency from '@/components/layouts/modalContingency';
 import { TbCircleCheckFilled } from "react-icons/tb";
 import { IoQrCode } from "react-icons/io5";
 import Footer from '@/components/commons/footer';
+import { BsClipboardCheck } from 'react-icons/bs';
+import jsQR from 'jsqr';
+
 
 interface FormattedBill {
   id: string;
@@ -165,15 +168,25 @@ const BillList = () => {
 
       if (response.ok) {
         const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
+        const img = new Image();
+        img.src = URL.createObjectURL(blob);
 
-        Swal.fire({
-          title: 'QR de factura',
-          imageUrl: url,
-          imageAlt: 'QR Code',
-          showCloseButton: true,
-          showConfirmButton: false,
-        });
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const context = canvas.getContext('2d');
+          context.drawImage(img, 0, 0);
+
+          const imageData = context.getImageData(0, 0, img.width, img.height);
+          const qrCode = jsQR(imageData.data, imageData.width, imageData.height);
+
+          if (qrCode) {
+            window.open(qrCode.data, '_blank');
+          } else {
+            Swal.fire('Error', 'No se pudo leer el código QR.', 'error');
+          }
+        };
       } else {
         Swal.fire('Error', 'No se pudo obtener el código QR.', 'error');
       }
@@ -480,7 +493,20 @@ const BillList = () => {
             clearInterval(timerInterval);
           }
         }).then(() => {
-          window.location.reload();
+          const deactivationEvent = new CustomEvent('contingencyDeactivated');
+          window.dispatchEvent(deactivationEvent);
+          setIsContingencyMode(false);          
+          fetchBills();
+
+          localStorage.removeItem('contingenciaEstado');
+          localStorage.removeItem('horaActivacionContingencia');
+          localStorage.removeItem('fechaHoraContingencia');
+
+          Swal.fire({
+            title: 'Paquetes enviados',
+            text: 'El modo contingencia se ha desactivado, puede volver a emitir facturas.',
+            confirmButtonText: 'Aceptar'
+        });
         });
       }
     });
@@ -543,7 +569,7 @@ const BillList = () => {
 
                 {isContingencyMode && (
                   <button
-                    className="bg-firstColor text-white rounded-lg font-bold hover:bg-fourthColor  h-10 px-3"
+                    className="bg-firstColor text-white rounded-lg font-bold hover:bg-fourthColor  p-1"
                     onClick={handleSendContingencyPackages}
                   >
                     Enviar paquetes contingencia
@@ -598,11 +624,11 @@ const BillList = () => {
                               className="bg-yellow-200 hover:bg-yellow-300 p-2 flex items-center justify-center border border-yellow-300"
                               onClick={() => handleViewQR(bill.cuf, bill.numeroFactura)}
                             >
-                              <IoQrCode className="text-black" />
+                              <BsClipboardCheck className="text-black" />
                             </button>
 
                             <button
-                              className="bg-blue-200 hover:bg-blue-300 p-2 rounded-r-lg flex items-center justify-center border border-blue-300"
+                              className="bg-red-200 hover:bg-red-300 p-2 rounded-r-lg flex items-center justify-center border border-red-300"
                               onClick={() => handleAnularFactura(bill)}
                             >
                               <HiReceiptRefund className="text-black" />
