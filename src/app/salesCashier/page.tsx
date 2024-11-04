@@ -648,8 +648,8 @@ const Sales = () => {
                         </div>
 
                         <div className="text-black w-2/3 border-l-4 border-black" style={{ maxHeight: "90vh" }}>
-                            <div className="ml-2">
-                                <h2 className="text-xl font-bold mb-8 ">Agregar Productos</h2>
+                            <div className="ml-4">
+                                <h2 className="text-xl font-bold mb-8">Agregar Productos</h2>
                                 <input
                                     type="text"
                                     placeholder="Buscar productos..."
@@ -693,7 +693,7 @@ const Sales = () => {
                             </div>
 
                             {/* Vista Grid / List */}
-                            <div className="max-h-[70vh] overflow-y-auto ml-2">
+                            <div className="max-h-[70vh] overflow-y-auto ml-4">
                                 {viewMode === "grid" ? (
                                     <div className="grid grid-cols-6 gap-4">
                                         {filteredProducts.map((product) => (

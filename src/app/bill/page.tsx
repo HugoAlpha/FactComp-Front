@@ -199,8 +199,11 @@ const BillList = () => {
 
   useEffect(() => {
     fetchBills();
-    checkServerCommunication();
-  }, [estadoFilter]);
+    const timer = setTimeout(() => {
+        checkServerCommunication();
+    }, 8000);
+    return () => clearTimeout(timer);
+}, [estadoFilter]);
 
   useEffect(() => {
     fetchBills();

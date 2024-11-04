@@ -358,7 +358,6 @@ const ClientList = () => {
                             </table>
                         </div>
 
-
                         <div className="flex flex-col items-center mt-6">
                             <div className="flex justify-center space-x-1 mb-2">
                                 <button

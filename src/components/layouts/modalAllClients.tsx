@@ -21,6 +21,8 @@ const ModalAllClients: React.FC<ModalAllClientsProps> = ({ isOpen, onClose, onSe
     const [isClientModalOpen, setIsClientModalOpen] = useState(false);
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [rowsPerPage] = useState(10);
 
     useEffect(() => {
         if (isOpen) {
@@ -58,8 +60,32 @@ const ModalAllClients: React.FC<ModalAllClientsProps> = ({ isOpen, onClose, onSe
     };
 
     const filteredClients = clients.filter(client =>
-        client.nombreRazonSocial.toLowerCase().includes(searchTerm.toLowerCase())
+        client.nombreRazonSocial.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        client.numeroDocumento.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+    const totalPages = Math.ceil(filteredClients.length / rowsPerPage);
+
+    const currentClients = filteredClients.slice(
+        (currentPage - 1) * rowsPerPage,
+        currentPage * rowsPerPage
+    );
+
+    const getPageNumbers = () => {
+        const pageNumbers = [];
+        for (let i = 1; i <= totalPages; i++) {
+            pageNumbers.push(i);
+        }
+        return pageNumbers;
+    };
+
+    const handleFirstPage = () => {
+        setCurrentPage(1);
+    };
+
+    const handleLastPage = () => {
+        setCurrentPage(totalPages);
+    };
 
     if (!isOpen) return null;
 
@@ -70,7 +96,7 @@ const ModalAllClients: React.FC<ModalAllClientsProps> = ({ isOpen, onClose, onSe
                     <h2 className="text-xl font-bold">Lista de Clientes</h2>
                     <button
                         onClick={handleCreateClient}
-                        className="flex items-center space-x-2 bg-blue-500 text-white px-3 py-2 rounded-lg hover:bg-blue-600"
+                        className="bg-principalColor text-white py-2 px-4 rounded-lg hover:bg-firstColor text-lg h-10 flex items-center justify-center"
                     >
                         <FaPlus /> <span>Crear Cliente</span>
                     </button>
@@ -97,7 +123,7 @@ const ModalAllClients: React.FC<ModalAllClientsProps> = ({ isOpen, onClose, onSe
                             </tr>
                         </thead>
                         <tbody>
-                            {filteredClients.map((client) => (
+                            {currentClients.map((client) => (
                                 <tr
                                     key={client.id}
                                     className="bg-white border-b hover:bg-gray-50 cursor-pointer"
@@ -120,6 +146,51 @@ const ModalAllClients: React.FC<ModalAllClientsProps> = ({ isOpen, onClose, onSe
                             ))}
                         </tbody>
                     </table>
+                </div>
+                <div className="flex flex-col items-center mt-6">
+                    <div className="flex justify-center space-x-1 mb-2">
+                        <button
+                            onClick={handleLastPage}
+                            className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                        >
+                            Último
+                        </button>
+                        <button
+                            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                            disabled={currentPage === 1}
+                            className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                        >
+                            Ant.
+                        </button>
+
+                        {getPageNumbers().map((number) => (
+                            <button
+                                key={number}
+                                onClick={() => setCurrentPage(number)}
+                                className={`rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 ${currentPage === number ? 'bg-slate-800 text-white' : ''}`}
+                            >
+                                {number}
+                            </button>
+                        ))}
+
+                        <button
+                            onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                            disabled={currentPage === totalPages}
+                            className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                        >
+                            Sig.
+                        </button>
+                        <button
+                            onClick={handleFirstPage}
+                            className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                        >
+                            Primero
+                        </button>
+                    </div>
+
+                    <div className="text-sm font-normal text-gray-500 dark:text-gray-400 mr-2">
+                        Mostrando página <span className="font-semibold text-gray-900 dark:text-black">{currentPage}</span> de <span className="font-semibold text-gray-900 dark:text-black">{totalPages}</span>
+                    </div>
                 </div>
                 <div className="flex justify-end mt-4">
                     <button
