@@ -136,6 +136,7 @@ const Sales = () => {
                     totalPrice: item.precioUnitario,
                     codigo: item.codigo,
                     unidadMedida: item.unidadMedida,
+                    imageId: image ? image.id : null,
                     unidadMedidaDescripcion: unidadMedida ? unidadMedida.descripcion : 'No disponible'
                 };
             });
