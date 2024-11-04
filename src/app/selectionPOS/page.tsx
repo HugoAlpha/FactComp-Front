@@ -22,10 +22,18 @@ const KanbanView = () => {
 
     const fetchSalesPoints = async () => {
         try {
-            const codigoSucursal = localStorage.getItem('CodigoSucursal');
-            const idEmpresa = localStorage.getItem('idEmpresa');
-            const response = await fetch(`${PATH_URL_BACKEND}/operaciones/punto-venta/lista-bd/${codigoSucursal}/${idEmpresa}`);
-            if (response.ok) {
+            const userRole = localStorage.getItem("role");
+            let response;
+    
+            if (userRole === "ROLE_USER") {
+                response = await fetch(`${PATH_URL_BACKEND}/operaciones/punto-venta/lista-bd`);
+            } else if (userRole === "ROLE_ADMIN") {
+                const codigoSucursal = localStorage.getItem('CodigoSucursal');
+                const idEmpresa = localStorage.getItem('idEmpresa');
+                response = await fetch(`${PATH_URL_BACKEND}/operaciones/punto-venta/lista-bd/${codigoSucursal}/${idEmpresa}`);
+            }
+    
+            if (response && response.ok) {
                 const data = await response.json();
                 setSalesPoints(data);
             } else {
@@ -35,6 +43,13 @@ const KanbanView = () => {
             Swal.fire('Error', 'Error en la conexión con el servidor', 'error');
         }
     };
+    
+    useEffect(() => {
+        const userRole = localStorage.getItem("role");
+        setRole(userRole);
+        fetchSalesPoints();
+    }, []);
+    
 
     useEffect(() => {
         const userRole = localStorage.getItem("role");
