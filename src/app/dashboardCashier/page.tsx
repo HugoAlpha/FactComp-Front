@@ -61,7 +61,7 @@ const DashboardCashier = () => {
                     },
                     body: JSON.stringify({
                         idPuntoVenta: parseInt(idPuntoVenta, 10),
-                        idSucursal: parseInt(idSucursal, 10),
+                        idSucursal: 1,
                         fecha: fechaActual,
                     }),
                 });
@@ -78,7 +78,7 @@ const DashboardCashier = () => {
                     },
                     body: JSON.stringify({
                         idPuntoVenta: parseInt(idPuntoVenta, 10),
-                        idSucursal: parseInt(idSucursal, 10),
+                        idSucursal: 1,
                         fechaInicio: primerDiaMes,
                         fechaFin: ultimoDiaMes,
                     }),
@@ -88,7 +88,7 @@ const DashboardCashier = () => {
 
                 const idBranch = localStorage.getItem('idSucursal');
                 const idPOS = localStorage.getItem('idPOS');
-                const totalOrdersResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/ventas-cantidad/${idPOS}/${idBranch}`);
+                const totalOrdersResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/ventas-cantidad/${idPOS}/1`);
                 const totalOrdersData = await totalOrdersResponse.json();
                 setTotalOrders(totalOrdersData || 0);
 
