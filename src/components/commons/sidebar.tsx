@@ -5,6 +5,7 @@ import { FaFileInvoice, FaUser, FaSignOutAlt, FaChevronDown, FaBars, FaHome, FaU
 import { MdOutlinePointOfSale, MdVerified } from "react-icons/md";
 import { HiDocumentCheck } from "react-icons/hi2";
 import { PiStorefrontFill } from "react-icons/pi";
+import Swal from 'sweetalert2';
 
 const Sidebar = () => {
     const [openMenu, setOpenMenu] = useState(null);
@@ -93,7 +94,33 @@ const Sidebar = () => {
         setOpenMenu(null);
     };
 
+    const handleLogout = () => {
+        Swal.fire({
+            title: '¿Deseas cerrar sesión?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, cerrar sesión',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true,
+            customClass: {
+                confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md',
+                cancelButton: 'bg-blue-500 text-white px-4 py-2 rounded-md',
+            }
+        }).then((result) => {
+            if (result.isConfirmed) {
+                Swal.fire({
+                    position: "center",
+                    icon: 'success',
+                    text: 'Hasta Pronto!!',
+                    showConfirmButton: false,
+                    timer: 3000,
+                });
+                localStorage.clear();
+                window.location.href = "/";
 
+            }
+        });
+    };
 
     return (
         <div className="flex min-h-screen">
@@ -205,10 +232,14 @@ const Sidebar = () => {
                     </nav>
 
                     <div className="mt-auto">
-                        <button className="flex items-center text-white font-bold hover:bg-firstColor p-2 w-full rounded-lg transition-colors duration-300">
+                        <button
+                            onClick={handleLogout}
+                            className="flex items-center text-white font-bold hover:bg-firstColor p-2 w-full rounded-lg transition-colors duration-300"
+                        >
                             <FaSignOutAlt size={20} />
                             {isOpen && <span className="ml-2">Salir</span>}
                         </button>
+
                     </div>
                 </div>
             </aside>
