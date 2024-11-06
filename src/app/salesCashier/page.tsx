@@ -11,6 +11,7 @@ import { GrDocumentConfig } from "react-icons/gr";
 import CreateEditClientModal from '@/components/layouts/modalCreateEditClient';
 import ModalCreateProduct from '@/components/layouts/modalCreateProduct';
 import { GoHomeFill } from "react-icons/go";
+import ModalAllClients from '@/components/layouts/modalAllClients';
 
 const Sales = () => {
     const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
@@ -34,6 +35,7 @@ const Sales = () => {
     const [clientSearchTerm, setClientSearchTerm] = useState('');
     const [filteredClients, setFilteredClients] = useState([]);
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [isAllClientsModalOpen, setIsAllClientsModalOpen] = useState(false);
     const [currentCustomer, setCurrentCustomer] = useState<Customer>({
         id: 0,
         nombreRazonSocial: '',
@@ -134,6 +136,7 @@ const Sales = () => {
                     totalPrice: item.precioUnitario,
                     codigo: item.codigo,
                     unidadMedida: item.unidadMedida,
+                    imageId: image ? image.id : null,
                     unidadMedidaDescripcion: unidadMedida ? unidadMedida.descripcion : 'No disponible'
                 };
             });
@@ -188,15 +191,25 @@ const Sales = () => {
 
     const updateProductInList = (updatedProduct: Product) => {
         const updatedProducts = products.map((item) =>
-            item.id === updatedProduct.id ? updatedProduct : item
+            item.id === updatedProduct.id ? { ...item, price: updatedProduct.precioUnitario } : item
         );
         setProducts(updatedProducts);
-        const updatedSelectedProducts = selectedProducts.map((item) =>
-            item.id === updatedProduct.id ? { ...item, price: updatedProduct.price, totalPrice: item.quantity! * updatedProduct.price } : item
-        );
+        const updatedSelectedProducts = selectedProducts.map((item) => {
+            if (item.id === updatedProduct.id) {
+                const newTotalPrice = (item.quantity ?? 1) * updatedProduct.precioUnitario;
+                return {
+                    ...item,
+                    price: updatedProduct.precioUnitario,
+                    totalPrice: !isNaN(newTotalPrice) ? newTotalPrice : 0,
+                };
+            }
+            return item;
+        });
         setSelectedProducts(updatedSelectedProducts);
         calculateTotal(updatedSelectedProducts);
     };
+    
+    
 
     const calculateTotal = (updatedProducts: Product[]) => {
         const subtotal = updatedProducts.reduce((acc, curr) => acc + (curr.totalPrice ?? 0), 0);
@@ -376,7 +389,7 @@ const Sales = () => {
     };
 
     const handleGoToDashboard = () => {
-        const route = '/dashboard';
+        const route = '/dashboardCashier';
         window.location.href = route;
     };
 
@@ -417,6 +430,12 @@ const Sales = () => {
         });
     };
 
+    const handleProductUpdate = (updatedProduct: Product) => {
+        updateProductInList(updatedProduct); 
+        setIsEditModalOpen(false);
+    };
+    
+
     const handleSaveCustomer = (savedCustomer: Customer) => {
 
         console.log('Cliente guardado:', savedCustomer);
@@ -438,6 +457,19 @@ const Sales = () => {
 
     const formatCurrency = (value) => {
         return new Intl.NumberFormat('es-BO', { style: 'currency', currency: 'BOB', minimumFractionDigits: 2 }).format(value);
+    };
+
+    const handleOpenAllClientsModal = () => {
+        setIsAllClientsModalOpen(true);
+    };
+    
+    const handleCloseAllClientsModal = () => {
+        setIsAllClientsModalOpen(false);
+    };
+
+    const handleClientSelectFromModal = (selectedClient) => {
+        setCurrentCustomer(selectedClient);
+        setIsAllClientsModalOpen(false);
     };
 
 
@@ -547,34 +579,33 @@ const Sales = () => {
                                             </button>
 
                                             {dropdownOpen && (
-                                                <div className="absolute z-50 bg-white shadow-lg rounded mt-2 w-full" style={{ maxHeight: '250px', overflowY: 'auto' }}>
-                                                    <input
-                                                        type="text"
-                                                        value={clientSearchTerm}
-                                                        onChange={(e) => setClientSearchTerm(e.target.value)}
-                                                        placeholder="Buscar cliente"
-                                                        className="block w-full p-2 text-sm border-gray-300"
-                                                    />
-                                                    <ul className="bg-white border border-gray-300 rounded-b">
-                                                        {filteredClients.length > 0 ? (
-                                                            filteredClients.map((client) => (
-                                                                <li key={client.id}>
-                                                                    <button
-                                                                        type="button"
-                                                                        className="block px-2 py-1 text-left w-full hover:bg-gray-100"
-                                                                        onClick={() => {
-                                                                            handleClientSelect(client.id);
-                                                                            setDropdownOpen(false);
-                                                                        }}
-                                                                    >
-                                                                        {client.nombreRazonSocial} - {client.numeroDocumento}
-                                                                    </button>
-                                                                </li>
-                                                            ))
-                                                        ) : (
-                                                            <li className="px-2 py-1 text-gray-500">No se encontraron clientes</li>
-                                                        )}
+                                                <div className="absolute z-50 bg-white shadow-lg rounded mt-2 w-full">
+                                                    <ul className="bg-white border border-gray-300 rounded-b max-h-48 overflow-y-auto">
+                                                        {clients.slice(0, 5).map((client) => (
+                                                            <li key={client.id}>
+                                                                <button
+                                                                    type="button"
+                                                                    className="block px-2 py-1 text-left w-full hover:bg-gray-100"
+                                                                    onClick={() => {
+                                                                        setCurrentCustomer(client);
+                                                                        setDropdownOpen(false);
+                                                                    }}
+                                                                >
+                                                                    {client.nombreRazonSocial} - {client.numeroDocumento}
+                                                                </button>
+                                                            </li>
+                                                        ))}
                                                     </ul>
+                                                    <button
+                                                        type="button"
+                                                        className="block w-full text-center bg-gray-200 hover:bg-gray-300 py-2"
+                                                        onClick={() => {
+                                                            setDropdownOpen(false);
+                                                            handleOpenAllClientsModal();
+                                                        }}
+                                                    >
+                                                        Buscar más
+                                                    </button>
                                                 </div>
                                             )}
                                         </div>
@@ -617,8 +648,8 @@ const Sales = () => {
                         </div>
 
                         <div className="text-black w-2/3 border-l-4 border-black" style={{ maxHeight: "90vh" }}>
-                            <div className="ml-2">
-                                <h2 className="text-xl font-bold mb-8 ">Agregar Productos</h2>
+                            <div className="ml-4">
+                                <h2 className="text-xl font-bold mb-8">Agregar Productos</h2>
                                 <input
                                     type="text"
                                     placeholder="Buscar productos..."
@@ -662,7 +693,7 @@ const Sales = () => {
                             </div>
 
                             {/* Vista Grid / List */}
-                            <div className="max-h-[70vh] overflow-y-auto ml-2">
+                            <div className="max-h-[70vh] overflow-y-auto ml-4">
                                 {viewMode === "grid" ? (
                                     <div className="grid grid-cols-6 gap-4">
                                         {filteredProducts.map((product) => (
@@ -678,6 +709,12 @@ const Sales = () => {
                                                 />
                                                 <h3 className="text-xs font-semibold truncate">{product.name}</h3>
                                                 <p className="text-sm font-bold">Bs {product.price}</p>
+                                                <button
+                                                    className="absolute top-2 right-2 text-blue-500 hover:text-blue-700 z-10"
+                                                    onClick={(e) => { e.stopPropagation(); handleEditProduct(product); }}
+                                                >
+                                                    <FaEdit />
+                                                </button>
                                             </div>
                                         ))}
                                     </div>
@@ -693,6 +730,12 @@ const Sales = () => {
                                                     <h3 className="text-sm font-semibold">{product.name}</h3>
                                                     <p className="text-sm font-bold">Bs {product.price}</p>
                                                 </div>
+                                                <button
+                                                    className="ml-4 text-blue-500 hover:text-blue-700 z-10"
+                                                    onClick={(e) => { e.stopPropagation(); handleEditProduct(product); }}
+                                                >
+                                                    <FaEdit />
+                                                </button>
                                             </div>
                                         ))}
                                     </div>
@@ -703,7 +746,7 @@ const Sales = () => {
                         <ModalCreateProduct
                             isOpen={isEditModalOpen}
                             onClose={() => setIsEditModalOpen(false)}
-                            onProductCreated={() => refreshProductList()}
+                            onProductCreated={handleProductUpdate}
                             refreshProducts={refreshProductList}
                             product={productToEdit}
                         />
@@ -726,6 +769,12 @@ const Sales = () => {
                             onClose={handleCloseClientModal}
                             customer={currentCustomer}
                             onSave={handleSaveCustomer}
+                        />
+
+                        <ModalAllClients
+                            isOpen={isAllClientsModalOpen}
+                            onClose={handleCloseAllClientsModal}
+                            onSelectClient={handleClientSelectFromModal} 
                         />
 
                     </>
