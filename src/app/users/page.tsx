@@ -287,7 +287,7 @@ const UserList = () => {
                                             <td className="px-6 py-4">{user.email}</td>
                                             <td className="px-6 py-4">{getCompanyName(user.id_empresa)}</td>
                                             <td className="px-6 py-4">
-                                                {user.rol === "ROLE_USER" ? "Cajero" : user.rol === "ROLE_ADMIN" ? "Administrador" : "Sin rol"} 
+                                                {user.rol === "ROLE_USER" ? "Cajero" : user.rol === "ROLE_ADMIN" ? "Administrador" : user.rol === "ROLE_CONTADOR" ? "Contador" : "Sin rol"} 
                                             </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex">

@@ -29,8 +29,11 @@ const HeaderPOS = () => {
             <div className="container mx-auto flex justify-between items-center">
                 {/* Título alineado a la izquierda */}
                 <div className="flex-shrink-0">
-                    <span className="text-2xl font-bold text-principalColor">
-                        Bienvenido/a {empresa ? `a ${empresa}` : ""}, por favor elige el punto de venta a ingresar
+                    <span className="text-2xl font-bold text-principalColor mr-24">
+                        Bienvenido/a, por favor elige el punto de venta a ingresar
+                    </span>
+                    <span className="text-2xl font-bold text-principalColor ml-44">
+                        {empresa}
                     </span>
                 </div>
                 <div className="flex items-center">

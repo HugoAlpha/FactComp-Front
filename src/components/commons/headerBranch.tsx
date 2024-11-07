@@ -28,8 +28,11 @@ const HeaderBranch = () => {
         <header className="flex items-center shadow p-4 bg-ninthColor">
             <div className="container mx-auto flex justify-between items-center">
                 <div className="flex-shrink-0">
-                    <span className="text-2xl font-bold text-principalColor">
-                        Bienvenido/a {empresa ? `a ${empresa}` : ""}, por favor elige la sucursal a gestionar
+                    <span className="text-2xl font-bold text-principalColor mr-24">
+                        Bienvenido/a, por favor elige la sucursal a gestionar
+                    </span>
+                    <span className="text-2xl font-bold text-principalColor ml-44">
+                        {empresa}
                     </span>
                 </div>
                 <div className="flex items-center">
