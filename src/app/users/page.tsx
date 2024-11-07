@@ -275,6 +275,7 @@ const UserList = () => {
                                         <th className="px-6 py-4 font-bold">Nombre completo</th>
                                         <th className="px-6 py-4 font-bold">Email</th>
                                         <th className="px-6 py-4 font-bold">Empresa</th>
+                                        <th className="px-6 py-4 font-bold">Rol</th> 
                                         <th className="px-6 py-4 font-bold">Operaciones</th>
                                     </tr>
                                 </thead>
@@ -285,6 +286,9 @@ const UserList = () => {
                                             <td className="px-6 py-4">{user.nombre} {user.apellidos}</td>
                                             <td className="px-6 py-4">{user.email}</td>
                                             <td className="px-6 py-4">{getCompanyName(user.id_empresa)}</td>
+                                            <td className="px-6 py-4">
+                                                {user.rol === "ROLE_USER" ? "Cajero" : user.rol === "ROLE_ADMIN" ? "Administrador" : "Sin rol"} 
+                                            </td>
                                             <td className="px-6 py-4">
                                                 <div className="flex">
                                                     <button className="bg-red-200 hover:bg-red-300 p-2 rounded-l-lg flex items-center justify-center border border-red-300 relative group"
