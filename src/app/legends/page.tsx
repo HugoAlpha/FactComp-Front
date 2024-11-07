@@ -207,10 +207,10 @@ const Legends: React.FC = () => {
                         <div className="flex flex-col items-center mt-6">
                             <div className="flex justify-center space-x-1 mb-2">
                                 <button
-                                    onClick={handleLastPage}
+                                    onClick={handleFirstPage}
                                     className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                                 >
-                                    Último
+                                    Primero
                                 </button>
                                 <button
                                     onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -237,11 +237,12 @@ const Legends: React.FC = () => {
                                 >
                                     Sig.
                                 </button>
+                                
                                 <button
-                                    onClick={handleFirstPage}
+                                    onClick={handleLastPage}
                                     className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                                 >
-                                    Primero
+                                    Último
                                 </button>
                             </div>
 
