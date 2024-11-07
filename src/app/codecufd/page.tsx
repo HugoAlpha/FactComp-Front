@@ -205,22 +205,22 @@ const CUFDList = () => {
     };
 
     return (
-        <div className="flex min-h-screen">
+        <div className="flex flex-col md:flex-row min-h-screen">
             {userRole === 'ROLE_ADMIN' ? <Sidebar /> : <CashierSidebar />}
 
             <div className="flex flex-col w-full min-h-screen">
                 <Header />
                 <div className="flex-grow overflow-auto bg-gray-50">
-                    <div className="p-6">
-                        <h2 className="text-xl font-bold mb-6 text-gray-700">Registros de CUFD</h2>
+                    <div className="p-4 md:p-6">
+                        <h2 className="text-lg md:text-xl font-bold mb-4 md:mb-6 text-gray-700">Registros de CUFD</h2>
 
-                        <div className="flex items-center mb-4 justify-between">
-                            <div className="flex items-center">
+                        <div className="flex flex-col md:flex-row items-center md:items-start md:justify-between mb-4">
+                            <div className="flex items-center mb-4 md:mb-0">
                                 <label htmlFor="itemsPerPage" className="mr-2 text-sm">Elementos por página:</label>
                                 <select
                                     value={rowsPerPage}
                                     onChange={handleRowsPerPageChange}
-                                    className="border p-2 rounded-lg w-20 h-10"
+                                    className="border p-2 rounded-lg w-20 h-10 text-sm"
                                 >
                                     <option value={10}>10</option>
                                     <option value={20}>20</option>
@@ -228,7 +228,7 @@ const CUFDList = () => {
                                 </select>
                             </div>
 
-                            <div className="relative flex items-center w-full max-w-md">
+                            <div className="relative flex items-center w-full md:w-1/2 lg:w-1/3 mb-4 md:mb-0">
                                 <input
                                     type="text"
                                     placeholder="Buscar CUFD por id o estado..."
@@ -236,16 +236,16 @@ const CUFDList = () => {
                                     value={filter}
                                     onChange={handleFilterChange}
                                 />
-                                <FaSearch className="absolute right-4 text-gray-500 text-xl pointer-events-none" />
+                                <FaSearch className="absolute right-3 text-gray-500 text-xl pointer-events-none" />
                             </div>
 
                             <button
-                                className="bg-principalColor text-white py-2 px-4 rounded-lg hover:bg-firstColor text-lg h-10 flex items-center justify-center"
+                                className="bg-principalColor text-white py-2 px-4 rounded-lg hover:bg-firstColor text-base md:text-lg h-10 flex items-center justify-center"
                                 onClick={handleEmitCUFD}
                             >
                                 <span className="flex items-center">
                                     Emitir CUFD
-                                    <FaPlus className="inline-block ml-2" />
+                                    <FaPlus className="inline-block ml-2 text-sm md:text-base" />
                                 </span>
                             </button>
 
@@ -256,21 +256,21 @@ const CUFDList = () => {
                             <table className="table-auto w-full bg-white">
                                 <thead>
                                     <tr className="bg-fourthColor text-left text-gray-700">
-                                        <th className="px-6 py-4 font-bold">ID</th>
-                                        <th className="px-6 py-4 font-bold">CUFD</th>
-                                        <th className="px-6 py-4 font-bold">Fecha/Hora Emisión</th>
-                                        <th className="px-6 py-4 font-bold">Fecha/Hora Vencimiento</th>
-                                        <th className="px-6 py-4 font-bold">Estado</th>
+                                        <th className="px-4 md:px-6 py-2 md:py-4 font-bold text-xs md:text-base">ID</th>
+                                        <th className="px-4 md:px-6 py-2 md:py-4 font-bold text-xs md:text-base">CUFD</th>
+                                        <th className="px-4 md:px-6 py-2 md:py-4 font-bold text-xs md:text-base">Fecha/Hora Emisión</th>
+                                        <th className="px-4 md:px-6 py-2 md:py-4 font-bold text-xs md:text-base">Fecha/Hora Vencimiento</th>
+                                        <th className="px-4 md:px-6 py-2 md:py-4 font-bold text-xs md:text-base">Estado</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {paginatedCUFDs.map((cufd) => (
                                         <tr key={cufd.id} className="border-b hover:bg-gray-50 text-black">
-                                            <td className="px-6 py-4">{cufd.id}</td>
-                                            <td className="px-6 py-4">{cufd.codigo}</td>
-                                            <td className="px-6 py-4">{formatDate(cufd.fechaInicio)}</td>
-                                            <td className="px-6 py-4">{formatDate(cufd.fechaVigencia)}</td>
-                                            <td className="border px-6 py-4">{getStatus(cufd.fechaVigencia, cufd.vigente)}</td>
+                                            <td className="px-4 md:px-6 py-2 md:py-4 text-xs md:text-base">{cufd.id}</td>
+                                            <td className="px-4 md:px-6 py-2 md:py-4 text-xs md:text-base">{cufd.codigo}</td>
+                                            <td className="px-4 md:px-6 py-2 md:py-4 text-xs md:text-base">{formatDate(cufd.fechaInicio)}</td>
+                                            <td className="px-4 md:px-6 py-2 md:py-4 text-xs md:text-base">{formatDate(cufd.fechaVigencia)}</td>
+                                            <td className="border px-4 md:px-6 py-2 md:py-4 text-xs md:text-base">{getStatus(cufd.fechaVigencia, cufd.vigente)}</td>
                                         </tr>
                                     ))}
                                 </tbody>
