@@ -25,15 +25,15 @@ const UserList = () => {
     const fetchUsers = async () => {
         try {
             const token = localStorage.getItem("tokenJWT");
-
+    
             const userResponse = await fetch(`${PATH_URL_SECURITY}/api/usuarios`, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,
                 },
             });
-            const usersData = await userResponse.json();
-
+            let usersData = await userResponse.json();
+    
             const companyResponse = await fetch(`${PATH_URL_BACKEND}/empresa`, {
                 headers: {
                     'Content-Type': 'application/json',
@@ -42,12 +42,15 @@ const UserList = () => {
             });
             const companiesData = await companyResponse.json();
 
+            usersData = usersData.sort((a, b) => b.id_user - a.id_user);
+    
             setUsers(usersData);
             setCompanies(companiesData);
         } catch (error) {
             console.error("Error fetching data:", error);
         }
     };
+    
 
     useEffect(() => {
         fetchUsers();

@@ -67,13 +67,16 @@ const ModalCreateUser: React.FC<ModalCreateUserProps> = ({ isOpen, onClose, onSa
         const alphanumericPattern = /^[a-zA-Z0-9]+$/;
         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         const numberPattern = /^[0-9]+$/;
+        const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^\s]{8,}$/; // Nuevo patrón para contraseña
     
         if (!formData.username) {
             newErrors.username = 'Este campo es requerido.';
         } else if (!alphanumericPattern.test(formData.username)) {
-            newErrors.username = 'Solo se permiten letras y espacios.';
+            newErrors.username = 'Solamente se permiten letras y números.';
         } else if (formData.username.length > 20) {
             newErrors.username = 'Número de caracteres permitido: 20.';
+        } else if (formData.username.length < 4) {
+            newErrors.username = 'El número de caracteres mínimo para el usuario es 4.';
         }
     
         if (!formData.nombre) {
@@ -108,14 +111,14 @@ const ModalCreateUser: React.FC<ModalCreateUserProps> = ({ isOpen, onClose, onSa
             newErrors.celular = 'Número de caracteres permitido: 15.';
         }
     
-        // if (!user && (!formData.password || formData.password.trim() === '')) {
-        //     newErrors.password = 'Este campo es requerido.';
-        // } else if (formData.password && formData.password.length > 20) {
-        //     newErrors.password = 'Número de caracteres permitido: 20.';
-        // }
-    
         if (!formData.rol) {
             newErrors.rol = 'Debe seleccionar un rol de usuario.';
+        }
+    
+        if (!formData.password) {
+            newErrors.password = 'Este campo es requerido.';
+        } else if (!passwordPattern.test(formData.password)) {
+            newErrors.password = 'La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número, y no debe contener espacios.';
         }
     
         setErrors(newErrors);
@@ -123,8 +126,6 @@ const ModalCreateUser: React.FC<ModalCreateUserProps> = ({ isOpen, onClose, onSa
     };
     
     
-
-
     const handleSubmit = async () => {
         if (validateForm()) {
             try {
@@ -196,7 +197,7 @@ const ModalCreateUser: React.FC<ModalCreateUserProps> = ({ isOpen, onClose, onSa
                     <form className="grid grid-cols-2 gap-6">
                         {renderInputField("username", "Nombre de Usuario", formData.username, handleInputChange, <FaUser />, errors.username)}
                         {renderInputField("nombre", "Nombre", formData.nombre, handleInputChange, <FaIdCard />, errors.nombre)}
-                        {renderInputField("apellidos", "Apellidos", formData.apellidos, handleInputChange, <FaIdCard />, errors.apellidos)}
+                        {renderInputField("apellidos", "Apellido", formData.apellidos, handleInputChange, <FaIdCard />, errors.apellidos)}
                         {renderInputField("email", "Correo", formData.email, handleInputChange, <FaEnvelope />, errors.email)}
                         {renderInputField("celular", "Teléfono", formData.celular.toString(), handleInputChange, <FaPhone />, errors.celular)}
                         {!user && renderInputField("password", "Contraseña", formData.password || '', handleInputChange, <FaLock />, errors.password)}

@@ -20,6 +20,14 @@ const KanbanView = () => {
     const [role, setRole] = useState<string | null>(null);
     const [isContingencyModalOpen, setIsContingencyModalOpen] = useState(false);
     const [viewMode, setViewMode] = useState("grid");
+    const [username, setUsername] = useState('Usuario no disponible');
+
+    useEffect(() => {
+        const storedUsername = localStorage.getItem('username');
+        if (storedUsername) {
+            setUsername(storedUsername);
+        }
+    }, []);
 
     const fetchSalesPoints = async () => {
         try {
@@ -152,6 +160,7 @@ const KanbanView = () => {
                         placeholder="Buscar por nombre de punto de venta..."
                         className="w-full max-w-md p-2 border border-gray-300 rounded-lg"
                     />
+                    <span className="ml-4 text-gray-600 font-medium">Usuario: {username}</span>
                     <div className="flex bg-gray-100 hover:bg-gray-200 rounded-lg transition p-1">
                         <ul className="relative flex gap-x-1" role="tablist" aria-label="Tabs" aria-orientation="horizontal">
                             <li className="z-30 flex-auto text-center">
@@ -192,9 +201,7 @@ const KanbanView = () => {
                                     <h5 className="mb-2 text-2xl font-semibold tracking-tight text-gray-900">
                                         {point.nombre}
                                     </h5>
-                                    <p className="mb-3 font-normal text-gray-500">
-                                        {today}
-                                    </p>
+                                    
                                     <button
                                         onClick={() => handleSelectSalesPoint(point.id, point.codigo, point.sucursal)}
                                         className="inline-flex font-medium items-center text-blue-600 hover:underline"

@@ -17,6 +17,14 @@ const SelectionBranch = () => {
     const [filteredBranches, setFilteredBranches] = useState([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [isContingencyModalOpen, setIsContingencyModalOpen] = useState(false);
+    const [username, setUsername] = useState('Usuario no disponible');
+
+    useEffect(() => {
+        const storedUsername = localStorage.getItem('username');
+        if (storedUsername) {
+            setUsername(storedUsername);
+        }
+    }, []);
 
     const fetchBranches = async () => {
         try {
@@ -121,7 +129,7 @@ const SelectionBranch = () => {
         <div className="min-h-screen flex flex-col">
             <HeaderBranch />
             <div className="flex flex-col min-h-screen bg-gray-50 p-6">
-                <div className="mb-6">
+            <div className="mb-6 flex justify-between items-center">
                     <input
                         type="text"
                         value={searchTerm}
@@ -129,6 +137,7 @@ const SelectionBranch = () => {
                         placeholder="Buscar por nombre de sucursal..."
                         className="w-full p-2 border border-gray-300 rounded-lg"
                     />
+                    <span className="ml-4 text-gray-600 font-medium whitespace-nowrap">Usuario: {username}</span>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                     {filteredBranches.map((branch) => (
@@ -138,7 +147,7 @@ const SelectionBranch = () => {
                                 {branch.nombre}
                             </h5>
                             <p className="mb-3 font-normal text-gray-500">
-                                {branch.municipio}<br />{today}
+                                {branch.municipio}<br />
                             </p>
                             <button
                                 onClick={() => handleSelectBranch(branch.id, branch.codigo)}
