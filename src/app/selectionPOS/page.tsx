@@ -33,7 +33,7 @@ const KanbanView = () => {
         try {
             const userRole = localStorage.getItem("role");
             let response;
-    
+
             if (userRole === "ROLE_USER") {
                 response = await fetch(`${PATH_URL_BACKEND}/operaciones/punto-venta/lista-bd`);
             } else if (userRole === "ROLE_ADMIN") {
@@ -41,7 +41,7 @@ const KanbanView = () => {
                 const idEmpresa = localStorage.getItem('idEmpresa');
                 response = await fetch(`${PATH_URL_BACKEND}/operaciones/punto-venta/lista-bd/${codigoSucursal}/${idEmpresa}`);
             }
-    
+
             if (response && response.ok) {
                 const data = await response.json();
                 setSalesPoints(data);
@@ -53,7 +53,7 @@ const KanbanView = () => {
             Swal.fire('Error', 'Error en la conexión con el servidor', 'error');
         }
     };
-    
+
     useEffect(() => {
         const userRole = localStorage.getItem("role");
         setRole(userRole);
@@ -70,7 +70,7 @@ const KanbanView = () => {
     const handleSelectSalesPoint = (id, codigo, sucursal) => {
         localStorage.setItem('idPOS', id);
         localStorage.setItem('CodigoPOS', codigo);
-    
+
         if (role === "ROLE_USER") {
             if (sucursal && sucursal.id !== undefined && sucursal.codigo !== undefined) {
                 localStorage.setItem('idSucursal', sucursal.id);
@@ -148,10 +148,9 @@ const KanbanView = () => {
     };
 
     return (
-        <div className="min-h-screen flex flex-col">
+        <div className="min-h-screen flex flex-col overflow-hidden">
             <HeaderPOS />
             <div className="flex flex-col min-h-screen bg-gray-50 p-6">
-                {/* Barra de búsqueda */}
                 <div className="w-full mb-4 flex justify-between items-center">
                     <input
                         type="text"
@@ -169,7 +168,7 @@ const KanbanView = () => {
                                     className={`py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg focus:outline-none transition-colors duration-200 ${viewMode === "grid"
                                         ? "bg-slate-700 text-white"
                                         : "bg-transparent text-gray-500 hover:bg-slate-300"
-                                    }`}
+                                        }`}
                                     onClick={() => setViewMode("grid")}
                                 >
                                     <FaTable className={`text-lg ${viewMode === "grid" ? "text-white" : "text-gray-500"}`} />
@@ -181,7 +180,7 @@ const KanbanView = () => {
                                     className={`py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg focus:outline-none transition-colors duration-200 ${viewMode === "list"
                                         ? "bg-slate-700 text-white"
                                         : "bg-transparent text-gray-500 hover:bg-slate-300"
-                                    }`}
+                                        }`}
                                     onClick={() => setViewMode("list")}
                                 >
                                     <FaList className={`text-lg ${viewMode === "list" ? "text-white" : "text-gray-500"}`} />
@@ -191,7 +190,6 @@ const KanbanView = () => {
                     </div>
                 </div>
 
-                {/* Renderizado de la vista Grid / List */}
                 <div className="max-h-[70vh] overflow-y-auto">
                     {viewMode === "grid" ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
@@ -201,7 +199,7 @@ const KanbanView = () => {
                                     <h5 className="mb-2 text-2xl font-semibold tracking-tight text-gray-900">
                                         {point.nombre}
                                     </h5>
-                                    
+
                                     <button
                                         onClick={() => handleSelectSalesPoint(point.id, point.codigo, point.sucursal)}
                                         className="inline-flex font-medium items-center text-blue-600 hover:underline"
@@ -245,8 +243,7 @@ const KanbanView = () => {
                         </div>
                     )}
                 </div>
-
-                <footer className="mt-auto text-center text-gray-500 py-4 border-t border-gray-200">
+                <footer className="text-center text-gray-500 py-4 border-t border-gray-200">
                     © ALPHA SYSTEMS S.R.L. EBILL 2.0 2024 Derechos Reservados
                 </footer>
             </div>
