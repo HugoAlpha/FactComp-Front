@@ -6,6 +6,7 @@ import { PATH_URL_BACKEND } from "@/utils/constants";
 import ModalContingency from '@/components/layouts/modalContingency';
 import Swal from 'sweetalert2';
 import { FaList, FaTable } from 'react-icons/fa';
+import Footer from '@/components/commons/footer';
 
 const KanbanView = () => {
     const today = new Date().toLocaleDateString('es-ES', {
@@ -148,9 +149,9 @@ const KanbanView = () => {
     };
 
     return (
-        <div className="min-h-screen flex flex-col overflow-hidden">
+        <div className="flex flex-col h-screen">
             <HeaderPOS />
-            <div className="flex flex-col min-h-screen bg-gray-50 p-6">
+            <div className="flex flex-col flex-grow bg-gray-50 p-6 overflow-auto">
                 <div className="w-full mb-4 flex justify-between items-center">
                     <input
                         type="text"
@@ -190,7 +191,7 @@ const KanbanView = () => {
                     </div>
                 </div>
 
-                <div className="max-h-[70vh] overflow-y-auto">
+                <div className="overflow-y-auto">
                     {viewMode === "grid" ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                             {filteredSalesPoints.map((point) => (
@@ -243,9 +244,7 @@ const KanbanView = () => {
                         </div>
                     )}
                 </div>
-                <footer className="text-center text-gray-500 py-4 border-t border-gray-200">
-                    © ALPHA SYSTEMS S.R.L. EBILL 2.0 2024 Derechos Reservados
-                </footer>
+                <Footer/>
             </div>
 
             <ModalContingency
@@ -254,6 +253,7 @@ const KanbanView = () => {
                 onConfirm={handleConfirm}
             />
         </div>
+
     );
 };
 

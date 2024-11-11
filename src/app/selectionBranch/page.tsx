@@ -5,6 +5,7 @@ import HeaderBranch from '@/components/commons/headerBranch';
 import { PATH_URL_BACKEND } from "@/utils/constants";
 import ModalContingency from '@/components/layouts/modalContingency';
 import Swal from 'sweetalert2';
+import Footer from '@/components/commons/footer';
 
 const SelectionBranch = () => {
     const today = new Date().toLocaleDateString('es-ES', {
@@ -126,7 +127,7 @@ const SelectionBranch = () => {
     };
 
     return (
-        <div className="min-h-screen flex flex-col">
+        <div className="flex flex-col h-screen">
             <HeaderBranch />
             <div className="flex flex-col min-h-screen bg-gray-50 p-6">
             <div className="mb-6 flex justify-between items-center">
@@ -173,9 +174,7 @@ const SelectionBranch = () => {
                         </div>
                     ))}
                 </div>
-                <footer className="mt-auto text-center text-gray-500 py-4 border-t border-gray-200">
-                    © ALPHA SYSTEMS S.R.L. EBILL 2.0 2024 Derechos Reservados
-                </footer>
+                <Footer />
             </div>
             <ModalContingency 
                 isOpen={isContingencyModalOpen} 
