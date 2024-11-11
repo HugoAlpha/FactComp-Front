@@ -39,7 +39,6 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
   const [paymentAmount, setPaymentAmount] = useState('');
   const [cashAmount, setCashAmount] = useState('');
   const [cardAmount, setCardAmount] = useState('');
-  const [clients, setClients] = useState<Client[]>([]);
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   const [showAllMethods, setShowAllMethods] = useState(false);
 
@@ -103,8 +102,6 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
         },
       });
 
-
-
       const contingenciaEstado = localStorage.getItem('contingenciaEstado');
       const body = {
         usuario: client?.codigoCliente || '',
@@ -114,7 +111,6 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
         nitInvalido: true,
         codigoMetodoPago: paymentMethod,
         activo: contingenciaEstado === '1' ? false : true,
-        odoo: false,
         detalle: products.map((product) => ({
           idProducto: product.id,
           cantidad: product.cantidad.toString(),
@@ -147,11 +143,20 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
           });
         });
       } else {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error al emitir factura',
-          text: 'No se pudo emitir la factura, intenta de nuevo.',
-        });
+        const errorData = await response.json();
+        if (errorData.message === "Cufd Inexistente") {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error al emitir factura',
+            text: 'CUFD no vigente. Por favor, verificar el estado de éste.',
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'Error al emitir factura',
+            text: errorData.message || 'No se pudo emitir la factura, intenta de nuevo.',
+          });
+        }
       }
     } catch (error) {
       Swal.close();
@@ -161,6 +166,7 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
         text: 'No se pudo conectar con el servidor.',
       });
     }
+
   };
 
   if (!isOpen) return null;

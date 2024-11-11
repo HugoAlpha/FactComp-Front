@@ -25,15 +25,15 @@ const UserList = () => {
     const fetchUsers = async () => {
         try {
             const token = localStorage.getItem("tokenJWT");
-
+    
             const userResponse = await fetch(`${PATH_URL_SECURITY}/api/usuarios`, {
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`,
                 },
             });
-            const usersData = await userResponse.json();
-
+            let usersData = await userResponse.json();
+    
             const companyResponse = await fetch(`${PATH_URL_BACKEND}/empresa`, {
                 headers: {
                     'Content-Type': 'application/json',
@@ -42,12 +42,15 @@ const UserList = () => {
             });
             const companiesData = await companyResponse.json();
 
+            usersData = usersData.sort((a, b) => b.id_user - a.id_user);
+    
             setUsers(usersData);
             setCompanies(companiesData);
         } catch (error) {
             console.error("Error fetching data:", error);
         }
     };
+    
 
     useEffect(() => {
         fetchUsers();
@@ -272,6 +275,7 @@ const UserList = () => {
                                         <th className="px-6 py-4 font-bold">Nombre completo</th>
                                         <th className="px-6 py-4 font-bold">Email</th>
                                         <th className="px-6 py-4 font-bold">Empresa</th>
+                                        <th className="px-6 py-4 font-bold">Rol</th> 
                                         <th className="px-6 py-4 font-bold">Operaciones</th>
                                     </tr>
                                 </thead>
@@ -283,20 +287,29 @@ const UserList = () => {
                                             <td className="px-6 py-4">{user.email}</td>
                                             <td className="px-6 py-4">{getCompanyName(user.id_empresa)}</td>
                                             <td className="px-6 py-4">
+                                                {user.rol === "ROLE_USER" ? "Cajero" : user.rol === "ROLE_ADMIN" ? "Administrador" : user.rol === "ROLE_CONTADOR" ? "Contador" : "Sin rol"} 
+                                            </td>
+                                            <td className="px-6 py-4">
                                                 <div className="flex">
-                                                    <button className="bg-red-200 hover:bg-red-300 p-2 rounded-l-lg flex items-center justify-center border border-red-300"
+                                                    <button className="bg-red-200 hover:bg-red-300 p-2 rounded-l-lg flex items-center justify-center border border-red-300 relative group"
                                                         onClick={() => handleDeleteUser(user.id_user)}>
                                                         <FaTrashAlt className="text-black" />
+                                                        <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 hidden group-hover:flex items-center justify-center bg-gray-800 text-white text-xs rounded px-2 py-1">
+                                                            Borrar Usuario
+                                                        </span>
                                                     </button>
 
                                                     <button
-                                                        className="bg-blue-200 hover:bg-blue-300 p-2 rounded-r-lg flex items-center justify-center border border-blue-300"
+                                                        className="bg-blue-200 hover:bg-blue-300 p-2 rounded-r-lg flex items-center justify-center border border-blue-300 relative group"
                                                         onClick={() => {
                                                             setCurrentUser(user);
                                                             setIsModalOpen(true);
                                                         }}
                                                     >
                                                         <FaEdit className="text-black" />
+                                                        <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 hidden group-hover:flex items-center justify-center bg-gray-800 text-white text-xs rounded px-2 py-1">
+                                                            Editar Usuario
+                                                        </span>
                                                     </button>
                                                 </div>
                                             </td>

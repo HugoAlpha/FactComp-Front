@@ -224,24 +224,33 @@ const ClientList = () => {
                 {userRole === 'ROLE_CLIENT' ? (
                     <>
                         <button
-                            className="bg-red-200 hover:bg-red-300 p-2 rounded-l-lg flex items-center justify-center border border-red-300"
+                            className="bg-red-200 hover:bg-red-300 p-2 rounded-l-lg flex items-center justify-center border border-red-300 relative group"
                             onClick={() => handleDeleteCustomer(customer.id)}
                         >
                             <FaTrashAlt className="text-black" />
+                            <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 hidden group-hover:flex items-center justify-center bg-gray-800 text-white text-xs rounded px-2 py-1">
+                            Borrar Cliente
+                        </span>
                         </button>
                         <button
-                            className="bg-blue-200 hover:bg-blue-300 p-2 rounded-r-lg flex items-center justify-center border border-blue-300"
+                            className="bg-blue-200 hover:bg-blue-300 p-2 rounded-r-lg flex items-center justify-center border border-blue-300 relative group"
                             onClick={() => handleEditCustomer(customer.id)}
                         >
                             <FaEdit className="text-black" />
+                            <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 hidden group-hover:flex items-center justify-center bg-gray-800 text-white text-xs rounded px-2 py-1">
+                            Editar Cliente
+                        </span>
                         </button>
                     </>
                 ) : (
                     <button
-                        className="bg-blue-200 hover:bg-blue-300 p-2 rounded-lg flex items-center justify-center border border-blue-300"
+                        className="bg-blue-200 hover:bg-blue-300 p-2 rounded-lg flex items-center justify-center border border-blue-300 relative group"
                         onClick={() => handleEditCustomer(customer.id)}
                     >
                         <FaEdit className="text-black" />
+                        <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 hidden group-hover:flex items-center justify-center bg-gray-800 text-white text-xs rounded px-2 py-1">
+                            Editar Cliente
+                        </span>
                     </button>
                 )}
             </div>
@@ -349,14 +358,13 @@ const ClientList = () => {
                             </table>
                         </div>
 
-
                         <div className="flex flex-col items-center mt-6">
                             <div className="flex justify-center space-x-1 mb-2">
                                 <button
-                                    onClick={handleLastPage}
+                                    onClick={handleFirstPage}
                                     className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                                 >
-                                    Último
+                                    Primero
                                 </button>
                                 <button
                                     onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -383,11 +391,12 @@ const ClientList = () => {
                                 >
                                     Sig.
                                 </button>
+                
                                 <button
-                                    onClick={handleFirstPage}
+                                    onClick={handleLastPage}
                                     className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                                 >
-                                    Primero
+                                    Último
                                 </button>
                             </div>
 
@@ -404,6 +413,6 @@ const ClientList = () => {
             )}
         </div>
     );
-};
+}; 
 
 export default ClientList;

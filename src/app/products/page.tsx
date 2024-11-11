@@ -52,17 +52,18 @@ const ProductList = () => {
             try {
                 const productResponse = await fetch(`${PATH_URL_BACKEND}/item/obtener-items`);
                 const productsData: Product[] = await productResponse.json();
-
+                const sortedProductsData = productsData.sort((a, b) => b.id - a.id);
+    
                 const imageResponse = await fetch(`${PATH_URL_IMAGES}/images`);
                 const imagesData = await imageResponse.json();
-
+    
                 const unidadMedidaResponse = await fetch(`${PATH_URL_BACKEND}/parametro/unidad-medida`);
                 const unidadMedidaData: UnidadMedidaOption[] = await unidadMedidaResponse.json();
-
-                const updatedProducts = productsData.map(product => {
+    
+                const updatedProducts = sortedProductsData.map(product => {
                     const image = imagesData.find(img => img.itemId === product.id);
                     const unidadMedida = unidadMedidaData.find(um => String(um.codigoClasificador) === String(product.unidadMedida));
-
+    
                     return {
                         ...product,
                         imageUrl: image ? `${PATH_URL_IMAGES}/images/${image.id}` : '/images/caja.png',
@@ -70,15 +71,16 @@ const ProductList = () => {
                         unidadMedidaDescripcion: unidadMedida ? unidadMedida.descripcion : 'No disponible'
                     };
                 });
-
+    
                 setProducts(updatedProducts);
             } catch (error) {
                 console.error('Error al obtener productos, imágenes o unidades de medida:', error);
             }
         };
-
+    
         fetchProductsAndImages();
     }, []);
+    
 
     const checkServerCommunication = async () => {
         try {
@@ -354,12 +356,15 @@ const ProductList = () => {
                                             <td className="px-6 py-4">{product.codigoProductoSin}</td>
                                             <td className="px-6 py-4">{product.unidadMedidaDescripcion}</td>
                                             <td className="px-6 py-4">
-                                                <button
-                                                    className="bg-blue-200 hover:bg-blue-300 p-2 rounded-lg flex items-center justify-center border border-blue-300"
-                                                    onClick={() => handleOpenModal(product)}
-                                                >
-                                                    <FaEdit className="text-black" />
-                                                </button>
+                                            <button
+                                                className="bg-blue-200 hover:bg-blue-300 p-2 rounded-r-lg flex items-center justify-center border border-blue-300 relative group"
+                                                onClick={() => handleOpenModal(product)}
+                                            >
+                                                <FaEdit className="text-black" />
+                                                <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 hidden group-hover:flex items-center justify-center bg-gray-800 text-white text-xs rounded px-2 py-1">
+                                                    Editar Producto
+                                                </span>
+                                            </button>
                                             </td>
                                         </tr>
                                     ))}

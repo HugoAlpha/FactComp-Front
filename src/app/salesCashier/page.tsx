@@ -11,6 +11,8 @@ import { GrDocumentConfig } from "react-icons/gr";
 import CreateEditClientModal from '@/components/layouts/modalCreateEditClient';
 import ModalCreateProduct from '@/components/layouts/modalCreateProduct';
 import { GoHomeFill } from "react-icons/go";
+import ModalAllClients from '@/components/layouts/modalAllClients';
+import { FaTrash } from "react-icons/fa6";
 
 const Sales = () => {
     const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
@@ -34,6 +36,7 @@ const Sales = () => {
     const [clientSearchTerm, setClientSearchTerm] = useState('');
     const [filteredClients, setFilteredClients] = useState([]);
     const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [isAllClientsModalOpen, setIsAllClientsModalOpen] = useState(false);
     const [currentCustomer, setCurrentCustomer] = useState<Customer>({
         id: 0,
         nombreRazonSocial: '',
@@ -44,6 +47,16 @@ const Sales = () => {
         email: '',
     });
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+
+    const hasZeroTotalProduct = selectedProducts.some(product => product.totalPrice === 0);
+
+    	const tooltipMessage = currentCustomer.id === 0 && hasZeroTotalProduct
+        ? 'Debe seleccionar un cliente y corregir los precios de los productos con total 0'
+        : currentCustomer.id === 0
+        ? 'Debe seleccionar un cliente primero'
+        : hasZeroTotalProduct
+        ? 'Alguno de los precios de los productos seleccionados es 0, corrija y continúe con el pago'
+        : '';
 
     interface Product {
         id: number;
@@ -134,6 +147,7 @@ const Sales = () => {
                     totalPrice: item.precioUnitario,
                     codigo: item.codigo,
                     unidadMedida: item.unidadMedida,
+                    imageId: image ? image.id : null,
                     unidadMedidaDescripcion: unidadMedida ? unidadMedida.descripcion : 'No disponible'
                 };
             });
@@ -188,15 +202,25 @@ const Sales = () => {
 
     const updateProductInList = (updatedProduct: Product) => {
         const updatedProducts = products.map((item) =>
-            item.id === updatedProduct.id ? updatedProduct : item
+            item.id === updatedProduct.id ? { ...item, price: updatedProduct.precioUnitario } : item
         );
         setProducts(updatedProducts);
-        const updatedSelectedProducts = selectedProducts.map((item) =>
-            item.id === updatedProduct.id ? { ...item, price: updatedProduct.price, totalPrice: item.quantity! * updatedProduct.price } : item
-        );
+        const updatedSelectedProducts = selectedProducts.map((item) => {
+            if (item.id === updatedProduct.id) {
+                const newTotalPrice = (item.quantity ?? 1) * updatedProduct.precioUnitario;
+                return {
+                    ...item,
+                    price: updatedProduct.precioUnitario,
+                    totalPrice: !isNaN(newTotalPrice) ? newTotalPrice : 0,
+                };
+            }
+            return item;
+        });
         setSelectedProducts(updatedSelectedProducts);
         calculateTotal(updatedSelectedProducts);
     };
+    
+    
 
     const calculateTotal = (updatedProducts: Product[]) => {
         const subtotal = updatedProducts.reduce((acc, curr) => acc + (curr.totalPrice ?? 0), 0);
@@ -223,8 +247,8 @@ const Sales = () => {
 
         const newTotal = total - discountValue;
 
-        if (newTotal < 0) {
-            Swal.fire('Error', 'El descuento global no puede hacer que el total sea menor que 0.', 'error');
+        if (newTotal < 1) {
+            Swal.fire('Error', 'El descuento global no puede hacer que el total sea menor que 1.', 'error');
             return;
         }
 
@@ -376,7 +400,7 @@ const Sales = () => {
     };
 
     const handleGoToDashboard = () => {
-        const route = '/dashboard';
+        const route = '/dashboardCashier';
         window.location.href = route;
     };
 
@@ -417,6 +441,12 @@ const Sales = () => {
         });
     };
 
+    const handleProductUpdate = (updatedProduct: Product) => {
+        updateProductInList(updatedProduct); 
+        setIsEditModalOpen(false);
+    };
+    
+
     const handleSaveCustomer = (savedCustomer: Customer) => {
 
         console.log('Cliente guardado:', savedCustomer);
@@ -438,6 +468,19 @@ const Sales = () => {
 
     const formatCurrency = (value) => {
         return new Intl.NumberFormat('es-BO', { style: 'currency', currency: 'BOB', minimumFractionDigits: 2 }).format(value);
+    };
+
+    const handleOpenAllClientsModal = () => {
+        setIsAllClientsModalOpen(true);
+    };
+    
+    const handleCloseAllClientsModal = () => {
+        setIsAllClientsModalOpen(false);
+    };
+
+    const handleClientSelectFromModal = (selectedClient) => {
+        setCurrentCustomer(selectedClient);
+        setIsAllClientsModalOpen(false);
     };
 
 
@@ -476,29 +519,28 @@ const Sales = () => {
                                             <tr key={product.id} className="text-sm">
                                                 <td className="px-4 py-2">{product.name}</td>
                                                 <td className="px-4 py-2">
-                                                    <div className="flex items-center justify-center space-x-2">
-                                                        <button
-                                                            onClick={() => decreaseQuantity(product.id)}
-                                                            className="bg-gray-100 hover:bg-slate-300 text-gray-700 font-bold w-7 h-7 rounded-full focus:outline-none flex items-center justify-center"
-                                                        >
-                                                            -
-                                                        </button>
-
-                                                        <input
-                                                            type="text"
-                                                            className="w-12 text-center border border-gray-200 rounded-md bg-transparent focus:outline-none"
-                                                            value={product.quantity}
-                                                            readOnly
-                                                        />
-
+                                                <div className="flex items-center justify-center space-x-2">
+                                                    <input
+                                                        type="text"
+                                                        className="w-12 text-center border border-gray-200 rounded-md bg-transparent focus:outline-none"
+                                                        value={product.quantity}
+                                                        readOnly
+                                                    />
+                                                    <div className="flex flex-col space-y-1">
                                                         <button
                                                             onClick={() => increaseQuantity(product.id)}
-                                                            className="bg-gray-100 hover:bg-slate-300 text-gray-700 font-bold w-7 h-7 rounded-full focus:outline-none flex items-center justify-center"
+                                                            className="bg-gray-100 hover:bg-slate-300 text-gray-700 font-bold w-5 h-5 rounded-full focus:outline-none flex items-center justify-center"
                                                         >
                                                             +
                                                         </button>
+                                                        <button
+                                                            onClick={() => decreaseQuantity(product.id)}
+                                                            className="bg-gray-100 hover:bg-slate-300 text-gray-700 font-bold w-5 h-5 rounded-full focus:outline-none flex items-center justify-center"
+                                                        >
+                                                            -
+                                                        </button>
                                                     </div>
-
+                                                </div>
                                                 </td>
                                                 <td className="px-4 py-2">
                                                     <input
@@ -515,7 +557,7 @@ const Sales = () => {
                                                     <button
                                                         onClick={() => removeProduct(product.id)}
                                                         className="bg-red-400 text-white px-3 py-1 rounded hover:bg-red-600 transtion-colors">
-                                                        Remove
+                                                        <FaTrash />
                                                     </button>
                                                 </td>
                                             </tr>
@@ -547,46 +589,47 @@ const Sales = () => {
                                             </button>
 
                                             {dropdownOpen && (
-                                                <div className="absolute z-50 bg-white shadow-lg rounded mt-2 w-full" style={{ maxHeight: '250px', overflowY: 'auto' }}>
-                                                    <input
-                                                        type="text"
-                                                        value={clientSearchTerm}
-                                                        onChange={(e) => setClientSearchTerm(e.target.value)}
-                                                        placeholder="Buscar cliente"
-                                                        className="block w-full p-2 text-sm border-gray-300"
-                                                    />
-                                                    <ul className="bg-white border border-gray-300 rounded-b">
-                                                        {filteredClients.length > 0 ? (
-                                                            filteredClients.map((client) => (
-                                                                <li key={client.id}>
-                                                                    <button
-                                                                        type="button"
-                                                                        className="block px-2 py-1 text-left w-full hover:bg-gray-100"
-                                                                        onClick={() => {
-                                                                            handleClientSelect(client.id);
-                                                                            setDropdownOpen(false);
-                                                                        }}
-                                                                    >
-                                                                        {client.nombreRazonSocial} - {client.numeroDocumento}
-                                                                    </button>
-                                                                </li>
-                                                            ))
-                                                        ) : (
-                                                            <li className="px-2 py-1 text-gray-500">No se encontraron clientes</li>
-                                                        )}
+                                                <div className="absolute z-50 bg-white shadow-lg rounded mt-2 w-full">
+                                                    <ul className="bg-white border border-gray-300 rounded-b max-h-48 overflow-y-auto">
+                                                        {clients.slice(0, 5).map((client) => (
+                                                            <li key={client.id}>
+                                                                <button
+                                                                    type="button"
+                                                                    className="block px-2 py-1 text-left w-full hover:bg-gray-100"
+                                                                    onClick={() => {
+                                                                        setCurrentCustomer(client);
+                                                                        setDropdownOpen(false);
+                                                                    }}
+                                                                >
+                                                                    {client.nombreRazonSocial} - {client.numeroDocumento}
+                                                                </button>
+                                                            </li>
+                                                        ))}
                                                     </ul>
+                                                    <button
+                                                        type="button"
+                                                        className="block w-full text-center bg-gray-200 hover:bg-gray-300 py-2"
+                                                        onClick={() => {
+                                                            setDropdownOpen(false);
+                                                            handleOpenAllClientsModal();
+                                                        }}
+                                                    >
+                                                        Buscar más - Crear cliente
+                                                    </button>
                                                 </div>
                                             )}
                                         </div>
                                     </div>
-
                                     <button
                                         onClick={handleOpenModal}
-                                        className="flex items-center justify-center bg-thirdColor hover:bg-opacity-90 text-white font-bold py-3 px-4 rounded-lg w-full"
+                                        className={`flex items-center justify-center ${
+                                            currentCustomer.id === 0 || hasZeroTotalProduct ? 'bg-gray-300' : 'bg-thirdColor hover:bg-opacity-90'
+                                        } text-white font-bold py-3 px-4 rounded-lg w-full`}
+                                        disabled={currentCustomer.id === 0 || hasZeroTotalProduct}
+                                        title={tooltipMessage}
                                     >
                                         <FaCreditCard className="mr-2" /> Pagar
                                     </button>
-
                                     <input
                                         type="number"
                                         className="w-full p-3 rounded-lg border border-gray-300"
@@ -664,7 +707,7 @@ const Sales = () => {
                             {/* Vista Grid / List */}
                             <div className="max-h-[70vh] overflow-y-auto ml-2">
                                 {viewMode === "grid" ? (
-                                    <div className="grid grid-cols-6 gap-4">
+                                    <div className="grid grid-cols-5 gap-4">
                                         {filteredProducts.map((product) => (
                                             <div
                                                 key={product.id}
@@ -678,11 +721,28 @@ const Sales = () => {
                                                 />
                                                 <h3 className="text-xs font-semibold truncate">{product.name}</h3>
                                                 <p className="text-sm font-bold">Bs {product.price}</p>
+                                                <button
+                                                    className="absolute top-2 right-2 text-blue-500 hover:text-blue-700 z-10"
+                                                    onClick={(e) => { e.stopPropagation(); handleEditProduct(product); }}
+                                                >
+                                                    <FaEdit />
+                                                </button>
                                             </div>
                                         ))}
                                     </div>
                                 ) : (
                                     <div className="space-y-2">
+                                        {/* Títulos para las columnas */}
+                                        <div className="flex items-center bg-gray-200 p-2 rounded-lg shadow">
+                                            <div className="flex-grow">
+                                                <h3 className="text-sm font-bold">Nombre y Precio del producto</h3>
+                                            </div>
+                                            <div className="justify-end">
+                                                <h3 className="text-sm font-bold">Unidad de medida</h3>
+                                            </div>
+                                        </div>
+
+                                        {/* Lista de productos */}
                                         {filteredProducts.map((product) => (
                                             <div
                                                 key={product.id}
@@ -693,17 +753,27 @@ const Sales = () => {
                                                     <h3 className="text-sm font-semibold">{product.name}</h3>
                                                     <p className="text-sm font-bold">Bs {product.price}</p>
                                                 </div>
+                                                <div className="justify-end">
+                                                    <p className="text-sm font-bold">{product.unidadMedidaDescripcion}</p>
+                                                </div>
+                                                <button
+                                                    className="ml-4 text-blue-500 hover:text-blue-700 z-10"
+                                                    onClick={(e) => { e.stopPropagation(); handleEditProduct(product); }}
+                                                >
+                                                    <FaEdit />
+                                                </button>
                                             </div>
                                         ))}
                                     </div>
                                 )}
                             </div>
+  
                         </div>
 
                         <ModalCreateProduct
                             isOpen={isEditModalOpen}
                             onClose={() => setIsEditModalOpen(false)}
-                            onProductCreated={() => refreshProductList()}
+                            onProductCreated={handleProductUpdate}
                             refreshProducts={refreshProductList}
                             product={productToEdit}
                         />
@@ -726,6 +796,12 @@ const Sales = () => {
                             onClose={handleCloseClientModal}
                             customer={currentCustomer}
                             onSave={handleSaveCustomer}
+                        />
+
+                        <ModalAllClients
+                            isOpen={isAllClientsModalOpen}
+                            onClose={handleCloseAllClientsModal}
+                            onSelectClient={handleClientSelectFromModal} 
                         />
 
                     </>

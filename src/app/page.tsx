@@ -17,7 +17,10 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    if (!username || !password) {
+    const trimmedUsername = username.trim();
+    const trimmedPassword = password.trim();
+
+    if (!trimmedUsername || !trimmedPassword) {
       Swal.fire({
         icon: 'warning',
         title: 'Campos vacíos',
@@ -35,57 +38,54 @@ const Login = () => {
           'Content-Type': 'application/x-www-form-urlencoded'
         },
         body: new URLSearchParams({
-          username,
-          password
+          username: trimmedUsername,
+          password: trimmedPassword
         }).toString()
       });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        if (data.response === "200") {
-          localStorage.setItem("username", username);
-          localStorage.setItem("role", data.role);
-          localStorage.setItem("tokenJWT", data.tokenJWT);
-          localStorage.setItem("idEmpresa", data.id_empresa);
-
-          Swal.fire({
-            position: "center",
-            icon: 'success',
-            title: data.message,
-            text: 'Bienvenido a Alpha E-Facturación',
-            showConfirmButton: false,
-            timer: 3500
-          }).then(() => {
-            if (data.role === "ROLE_ADMIN") {
-              router.push('/selectionBranch');
-            } else if (data.role === "ROLE_USER") {
-              router.push('/selectionPOS');
-            }
-          });
-        } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error de autenticación',
-            text: data.response || 'Usuario o contraseña incorrectos.',
-            showConfirmButton: false,
-            timer: 2000
-          });
-        }
+      let data;
+      if (response.headers.get("content-type")?.includes("application/json")) {
+        data = await response.json();
       } else {
+        data = await response.text();
+      }
+
+      if (response.ok && typeof data === "object" && data.response === "200") {
+        localStorage.setItem("username", trimmedUsername);
+        localStorage.setItem("role", data.role);
+        localStorage.setItem("tokenJWT", data.tokenJWT);
+        localStorage.setItem("idEmpresa", data.id_empresa);
+
+        Swal.fire({
+          position: "center",
+          icon: 'success',
+          title: data.message,
+          text: 'Bienvenido a Alpha E-Facturación',
+          showConfirmButton: false,
+          timer: 3500
+        }).then(() => {
+          if (data.role === "ROLE_ADMIN") {
+            router.push('/selectionBranch');
+          } else if (data.role === "ROLE_USER") {
+            router.push('/selectionPOS');
+          }
+        });
+      } else {
+        const errorMessage = typeof data === "string" ? data : data.message || 'Error de inicio de sesión.';
+
         Swal.fire({
           icon: 'error',
-          title: 'Error de servidor',
-          text: data.response || 'No se pudo conectar con el servidor.',
+          title: 'Error de autenticación',
+          text: errorMessage,
           showConfirmButton: false,
-          timer: 2000
+          timer: 2500
         });
       }
     } catch (error) {
       console.error("Error de conexión:", error);
       Swal.fire({
         icon: 'error',
-        title: 'Error de inicio de sesion',
+        title: 'Error de inicio de sesión',
         text: 'Hubo un problema, verifica usuario y contraseña',
         showConfirmButton: false,
         timer: 2000
@@ -94,16 +94,15 @@ const Login = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-[#d8e3e8] to-[#e8f3f5] animate-fade-in">
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-[#d8e3e8] to-[#e8f3f5] ">
       <div className="bg-white shadow-lg rounded-3xl flex flex-col md:flex-row w-full max-w-4xl overflow-hidden">
         <div className="hidden md:flex md:w-1/2 bg-[#10314b] flex-col items-center justify-center p-8 text-white rounded-l-3xl shadow-lg relative">
-          <div className="flex flex-col items-center justify-center text-center animate-pulse">
+          <div className="flex flex-col items-center justify-center text-center">
             <Image
               src="/images/efactu2.png"
               alt="Logo Alpha"
               width={220}
               height={220}
-              className="animate-scale-pulse"
             />
             <h2 className="text-3xl font-bold mt-6">Alpha E-Facturación</h2>
             <p className="mt-4 text-lg px-4">Gestión eficiente de tus facturas con Alpha E-Facturación. ¡Hazlo fácil y rápido!</p>

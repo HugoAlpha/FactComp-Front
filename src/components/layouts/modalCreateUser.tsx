@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaUser, FaIdCard, FaPhone, FaEnvelope, FaLock } from 'react-icons/fa';
+import { FaUser, FaIdCard, FaPhone, FaEnvelope, FaLock, FaEye, FaEyeSlash  } from 'react-icons/fa';
 import Swal from 'sweetalert2';
 import { PATH_URL_SECURITY } from '@/utils/constants';
 
@@ -35,6 +35,7 @@ const ModalCreateUser: React.FC<ModalCreateUserProps> = ({ isOpen, onClose, onSa
         rol: 'ROLE_USER',
     });
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
+    const [showPassword, setShowPassword] = useState(false); 
 
     useEffect(() => {
         if (user) {
@@ -54,11 +55,16 @@ const ModalCreateUser: React.FC<ModalCreateUserProps> = ({ isOpen, onClose, onSa
         }
         setErrors({});
     }, [user, isOpen]);
+    
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
         setErrors(prev => ({ ...prev, [name]: '' }));
+    };
+
+    const togglePasswordVisibility = () => {
+        setShowPassword(prevShow => !prevShow);
     };
 
     const validateForm = () => {
@@ -67,13 +73,16 @@ const ModalCreateUser: React.FC<ModalCreateUserProps> = ({ isOpen, onClose, onSa
         const alphanumericPattern = /^[a-zA-Z0-9]+$/;
         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         const numberPattern = /^[0-9]+$/;
+        const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[^\s]{8,}$/; 
     
         if (!formData.username) {
             newErrors.username = 'Este campo es requerido.';
         } else if (!alphanumericPattern.test(formData.username)) {
-            newErrors.username = 'Solo se permiten letras y espacios.';
+            newErrors.username = 'Solamente se permiten letras y números.';
         } else if (formData.username.length > 20) {
             newErrors.username = 'Número de caracteres permitido: 20.';
+        } else if (formData.username.length < 4) {
+            newErrors.username = 'El número de caracteres mínimo para el usuario es 4.';
         }
     
         if (!formData.nombre) {
@@ -108,14 +117,14 @@ const ModalCreateUser: React.FC<ModalCreateUserProps> = ({ isOpen, onClose, onSa
             newErrors.celular = 'Número de caracteres permitido: 15.';
         }
     
-        // if (!user && (!formData.password || formData.password.trim() === '')) {
-        //     newErrors.password = 'Este campo es requerido.';
-        // } else if (formData.password && formData.password.length > 20) {
-        //     newErrors.password = 'Número de caracteres permitido: 20.';
-        // }
-    
         if (!formData.rol) {
             newErrors.rol = 'Debe seleccionar un rol de usuario.';
+        }
+    
+        if (!formData.password) {
+            newErrors.password = 'Este campo es requerido.';
+        } else if (!passwordPattern.test(formData.password)) {
+            newErrors.password = 'La contraseña debe tener al menos 8 caracteres, una mayúscula, una minúscula y un número, y no debe contener espacios.';
         }
     
         setErrors(newErrors);
@@ -123,8 +132,6 @@ const ModalCreateUser: React.FC<ModalCreateUserProps> = ({ isOpen, onClose, onSa
     };
     
     
-
-
     const handleSubmit = async () => {
         if (validateForm()) {
             try {
@@ -196,10 +203,19 @@ const ModalCreateUser: React.FC<ModalCreateUserProps> = ({ isOpen, onClose, onSa
                     <form className="grid grid-cols-2 gap-6">
                         {renderInputField("username", "Nombre de Usuario", formData.username, handleInputChange, <FaUser />, errors.username)}
                         {renderInputField("nombre", "Nombre", formData.nombre, handleInputChange, <FaIdCard />, errors.nombre)}
-                        {renderInputField("apellidos", "Apellidos", formData.apellidos, handleInputChange, <FaIdCard />, errors.apellidos)}
+                        {renderInputField("apellidos", "Apellido", formData.apellidos, handleInputChange, <FaIdCard />, errors.apellidos)}
                         {renderInputField("email", "Correo", formData.email, handleInputChange, <FaEnvelope />, errors.email)}
                         {renderInputField("celular", "Teléfono", formData.celular.toString(), handleInputChange, <FaPhone />, errors.celular)}
-                        {!user && renderInputField("password", "Contraseña", formData.password || '', handleInputChange, <FaLock />, errors.password)}
+                        {!user && renderInputField(
+                            "password",
+                            "Contraseña",
+                            formData.password || '',
+                            handleInputChange,
+                            <FaLock />,
+                            errors.password,
+                            showPassword, 
+                            togglePasswordVisibility 
+                        )}
 
                         <div className="relative z-0 w-full mb-5 group">
                             <select
@@ -238,10 +254,12 @@ const renderInputField = (
     onChange: (e: React.ChangeEvent<HTMLInputElement>) => void,
     icon: React.ReactNode,
     error?: string,
+    showPassword?: boolean, 
+    togglePasswordVisibility?: () => void
 ) => (
     <div className="relative z-0 w-full mb-5 group">
         <input
-            type={name === "password" ? "password" : "text"}
+            type={name === "password" && showPassword ? "text" : name === "password" ? "password" : "text"}
             name={name}
             value={value}
             onChange={onChange}
@@ -252,6 +270,16 @@ const renderInputField = (
             {label}
         </label>
         {error && <span className="text-red-500 text-sm">{error}</span>}
+        
+        {name === "password" && (
+            <button
+                type="button"
+                onClick={togglePasswordVisibility}
+                className="absolute right-2 top-2 text-gray-500"
+            >
+                {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
+        )}
     </div>
 );
 

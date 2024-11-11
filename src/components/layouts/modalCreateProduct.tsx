@@ -48,7 +48,12 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
     const [dropdownOpenUnidadMedida, setDropdownOpenUnidadMedida] = useState(false);
     const [selectedImage, setSelectedImage] = useState<File | null>(null);
     const [previousImageId, setPreviousImageId] = useState<number | null>(null);
+    const maxLength = 100;
 
+    const handleDescriptionChange = (e) => {
+        setNombreProducto(e.target.value);
+    };
+    
     const [errors, setErrors] = useState({
         codigo: '',
         nombreProducto: '',
@@ -174,16 +179,14 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
 
         if (!codigo) {
             newErrors.codigo = 'Este campo es requerido.';
-        } else if (!alphanumericPattern.test(codigo)) {
-            newErrors.codigo = 'Solo se permiten caracteres alfanuméricos y sin espacios.';
         } else if (codigo.length > 10) {
             newErrors.codigo = 'Máximo 10 caracteres permitidos.';
         }
 
         if (!nombreProducto) {
             newErrors.nombreProducto = 'Este campo es requerido.';
-        } else if (nombreProducto.length > 40) {
-            newErrors.nombreProducto = 'Máximo 40 caracteres permitidos.';
+        } else if (nombreProducto.length > 100) {
+            newErrors.nombreProducto = 'Máximo 100 caracteres permitidos.';
         }
 
         if (!precioUnitario) {
@@ -322,29 +325,32 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                     {product ? 'Editar Producto' : 'Agregar Nuevo Producto'}
                 </div>
                 <form className="grid md:grid-cols-2 gap-6 mt-4" onSubmit={handleSubmitProduct}>
+    
+                    {/* Código Interno del Producto */}
                     <div className="relative z-0 w-full mb-5 group">
+                        <label className="text-sm text-gray-500">Código Interno del Producto</label>
                         <input
                             type="text"
                             name="codigo"
                             value={codigo}
                             onChange={(e) => setCodigo(e.target.value)}
-                            className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                            placeholder=" "
+                            className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600"
+                            placeholder="Código identificadors único"
+                            style={{ whiteSpace: 'normal' }}
                             required
                         />
-                        <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-2 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
-                            Código del Producto
-                        </label>
                         {errors.codigo && <span className="text-red-500 text-sm">{errors.codigo}</span>}
                     </div>
-
+    
+                    {/* Homologación SIAT */}
                     <div className="relative z-50 w-full mb-5 group">
+                        <label className="text-sm text-gray-500">Homologación SIAT</label>
                         <button
                             type="button"
                             onClick={handleDropdownToggle}
                             className="block w-full text-left py-2.5 px-0 text-sm text-gray-900 border-b-2 border-gray-300 focus:outline-none focus:ring-0 focus:border-blue-600"
                         >
-                            {selectedOption ? selectedOption.descripcionProducto : 'Selecciona una descripción del producto'}
+                            {selectedOption ? selectedOption.descripcionProducto : 'Selecciona una homologación para el producto'}
                         </button>
                         {dropdownOpen && (
                             <div className="absolute z-50 bg-white shadow-lg rounded mt-2 w-full">
@@ -370,14 +376,12 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                                 </ul>
                             </div>
                         )}
-
-                        <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-2 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
-                            Homologación
-                        </label>
                         {errors.codigoProductoSin && <span className="text-red-500 text-sm">{errors.codigoProductoSin}</span>}
                     </div>
-
+    
+                    {/* Unidad de medida SIAT */}
                     <div className="relative z-50 w-full mb-5 group">
+                        <label className="text-sm text-gray-500">Unidad de medida SIAT</label>
                         <button
                             type="button"
                             onClick={handleDropdownToggleUnidadMedida}
@@ -409,59 +413,62 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                                 </ul>
                             </div>
                         )}
-                        <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-2 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
-                            Unidad de medida
-                        </label>
                         {errors.unidadMedida && <span className="text-red-500 text-sm">{errors.unidadMedida}</span>}
                     </div>
-
+    
+                    {/* Descripción Comercial del Producto */}
                     <div className="relative z-0 w-full mb-5 group">
+                        <label className="text-sm text-gray-500">Descripción Comercial del Producto</label>
                         <input
                             type="text"
                             name="nombreProducto"
                             value={nombreProducto}
-                            onChange={(e) => setNombreProducto(e.target.value)}
-                            className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                            placeholder=" "
+                            onChange={handleDescriptionChange}
+                            className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600"
+                            placeholder="Descripción para el cliente"
+                            style={{ whiteSpace: 'normal' }}
+                            maxLength={maxLength + 1} 
                             required
                         />
-                        <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-2 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
-                            Descripción del Producto
-                        </label>
-                        {errors.nombreProducto && <span className="text-red-500 text-sm">{errors.nombreProducto}</span>}
+                        {/* Contador de caracteres */}
+                        <span
+                            className={`text-sm mt-1 ${
+                                nombreProducto.length > maxLength ? 'text-red-500' : 'text-gray-500'
+                            }`}
+                        >
+                            Caracteres: {nombreProducto.length} de {maxLength}
+                        </span>
                     </div>
-
+    
+                    {/* Precio Unitario en Bs. */}
                     <div className="relative z-0 w-full mb-5 group">
+                        <label className="text-sm text-gray-500">Precio Unitario en Bs.</label>
                         <input
                             type="text"
                             name="precioUnitario"
                             value={precioUnitario}
                             onChange={(e) => setPrecioUnitario(e.target.value)}
-                            className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                            placeholder=" "
+                            className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600"
+                            placeholder="Precio por unidad del producto"
+                            style={{ whiteSpace: 'normal' }}
                             required
                         />
-                        <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-2 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
-                            Precio Unitario en Bs.
-                        </label>
                         {errors.precioUnitario && <span className="text-red-500 text-sm">{errors.precioUnitario}</span>}
-
                     </div>
-
+    
                 </form>
+    
+                {/* Selector de imagen */}
                 <div className="relative z-0 w-full my-5 group">
+                    <label className="text-sm text-gray-500">Selecciona una imagen (JPG o PNG)</label>
                     <input
                         type="file"
                         onChange={(e) => setSelectedImage(e.target.files?.[0] || null)}
                         className="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 p-2 focus:outline-none focus:ring-2 focus:ring-blue-600"
                     />
-                    <label className="block text-sm text-gray-500 mt-1">
-                        Selecciona una imagen (JPG o PNG)
-                    </label>
                     {errors.image && <span className="text-red-500 text-sm">{errors.image}</span>}
                 </div>
-
-
+    
                 <div className="flex justify-end mt-6">
                     <button onClick={onClose} className="px-6 py-2 bg-sixthColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400 mr-2">
                         Cancelar
@@ -472,7 +479,7 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                 </div>
             </div>
         </div>
-    );
+    );    
 };
 
 export default ModalCreateProduct;

@@ -12,6 +12,7 @@ import CreateEditClientModal from '@/components/layouts/modalCreateEditClient';
 import ModalCreateProduct from '@/components/layouts/modalCreateProduct';
 import { GoHomeFill } from "react-icons/go";
 import ModalAllClients from '@/components/layouts/modalAllClients';
+import { FaTrash } from "react-icons/fa6";
 
 const Sales = () => {
     const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
@@ -46,6 +47,16 @@ const Sales = () => {
         email: '',
     });
     const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+
+    const hasZeroTotalProduct = selectedProducts.some(product => product.totalPrice === 0);
+
+    	const tooltipMessage = currentCustomer.id === 0 && hasZeroTotalProduct
+        ? 'Debe seleccionar un cliente y corregir los precios de los productos con total 0'
+        : currentCustomer.id === 0
+        ? 'Debe seleccionar un cliente primero'
+        : hasZeroTotalProduct
+        ? 'Alguno de los precios de los productos seleccionados es 0, corrija y continúe con el pago'
+        : '';
 
     interface Product {
         id: number;
@@ -236,8 +247,8 @@ const Sales = () => {
 
         const newTotal = total - discountValue;
 
-        if (newTotal < 0) {
-            Swal.fire('Error', 'El descuento global no puede hacer que el total sea menor que 0.', 'error');
+        if (newTotal < 1) {
+            Swal.fire('Error', 'El descuento global no puede hacer que el total sea menor que 1.', 'error');
             return;
         }
 
@@ -508,29 +519,28 @@ const Sales = () => {
                                             <tr key={product.id} className="text-sm">
                                                 <td className="px-4 py-2">{product.name}</td>
                                                 <td className="px-4 py-2">
-                                                    <div className="flex items-center justify-center space-x-2">
-                                                        <button
-                                                            onClick={() => decreaseQuantity(product.id)}
-                                                            className="bg-gray-100 hover:bg-slate-300 text-gray-700 font-bold w-7 h-7 rounded-full focus:outline-none flex items-center justify-center"
-                                                        >
-                                                            -
-                                                        </button>
-
-                                                        <input
-                                                            type="text"
-                                                            className="w-12 text-center border border-gray-200 rounded-md bg-transparent focus:outline-none"
-                                                            value={product.quantity}
-                                                            readOnly
-                                                        />
-
+                                                <div className="flex items-center justify-center space-x-2">
+                                                    <input
+                                                        type="text"
+                                                        className="w-12 text-center border border-gray-200 rounded-md bg-transparent focus:outline-none"
+                                                        value={product.quantity}
+                                                        readOnly
+                                                    />
+                                                    <div className="flex flex-col space-y-1">
                                                         <button
                                                             onClick={() => increaseQuantity(product.id)}
-                                                            className="bg-gray-100 hover:bg-slate-300 text-gray-700 font-bold w-7 h-7 rounded-full focus:outline-none flex items-center justify-center"
+                                                            className="bg-gray-100 hover:bg-slate-300 text-gray-700 font-bold w-5 h-5 rounded-full focus:outline-none flex items-center justify-center"
                                                         >
                                                             +
                                                         </button>
+                                                        <button
+                                                            onClick={() => decreaseQuantity(product.id)}
+                                                            className="bg-gray-100 hover:bg-slate-300 text-gray-700 font-bold w-5 h-5 rounded-full focus:outline-none flex items-center justify-center"
+                                                        >
+                                                            -
+                                                        </button>
                                                     </div>
-
+                                                </div>
                                                 </td>
                                                 <td className="px-4 py-2">
                                                     <input
@@ -547,7 +557,7 @@ const Sales = () => {
                                                     <button
                                                         onClick={() => removeProduct(product.id)}
                                                         className="bg-red-400 text-white px-3 py-1 rounded hover:bg-red-600 transtion-colors">
-                                                        Remove
+                                                        <FaTrash />
                                                     </button>
                                                 </td>
                                             </tr>
@@ -604,20 +614,22 @@ const Sales = () => {
                                                             handleOpenAllClientsModal();
                                                         }}
                                                     >
-                                                        Buscar más
+                                                        Buscar más - Crear cliente
                                                     </button>
                                                 </div>
                                             )}
                                         </div>
                                     </div>
-
                                     <button
                                         onClick={handleOpenModal}
-                                        className="flex items-center justify-center bg-thirdColor hover:bg-opacity-90 text-white font-bold py-3 px-4 rounded-lg w-full"
+                                        className={`flex items-center justify-center ${
+                                            currentCustomer.id === 0 || hasZeroTotalProduct ? 'bg-gray-300' : 'bg-thirdColor hover:bg-opacity-90'
+                                        } text-white font-bold py-3 px-4 rounded-lg w-full`}
+                                        disabled={currentCustomer.id === 0 || hasZeroTotalProduct}
+                                        title={tooltipMessage}
                                     >
                                         <FaCreditCard className="mr-2" /> Pagar
                                     </button>
-
                                     <input
                                         type="number"
                                         className="w-full p-3 rounded-lg border border-gray-300"
@@ -695,7 +707,7 @@ const Sales = () => {
                             {/* Vista Grid / List */}
                             <div className="max-h-[70vh] overflow-y-auto ml-2">
                                 {viewMode === "grid" ? (
-                                    <div className="grid grid-cols-6 gap-4">
+                                    <div className="grid grid-cols-5 gap-4">
                                         {filteredProducts.map((product) => (
                                             <div
                                                 key={product.id}
@@ -720,6 +732,17 @@ const Sales = () => {
                                     </div>
                                 ) : (
                                     <div className="space-y-2">
+                                        {/* Títulos para las columnas */}
+                                        <div className="flex items-center bg-gray-200 p-2 rounded-lg shadow">
+                                            <div className="flex-grow">
+                                                <h3 className="text-sm font-bold">Nombre y Precio del producto</h3>
+                                            </div>
+                                            <div className="justify-end">
+                                                <h3 className="text-sm font-bold">Unidad de medida</h3>
+                                            </div>
+                                        </div>
+
+                                        {/* Lista de productos */}
                                         {filteredProducts.map((product) => (
                                             <div
                                                 key={product.id}
@@ -729,6 +752,9 @@ const Sales = () => {
                                                 <div className="flex-grow">
                                                     <h3 className="text-sm font-semibold">{product.name}</h3>
                                                     <p className="text-sm font-bold">Bs {product.price}</p>
+                                                </div>
+                                                <div className="justify-end">
+                                                    <p className="text-sm font-bold">{product.unidadMedidaDescripcion}</p>
                                                 </div>
                                                 <button
                                                     className="ml-4 text-blue-500 hover:text-blue-700 z-10"
@@ -741,6 +767,7 @@ const Sales = () => {
                                     </div>
                                 )}
                             </div>
+  
                         </div>
 
                         <ModalCreateProduct

@@ -1,25 +1,42 @@
 "use client";
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { IoExitOutline } from 'react-icons/io5';
+import { PATH_URL_BACKEND } from '@/utils/constants';
 
 const HeaderPOS = () => {
+    const [empresa, setEmpresa] = useState<string | null>(null);
+
+    useEffect(() => {
+        const idEmpresa = localStorage.getItem("idEmpresa");
+        
+        if (idEmpresa) {
+            fetch(`${PATH_URL_BACKEND}/empresa/${idEmpresa}`)
+                .then((response) => response.json())
+                .then((data) => {
+                    setEmpresa(data.razonSocial);
+                })
+                .catch((error) => console.error("Error fetching empresa data:", error));
+        }
+    }, []);
+    
     const limpiarLocal = () => {
         localStorage.clear();
         window.location.href = "/";
     };
 
     return (
-        <header className="flex justify-between items-center shadow p-4 bg-ninthColor">
-            <div className="container mx-auto px-6 flex justify-between items-center">
-                <div className="flex items-center flex-grow">
-                    <div className="relative mx-2 lg:mx-0">
-                        <span className="text-2xl font-bold text-principalColor">
-                            Bienvenido/a, por favor elige tu puesto de atención
-                        </span>
-                    </div>
+        <header className="flex items-center shadow p-4 bg-ninthColor">
+            <div className="container mx-auto flex justify-between items-center">
+                {/* Título alineado a la izquierda */}
+                <div className="flex-shrink-0">
+                    <span className="text-2xl font-bold text-principalColor mr-24">
+                        Bienvenido/a, por favor elige el punto de venta a ingresar
+                    </span>
+                    <span className="text-2xl font-bold text-principalColor ml-44">
+                        {empresa}
+                    </span>
                 </div>
-
-                <div className="flex items-center space-x-4">
+                <div className="flex items-center">
                     <button
                         onClick={limpiarLocal}
                         className="flex items-center bg-gray-100 p-2 rounded-full hover:bg-gray-200"
@@ -30,7 +47,7 @@ const HeaderPOS = () => {
                 </div>
             </div>
         </header>
-    );
+    );    
 };
 
 export default HeaderPOS;

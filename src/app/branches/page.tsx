@@ -346,15 +346,21 @@ const Branches: React.FC = () => {
                                                 <div className="flex">
                                                     <button
                                                         onClick={() => handleDeleteBranch(branch.id)}
-                                                        className="bg-red-200 hover:bg-red-300 p-2 rounded-l-lg flex items-center justify-center border border-red-300"
+                                                        className="bg-red-200 hover:bg-red-300 p-2 rounded-l-lg flex items-center justify-center border border-red-300 relative group"
                                                     >
                                                         <FaTrashAlt className="text-black" />
+                                                        <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 hidden group-hover:flex items-center justify-center bg-gray-800 text-white text-xs rounded px-2 py-1">
+                                                            Borrar Sucursal
+                                                        </span>
                                                     </button>
                                                     <button
                                                         onClick={() => handleEditBranch(branch.id)}
-                                                        className="bg-blue-200 hover:bg-blue-300 p-2 rounded-r-lg flex items-center justify-center border border-blue-300"
+                                                        className="bg-blue-200 hover:bg-blue-300 p-2 rounded-r-lg flex items-center justify-center border border-blue-300 relative group"
                                                     >
                                                         <FaEdit className="text-black" />
+                                                        <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 hidden group-hover:flex items-center justify-center bg-gray-800 text-white text-xs rounded px-2 py-1">
+                                                            Editar Sucursal
+                                                        </span>
                                                     </button>
                                                 </div>
                                             </td>

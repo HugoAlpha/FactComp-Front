@@ -23,6 +23,11 @@ const Dashboard = () => {
     const [totalOrders, setTotalOrders] = useState(0);
     const [totalClients, setTotalClients] = useState(0);
     const [isContingencyModalOpen, setIsContingencyModalOpen] = useState(false);
+    const [isOpen, setIsOpen] = useState(false);
+
+    const toggleSidebar = () => {
+        setIsOpen(prevState => !prevState);
+    };
 
     const formatCurrency = (value) => {
         return new Intl.NumberFormat('es-BO', { style: 'currency', currency: 'BOB', minimumFractionDigits: 2 }).format(value);
@@ -99,8 +104,9 @@ const Dashboard = () => {
                 const response = await fetch(`${PATH_URL_BACKEND}/factura`);
                 if (response.ok) {
                     const data = await response.json();
-                    const filteredData = data.filter(invoice => invoice.codigoPuntoVenta === Number(idPOS));
-                    const sortedData = filteredData.sort((a, b) => new Date(b.fechaEmision) - new Date(a.fechaEmision));
+                    const idPOS = localStorage.getItem('idPOS');
+                    const filteredData = data.filter(invoice => invoice.puntoVenta.id === Number(idPOS));
+                    const sortedData = filteredData.sort((a, b) => b.id - a.id);
                     const lastFourInvoices = sortedData.slice(0, 4);
                     const formattedInvoices = lastFourInvoices.map(invoice => ({
                         id: invoice.id,
@@ -111,10 +117,12 @@ const Dashboard = () => {
                         date: new Date(invoice.fechaEmision).toLocaleDateString(),
                         company: invoice.razonSocialEmisor,
                     }));
+
                     setRecentInvoices(formattedInvoices);
                 } else {
                     console.error("Error al obtener los datos de las facturas");
                 }
+
 
                 const clientsResponse = await fetch(`${PATH_URL_BACKEND}/api/clientes/`);
                 if (clientsResponse.ok) {
@@ -208,48 +216,49 @@ const Dashboard = () => {
 
     return (
         <div className="flex flex-col md:flex-row min-h-screen">
-            <Sidebar />
+            <Sidebar isOpen={isOpen} toggleSidebar={toggleSidebar} />
             <div className="flex flex-col w-full min-h-screen">
-                <Header />
-                <div className="flex-grow overflow-auto bg-gray-50 mt-8">
-                    <div className="p-4 sm:p-6">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-4 sm:mb-6">
-                            {/* Ventas de Hoy */}
-                            <div className="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg p-4">
-                                <h3 className="text-sm sm:text-base font-semibold text-slate-800">Ventas de Hoy</h3>
-                                <p className="text-lg sm:text-xl font-bold text-slate-800">{dailySales ? formatCurrency(dailySales) : 'Cargando...'}</p>
-                            </div>
+                <Header isOpen={isOpen} toggleSidebar={toggleSidebar} />
 
-                            {/* Total Mensual */}
-                            <div className="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg p-4">
-                                <h3 className="text-sm sm:text-base font-semibold text-slate-800">Total Mensual</h3>
-                                <p className="text-lg sm:text-xl font-bold text-slate-800">{monthlySales ? formatCurrency(monthlySales) : 'Cargando...'}</p>
-                            </div>
-
-                            {/* Total de Facturas */}
-                            <div className="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg p-4">
-                                <h3 className="text-sm sm:text-base font-semibold text-slate-800">Total de Facturas</h3>
-                                <p className="text-lg sm:text-xl font-bold text-slate-800">{totalOrders ? totalOrders : 'Cargando...'}</p>
-                            </div>
-
-                            {/* Clientes Registrados */}
-                            <div className="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg p-4">
-                                <h3 className="text-sm sm:text-base font-semibold text-slate-800">Clientes</h3>
-                                <p className="text-lg sm:text-xl font-bold text-slate-800">{totalClients ? totalClients : 'Cargando...'}</p>
-                            </div>
+                <main className="flex-grow overflow-auto bg-gray-50 mt-8 p-4 sm:p-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-4 sm:mb-6">
+                        {/* Ventas de Hoy */}
+                        <div className="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg p-4">
+                            <h3 className="text-sm sm:text-base font-semibold text-slate-800">Ventas de Hoy</h3>
+                            <p className="text-lg sm:text-xl font-bold text-slate-800">{dailySales !== null && dailySales !== undefined ? formatCurrency(dailySales) : '0'}</p>
                         </div>
 
-                        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-                            <div className="col-span-1 lg:col-span-2 flex flex-col min-h-full">
-                                <div className="relative bg-white shadow-sm border border-slate-200 rounded-lg flex-grow">
-                                    <div className="p-4 flex justify-between items-center">
-                                        <h4 className="text-sm sm:text-base font-semibold text-slate-800">Facturas Recientes</h4>
-                                        <a href="bill" className="font-bold text-firstColor hover:underline">
-                                            Ver todas las facturas
-                                        </a>
-                                    </div>
-                                    <p className="text-xs sm:text-sm text-slate-500 px-4">Puedes ver el estado de las Facturas</p>
-                                    <div className="overflow-x-auto px-4">
+                        {/* Total Mensual */}
+                        <div className="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg p-4">
+                            <h3 className="text-sm sm:text-base font-semibold text-slate-800">Total Mensual</h3>
+                            <p className="text-lg sm:text-xl font-bold text-slate-800">{monthlySales !== null && monthlySales !== undefined ? formatCurrency(monthlySales) : '0'}</p>
+                        </div>
+
+                        {/* Total de Facturas */}
+                        <div className="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg p-4">
+                            <h3 className="text-sm sm:text-base font-semibold text-slate-800">Total de Facturas</h3>
+                            <p className="text-lg sm:text-xl font-bold text-slate-800">{totalOrders !== null && totalOrders !== undefined ? totalOrders : '0'}</p>
+                        </div>
+
+                        {/* Clientes Registrados */}
+                        <div className="relative flex flex-col bg-white shadow-sm border border-slate-200 rounded-lg p-4">
+                            <h3 className="text-sm sm:text-base font-semibold text-slate-800">Clientes</h3>
+                            <p className="text-lg sm:text-xl font-bold text-slate-800">{totalClients !== null && totalClients !== undefined ? totalClients : '0'}</p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+                        <div className="col-span-1 lg:col-span-2 flex flex-col min-h-full">
+                            <div className="relative bg-white shadow-sm border border-slate-200 rounded-lg flex-grow">
+                                <div className="p-4 flex justify-between items-center">
+                                    <h4 className="text-sm sm:text-base font-semibold text-slate-800">Facturas Recientes</h4>
+                                    <a href="bill" className="font-bold text-firstColor hover:underline">
+                                        Ver todas las facturas
+                                    </a>
+                                </div>
+                                <p className="text-xs sm:text-sm text-slate-500 px-4">Puedes ver el estado de las Facturas</p>
+                                <div className="overflow-x-auto px-4">
+                                    {recentInvoices.length > 0 ? (
                                         <table className="w-full text-xs sm:text-sm text-left text-gray-500">
                                             <thead className="text-xs text-gray-700 uppercase bg-gray-50">
                                                 <tr>
@@ -275,78 +284,82 @@ const Dashboard = () => {
                                                 ))}
                                             </tbody>
                                         </table>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Clientes Recientes */}
-                            <div className="flex flex-col min-h-full">
-                                <div className="relative bg-white shadow-sm border border-slate-200 rounded-lg flex-grow">
-                                    <div className="p-4 flex justify-between items-center">
-                                        <h4 className="text-sm sm:text-base font-semibold text-slate-800">Clientes Recientes</h4>
-                                        <a href="clientList" className="font-bold text-firstColor hover:underline">
-                                            Ver todos los clientes
-                                        </a>
-                                    </div>
-                                    <p className="text-xs sm:text-sm text-slate-500 px-4">Resumen de clientes</p>
-                                    <div className="overflow-x-auto px-4">
-                                        <table className="w-full text-xs sm:text-sm text-left text-gray-500">
-                                            <tbody>
-                                                {recentClients.map((client) => (
-                                                    <tr className="bg-white border-b hover:bg-gray-50" key={client.id}>
-                                                        <th scope="row" className="flex items-center px-4 py-2 whitespace-nowrap">
-                                                            <img className="w-8 sm:w-10 h-8 sm:h-10 rounded-full" src={`https://cdn.pixabay.com/photo/2017/11/10/05/48/user-2935527_1280.png`} alt={client.name} />
-                                                            <div className="pl-2">
-                                                                <div className="text-xs sm:text-sm font-semibold">{client.name}</div>
-                                                                <div className="text-xs font-normal text-gray-500">{client.document}</div>
-                                                            </div>
-                                                        </th>
-                                                        <td className="px-4 py-2 text-right">{client.code}</td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
+                                    ) : (
+                                        <p className="text-center text-gray-500 py-4">No existen facturas recientes</p>
+                                    )}
                                 </div>
                             </div>
                         </div>
 
-                        <section className="bg-white mt-6">
-                            <div className="px-4 mx-auto max-w-screen-xl sm:py-8 lg:px-6">
-                                <div className="mx-auto max-w-screen-sm text-center">
-                                    <h2 className="text-xl sm:text-3xl tracking-tight font-extrabold text-gray-900">
-                                        Realiza una nueva acción
-                                    </h2>
-                                    <p className="mb-4 sm:mb-6 font-light text-gray-500 text-sm sm:text-base">
-                                        Inicia una nueva venta o agrega un cliente nuevo para continuar con tus operaciones.
-                                    </p>
-                                    <div className="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-4">
-                                        {/* Botón para nueva venta */}
-                                        <a
-                                            href="/sales"
-                                            className="flex items-center justify-center text-white bg-firstColor hover:bg-fourthColor focus:ring-4 focus:ring-primary-300 font-bold rounded-lg text-sm px-4 sm:px-5 py-2.5"
-                                        >
-                                            <MdPointOfSale className="text-lg sm:text-xl mr-2" />
-                                            <span>Iniciar nueva venta</span>
-                                        </a>
-                                        {/* Botón para nuevo cliente */}
-                                        <a
-                                            href="#"
-                                            onClick={handleOpenClientModal}
-                                            className="flex items-center justify-center text-white bg-thirdColor hover:bg-fourthColor focus:ring-4 focus:ring-green-300 font-bold rounded-lg text-sm px-4 sm:px-5 py-2.5"
-                                        >
-                                            <IoMdPersonAdd className="text-lg sm:text-xl mr-2" />
-                                            <span>Agregar un nuevo cliente</span>
-                                        </a>
-                                    </div>
+                        {/* Clientes Recientes */}
+                        <div className="flex flex-col min-h-full">
+                            <div className="relative bg-white shadow-sm border border-slate-200 rounded-lg flex-grow">
+                                <div className="p-4 flex justify-between items-center">
+                                    <h4 className="text-sm sm:text-base font-semibold text-slate-800">Clientes Recientes</h4>
+                                    <a href="clientList" className="font-bold text-firstColor hover:underline">
+                                        Ver todos los clientes
+                                    </a>
+                                </div>
+                                <p className="text-xs sm:text-sm text-slate-500 px-4">Resumen de clientes</p>
+                                <div className="overflow-x-auto px-4">
+                                    <table className="w-full text-xs sm:text-sm text-left text-gray-500">
+                                        <tbody>
+                                            {recentClients.map((client) => (
+                                                <tr className="bg-white border-b hover:bg-gray-50" key={client.id}>
+                                                    <th scope="row" className="flex items-center px-4 py-2 whitespace-nowrap">
+                                                        <img className="w-8 sm:w-10 h-8 sm:h-10 rounded-full" src={`https://cdn.pixabay.com/photo/2017/11/10/05/48/user-2935527_1280.png`} alt={client.name} />
+                                                        <div className="pl-2">
+                                                            <div className="text-xs sm:text-sm font-semibold">{client.name}</div>
+                                                            <div className="text-xs font-normal text-gray-500">{client.document}</div>
+                                                        </div>
+                                                    </th>
+                                                    <td className="px-4 py-2 text-right">{client.code}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
-                        </section>
+                        </div>
                     </div>
-                </div>
+
+                    <section className="bg-white mt-6">
+                        <div className="px-4 mx-auto max-w-screen-xl sm:py-8 lg:px-6">
+                            <div className="mx-auto max-w-screen-sm text-center">
+                                <h2 className="text-xl sm:text-3xl tracking-tight font-extrabold text-gray-900">
+                                    Realiza una nueva acción
+                                </h2>
+                                <p className="mb-4 sm:mb-6 font-light text-gray-500 text-sm sm:text-base">
+                                    Inicia una nueva venta o agrega un cliente nuevo para continuar con tus operaciones.
+                                </p>
+                                <div className="flex flex-col sm:flex-row justify-center space-y-2 sm:space-y-0 sm:space-x-4">
+                                    {/* Botón para nueva venta */}
+                                    <a
+                                        href="/sales"
+                                        className="flex items-center justify-center text-white bg-firstColor hover:bg-fourthColor focus:ring-4 focus:ring-primary-300 font-bold rounded-lg text-sm px-4 sm:px-5 py-2.5"
+                                    >
+                                        <MdPointOfSale className="text-lg sm:text-xl mr-2" />
+                                        <span>Iniciar nueva venta</span>
+                                    </a>
+                                    {/* Botón para nuevo cliente */}
+                                    <a
+                                        href="#"
+                                        onClick={handleOpenClientModal}
+                                        className="flex items-center justify-center text-white bg-thirdColor hover:bg-fourthColor focus:ring-4 focus:ring-green-300 font-bold rounded-lg text-sm px-4 sm:px-5 py-2.5"
+                                    >
+                                        <IoMdPersonAdd className="text-lg sm:text-xl mr-2" />
+                                        <span>Agregar un nuevo cliente</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </main>
+
                 <Footer />
             </div>
 
+            {/* Modales */}
             <CreateEditClientModal
                 isOpen={isClientModalOpen}
                 onClose={handleCloseClientModal}
@@ -360,6 +373,7 @@ const Dashboard = () => {
             />
         </div>
     );
+
 };
 
 export default Dashboard;
