@@ -25,7 +25,6 @@ const Sidebar = () => {
         }
     }, []);
 
-
     const toggleSidebar = () => {
         setIsOpen(!isOpen);
     };
@@ -43,6 +42,9 @@ const Sidebar = () => {
         }
     };
 
+    const toggleMenu = (menuName) => {
+        setOpenMenu(prevMenu => (prevMenu === menuName ? null : menuName));
+    };
 
     const menuItems = [
         {
@@ -85,15 +87,6 @@ const Sidebar = () => {
         href: 'bill'
     };
 
-
-    const handleMouseEnter = (menuName) => {
-        setOpenMenu(menuName);
-    };
-
-    const handleMouseLeave = () => {
-        setOpenMenu(null);
-    };
-
     const handleLogout = () => {
         Swal.fire({
             title: '¿Deseas cerrar sesión?',
@@ -117,24 +110,20 @@ const Sidebar = () => {
                 });
                 localStorage.clear();
                 window.location.href = "/";
-
             }
         });
     };
 
     return (
         <div className="flex min-h-screen">
-            {/* Botón para abrir/cerrar el sidebar en pantallas pequeñas */}
             <div className="md:hidden">
                 <button onClick={toggleSidebar} className="p-4 text-white bg-gray-800">
                     <FaBars />
                 </button>
             </div>
 
-            {/* Sidebar */}
             <aside className={`bg-principalColor text-white min-h-screen fixed md:relative z-10 transition-all duration-500 ease-in-out ${isOpen ? 'w-64' : 'w-16 overflow-hidden'}`}>
                 <div className="p-4 flex flex-col h-full">
-                    {/* Botón de alternancia dentro del sidebar */}
                     <div className={`flex ${isOpen ? 'justify-end' : 'justify-center'} mb-2 transition-all duration-500 ease-in-out`}>
                         <button className='text-white' onClick={toggleSidebar}>
                             <FaBars size={24} />
@@ -183,8 +172,8 @@ const Sidebar = () => {
                             </li>
 
                             {menuItems.map((item, index) => (
-                                <li key={index} onMouseEnter={() => handleMouseEnter(item.name)} onMouseLeave={handleMouseLeave}>
-                                    <button className="flex items-center justify-between w-full p-2 text-left font-bold hover:bg-firstColor rounded-lg transition-colors duration-300">
+                                <li key={index}>
+                                    <button onClick={() => toggleMenu(item.name)} className="flex items-center justify-between w-full p-2 text-left font-bold hover:bg-firstColor rounded-lg transition-colors duration-300">
                                         <span className="flex items-center">
                                             <div className="w-6 h-6 flex justify-center items-center">
                                                 {item.icon}
@@ -232,14 +221,10 @@ const Sidebar = () => {
                     </nav>
 
                     <div className="mt-auto">
-                        <button
-                            onClick={handleLogout}
-                            className="flex items-center text-white font-bold hover:bg-firstColor p-2 w-full rounded-lg transition-colors duration-300"
-                        >
+                        <button onClick={handleLogout} className="flex items-center text-white font-bold hover:bg-firstColor p-2 w-full rounded-lg transition-colors duration-300">
                             <FaSignOutAlt size={20} />
                             {isOpen && <span className="ml-2">Salir</span>}
                         </button>
-
                     </div>
                 </div>
             </aside>
