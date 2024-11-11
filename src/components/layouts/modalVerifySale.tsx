@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
-import { FaMoneyBill, FaCreditCard, FaQrcode } from 'react-icons/fa';
+import { FaMoneyBill } from 'react-icons/fa';
 import { PATH_URL_BACKEND } from '@/utils/constants';
 
 interface Product {
