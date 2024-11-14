@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { FaFileInvoice, FaUser, FaSignOutAlt, FaChevronDown, FaBars, FaHome } from 'react-icons/fa';
+import { FaFileInvoice, FaUser, FaSignOutAlt, FaChevronDown, FaBars, FaHome, FaFileInvoiceDollar } from 'react-icons/fa';
 import { MdOutlinePointOfSale, MdVerified } from "react-icons/md";
 
 const CashierSidebar = () => {
@@ -148,6 +148,17 @@ const CashierSidebar = () => {
                                     )}
                                 </li>
                             ))}
+
+                            <li>
+                                <Link href="manualBill" className={`block p-2 font-bold hover:bg-firstColor rounded-lg transition-colors duration-300 ${activeLink === '/manualBill' ? 'bg-white bg-opacity-20 text-ninthColor' : ''}`} onClick={() => handleLinkClick('/manualBill')}>
+                                    <span className="flex items-center">
+                                        <div className="w-6 h-6 flex justify-center items-center">
+                                            <FaFileInvoiceDollar size={20} />
+                                        </div>
+                                        {isOpen && <span className="ml-2">Factura manual</span>}
+                                    </span>
+                                </Link>
+                            </li>
 
                         </ul>
                     </nav>

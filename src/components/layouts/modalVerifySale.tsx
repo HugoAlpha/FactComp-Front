@@ -111,6 +111,9 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
         nitInvalido: true,
         codigoMetodoPago: paymentMethod,
         activo: contingenciaEstado === '1' ? false : true,
+        numeroFactura: '',
+        fechaHoraEmision: '',
+        cafc: false,
         detalle: products.map((product) => ({
           idProducto: product.id,
           cantidad: product.cantidad.toString(),

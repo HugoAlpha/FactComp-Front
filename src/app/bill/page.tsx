@@ -472,49 +472,80 @@ const BillList = () => {
 
   const handleSendContingencyPackages = () => {
     Swal.fire({
-      title: '¿Está seguro de enviar los paquetes de contingencia?',
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Sí, enviar',
-      cancelButtonText: 'Cancelar',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        let timerInterval;
-        Swal.fire({
-          title: 'Enviando paquetes...',
-          html: 'Completando en <b></b> segundos.',
-          timer: 5000,
-          timerProgressBar: true,
-          didOpen: () => {
-            Swal.showLoading();
-            const b = Swal.getHtmlContainer().querySelector('b');
-            timerInterval = setInterval(() => {
-              b.textContent = Math.ceil(Swal.getTimerLeft() / 1000).toString();
-            }, 1000);
-          },
-          willClose: () => {
-            clearInterval(timerInterval);
-          }
-        }).then(() => {
-          const deactivationEvent = new CustomEvent('contingencyDeactivated');
-          window.dispatchEvent(deactivationEvent);
-          setIsContingencyMode(false);
-          fetchBills();
+        title: '¿Está seguro de enviar los paquetes de contingencia?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, enviar',
+        cancelButtonText: 'Cancelar',
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            Swal.fire({
+                title: 'Enviando paquetes...',
+                html: 'Por favor, espere mientras se envían los paquetes.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
 
-          localStorage.removeItem('contingenciaEstado');
-          localStorage.removeItem('horaActivacionContingencia');
-          localStorage.removeItem('fechaHoraContingencia');
+            const idPuntoVenta = localStorage.getItem('idPOS');
+            const idSucursal = localStorage.getItem('idSucursal');
+            const idEvento = localStorage.getItem('idEvento');
 
-          Swal.fire({
-            title: 'Paquetes enviados',
-            text: 'El modo contingencia se ha desactivado, puede volver a emitir facturas.',
-            confirmButtonText: 'Aceptar'
-          });
-        });
-      }
+            if (!idPuntoVenta || !idSucursal || !idEvento) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Faltan datos para enviar los paquetes de contingencia. Por favor, asegúrese de que todos los datos estén disponibles.',
+                    confirmButtonText: 'Aceptar'
+                });
+                return;
+            }
+
+            try {
+                const response = await fetch(`${PATH_URL_BACKEND}/factura/emitir-paquete/${idPuntoVenta}/${idSucursal}/${idEvento}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    console.log('Paquetes enviados:', data);
+
+                    const deactivationEvent = new CustomEvent('contingencyDeactivated');
+                    window.dispatchEvent(deactivationEvent);
+                    setIsContingencyMode(false);
+                    fetchBills();
+
+                    localStorage.removeItem('contingenciaEstado');
+                    localStorage.removeItem('horaActivacionContingencia');
+                    localStorage.removeItem('fechaHoraContingencia');
+                    localStorage.removeItem('idEvento');
+
+                    Swal.fire({
+                        title: 'Paquetes enviados',
+                        text: 'El modo contingencia se ha desactivado, puede volver a emitir facturas.',
+                        icon: 'success',
+                        confirmButtonText: 'Aceptar'
+                    });
+                } else {
+                    throw new Error('No se pudo enviar los paquetes de contingencia.');
+                }
+            } catch (error) {
+                console.error('Error al enviar paquetes de contingencia:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Ocurrió un error al intentar enviar los paquetes de contingencia.',
+                    confirmButtonText: 'Aceptar'
+                });
+            }
+        }
     });
-  };
-
+};
 
   return (
     <div className="flex min-h-screen">
@@ -567,15 +598,12 @@ const BillList = () => {
                   className="border border-gray-300 rounded-lg w-full md:w-auto h-10 px-3"
                 />
               </div>
-
-              {isContingencyMode && (
                 <button
                   className="bg-firstColor text-white rounded-lg font-bold hover:bg-fourthColor p-1 md:p-2"
                   onClick={handleSendContingencyPackages}
                 >
                   Enviar paquetes contingencia
                 </button>
-              )}
             </div>
           </div>
 
