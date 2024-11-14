@@ -60,29 +60,33 @@ const ModalContingency2: React.FC<ModalContingency2Props> = ({ isOpen, onClose, 
                 body: JSON.stringify(body),
             });
 
-            if (response.ok) {
-                const data = await response.json();
+            const data = await response.json();
+
+
+            if (response.ok && data.codigo && data.idEvento && data.mensaje?.includes("Evento registrado con exito")) {
                 localStorage.setItem('idEvento', data.idEvento.toString());
 
                 Swal.fire({
                     icon: 'success',
                     title: 'Modo contingencia Activado',
-                    text: 'El evento ha sido registrado con éxito. Puede emitir facturas en modo contingencia.',
+                    text: data.mensaje,
                     confirmButtonText: 'Aceptar',
                 });
 
                 onConfirm(evento?.descripcion || '');
-
                 onClose();
+
+                const event = new CustomEvent('contingencyActivated');
+                window.dispatchEvent(event);
             } else {
-                throw new Error('Error al registrar el evento');
+                Swal.fire('Error', 'Ocurrió un error al registrar el evento. Intente nuevamente.', 'error');
             }
         } catch (error) {
-            console.error('Error al registrar evento significativo:', error);
+            console.error('Error al registrar evento de contingencia:', error);
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: 'No se pudo registrar el evento. Intente nuevamente.',
+                text: 'No se pudo activar el modo de contingencia. Intente nuevamente.',
             });
         }
     };

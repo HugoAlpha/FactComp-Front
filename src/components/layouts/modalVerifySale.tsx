@@ -80,22 +80,14 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
     }
 
     try {
-      let timerInterval: NodeJS.Timeout;
+      let timerInterval;
       Swal.fire({
         title: 'Se está generando la factura',
-        html: 'La factura se generará en <b></b> segundos.',
-        timer: 10000,
-        timerProgressBar: true,
+        html: 'Espere mientras procesamos su factura.',
         allowOutsideClick: false,
         allowEscapeKey: false,
         didOpen: () => {
           Swal.showLoading();
-          const b = Swal.getHtmlContainer()?.querySelector('b');
-          if (b) {
-            timerInterval = setInterval(() => {
-              b.textContent = Math.ceil(Swal.getTimerLeft()! / 1000).toString();
-            }, 1000);
-          }
         },
         willClose: () => {
           clearInterval(timerInterval);
@@ -129,7 +121,6 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
         body: JSON.stringify(body),
       });
 
-      await new Promise((resolve) => setTimeout(resolve, 5000));
       Swal.close();
 
       if (response.ok) {
@@ -169,7 +160,6 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
         text: 'No se pudo conectar con el servidor.',
       });
     }
-
   };
 
   if (!isOpen) return null;

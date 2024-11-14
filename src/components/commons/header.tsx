@@ -131,6 +131,19 @@ const Header = () => {
     }, []);
 
     useEffect(() => {
+        const handleContingencyActivated = () => {
+            confirmarContingencia("Evento significativo activado automáticamente");
+        };
+
+        window.addEventListener('contingencyActivated', handleContingencyActivated);
+
+        return () => {
+            window.removeEventListener('contingencyActivated', handleContingencyActivated);
+        };
+    }, []);
+
+
+    useEffect(() => {
         let timer;
         if (countdown > 0 && contingencia) {
             timer = setInterval(() => {
@@ -199,7 +212,7 @@ const Header = () => {
             console.error('No se encontró idEvento en el localStorage');
             return;
         }
-    
+
         Swal.fire({
             title: 'Desactivando modo contingencia...',
             html: 'Por favor, espere mientras se completa la operación.',
@@ -208,19 +221,19 @@ const Header = () => {
                 Swal.showLoading();
             }
         });
-    
+
         try {
             const response = await fetch(`${PATH_URL_BACKEND}/contingencia/registrar-fin-evento/${idEvento}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
             });
-    
+
             if (response.ok) {
                 const data = await response.json();
                 console.log('Contingencia desactivada:', data.mensaje);
                 clearContingencyState();
                 syncContingencyState();
-    
+
                 Swal.fire({
                     icon: 'success',
                     title: 'Modo contingencia desactivado',
@@ -239,7 +252,7 @@ const Header = () => {
             });
         }
     };
-    
+
 
     const confirmarContingencia = (eventoDescripcion) => {
         const ahora = new Date();
