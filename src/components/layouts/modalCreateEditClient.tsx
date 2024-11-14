@@ -137,11 +137,19 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
             try {
                 const response = await fetch(`${PATH_URL_BACKEND}/codigos/verificar-nit?nit=${formData.numeroDocumento}`);
                 const result = await response.json();
+                
                 if (result.transaccion && result.mensajesList[0].codigo === 986) {
                     return true; 
                 } else {
-                    Swal.fire('Error', 'Ponga un NIT válido', 'error');
-                    return false; 
+                    const userConfirmation = await Swal.fire({
+                        title: 'NIT inválido',
+                        text: "El NIT ingresado no es válido. ¿Deseas proceder con la creación del cliente de todas formas?",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Sí, continuar',
+                        cancelButtonText: 'No, cancelar'
+                    });
+                    return userConfirmation.isConfirmed;
                 }
             } catch (error) {
                 Swal.fire('Error', 'No se pudo conectar para verificar el NIT', 'error');
