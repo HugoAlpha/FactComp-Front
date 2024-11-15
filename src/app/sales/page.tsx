@@ -181,7 +181,6 @@ const Sales = () => {
     };
 
     const updateDiscount = (id: number, value: string) => {
-        console.log(`Actualizando descuento del producto con id: ${id}, nuevo valor: ${value}`);
         const updatedProducts = selectedProducts.map((item: Product) => {
             if (item.id === id) {
                 const newDiscount = value ? parseFloat(value) : 0;
@@ -356,7 +355,6 @@ const Sales = () => {
 
             if (response.ok) {
                 const facturaData = await response.json();
-                console.log(facturaData);
 
                 const items = selectedProducts.map((product) => ({
                     descripcion: product.descripcion,
@@ -448,8 +446,6 @@ const Sales = () => {
     
 
     const handleSaveCustomer = (savedCustomer: Customer) => {
-
-        console.log('Cliente guardado:', savedCustomer);
         handleCloseClientModal();
     };
 

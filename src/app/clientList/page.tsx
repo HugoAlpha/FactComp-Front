@@ -121,7 +121,6 @@ const ClientList = () => {
     useEffect(() => {
         const role = localStorage.getItem("role");
         setUserRole(role);
-        console.log("User Role:", role);
     }, []);
 
     useEffect(() => {

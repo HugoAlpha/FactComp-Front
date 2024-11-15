@@ -38,12 +38,10 @@ const Dashboard = () => {
     };
 
     const handleSaveClient = (newClient) => {
-        console.log("Cliente guardado:", newClient);
         handleCloseClientModal();
     };
 
     const handleConfirm = (eventoDescripcion: string) => {
-        console.log("Evento confirmado:", eventoDescripcion);
         setIsContingencyModalOpen(false);
     };
 

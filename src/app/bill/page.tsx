@@ -80,7 +80,6 @@ const BillList = () => {
         const sortedData = formattedData.sort((a, b) => b.date - a.date);
         setBills(sortedData);
 
-        console.log('Facturas filtradas por punto de venta:', sortedData);
       } else {
         console.error('Error fetching bills');
       }
@@ -262,7 +261,6 @@ const BillList = () => {
   useEffect(() => {
     const role = localStorage.getItem("role");
     setUserRole(role);
-    console.log("User Role:", role);
   }, []);
 
   const handleViewRollo = async (id: string) => {
@@ -320,8 +318,6 @@ const BillList = () => {
   const paginatedBills = useMemo(() => {
     const startIndex = (currentPage - 1) * rowsPerPage;
     const paginated = filteredBills.slice(startIndex, startIndex + rowsPerPage);
-
-    console.log("Paginated Bills:", paginated);
     return paginated;
   }, [filteredBills, currentPage, rowsPerPage]);
 
@@ -436,8 +432,6 @@ const BillList = () => {
           idSucursal: parseInt(localStorage.getItem('idSucursal') as string)
         };
 
-        console.log('Body que se enviará al POST:', body);
-
         const response = await fetch(`${PATH_URL_BACKEND}/factura/anular`, {
           method: 'POST',
           headers: {
@@ -512,8 +506,6 @@ const BillList = () => {
 
                 if (response.ok) {
                     const data = await response.json();
-
-                    console.log('Paquetes enviados:', data);
 
                     const deactivationEvent = new CustomEvent('contingencyDeactivated');
                     window.dispatchEvent(deactivationEvent);
