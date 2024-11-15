@@ -8,10 +8,10 @@ interface ModalContingency2Props {
     isOpen: boolean;
     onClose: () => void;
     evento: { codigoClasificador: string; descripcion: string } | undefined;
-    onConfirm: (descripcion: string) => void;
+    
 }
 
-const ModalContingency2: React.FC<ModalContingency2Props> = ({ isOpen, onClose, evento, onConfirm }) => {
+const ModalContingency2: React.FC<ModalContingency2Props> = ({ isOpen, onClose, evento }) => {
     const [fechaHoraInicio, setFechaHoraInicio] = useState<Date | null>(null);
     const [fechaHoraFin, setFechaHoraFin] = useState<Date | null>(null);
 
@@ -72,8 +72,6 @@ const ModalContingency2: React.FC<ModalContingency2Props> = ({ isOpen, onClose, 
                     text: data.mensaje,
                     confirmButtonText: 'Aceptar',
                 });
-
-                onConfirm(evento?.descripcion || '');
                 onClose();
 
                 const event = new CustomEvent('contingencyActivated');

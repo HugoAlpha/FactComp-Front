@@ -613,7 +613,7 @@ const BillList = () => {
                 <table className="table-auto w-full">
                   <thead>
                     <tr className="bg-fourthColor text-left text-gray-700">
-                      <th className="px-4 py-2 md:px-6 md:py-4 font-bold">Número de Documento</th>
+                      <th className="px-4 py-2 md:px-6 md:py-4 font-bold">ID de factura</th>
                       <th className="px-4 py-2 md:px-6 md:py-4 font-bold">Cliente</th>
                       <th className="px-4 py-2 md:px-6 md:py-4 font-bold">Fecha</th>
                       <th className="px-4 py-2 md:px-6 md:py-4 font-bold">Total</th>
@@ -625,7 +625,7 @@ const BillList = () => {
                   <tbody>
                     {paginatedBills.map((bill) => (
                       <tr key={bill.id} className="border-b hover:bg-gray-50 text-black">
-                        <td className="px-4 py-2 md:px-6 md:py-4">{bill.documentNumber}</td>
+                        <td className="px-4 py-2 md:px-6 md:py-4">{bill.id}</td>
                         <td className="px-4 py-2 md:px-6 md:py-4">{bill.client}</td>
                         <td className="px-4 py-2 md:px-6 md:py-4">
                           {bill.date.toLocaleDateString()} {bill.date.toLocaleTimeString()}

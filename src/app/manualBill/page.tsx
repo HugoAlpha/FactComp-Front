@@ -28,7 +28,6 @@ const ManualBill = () => {
     const [rangoFechaFin, setRangoFechaFin] = useState(new Date());
 
     useEffect(() => {
-        // Solo acceder a localStorage en el lado del cliente
         if (typeof window !== "undefined") {
             setIdPuntoVenta(localStorage.getItem("idPOS"));
             setIdSucursal(localStorage.getItem("idSucursal"));
@@ -79,10 +78,10 @@ const ManualBill = () => {
 
     const handleSubmit = () => {
         if (!validateFechaHoraEmision(fechaHoraEmision)) return;
-
+    
         const cliente = clientes.find(c => c.id === parseInt(selectedCliente));
         const metodoPago = metodosPago.find(m => m.codigoClasificador === selectedMetodoPago);
-
+    
         const factura = {
             usuario: cliente?.codigoCliente || "",
             idPuntoVenta: parseInt(idPuntoVenta),
@@ -97,10 +96,25 @@ const ManualBill = () => {
             })),
             idSucursal: parseInt(idSucursal),
             numeroFactura: parseInt(numeroFactura),
-            fechaHoraEmision: fechaHoraEmision.toISOString().slice(0, 19).replace("T", " "),
+            fechaHoraEmision: `${fechaHoraEmision.getFullYear()}-${(fechaHoraEmision.getMonth() + 1).toString().padStart(2, "0")}-${fechaHoraEmision.getDate().toString().padStart(2, "0")} ${fechaHoraEmision.getHours().toString().padStart(2, "0")}:${fechaHoraEmision.getMinutes().toString().padStart(2, "0")}:${fechaHoraEmision.getSeconds().toString().padStart(2, "0")}`,
             cafc: true,
         };
-
+    
+        let timerInterval;
+    
+        Swal.fire({
+            title: "Se está generando la factura",
+            html: "Espere mientras procesamos su factura.",
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+                Swal.showLoading();
+            },
+            willClose: () => {
+                clearInterval(timerInterval);
+            },
+        });
+    
         fetch(`${PATH_URL_BACKEND}/factura/emitir-computarizada`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -111,7 +125,13 @@ const ManualBill = () => {
                 Swal.fire({
                     icon: "success",
                     title: "Factura emitida",
-                    text: `Factura emitida con éxito. ID: ${data.id}`,
+                    text: `Factura emitida con éxito. Número de factura: ${data.numeroFactura}`,
+                    timer: 3000,
+                    timerProgressBar: true,
+                    showConfirmButton: false,
+                    didClose: () => {
+                        resetForm(); 
+                    },
                 });
             })
             .catch(error => {
@@ -122,6 +142,18 @@ const ManualBill = () => {
                     text: "No se pudo emitir la factura. Intente nuevamente.",
                 });
             });
+    };
+
+    const resetForm = () => {
+        setSelectedCliente("");
+        setSelectedMetodoPago("");
+        setNumeroFactura("");
+        setFechaHoraEmision(new Date());
+        setDetalle([]);
+        setDropdownClienteOpen(false);
+        setDropdownMetodoPagoOpen(false);
+        setSearchCliente("");
+        setSearchMetodoPago("");
     };
 
     const filteredClientes = clientes.filter(cliente =>
