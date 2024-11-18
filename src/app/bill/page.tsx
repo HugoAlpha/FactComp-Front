@@ -461,9 +461,6 @@ const BillList = () => {
     }
   };
 
-  // const openModal = () => setIsModalOpen(true);
-  // const closeModal = () => setIsModalOpen(false);
-
   const handleSendContingencyPackages = () => {
     Swal.fire({
         title: '¿Está seguro de enviar los paquetes de contingencia?',
