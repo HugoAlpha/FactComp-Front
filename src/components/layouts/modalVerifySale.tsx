@@ -41,6 +41,21 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
   const [cardAmount, setCardAmount] = useState('');
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   const [showAllMethods, setShowAllMethods] = useState(false);
+  const [cardFields, setCardFields] = useState({
+    firstFour: '',
+    lastFour: '',
+  });
+
+  const handleCardFieldChange = (field, value) => {
+    setCardFields((prev) => ({ ...prev, [field]: value.replace(/[^0-9]/g, '') }));
+  };
+
+  const isCardPayment = () => {
+    const selectedMethod = paymentMethods.find(
+      (method) => method.codigoClasificador === paymentMethod
+    );
+    return selectedMethod?.descripcion.toLowerCase().includes('tarjeta');
+  };
 
   useEffect(() => {
     const fetchPaymentMethods = async () => {
@@ -93,8 +108,11 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
           clearInterval(timerInterval);
         },
       });
-
       const contingenciaEstado = localStorage.getItem('contingenciaEstado');
+      const numeroTarjeta = isCardPayment()
+        ? `${cardFields.firstFour}00000000${cardFields.lastFour}`
+        : null;
+
       const body = {
         usuario: client?.codigoCliente || '',
         idPuntoVenta: parseInt(localStorage.getItem('idPOS') as string),
@@ -106,6 +124,8 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
         numeroFactura: '',
         fechaHoraEmision: '',
         cafc: false,
+        numeroTarjeta,
+        descuentoGlobal: null,
         detalle: products.map((product) => ({
           idProducto: product.id,
           cantidad: product.cantidad.toString(),
@@ -175,7 +195,6 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
     <div className="text-black fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div className="bg-white p-8 rounded-lg shadow-lg max-w-lg w-full">
         <h2 className="text-xl font-bold mb-4">Verificación de Pago</h2>
-
         <div className="mb-4">
           <label className="block mb-2 font-semibold">Método de Pago</label>
           <div className="flex space-x-4">
@@ -183,9 +202,10 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
               <button
                 key={method.codigoClasificador}
                 onClick={() => setPaymentMethod(method.codigoClasificador)}
-                className={`flex items-center p-2 border rounded ${paymentMethod === method.codigoClasificador ? 'bg-fifthColor' : 'bg-gray-100'}`}
+                className={`flex items-center p-2 border rounded ${paymentMethod === method.codigoClasificador ? 'bg-fifthColor' : 'bg-gray-100'
+                  }`}
               >
-                <FaMoneyBill className="mr-2" /> {method.descripcion}
+                {method.descripcion}
               </button>
             ))}
             {paymentMethods.length > defaultMethods.length && (
@@ -202,13 +222,16 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
               {paymentMethods
                 .filter(
                   (method) =>
-                    !defaultMethods.some((defaultMethod) => defaultMethod.codigoClasificador === method.codigoClasificador)
+                    !defaultMethods.some(
+                      (defaultMethod) => defaultMethod.codigoClasificador === method.codigoClasificador
+                    )
                 )
                 .map((method) => (
                   <button
                     key={method.codigoClasificador}
                     onClick={() => setPaymentMethod(method.codigoClasificador)}
-                    className={`flex items-center p-2 border rounded mb-2 ${paymentMethod === method.codigoClasificador ? 'bg-fifthColor' : 'bg-gray-100'}`}
+                    className={`flex items-center p-2 border rounded mb-2 ${paymentMethod === method.codigoClasificador ? 'bg-fifthColor' : 'bg-gray-100'
+                      }`}
                   >
                     {method.descripcion}
                   </button>
@@ -216,6 +239,27 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
             </div>
           )}
         </div>
+
+        {isCardPayment() && (
+          <div className="mb-4">
+            <label className="block mb-2 font-semibold">4 Primeros Números de la Tarjeta</label>
+            <input
+              type="text"
+              maxLength={4}
+              value={cardFields.firstFour}
+              onChange={(e) => handleCardFieldChange('firstFour', e.target.value)}
+              className="border p-2 w-full"
+            />
+            <label className="block mb-2 font-semibold mt-4">4 Últimos Números de la Tarjeta</label>
+            <input
+              type="text"
+              maxLength={4}
+              value={cardFields.lastFour}
+              onChange={(e) => handleCardFieldChange('lastFour', e.target.value)}
+              className="border p-2 w-full"
+            />
+          </div>
+        )}
 
         {paymentMethod === '1' && (
           <div className="mb-4">
@@ -259,21 +303,22 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
 
         <div className="flex justify-end space-x-4">
           <button
-            className="px-6 py-2 bg-sixthColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400 mr-2"
+            className="px-6 py-2 bg-sixthColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400"
             onClick={onClose}
           >
             Cancelar
           </button>
           <button
-            className="px-6 py-2 bg-thirdColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400 ml-2"
+            className="px-6 py-2 bg-thirdColor text-white rounded-lg font-bold transform hover:-translate-y-1 transition duration-400"
             onClick={handleValidate}
           >
-            Validar
+            Pagar
           </button>
         </div>
       </div>
     </div>
   );
+
 };
 
 export default ModalVerifySale;
