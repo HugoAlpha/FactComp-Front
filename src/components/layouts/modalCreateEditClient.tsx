@@ -10,6 +10,7 @@ interface Customer {
     codigoTipoDocumentoIdentidad: number;
     codigoCliente: string;
     email: string;
+    nitInvalido?: number;
 }
 
 interface DocumentType {
@@ -65,12 +66,15 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
     const handleDocumentTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedType = e.target.value;
         setSelectedDocumentType(selectedType);
-        setErrors((prevErrors) => ({ ...prevErrors, codigoTipoDocumentoIdentidad: '' })); 
+        setErrors((prevErrors) => ({ ...prevErrors, codigoTipoDocumentoIdentidad: '' }));
+    
         const selectedTypeObject = documentTypes.find((docType) => docType.codigoClasificador === selectedType);
+    
         if (selectedTypeObject) {
             setFormData((prevData) => ({
                 ...prevData,
                 codigoTipoDocumentoIdentidad: parseInt(selectedTypeObject.codigoClasificador),
+                complemento: selectedType === '5' ? '' : prevData.complemento, 
             }));
         } else {
             setFormData((prevData) => ({
@@ -133,13 +137,14 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
     };
     
     const validateNIT = async () => {
-        if (formData.codigoTipoDocumentoIdentidad === 5) { 
+        if (formData.codigoTipoDocumentoIdentidad === 5) {
             try {
                 const response = await fetch(`${PATH_URL_BACKEND}/codigos/verificar-nit?nit=${formData.numeroDocumento}`);
                 const result = await response.json();
-                
+    
                 if (result.transaccion && result.mensajesList[0].codigo === 986) {
-                    return true; 
+                    setFormData((prevData) => ({ ...prevData, nitInvalido: 1 }));
+                    return true;
                 } else {
                     const userConfirmation = await Swal.fire({
                         title: 'NIT inválido',
@@ -149,6 +154,12 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
                         confirmButtonText: 'Sí, continuar',
                         cancelButtonText: 'No, cancelar'
                     });
+    
+                    setFormData((prevData) => ({
+                        ...prevData,
+                        nitInvalido: userConfirmation.isConfirmed ? 0 : 1,
+                    }));
+    
                     return userConfirmation.isConfirmed;
                 }
             } catch (error) {
@@ -156,7 +167,7 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
                 return false;
             }
         }
-        return true; 
+        return true;
     };
     
 
@@ -164,9 +175,14 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
     const handleSubmit = async () => {
         if (validateForm()) {
             const isNITValid = await validateNIT();
-            if (!isNITValid) return; 
-
+            if (!isNITValid) return;
+    
             try {
+                const body = {
+                    ...formData,
+                    nitInvalido: formData.nitInvalido !== undefined ? formData.nitInvalido : 1,
+                };
+    
                 let response;
                 if (customer.id) {
                     response = await fetch(`${PATH_URL_BACKEND}/api/clientes/${customer.id}`, {
@@ -174,7 +190,7 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify(formData),
+                        body: JSON.stringify(body),
                     });
                 } else {
                     response = await fetch(`${PATH_URL_BACKEND}/api/clientes`, {
@@ -182,10 +198,10 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify(formData),
+                        body: JSON.stringify(body),
                     });
                 }
-
+    
                 if (response.ok) {
                     const savedCustomer = await response.json();
                     onSave(savedCustomer);
@@ -292,6 +308,7 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
                                 name="complemento"
                                 value={formData.complemento}
                                 onChange={handleInputChange}
+                                disabled={formData.codigoTipoDocumentoIdentidad === 5}
                                 className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
                                 placeholder=" "
                             />

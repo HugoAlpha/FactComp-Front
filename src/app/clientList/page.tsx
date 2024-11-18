@@ -18,6 +18,7 @@ interface Customer {
     complemento: string | null;
     codigoCliente: string;
     email: string;
+    nitInvalido?: number;
 }
 
 interface UserRole {
@@ -44,6 +45,7 @@ const ClientList = () => {
         complemento: '',
         codigoCliente: '',
         email: '',
+        nitInvalido: 0
     });
     const [rowsPerPage, setRowsPerPage] = useState<number>(10);
     const [currentPage, setCurrentPage] = useState<number>(1);
