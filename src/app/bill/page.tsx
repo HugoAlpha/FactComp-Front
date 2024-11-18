@@ -350,8 +350,8 @@ const BillList = () => {
         return <span className="px-2 py-1 rounded-full bg-orange-100 text-orange-600">Offline</span>;
       case 'ANULADO':
         return <span className="px-2 py-1 rounded-full bg-red-100 text-red-600">Anulado</span>;
-      case 'RECHAZADO':
-        return <span className="px-2 py-1 rounded-full bg-gray-100 text-gray-600">Rechazado</span>;
+      case 'RECHAZADA':
+        return <span className="px-2 py-1 rounded-full bg-black text-white">Rechazado</span>;
       default:
         return <span className="px-2 py-1 rounded-full bg-gray-100 text-gray-600">Desconocido</span>;
     }

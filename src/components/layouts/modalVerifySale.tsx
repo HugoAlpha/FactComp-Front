@@ -18,6 +18,8 @@ interface ModalVerifySaleProps {
   total: number;
   client: Client | null;
   onSuccess: (data: { client: string; total: number; numeroFactura: number }) => void;
+  globalDiscount?: number | null;
+  numeroDocumento?: string; 
 }
 
 interface Client {
@@ -34,6 +36,7 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
   total,
   client,
   onSuccess,
+  globalDiscount, 
 }) => {
   const [paymentMethod, setPaymentMethod] = useState('1');
   const [paymentAmount, setPaymentAmount] = useState('');
@@ -56,7 +59,7 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
     );
     return selectedMethod?.descripcion.toLowerCase().includes('tarjeta');
   };
-
+ 
   useEffect(() => {
     const fetchPaymentMethods = async () => {
       try {
@@ -81,7 +84,7 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
       });
       return;
     }
-
+  
     if (paymentMethod === '10') {
       const totalPayment = parseFloat(cashAmount) + parseFloat(cardAmount);
       if (totalPayment !== total) {
@@ -93,7 +96,44 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
         return;
       }
     }
+  
+    try {
+      const nitResponse = await fetch(
+        `${PATH_URL_BACKEND}/codigos/verificar-nit?nit=${client?.numeroDocumento}`
+      );
+      const nitData = await nitResponse.json();
+  
+      if (nitResponse.ok && nitData.mensajesList[0].descripcion === 'NIT ACTIVO') {
+        await processSale(false);
+      } else if (
+        nitData.mensajesList[0].descripcion === 'NIT INEXISTENTE'
+      ) {
+        const result = await Swal.fire({
+          icon: 'warning',
+          title: 'El NIT del cliente es inválido.',
+          text: '¿Desea proceder con el pago de todas formas?',
+          showCancelButton: true,
+          confirmButtonText: 'Sí',
+          cancelButtonText: 'No',
+        });
+  
+        if (result.isConfirmed) {
+          await processSale(true);
+        }
+      } else {
+        throw new Error('Error desconocido al verificar el NIT.');
+      }
+    } catch (error) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Hubo un problema al validar el NIT. Por favor, intente de nuevo.',
+      });
+      console.error(error);
+    }
+  };
 
+  const processSale = async (nitInvalido: boolean) => {
     try {
       let timerInterval;
       Swal.fire({
@@ -108,41 +148,45 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
           clearInterval(timerInterval);
         },
       });
+  
       const contingenciaEstado = localStorage.getItem('contingenciaEstado');
       const numeroTarjeta = isCardPayment()
         ? `${cardFields.firstFour}00000000${cardFields.lastFour}`
         : null;
-
+  
       const body = {
         usuario: client?.codigoCliente || '',
         idPuntoVenta: parseInt(localStorage.getItem('idPOS') as string),
         idCliente: client?.id || '',
         idSucursal: parseInt(localStorage.getItem('idSucursal') as string),
-        nitInvalido: true,
+        nitInvalido, 
         codigoMetodoPago: paymentMethod,
         activo: contingenciaEstado === '1' ? false : true,
         numeroFactura: '',
         fechaHoraEmision: '',
         cafc: false,
         numeroTarjeta,
-        descuentoGlobal: null,
+        descuentoGlobal: globalDiscount || null,
         detalle: products.map((product) => ({
           idProducto: product.id,
           cantidad: product.cantidad.toString(),
           montoDescuento: product.discount ? product.discount.toFixed(2) : '00.0',
         })),
       };
-
-      const response = await fetch(`${PATH_URL_BACKEND}/factura/emitir-computarizada`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
-      });
-
+  
+      const response = await fetch(
+        `${PATH_URL_BACKEND}/factura/emitir-computarizada`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(body),
+        }
+      );
+  
       Swal.close();
-
+  
       if (response.ok) {
         const data = await response.json();
         Swal.fire({
@@ -158,7 +202,7 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
         });
       } else {
         const errorData = await response.json();
-        if (errorData.message === "Cufd Inexistente") {
+        if (errorData.message === 'Cufd Inexistente') {
           Swal.fire({
             icon: 'error',
             title: 'Error al emitir factura',
@@ -168,7 +212,9 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
           Swal.fire({
             icon: 'error',
             title: 'Error al emitir factura',
-            text: errorData.message || 'No se pudo emitir la factura, intenta de nuevo.',
+            text:
+              errorData.message ||
+              'No se pudo emitir la factura, intenta de nuevo.',
           });
         }
       }
@@ -179,8 +225,9 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
         title: 'Error de conexión',
         text: 'No se pudo conectar con el servidor.',
       });
+      console.error(error);
     }
-  };
+  };  
 
   if (!isOpen) return null;
 
