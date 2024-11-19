@@ -1,34 +1,3 @@
-import React, { useState, useEffect } from 'react';
-import Swal from 'sweetalert2';
-import { FaMoneyBill, FaCreditCard, FaQrcode } from 'react-icons/fa';
-import { PATH_URL_BACKEND } from '@/utils/constants';
-
-interface Product {
-  id: number;
-  nombre: string;
-  precio: number;
-  cantidad: number;
-  discount?: number;
-}
-
-interface ModalVerifySaleProps {
-  isOpen: boolean;
-  onClose: () => void;
-  products: Product[];
-  total: number;
-  client: Client | null;
-  onSuccess: (data: { client: string; total: number; numeroFactura: number }) => void;
-  globalDiscount?: number | null;
-  numeroDocumento?: string; 
-}
-
-interface Client {
-  id: number;
-  nombreRazonSocial: string;
-  numeroDocumento: string;
-  codigoCliente: string;
-}
-
 const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
   isOpen,
   onClose,
@@ -36,13 +5,13 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
   total,
   client,
   onSuccess,
-  globalDiscount, 
+  globalDiscount,
 }) => {
   const [paymentMethod, setPaymentMethod] = useState('1');
   const [paymentAmount, setPaymentAmount] = useState('');
   const [cashAmount, setCashAmount] = useState('');
   const [cardAmount, setCardAmount] = useState('');
-  const [giftCardAmount, setGiftCardAmount] = useState('');
+  const [giftCardAmount, setGiftCardAmount] = useState(''); // Estado para el monto de la Gift Card
   const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
   const [showAllMethods, setShowAllMethods] = useState(false);
   const [cardFields, setCardFields] = useState({
@@ -67,11 +36,10 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
     );
     return (
       selectedMethod?.descripcion.toLowerCase().includes('gift card') ||
-      selectedMethod?.descripcion.toLowerCase().includes('gift-card') ||
-      selectedMethod?.descripcion.toLowerCase().includes('gift')
+      selectedMethod?.descripcion.toLowerCase().includes('gift-card')
     );
   };
- 
+
   useEffect(() => {
     const fetchPaymentMethods = async () => {
       try {
@@ -96,7 +64,7 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
       });
       return;
     }
-  
+
     if (paymentMethod === '10') {
       const totalPayment = parseFloat(cashAmount) + parseFloat(cardAmount);
       if (totalPayment !== total) {
@@ -108,18 +76,16 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
         return;
       }
     }
-  
+
     try {
       const nitResponse = await fetch(
         `${PATH_URL_BACKEND}/codigos/verificar-nit?nit=${client?.numeroDocumento}`
       );
       const nitData = await nitResponse.json();
-  
+
       if (nitResponse.ok && nitData.mensajesList[0].descripcion === 'NIT ACTIVO') {
         await processSale(false);
-      } else if (
-        nitData.mensajesList[0].descripcion === 'NIT INEXISTENTE'
-      ) {
+      } else if (nitData.mensajesList[0].descripcion === 'NIT INEXISTENTE') {
         const result = await Swal.fire({
           icon: 'warning',
           title: 'El NIT del cliente es inválido.',
@@ -128,7 +94,7 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
           confirmButtonText: 'Sí',
           cancelButtonText: 'No',
         });
-  
+
         if (result.isConfirmed) {
           await processSale(true);
         }
@@ -160,25 +126,25 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
           clearInterval(timerInterval);
         },
       });
-  
+
       const contingenciaEstado = localStorage.getItem('contingenciaEstado');
       const numeroTarjeta = isCardPayment()
         ? `${cardFields.firstFour}00000000${cardFields.lastFour}`
         : null;
-  
+
       const body = {
         usuario: client?.codigoCliente || '',
         idPuntoVenta: parseInt(localStorage.getItem('idPOS') as string),
         idCliente: client?.id || '',
         idSucursal: parseInt(localStorage.getItem('idSucursal') as string),
-        nitInvalido, 
+        nitInvalido,
         codigoMetodoPago: paymentMethod,
         activo: contingenciaEstado === '1' ? false : true,
         numeroFactura: '',
         fechaHoraEmision: '',
         cafc: false,
         numeroTarjeta,
-        montoGiftCard: isGiftCardPayment() ? parseFloat(giftCardAmount) : null,
+        montoGiftCard: isGiftCardPayment() ? parseFloat(giftCardAmount) : null, // Campo para Gift Card
         descuentoGlobal: globalDiscount || null,
         detalle: products.map((product) => ({
           idProducto: product.id,
@@ -186,7 +152,7 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
           montoDescuento: product.discount ? product.discount.toFixed(2) : '00.0',
         })),
       };
-  
+
       const response = await fetch(
         `${PATH_URL_BACKEND}/factura/emitir-computarizada`,
         {
@@ -197,9 +163,9 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
           body: JSON.stringify(body),
         }
       );
-  
+
       Swal.close();
-  
+
       if (response.ok) {
         const data = await response.json();
         Swal.fire({
@@ -215,21 +181,11 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
         });
       } else {
         const errorData = await response.json();
-        if (errorData.message === 'Cufd Inexistente') {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error al emitir factura',
-            text: 'CUFD no vigente. Por favor, verificar el estado de éste.',
-          });
-        } else {
-          Swal.fire({
-            icon: 'error',
-            title: 'Error al emitir factura',
-            text:
-              errorData.message ||
-              'No se pudo emitir la factura, intenta de nuevo.',
-          });
-        }
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al emitir factura',
+          text: errorData.message || 'No se pudo emitir la factura, intenta de nuevo.',
+        });
       }
     } catch (error) {
       Swal.close();
@@ -240,7 +196,7 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
       });
       console.error(error);
     }
-  };  
+  };
 
   if (!isOpen) return null;
 
@@ -262,100 +218,15 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
               <button
                 key={method.codigoClasificador}
                 onClick={() => setPaymentMethod(method.codigoClasificador)}
-                className={`flex items-center p-2 border rounded ${paymentMethod === method.codigoClasificador ? 'bg-fifthColor' : 'bg-gray-100'
-                  }`}
+                className={`flex items-center p-2 border rounded ${
+                  paymentMethod === method.codigoClasificador ? 'bg-fifthColor' : 'bg-gray-100'
+                }`}
               >
                 {method.descripcion}
               </button>
             ))}
-            {paymentMethods.length > defaultMethods.length && (
-              <button
-                onClick={() => setShowAllMethods((prev) => !prev)}
-                className="flex items-center p-2 border rounded bg-gray-100"
-              >
-                {showAllMethods ? 'Ver menos' : 'Ver más'}
-              </button>
-            )}
           </div>
-          {showAllMethods && (
-            <div className="mt-4 max-h-60 overflow-y-auto">
-              {paymentMethods
-                .filter(
-                  (method) =>
-                    !defaultMethods.some(
-                      (defaultMethod) => defaultMethod.codigoClasificador === method.codigoClasificador
-                    )
-                )
-                .map((method) => (
-                  <button
-                    key={method.codigoClasificador}
-                    onClick={() => setPaymentMethod(method.codigoClasificador)}
-                    className={`flex items-center p-2 border rounded mb-2 ${paymentMethod === method.codigoClasificador ? 'bg-fifthColor' : 'bg-gray-100'
-                      }`}
-                  >
-                    {method.descripcion}
-                  </button>
-                ))}
-            </div>
-          )}
         </div>
-
-        {isCardPayment() && (
-          <div className="mb-4">
-            <label className="block mb-2 font-semibold">4 Primeros Números de la Tarjeta</label>
-            <input
-              type="text"
-              maxLength={4}
-              value={cardFields.firstFour}
-              onChange={(e) => handleCardFieldChange('firstFour', e.target.value)}
-              className="border p-2 w-full"
-            />
-            <label className="block mb-2 font-semibold mt-4">4 Últimos Números de la Tarjeta</label>
-            <input
-              type="text"
-              maxLength={4}
-              value={cardFields.lastFour}
-              onChange={(e) => handleCardFieldChange('lastFour', e.target.value)}
-              className="border p-2 w-full"
-            />
-          </div>
-        )}
-
-        {paymentMethod === '1' && (
-          <div className="mb-4">
-            <label className="block mb-2 font-semibold">Cantidad Pagada</label>
-            <input
-              type="number"
-              className="border p-2 w-full"
-              value={paymentAmount}
-              onChange={(e) => setPaymentAmount(e.target.value.replace(/[^0-9.]/g, ''))}
-            />
-            {Number(paymentAmount) > total && (
-              <p className="text-green-500 mt-2">
-                Cambio: Bs.{(Number(paymentAmount) - total).toFixed(2)}
-              </p>
-            )}
-          </div>
-        )}
-
-        {paymentMethod === '10' && (
-          <div className="mb-4">
-            <label className="block mb-2 font-semibold">Cantidad Pagada en Efectivo</label>
-            <input
-              type="number"
-              className="border p-2 w-full mb-4"
-              value={cashAmount}
-              onChange={(e) => setCashAmount(e.target.value.replace(/[^0-9.]/g, ''))}
-            />
-            <label className="block mb-2 font-semibold">Cantidad Pagada en Tarjeta</label>
-            <input
-              type="number"
-              className="border p-2 w-full"
-              value={cardAmount}
-              onChange={(e) => setCardAmount(e.target.value.replace(/[^0-9.]/g, ''))}
-            />
-          </div>
-        )}
 
         {isGiftCardPayment() && (
           <div className="mb-4">
@@ -390,7 +261,6 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
       </div>
     </div>
   );
-
 };
 
 export default ModalVerifySale;
