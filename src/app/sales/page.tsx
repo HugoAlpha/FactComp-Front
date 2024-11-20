@@ -787,7 +787,10 @@ const Sales = () => {
                             onClose={() => setIsModalOpen(false)}
                             products={formattedSelectedProducts}
                             total={total}
-                            client={currentCustomer}
+                            client={{
+                                ...currentCustomer, 
+                                codigoTipoDocumentoIdentidad: currentCustomer.codigoTipoDocumentoIdentidad 
+                            }}
                             globalDiscount={appliedGlobalDiscount} 
                             onSuccess={(data) =>
                                 handleSaleSuccess({
