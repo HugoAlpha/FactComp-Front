@@ -22,7 +22,7 @@ const ModalAllClients: React.FC<ModalAllClientsProps> = ({ isOpen, onClose, onSe
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
-    const [rowsPerPage] = useState(10);
+    const [rowsPerPage] = useState(7);
 
     useEffect(() => {
         if (isOpen) {
@@ -35,6 +35,7 @@ const ModalAllClients: React.FC<ModalAllClientsProps> = ({ isOpen, onClose, onSe
             const response = await fetch(`${PATH_URL_BACKEND}/api/clientes/`);
             if (response.ok) {
                 const data: Client[] = await response.json();
+                const sortedClients = data.sort((a, b) => b.id - a.id);
                 setClients(data);
             } else {
                 Swal.fire('Error', 'Error al obtener la lista de clientes', 'error');
@@ -91,7 +92,7 @@ const ModalAllClients: React.FC<ModalAllClientsProps> = ({ isOpen, onClose, onSe
 
     return (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-            <div className="bg-white rounded-lg shadow-lg p-6 w-full max-w-4xl">
+            <div className="bg-white rounded-lg shadow-lg p-6 h-auto max-h-[95%] w-full max-w-4xl overflow-y-auto">
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-bold">Lista de Clientes</h2>
                     <button
@@ -149,11 +150,11 @@ const ModalAllClients: React.FC<ModalAllClientsProps> = ({ isOpen, onClose, onSe
                 </div>
                 <div className="flex flex-col items-center mt-6">
                     <div className="flex justify-center space-x-1 mb-2">
-                        <button
-                            onClick={handleLastPage}
+                    <button
+                            onClick={handleFirstPage}
                             className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                         >
-                            Último
+                            Primero
                         </button>
                         <button
                             onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -181,10 +182,10 @@ const ModalAllClients: React.FC<ModalAllClientsProps> = ({ isOpen, onClose, onSe
                             Sig.
                         </button>
                         <button
-                            onClick={handleFirstPage}
+                            onClick={handleLastPage}
                             className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                         >
-                            Primero
+                            Último
                         </button>
                     </div>
 
