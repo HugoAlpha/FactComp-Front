@@ -1,7 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import React, { useState, useEffect } from 'react';
-import { FaFileInvoice, FaUser, FaSignOutAlt, FaChevronDown, FaBars, FaHome, FaUsers, FaBuilding } from 'react-icons/fa';
+import { FaFileInvoice, FaUser, FaSignOutAlt, FaChevronDown, FaBars, FaHome, FaUsers, FaBuilding, FaFileInvoiceDollar } from 'react-icons/fa';
 import { MdOutlinePointOfSale, MdVerified } from "react-icons/md";
 import { HiDocumentCheck } from "react-icons/hi2";
 import { PiStorefrontFill } from "react-icons/pi";
@@ -195,6 +195,17 @@ const Sidebar = () => {
                                     )}
                                 </li>
                             ))}
+
+                            <li>
+                                <Link href="manualBill" className={`block p-2 font-bold hover:bg-firstColor rounded-lg transition-colors duration-300 ${activeLink === '/manualBill' ? 'bg-white bg-opacity-20 text-ninthColor' : ''}`} onClick={() => handleLinkClick('/manualBill')}>
+                                    <span className="flex items-center">
+                                        <div className="w-6 h-6 flex justify-center items-center">
+                                            <FaFileInvoiceDollar size={20} />
+                                        </div>
+                                        {isOpen && <span className="ml-2">Factura manual</span>}
+                                    </span>
+                                </Link>
+                            </li>
 
                             <li>
                                 <Link href="users" className={`block p-2 font-bold hover:bg-firstColor rounded-lg transition-colors duration-300 ${activeLink === '/users' ? 'bg-white bg-opacity-20 text-ninthColor' : ''}`} onClick={() => handleLinkClick('/users')}>

@@ -7,6 +7,7 @@ import Swal from 'sweetalert2';
 import { PATH_URL_BACKEND } from '@/utils/constants';
 import ModalContingency from '@/components/layouts/modalContingency';
 import CashierSidebar from '@/components/commons/cashierSidebar';
+import { GrCatalog } from "react-icons/gr";
 
 interface CUFD {
     id: number;
@@ -122,7 +123,6 @@ const CUFDList = () => {
         currentPage * rowsPerPage
     );
 
-
     const handleEmitCUFD = async () => {
         Swal.fire({
             title: 'Emitir CUFD',
@@ -148,6 +148,62 @@ const CUFDList = () => {
                 } catch (error) {
                     console.error('Error al emitir el CUFD:', error);
                     Swal.fire('Error', 'Hubo un problema al emitir el CUFD.', 'error');
+                }
+            }
+        });
+    };
+
+    const handleSynchronizeCatalog = async () => {
+        Swal.fire({
+            title: 'Sincronizar catalogos',
+            text: '¿Sincronizar los catálogos?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sincronizar',
+            cancelButtonText: 'Cancelar',
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch(`${PATH_URL_BACKEND}/sincronizar/catalogos`, {
+                        method: 'POST',
+                    });
+                    if (response.ok) {
+                        Swal.fire('¡Sincronizado!', 'Catálogos sincronizados con éxito.', 'success');
+                        fetchCUFDs();
+                    } else {
+                        Swal.fire('Error', 'No se pudo sincronizar los catálogos.', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error al sincronizar los catálogos:', error);
+                    Swal.fire('Error', 'Hubo un problema con la sincronización.', 'error');
+                }
+            }
+        });
+    };
+
+    const handleSynchronizeParameters = async () => {
+        Swal.fire({
+            title: 'Sincronizar parametros',
+            text: '¿Sincronizar los parámetros??',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sincronizar',
+            cancelButtonText: 'Cancelar',
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch(`${PATH_URL_BACKEND}/sincronizar/parametros`, {
+                        method: 'POST',
+                    });
+                    if (response.ok) {
+                        Swal.fire('¡Sincronizado!', 'Parametros sincronizados con éxito', 'success');
+                        fetchCUFDs();
+                    } else {
+                        Swal.fire('Error', 'No se pudo sincronizar los parametros.', 'error');
+                    }
+                } catch (error) {
+                    console.error('Error al sincronizar los parametros:', error);
+                    Swal.fire('Error', 'Hubo un problema con la sincronización.', 'error');
                 }
             }
         });
@@ -238,6 +294,26 @@ const CUFDList = () => {
                                 />
                                 <FaSearch className="absolute right-3 text-gray-500 text-xl pointer-events-none" />
                             </div>
+
+                            <button
+                                className="bg-principalColor text-white py-2 px-4 rounded-lg hover:bg-firstColor text-base md:text-lg h-10 flex items-center justify-center"
+                                onClick={handleSynchronizeCatalog}
+                            >
+                                <span className="flex items-center">
+                                    Sincronizar Catálogo
+                                    <GrCatalog className="inline-block ml-2 text-sm md:text-base" />
+                                </span>
+                            </button>
+
+                            <button
+                                className="bg-principalColor text-white py-2 px-4 rounded-lg hover:bg-firstColor text-base md:text-lg h-10 flex items-center justify-center"
+                                onClick={handleSynchronizeParameters}
+                            >
+                                <span className="flex items-center">
+                                    Sincronizar Parámetros
+                                    <FaPlus className="inline-block ml-2 text-sm md:text-base" />
+                                </span>
+                            </button>
 
                             <button
                                 className="bg-principalColor text-white py-2 px-4 rounded-lg hover:bg-firstColor text-base md:text-lg h-10 flex items-center justify-center"

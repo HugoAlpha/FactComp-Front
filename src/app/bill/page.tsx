@@ -80,7 +80,6 @@ const BillList = () => {
         const sortedData = formattedData.sort((a, b) => b.date - a.date);
         setBills(sortedData);
 
-        console.log('Facturas filtradas por punto de venta:', sortedData);
       } else {
         console.error('Error fetching bills');
       }
@@ -262,7 +261,6 @@ const BillList = () => {
   useEffect(() => {
     const role = localStorage.getItem("role");
     setUserRole(role);
-    console.log("User Role:", role);
   }, []);
 
   const handleViewRollo = async (id: string) => {
@@ -320,8 +318,6 @@ const BillList = () => {
   const paginatedBills = useMemo(() => {
     const startIndex = (currentPage - 1) * rowsPerPage;
     const paginated = filteredBills.slice(startIndex, startIndex + rowsPerPage);
-
-    console.log("Paginated Bills:", paginated);
     return paginated;
   }, [filteredBills, currentPage, rowsPerPage]);
 
@@ -354,8 +350,8 @@ const BillList = () => {
         return <span className="px-2 py-1 rounded-full bg-orange-100 text-orange-600">Offline</span>;
       case 'ANULADO':
         return <span className="px-2 py-1 rounded-full bg-red-100 text-red-600">Anulado</span>;
-      case 'RECHAZADO':
-        return <span className="px-2 py-1 rounded-full bg-gray-100 text-gray-600">Rechazado</span>;
+      case 'RECHAZADA':
+        return <span className="px-2 py-1 rounded-full bg-black text-white">Rechazado</span>;
       default:
         return <span className="px-2 py-1 rounded-full bg-gray-100 text-gray-600">Desconocido</span>;
     }
@@ -436,8 +432,6 @@ const BillList = () => {
           idSucursal: parseInt(localStorage.getItem('idSucursal') as string)
         };
 
-        console.log('Body que se enviará al POST:', body);
-
         const response = await fetch(`${PATH_URL_BACKEND}/factura/anular`, {
           method: 'POST',
           headers: {
@@ -467,54 +461,80 @@ const BillList = () => {
     }
   };
 
-  // const openModal = () => setIsModalOpen(true);
-  // const closeModal = () => setIsModalOpen(false);
-
   const handleSendContingencyPackages = () => {
     Swal.fire({
-      title: '¿Está seguro de enviar los paquetes de contingencia?',
-      icon: 'question',
-      showCancelButton: true,
-      confirmButtonText: 'Sí, enviar',
-      cancelButtonText: 'Cancelar',
-    }).then((result) => {
-      if (result.isConfirmed) {
-        let timerInterval;
-        Swal.fire({
-          title: 'Enviando paquetes...',
-          html: 'Completando en <b></b> segundos.',
-          timer: 5000,
-          timerProgressBar: true,
-          didOpen: () => {
-            Swal.showLoading();
-            const b = Swal.getHtmlContainer().querySelector('b');
-            timerInterval = setInterval(() => {
-              b.textContent = Math.ceil(Swal.getTimerLeft() / 1000).toString();
-            }, 1000);
-          },
-          willClose: () => {
-            clearInterval(timerInterval);
-          }
-        }).then(() => {
-          const deactivationEvent = new CustomEvent('contingencyDeactivated');
-          window.dispatchEvent(deactivationEvent);
-          setIsContingencyMode(false);
-          fetchBills();
+        title: '¿Está seguro de enviar los paquetes de contingencia?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Sí, enviar',
+        cancelButtonText: 'Cancelar',
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            Swal.fire({
+                title: 'Enviando paquetes...',
+                html: 'Por favor, espere mientras se envían los paquetes.',
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
 
-          localStorage.removeItem('contingenciaEstado');
-          localStorage.removeItem('horaActivacionContingencia');
-          localStorage.removeItem('fechaHoraContingencia');
+            const idPuntoVenta = localStorage.getItem('idPOS');
+            const idSucursal = localStorage.getItem('idSucursal');
+            const idEvento = localStorage.getItem('idEvento');
 
-          Swal.fire({
-            title: 'Paquetes enviados',
-            text: 'El modo contingencia se ha desactivado, puede volver a emitir facturas.',
-            confirmButtonText: 'Aceptar'
-          });
-        });
-      }
+            if (!idPuntoVenta || !idSucursal || !idEvento) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Faltan datos para enviar los paquetes de contingencia. Por favor, asegúrese de que todos los datos estén disponibles.',
+                    confirmButtonText: 'Aceptar'
+                });
+                return;
+            }
+
+            try {
+                const response = await fetch(`${PATH_URL_BACKEND}/factura/emitir-paquete/${idPuntoVenta}/${idSucursal}/${idEvento}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+
+                    const deactivationEvent = new CustomEvent('contingencyDeactivated');
+                    window.dispatchEvent(deactivationEvent);
+                    setIsContingencyMode(false);
+                    fetchBills();
+
+                    localStorage.removeItem('contingenciaEstado');
+                    localStorage.removeItem('horaActivacionContingencia');
+                    localStorage.removeItem('fechaHoraContingencia');
+                    localStorage.removeItem('idEvento');
+
+                    Swal.fire({
+                        title: 'Paquetes enviados',
+                        text: 'El modo contingencia se ha desactivado, puede volver a emitir facturas.',
+                        icon: 'success',
+                        confirmButtonText: 'Aceptar'
+                    });
+                } else {
+                    throw new Error('No se pudo enviar los paquetes de contingencia.');
+                }
+            } catch (error) {
+                console.error('Error al enviar paquetes de contingencia:', error);
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Ocurrió un error al intentar enviar los paquetes de contingencia.',
+                    confirmButtonText: 'Aceptar'
+                });
+            }
+        }
     });
-  };
-
+};
 
   return (
     <div className="flex min-h-screen">
@@ -567,15 +587,12 @@ const BillList = () => {
                   className="border border-gray-300 rounded-lg w-full md:w-auto h-10 px-3"
                 />
               </div>
-
-              {isContingencyMode && (
                 <button
                   className="bg-firstColor text-white rounded-lg font-bold hover:bg-fourthColor p-1 md:p-2"
                   onClick={handleSendContingencyPackages}
                 >
                   Enviar paquetes contingencia
                 </button>
-              )}
             </div>
           </div>
 
@@ -585,7 +602,7 @@ const BillList = () => {
                 <table className="table-auto w-full">
                   <thead>
                     <tr className="bg-fourthColor text-left text-gray-700">
-                      <th className="px-4 py-2 md:px-6 md:py-4 font-bold">Número de Documento</th>
+                      <th className="px-4 py-2 md:px-6 md:py-4 font-bold">ID de factura</th>
                       <th className="px-4 py-2 md:px-6 md:py-4 font-bold">Cliente</th>
                       <th className="px-4 py-2 md:px-6 md:py-4 font-bold">Fecha</th>
                       <th className="px-4 py-2 md:px-6 md:py-4 font-bold">Total</th>
@@ -597,7 +614,7 @@ const BillList = () => {
                   <tbody>
                     {paginatedBills.map((bill) => (
                       <tr key={bill.id} className="border-b hover:bg-gray-50 text-black">
-                        <td className="px-4 py-2 md:px-6 md:py-4">{bill.documentNumber}</td>
+                        <td className="px-4 py-2 md:px-6 md:py-4">{bill.id}</td>
                         <td className="px-4 py-2 md:px-6 md:py-4">{bill.client}</td>
                         <td className="px-4 py-2 md:px-6 md:py-4">
                           {bill.date.toLocaleDateString()} {bill.date.toLocaleTimeString()}

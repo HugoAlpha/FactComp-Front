@@ -43,12 +43,10 @@ const Dashboard = () => {
     };
 
     const handleSaveClient = (newClient) => {
-        console.log("Cliente guardado:", newClient);
         handleCloseClientModal();
     };
 
     const handleConfirm = (eventoDescripcion: string) => {
-        console.log("Evento confirmado:", eventoDescripcion);
         setIsContingencyModalOpen(false);
     };
 
@@ -108,21 +106,39 @@ const Dashboard = () => {
                     const filteredData = data.filter(invoice => invoice.puntoVenta.id === Number(idPOS));
                     const sortedData = filteredData.sort((a, b) => b.id - a.id);
                     const lastFourInvoices = sortedData.slice(0, 4);
-                    const formattedInvoices = lastFourInvoices.map(invoice => ({
-                        id: invoice.id,
-                        status: invoice.estado === "VALIDA" ? "Fac. Válida" : "Anulada",
-                        statusColor: invoice.estado === "VALIDA" ? "green" : "red",
-                        method: invoice.codigoMetodoPago === 1 ? "Efectivo" : invoice.codigoMetodoPago === 7 ? "Transferencia" : "Otro",
-                        amount: `Bs ${invoice.montoTotal.toFixed(2)}`,
-                        date: new Date(invoice.fechaEmision).toLocaleDateString(),
-                        company: invoice.razonSocialEmisor,
-                    }));
+
+                    const formattedInvoices = lastFourInvoices.map(invoice => {
+                        let status, statusColor;
+
+                        if (invoice.estado === "OFFLINE") {
+                            status = "OFFLINE";
+                            statusColor = "orange";
+                        } else if (invoice.estado === "ANULADA") {
+                            status = "ANULADA";
+                            statusColor = "red";
+                        } else if (invoice.estado === "ONLINE") {
+                            status = invoice.formato === "VALIDA" ? "Fac. Válida" : "Anulada";
+                            statusColor = invoice.formato === "VALIDA" ? "green" : "red";
+                        } else {
+                            status = "Desconocido";
+                            statusColor = "gray";
+                        }
+
+                        return {
+                            id: invoice.id,
+                            status,
+                            statusColor,
+                            method: invoice.codigoMetodoPago === 1 ? "Efectivo" : invoice.codigoMetodoPago === 7 ? "Transferencia" : "Otro",
+                            amount: `Bs ${invoice.montoTotal.toFixed(2)}`,
+                            date: new Date(invoice.fechaEmision).toLocaleDateString(),
+                            company: invoice.razonSocialEmisor,
+                        };
+                    });
 
                     setRecentInvoices(formattedInvoices);
                 } else {
                     console.error("Error al obtener los datos de las facturas");
                 }
-
 
                 const clientsResponse = await fetch(`${PATH_URL_BACKEND}/api/clientes/`);
                 if (clientsResponse.ok) {

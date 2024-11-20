@@ -144,7 +144,6 @@ const KanbanView = () => {
     };
 
     const handleConfirm = (eventoDescripcion: string) => {
-        console.log("Evento confirmado:", eventoDescripcion);
         setIsContingencyModalOpen(false);
     };
 
