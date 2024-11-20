@@ -1,151 +1,173 @@
 "use client";
-import React, { useEffect, useState } from 'react';
-import { FaCashRegister } from "react-icons/fa6";
-import HeaderPOS from '@/components/commons/headerPOS';
+import React, { useEffect, useState } from "react";
+import { FaCashRegister, FaPlus } from "react-icons/fa6";
+import HeaderPOS from "@/components/commons/headerPOS";
 import { PATH_URL_BACKEND } from "@/utils/constants";
-import ModalContingency from '@/components/layouts/modalContingency';
-import Swal from 'sweetalert2';
-import { FaList, FaTable } from 'react-icons/fa';
-import Footer from '@/components/commons/footer';
+import ModalContingency from "@/components/layouts/modalContingency";
+import ModalCreatePos from "@/components/layouts/modalCreatePos";
+import Swal from "sweetalert2";
+import { FaList, FaTable } from "react-icons/fa";
+import Footer from "@/components/commons/footer";
 
 const KanbanView = () => {
-    const today = new Date().toLocaleDateString('es-ES', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
-    });
+  const today = new Date().toLocaleDateString("es-ES", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
 
-    const [salesPoints, setSalesPoints] = useState([]);
-    const [filteredSalesPoints, setFilteredSalesPoints] = useState([]);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [role, setRole] = useState<string | null>(null);
-    const [isContingencyModalOpen, setIsContingencyModalOpen] = useState(false);
-    const [viewMode, setViewMode] = useState("grid");
-    const [username, setUsername] = useState('Usuario no disponible');
+  const [salesPoints, setSalesPoints] = useState([]);
+  const [filteredSalesPoints, setFilteredSalesPoints] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [role, setRole] = useState<string | null>(null);
+  const [isContingencyModalOpen, setIsContingencyModalOpen] = useState(false);
+  const [isCreatePosModalOpen, setIsCreatePosModalOpen] = useState(false);
+  const [viewMode, setViewMode] = useState("grid");
+  const [username, setUsername] = useState("Usuario no disponible");
+  const [tiposPuntoVenta, setTiposPuntoVenta] = useState([]);
 
-    useEffect(() => {
-        const storedUsername = localStorage.getItem('username');
-        if (storedUsername) {
-            setUsername(storedUsername);
-        }
-    }, []);
+  useEffect(() => {
+    const storedUsername = localStorage.getItem("username");
+    if (storedUsername) {
+      setUsername(storedUsername);
+    }
+  }, []);
 
-    const fetchSalesPoints = async () => {
-        try {
-            const userRole = localStorage.getItem("role");
-            let response;
+  const fetchSalesPoints = async () => {
+    try {
+      const userRole = localStorage.getItem("role");
+      let response;
 
-            if (userRole === "ROLE_USER") {
-                response = await fetch(`${PATH_URL_BACKEND}/operaciones/punto-venta/lista-bd`);
-            } else if (userRole === "ROLE_ADMIN") {
-                const codigoSucursal = localStorage.getItem('CodigoSucursal');
-                const idEmpresa = localStorage.getItem('idEmpresa');
-                response = await fetch(`${PATH_URL_BACKEND}/operaciones/punto-venta/lista-bd/${codigoSucursal}/${idEmpresa}`);
+      if (userRole === "ROLE_USER") {
+        response = await fetch(`${PATH_URL_BACKEND}/operaciones/punto-venta/lista-bd`);
+      } else if (userRole === "ROLE_ADMIN") {
+        const codigoSucursal = localStorage.getItem("CodigoSucursal");
+        const idEmpresa = localStorage.getItem("idEmpresa");
+        response = await fetch(
+          `${PATH_URL_BACKEND}/operaciones/punto-venta/lista-bd/${codigoSucursal}/${idEmpresa}`
+        );
+      }
+
+      if (response && response.ok) {
+        const data = await response.json();
+        setSalesPoints(data);
+        setFilteredSalesPoints(data);
+      } else {
+        Swal.fire("Error", "No se pudo obtener la lista de puntos de venta", "error");
+      }
+    } catch (error) {
+      Swal.fire("Error", "Error en la conexión con el servidor", "error");
+    }
+  };
+
+  const fetchTiposPuntoVenta = async () => {
+    try {
+      const response = await fetch(`${PATH_URL_BACKEND}/parametro/tipo-punto-venta`);
+      if (response.ok) {
+        const data = await response.json();
+        setTiposPuntoVenta(data);
+      }
+    } catch (error) {
+      Swal.fire("Error", "No se pudo obtener los tipos de punto de venta", "error");
+    }
+  };
+
+  useEffect(() => {
+    const userRole = localStorage.getItem("role");
+    setRole(userRole);
+    fetchSalesPoints();
+    fetchTiposPuntoVenta();
+  }, []);
+
+  const handleSearch = (e) => {
+    const term = e.target.value.toLowerCase();
+    setSearchTerm(term);
+    const filtered = salesPoints.filter((point) =>
+      point.nombre.toLowerCase().includes(term)
+    );
+    setFilteredSalesPoints(filtered);
+  };
+
+  const handleSelectSalesPoint = (id, codigo, sucursal) => {
+    localStorage.setItem("idPOS", id);
+    localStorage.setItem("CodigoPOS", codigo);
+
+    if (role === "ROLE_USER") {
+      if (sucursal && sucursal.id !== undefined && sucursal.codigo !== undefined) {
+        localStorage.setItem("idSucursal", sucursal.id);
+        localStorage.setItem("CodigoSucursal", sucursal.codigo);
+      }
+      window.location.href = "/dashboardCashier";
+    } else if (role === "ROLE_ADMIN") {
+      window.location.href = "/dashboard";
+    }
+  };
+
+  const checkServerCommunication = async () => {
+    try {
+      const response = await fetch(`${PATH_URL_BACKEND}/contingencia/verificar-comunicacion`);
+      if (!response.ok) {
+        if (response.status === 500) {
+          Swal.fire({
+            title: "La comunicación con impuestos falló",
+            text: "¿Desea entrar en modo de contingencia?",
+            icon: "error",
+            showCancelButton: true,
+            confirmButtonText: "Aceptar",
+            cancelButtonText: "Cancelar",
+            reverseButtons: true,
+            customClass: {
+              confirmButton: "bg-red-500 text-white px-4 py-2 rounded-md",
+              cancelButton: "bg-blue-500 text-white px-4 py-2 rounded-md",
+            },
+          }).then((result) => {
+            if (result.isConfirmed) {
+              setIsContingencyModalOpen(true);
             }
-
-            if (response && response.ok) {
-                const data = await response.json();
-                setSalesPoints(data);
-                setFilteredSalesPoints(data);
-            } else {
-                Swal.fire('Error', 'No se pudo obtener la lista de puntos de venta', 'error');
-            }
-        } catch (error) {
-            Swal.fire('Error', 'Error en la conexión con el servidor', 'error');
+          });
+        } else {
+          console.error("Error de comunicación con el servidor:", response.statusText);
         }
-    };
+      }
+    } catch (error) {
+      Swal.fire("Error", "No se pudo conectar con el servidor", "error");
+    }
+  };
 
-    useEffect(() => {
-        const userRole = localStorage.getItem("role");
-        setRole(userRole);
+  useEffect(() => {
+    checkServerCommunication();
+  }, []);
+
+  const closeModal = () => {
+    setIsContingencyModalOpen(false);
+  };
+
+  const closeCreatePosModal = () => {
+    setIsCreatePosModalOpen(false);
+  };
+
+  const handleConfirm = (eventoDescripcion: string) => {
+    setIsContingencyModalOpen(false);
+  };
+
+  const handleCreatePos = async (newPos) => {
+    try {
+      const response = await fetch(`${PATH_URL_BACKEND}/operaciones/punto-venta/registrar`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(newPos),
+      });
+
+      if (response.ok) {
+        Swal.fire("Éxito", "El punto de venta fue creado correctamente", "success");
         fetchSalesPoints();
-    }, []);
-
-    const handleSearch = (e) => {
-        const term = e.target.value.toLowerCase();
-        setSearchTerm(term);
-        const filtered = salesPoints.filter(point => point.nombre.toLowerCase().includes(term));
-        setFilteredSalesPoints(filtered);
-    };
-
-    const handleSelectSalesPoint = (id, codigo, sucursal) => {
-        localStorage.setItem('idPOS', id);
-        localStorage.setItem('CodigoPOS', codigo);
-
-        if (role === "ROLE_USER") {
-            if (sucursal && sucursal.id !== undefined && sucursal.codigo !== undefined) {
-                localStorage.setItem('idSucursal', sucursal.id);
-                localStorage.setItem('CodigoSucursal', sucursal.codigo);
-            }
-            window.location.href = "/dashboardCashier";
-        } else if (role === "ROLE_ADMIN") {
-            window.location.href = "/dashboard";
-        }
-    };
-
-    const checkServerCommunication = async () => {
-        try {
-            const response = await fetch(`${PATH_URL_BACKEND}/contingencia/verificar-comunicacion`);
-            if (!response.ok) {
-                if (response.status === 500) {
-                    Swal.fire({
-                        title: 'La comunicación con impuestos falló',
-                        text: '¿Desea entrar en modo de contingencia?',
-                        icon: 'error',
-                        showCancelButton: true,
-                        confirmButtonText: 'Aceptar',
-                        cancelButtonText: 'Cancelar',
-                        reverseButtons: true,
-                        customClass: {
-                            confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md',
-                            cancelButton: 'bg-blue-500 text-white px-4 py-2 rounded-md',
-                        }
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            setIsContingencyModalOpen(true);
-                        } else {
-                            console.log('Modo de contingencia cancelado.');
-                        }
-                    });
-                } else {
-                    console.error("Error de comunicación con el servidor:", response.statusText);
-                }
-            }
-        } catch (error) {
-            console.error("Error al conectar con el servidor:", error);
-            Swal.fire({
-                title: 'La comunicación con impuestos falló',
-                text: '¿Desea entrar en modo de contingencia?',
-                icon: 'error',
-                showCancelButton: true,
-                confirmButtonText: 'Aceptar',
-                cancelButtonText: 'Cancelar',
-                reverseButtons: true,
-                customClass: {
-                    confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md',
-                    cancelButton: 'bg-blue-500 text-white px-4 py-2 rounded-md',
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    setIsContingencyModalOpen(true);
-                } else {
-                    console.log('Modo de contingencia cancelado.');
-                }
-            });
-        }
-    };
-
-    useEffect(() => {
-        checkServerCommunication();
-    }, []);
-
-    const closeModal = () => {
-        setIsContingencyModalOpen(false);
-    };
-
-    const handleConfirm = (eventoDescripcion: string) => {
-        setIsContingencyModalOpen(false);
-    };
+      } else {
+        Swal.fire("Error", "No se pudo crear el punto de venta", "error");
+      }
+    } catch (error) {
+      Swal.fire("Error", "Error al registrar el punto de venta", "error");
+    }
+  };
 
     return (
         <div className="flex flex-col h-screen">
@@ -160,6 +182,14 @@ const KanbanView = () => {
                         className="w-full max-w-md p-2 border border-gray-300 rounded-lg"
                     />
                     <span className="ml-4 text-gray-600 font-medium">Usuario: {username}</span>
+                    {role === "ROLE_ADMIN" && (
+                        <button
+                            className="bg-principalColor text-white py-2 px-4 rounded-lg hover:bg-firstColor text-lg ml-4 flex items-center"
+                            onClick={() => setIsCreatePosModalOpen(true)}
+                        >
+                            <FaPlus className="mr-2" /> Registrar Punto de Venta
+                        </button>
+                    )}
                     <div className="flex bg-gray-100 hover:bg-gray-200 rounded-lg transition p-1">
                         <ul className="relative flex gap-x-1" role="tablist" aria-label="Tabs" aria-orientation="horizontal">
                             <li className="z-30 flex-auto text-center">
@@ -250,6 +280,12 @@ const KanbanView = () => {
                 isOpen={isContingencyModalOpen}
                 onClose={closeModal}
                 onConfirm={handleConfirm}
+            />
+             <ModalCreatePos
+                isOpen={isCreatePosModalOpen}
+                onClose={closeCreatePosModal}
+                onPosCreated={handleCreatePos}
+                tiposPuntoVenta={tiposPuntoVenta}
             />
         </div>
 
