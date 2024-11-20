@@ -53,10 +53,44 @@ const KanbanView = () => {
         setSalesPoints(data);
         setFilteredSalesPoints(data);
       } else {
-        Swal.fire("Error", "No se pudo obtener la lista de puntos de venta", "error");
+        Swal.fire({
+          position: "center",
+          icon: "question",
+          title: "No existe ningun punto de venta",
+          showConfirmButton: false,
+          timer: 1500
+        });
       }
     } catch (error) {
       Swal.fire("Error", "Error en la conexión con el servidor", "error");
+    }
+  };
+
+  const handlePostCuis = async () => {
+    const branchId = parseInt(localStorage.getItem("idSucursal") || "0", 10);
+    if (!branchId) {
+      Swal.fire("Error", "No se encontró el ID de la sucursal", "error");
+      return;
+    }
+    try {
+      const cuisResponse = await fetch(`${PATH_URL_BACKEND}/codigos/obtener-cuis/${branchId}`, {
+        method: "POST",
+      });
+
+      if (!cuisResponse.ok) {
+        throw new Error("Error al obtener el CUIS");
+      }
+
+      const cuisData = await cuisResponse.json();
+      await Swal.fire({
+        icon: "success",
+        title: "CUIS generado",
+        text: `CUIS: ${cuisData.codigo}`,
+      });
+
+      fetchSalesPoints();
+    } catch (error) {
+      Swal.fire("Error", "No se pudo generar el CUIS", "error");
     }
   };
 
@@ -134,6 +168,97 @@ const KanbanView = () => {
     }
   };
 
+  const handleSyncCatalogsAndParameters = async () => {
+    let timerInterval;
+
+    try {
+      Swal.fire({
+        title: "Sincronizando datos",
+        html: "Espere mientras sincronizamos los catálogos y parámetros.",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+        willClose: () => {
+          clearInterval(timerInterval);
+        },
+      });
+
+      const paramResponse = await fetch(`${PATH_URL_BACKEND}/sincronizar/parametros`, {
+        method: "POST",
+      });
+      if (!paramResponse.ok) {
+        throw new Error("Error al sincronizar parámetros");
+      }
+
+      const catalogResponse = await fetch(`${PATH_URL_BACKEND}/sincronizar/catalogos`, {
+        method: "POST",
+      });
+      if (!catalogResponse.ok) {
+        throw new Error("Error al sincronizar catálogos");
+      }
+
+      Swal.fire({
+        icon: "success",
+        title: "Sincronización exitosa",
+        text: "Catálogos y parámetros sincronizados",
+        timer: 1000,
+        showConfirmButton: false,
+      });
+    } catch (error) {
+      Swal.fire("Error", "No se pudo sincronizar los catálogos y parámetros", "error");
+    }
+  };
+
+  const handleGenerateCuisForPOS = async (pointId) => {
+    const branchId = parseInt(localStorage.getItem("idSucursal") || "0", 10);
+  
+    if (!branchId || !pointId) {
+      Swal.fire("Error", "Faltan datos para generar el CUIS", "error");
+      return;
+    }
+  
+    try {
+      let timerInterval;
+        Swal.fire({
+        title: "Generando CUIS",
+        html: "Espere mientras generamos el CUIS.",
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+        willClose: () => {
+          clearInterval(timerInterval);
+        },
+      });
+  
+      const response = await fetch(
+        `${PATH_URL_BACKEND}/codigos/cuis/activo/${pointId}/${branchId}`,
+        {
+          method: "GET",
+        }
+      );
+  
+      if (!response.ok) {
+        throw new Error("Error al generar el CUIS");
+      }
+  
+      const data = await response.json();
+  
+      Swal.fire({
+        icon: "success",
+        title: "CUIS generado",
+        text: `CUIS: ${data.codigo}`,
+      });
+  
+      fetchSalesPoints();
+    } catch (error) {
+      Swal.fire("Error", "No se pudo generar el CUIS", "error");
+    }
+  };
+
   useEffect(() => {
     checkServerCommunication();
   }, []);
@@ -169,127 +294,148 @@ const KanbanView = () => {
     }
   };
 
-    return (
-        <div className="flex flex-col h-screen">
-            <HeaderPOS />
-            <div className="flex flex-col flex-grow bg-gray-50 p-6 overflow-auto">
-                <div className="w-full mb-4 flex justify-between items-center">
-                    <input
-                        type="text"
-                        value={searchTerm}
-                        onChange={handleSearch}
-                        placeholder="Buscar por nombre de punto de venta..."
-                        className="w-full max-w-md p-2 border border-gray-300 rounded-lg"
-                    />
-                    <span className="ml-4 text-gray-600 font-medium">Usuario: {username}</span>
-                    {role === "ROLE_ADMIN" && (
-                        <button
-                            className="bg-principalColor text-white py-2 px-4 rounded-lg hover:bg-firstColor text-lg ml-4 flex items-center"
-                            onClick={() => setIsCreatePosModalOpen(true)}
-                        >
-                            <FaPlus className="mr-2" /> Registrar Punto de Venta
-                        </button>
-                    )}
-                    <div className="flex bg-gray-100 hover:bg-gray-200 rounded-lg transition p-1">
-                        <ul className="relative flex gap-x-1" role="tablist" aria-label="Tabs" aria-orientation="horizontal">
-                            <li className="z-30 flex-auto text-center">
-                                <button
-                                    type="button"
-                                    className={`py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg focus:outline-none transition-colors duration-200 ${viewMode === "grid"
-                                        ? "bg-slate-700 text-white"
-                                        : "bg-transparent text-gray-500 hover:bg-slate-300"
-                                        }`}
-                                    onClick={() => setViewMode("grid")}
-                                >
-                                    <FaTable className={`text-lg ${viewMode === "grid" ? "text-white" : "text-gray-500"}`} />
-                                </button>
-                            </li>
-                            <li className="z-30 flex-auto text-center">
-                                <button
-                                    type="button"
-                                    className={`py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg focus:outline-none transition-colors duration-200 ${viewMode === "list"
-                                        ? "bg-slate-700 text-white"
-                                        : "bg-transparent text-gray-500 hover:bg-slate-300"
-                                        }`}
-                                    onClick={() => setViewMode("list")}
-                                >
-                                    <FaList className={`text-lg ${viewMode === "list" ? "text-white" : "text-gray-500"}`} />
-                                </button>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
+  return (
+    <div className="flex flex-col h-screen">
+      <HeaderPOS />
+      <div className="flex flex-col flex-grow bg-gray-50 p-6 overflow-auto">
+        <div className="w-full mb-4 flex justify-between items-center">
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={handleSearch}
+            placeholder="Buscar por nombre de punto de venta..."
+            className="w-full max-w-md p-2 border border-gray-300 rounded-lg"
+          />
+          <span className="ml-4 text-gray-600 font-medium">Usuario: {username}</span>
+          {role === "ROLE_ADMIN" && (
+            <div className="flex flex-row">
+              <button
+                className="bg-principalColor text-white py-2 px-4 rounded-lg hover:bg-firstColor text-lg ml-4 flex items-center"
+                onClick={() => setIsCreatePosModalOpen(true)}
+              >
+                Registrar Punto de Venta
+              </button>
+              <button
+                className="bg-principalColor text-white py-2 px-4 rounded-lg hover:bg-firstColor text-lg ml-4 flex items-center"
+                onClick={handleSyncCatalogsAndParameters}
+              >
 
-                <div className="overflow-y-auto">
-                    {viewMode === "grid" ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-                            {filteredSalesPoints.map((point) => (
-                                <div key={point.id} className="bg-white border border-gray-200 rounded-lg shadow p-6">
-                                    <FaCashRegister className="w-7 h-7 text-gray-500 mb-3" />
-                                    <h5 className="mb-2 text-2xl font-semibold tracking-tight text-gray-900">
-                                        {point.nombre}
-                                    </h5>
-
-                                    <button
-                                        onClick={() => handleSelectSalesPoint(point.id, point.codigo, point.sucursal)}
-                                        className="inline-flex font-medium items-center text-blue-600 hover:underline"
-                                    >
-                                        Ingresar a punto de venta
-                                        <svg
-                                            className="w-3 h-3 ms-2.5"
-                                            aria-hidden="true"
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 18 18"
-                                        >
-                                            <path
-                                                stroke="currentColor"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                strokeWidth="2"
-                                                d="M15 11v4.833A1.166 1.166 0 0 1 13.833 17H2.167A1.167 1.167 0 0 1 1 15.833V4.167A1.166 1.166 0 0 1 2.167 3h4.618m4.447-2H17v5.768M9.111 8.889l7.778-7.778"
-                                            />
-                                        </svg>
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div className="space-y-2">
-                            {filteredSalesPoints.map((point) => (
-                                <div key={point.id} className="flex items-center bg-white border border-gray-200 rounded-lg p-4 shadow hover:bg-gray-100">
-                                    <FaCashRegister className="w-7 h-7 text-gray-500 mr-4" />
-                                    <div className="flex-grow">
-                                        <h5 className="text-lg font-semibold">{point.nombre}</h5>
-                                    </div>
-                                    <button
-                                        onClick={() => handleSelectSalesPoint(point.id, point.codigo, point.sucursal)}
-                                        className="ml-auto font-medium text-blue-600 hover:underline"
-                                    >
-                                        Ingresar
-                                    </button>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-                </div>
-                <Footer/>
+                Sincronizar Catalogos y Paremetros
+              </button>
             </div>
-
-            <ModalContingency
-                isOpen={isContingencyModalOpen}
-                onClose={closeModal}
-                onConfirm={handleConfirm}
-            />
-             <ModalCreatePos
-                isOpen={isCreatePosModalOpen}
-                onClose={closeCreatePosModal}
-                onPosCreated={handleCreatePos}
-                tiposPuntoVenta={tiposPuntoVenta}
-            />
+          )}
+          <div className="flex bg-gray-100 hover:bg-gray-200 rounded-lg transition p-1">
+            <ul className="relative flex gap-x-1" role="tablist" aria-label="Tabs" aria-orientation="horizontal">
+              <li className="z-30 flex-auto text-center">
+                <button
+                  type="button"
+                  className={`py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg focus:outline-none transition-colors duration-200 ${viewMode === "grid"
+                    ? "bg-slate-700 text-white"
+                    : "bg-transparent text-gray-500 hover:bg-slate-300"
+                    }`}
+                  onClick={() => setViewMode("grid")}
+                >
+                  <FaTable className={`text-lg ${viewMode === "grid" ? "text-white" : "text-gray-500"}`} />
+                </button>
+              </li>
+              <li className="z-30 flex-auto text-center">
+                <button
+                  type="button"
+                  className={`py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg focus:outline-none transition-colors duration-200 ${viewMode === "list"
+                    ? "bg-slate-700 text-white"
+                    : "bg-transparent text-gray-500 hover:bg-slate-300"
+                    }`}
+                  onClick={() => setViewMode("list")}
+                >
+                  <FaList className={`text-lg ${viewMode === "list" ? "text-white" : "text-gray-500"}`} />
+                </button>
+              </li>
+            </ul>
+          </div>
         </div>
 
-    );
+        <div className="overflow-y-auto">
+          {salesPoints.length === 0 || salesPoints.every(point => point.id === 0) ? (
+            <div className="flex flex-col items-center justify-center p-6 bg-white border border-gray-200 rounded-lg shadow">
+              <p className="text-lg font-semibold text-red-600 mb-4">
+                Esta sucursal no tiene un CUIS asignado.
+              </p>
+              <button
+                className="bg-principalColor text-white py-2 px-4 rounded-lg hover:bg-firstColor"
+                onClick={handlePostCuis}
+              >
+                GENERAR CUIS
+              </button>
+            </div>
+          ) : viewMode === "grid" ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+              {filteredSalesPoints.map((point) => (
+                <div key={point.id} className="bg-white border border-gray-200 rounded-lg shadow p-6">
+                  <div className="flex flex-row">
+                    <FaCashRegister className="w-7 h-7 text-gray-500 mb-3" />
+                  <button
+                    className="bg-principalColor text-white py-2 px-4 rounded-lg hover:bg-firstColor ml-auto"
+                    onClick={() => handleGenerateCuisForPOS(point.id)}
+                  >
+                    GENERAR CUIS
+                  </button>
+                  </div>
+                  
+                  <h5 className="mb-2 text-2xl font-semibold tracking-tight text-gray-900">
+                    {point.nombre}
+                  </h5>
+
+                  <button
+                    onClick={() => handleSelectSalesPoint(point.id, point.codigo, point.sucursal)}
+                    className="inline-flex font-medium items-center text-blue-600 hover:underline"
+                  >
+                    Ingresar a punto de venta
+
+                  </button>
+
+
+                  
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="space-y-2">
+              {filteredSalesPoints.map((point) => (
+                <div key={point.id} className="flex items-center bg-white border border-gray-200 rounded-lg p-4 shadow hover:bg-gray-100">
+                  <FaCashRegister className="w-7 h-7 text-gray-500 mr-4" />
+                  <div className="flex-grow">
+                    <h5 className="text-lg font-semibold">{point.nombre}</h5>
+                  </div>
+                  <button
+                    onClick={() => handleSelectSalesPoint(point.id, point.codigo, point.sucursal)}
+                    className="ml-auto font-medium text-blue-600 hover:underline"
+                  >
+                    Ingresar
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+
+        <Footer />
+      </div>
+
+      <ModalContingency
+        isOpen={isContingencyModalOpen}
+        onClose={closeModal}
+        onConfirm={handleConfirm}
+      />
+      <ModalCreatePos
+        isOpen={isCreatePosModalOpen}
+        onClose={closeCreatePosModal}
+        onPosCreated={handleCreatePos}
+        tiposPuntoVenta={tiposPuntoVenta}
+      />
+    </div>
+
+  );
 };
 
 export default KanbanView;

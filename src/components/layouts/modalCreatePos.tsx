@@ -21,8 +21,6 @@ const ModalCreatePos: React.FC<ModalCreatePosProps> = ({ isOpen, onClose, onPosC
             newErrors.nombre = 'El nombre es requerido.';
         } else if (nombre.length > 20) {
             newErrors.nombre = 'Máximo 20 caracteres permitidos.';
-        } else if (!alphanumericPattern.test(nombre)) {
-            newErrors.nombre = 'No se permiten caracteres especiales.';
         }
 
         if (!selectedTipoPuntoVenta) {
