@@ -123,7 +123,7 @@ const ModalCreateBranch: React.FC<ModalCreateBranchProps> = ({ isOpen, onClose, 
             Swal.fire("Error", "Corrige los errores en el formulario", "error");
             return;
         }
-
+    
         const body = {
             codigo,
             nombre,
@@ -133,11 +133,13 @@ const ModalCreateBranch: React.FC<ModalCreateBranchProps> = ({ isOpen, onClose, 
             telefono,
             empresa: { id: empresaId }
         };
-
+    
         try {
             const method = branchToEdit ? 'PUT' : 'POST';
-            const endpoint = branchToEdit ? `${PATH_URL_BACKEND}/sucursales/${branchToEdit.id}` : `${PATH_URL_BACKEND}/sucursales`;
-
+            const endpoint = branchToEdit
+                ? `${PATH_URL_BACKEND}/sucursales/${branchToEdit.id}`
+                : `${PATH_URL_BACKEND}/sucursales`;
+    
             const response = await fetch(endpoint, {
                 method,
                 headers: {
@@ -145,21 +147,24 @@ const ModalCreateBranch: React.FC<ModalCreateBranchProps> = ({ isOpen, onClose, 
                 },
                 body: JSON.stringify(body),
             });
-
+    
             if (!response.ok) {
                 throw new Error('Error al guardar la sucursal');
             }
-
+    
             const newBranch = await response.json();
             onBranchCreated(newBranch);
-
-            Swal.fire({
-                icon: 'success',
-                title: branchToEdit ? 'Sucursal actualizada' : 'Sucursal creada',
-                text: branchToEdit ? 'La sucursal fue actualizada correctamente.' : 'La sucursal fue creada correctamente.',
-            });
-
-            onClose();
+    
+            if (!branchToEdit) {
+                await handlePostCuis(newBranch.id);
+            } else {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Sucursal actualizada',
+                    text: 'La sucursal fue actualizada correctamente.',
+                });
+                onClose();
+            }
         } catch (error) {
             console.error("Error al guardar la sucursal:", error);
             Swal.fire({
@@ -169,6 +174,63 @@ const ModalCreateBranch: React.FC<ModalCreateBranchProps> = ({ isOpen, onClose, 
             });
         }
     };
+    
+    const handlePostCuis = async (branchId: number) => {
+        try {
+            const cuisResponse = await fetch(`${PATH_URL_BACKEND}/codigos/obtener-cuis/${branchId}`, {
+                method: 'POST',
+            });
+    
+            if (!cuisResponse.ok) {
+                throw new Error('Error al obtener el CUIS');
+            }
+    
+            const cuisData = await cuisResponse.json();
+            await Swal.fire({
+                icon: 'success',
+                title: 'CUIS generado',
+                text: `CUIS: ${cuisData.cuis}`,
+            });
+
+            const paramResponse = await fetch(`${PATH_URL_BACKEND}/sincronizar/parametros`, {
+                method: 'POST',
+            });
+    
+            if (!paramResponse.ok) {
+                throw new Error('Error al sincronizar parámetros');
+            }
+    
+            await Swal.fire({
+                icon: 'success',
+                title: 'Parámetros sincronizados',
+                text: 'Los parámetros fueron sincronizados exitosamente.',
+            });
+
+            const catalogResponse = await fetch(`${PATH_URL_BACKEND}/sincronizar/catalogos`, {
+                method: 'POST',
+            });
+    
+            if (!catalogResponse.ok) {
+                throw new Error('Error al sincronizar catálogos');
+            }
+    
+            await Swal.fire({
+                icon: 'success',
+                title: 'Catálogos sincronizados',
+                text: 'Los catálogos fueron sincronizados exitosamente.',
+            });
+
+            onClose();
+        } catch (error) {
+            console.error("Error en el flujo de creación de CUIS y sincronización:", error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Ocurrió un error durante el flujo de creación de CUIS y sincronización.',
+            });
+        }
+    };
+    
 
     if (!isOpen) return null;
 
