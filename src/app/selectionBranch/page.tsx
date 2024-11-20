@@ -1,11 +1,19 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import { FaBuilding } from "react-icons/fa";
+import { FaBuilding, FaPlus } from "react-icons/fa";
 import HeaderBranch from '@/components/commons/headerBranch';
 import { PATH_URL_BACKEND } from "@/utils/constants";
 import ModalContingency from '@/components/layouts/modalContingency';
 import Swal from 'sweetalert2';
 import Footer from '@/components/commons/footer';
+import ModalCreateBranch from '@/components/layouts/modalCreateBranches';
+
+interface Branch {
+    id: number;
+    nombre: string;
+    municipio: string;
+    codigo: string;
+}
 
 const SelectionBranch = () => {
     const today = new Date().toLocaleDateString('es-ES', {
@@ -14,11 +22,13 @@ const SelectionBranch = () => {
         day: '2-digit'
     });
 
-    const [branches, setBranches] = useState([]);
-    const [filteredBranches, setFilteredBranches] = useState([]);
+    const [branches, setBranches] = useState<Branch[]>([]);
+    const [filteredBranches, setFilteredBranches] = useState<Branch[]>([]);
     const [searchTerm, setSearchTerm] = useState('');
     const [isContingencyModalOpen, setIsContingencyModalOpen] = useState(false);
+    const [isCreateBranchModalOpen, setIsCreateBranchModalOpen] = useState(false);
     const [username, setUsername] = useState('Usuario no disponible');
+
 
     useEffect(() => {
         const storedUsername = localStorage.getItem('username');
@@ -29,10 +39,10 @@ const SelectionBranch = () => {
 
     const fetchBranches = async () => {
         try {
-            const idEmpresa = parseInt(localStorage.getItem('idEmpresa') || '0', 10); 
+            const idEmpresa = parseInt(localStorage.getItem('idEmpresa') || '0', 10);
             const response = await fetch(`${PATH_URL_BACKEND}/sucursales`);
             if (response.ok) {
-                const data = await response.json();
+                const data: Branch[] = await response.json();
                 const filteredBranches = data.filter(branch => branch.empresa.id === idEmpresa);
                 setBranches(filteredBranches);
                 setFilteredBranches(filteredBranches);
@@ -55,11 +65,17 @@ const SelectionBranch = () => {
         setFilteredBranches(filtered);
     };
 
-    const handleSelectBranch = (id, codigo) => {
-        localStorage.setItem('idSucursal', id);
+    const handleSelectBranch = (id: number, codigo: string) => {
+        localStorage.setItem('idSucursal', id.toString());
         localStorage.setItem('CodigoSucursal', codigo);
         window.location.href = "/selectionPOS";
     };
+
+    const handleBranchCreated = () => {
+        setIsCreateBranchModalOpen(false);
+        fetchBranches();
+    };
+
 
     const handleConfirm = (eventoDescripcion: string) => {
         setIsContingencyModalOpen(false);
@@ -129,7 +145,8 @@ const SelectionBranch = () => {
         <div className="flex flex-col h-screen">
             <HeaderBranch />
             <div className="flex flex-col min-h-screen bg-gray-50 p-6">
-            <div className="mb-6 flex justify-between items-center">
+                <div className="mb-6 flex justify-between items-center">
+
                     <input
                         type="text"
                         value={searchTerm}
@@ -137,8 +154,17 @@ const SelectionBranch = () => {
                         placeholder="Buscar por nombre de sucursal..."
                         className="w-full p-2 border border-gray-300 rounded-lg"
                     />
+
                     <span className="ml-4 text-gray-600 font-medium whitespace-nowrap">Usuario: {username}</span>
+
+                    <button
+                        className="bg-firstColor text-white rounded-lg font-bold hover:bg-fourthColor ml-1 "
+                        onClick={() => setIsCreateBranchModalOpen(true)}
+                    >
+                        Crear Sucursal
+                    </button>
                 </div>
+
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
                     {filteredBranches.map((branch) => (
                         <div key={branch.id} className="bg-white border border-gray-200 rounded-lg shadow p-6">
@@ -175,10 +201,16 @@ const SelectionBranch = () => {
                 </div>
                 <Footer />
             </div>
-            <ModalContingency 
-                isOpen={isContingencyModalOpen} 
-                onClose={closeModal} 
-                onConfirm={handleConfirm} 
+            <ModalContingency
+                isOpen={isContingencyModalOpen}
+                onClose={closeModal}
+                onConfirm={handleConfirm}
+            />
+            <ModalCreateBranch
+                isOpen={isCreateBranchModalOpen}
+                onClose={() => setIsCreateBranchModalOpen(false)}
+                onBranchCreated={handleBranchCreated}
+                branchToEdit={null}
             />
         </div>
     );
