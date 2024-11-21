@@ -115,7 +115,7 @@ const ManualBill = () => {
             },
         });
     
-        fetch(`${PATH_URL_BACKEND}/factura/emitir`, {
+        fetch(`${PATH_URL_BACKEND}/factura/emitir-computarizada`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(factura),

@@ -344,6 +344,9 @@ const ProductList = () => {
                                                     src={product.imageUrl}
                                                     alt={product.descripcion}
                                                     className="w-20 h-20 object-cover rounded-lg shadow-sm"
+                                                    onError={(e) => {
+                                                        (e.target as HTMLImageElement).src = "/images/caja.png";
+                                                    }}
                                                 />
                                             </td>
                                             <td className="px-6 py-4">

@@ -722,6 +722,9 @@ const Sales = () => {
                                                     src={product.img}
                                                     alt={product.name}
                                                     className="h-24 w-full object-contain mb-2 transition-all duration-300 hover:scale-110"
+                                                    onError={(e) => {
+                                                        (e.target as HTMLImageElement).src = "/images/caja.png";
+                                                    }}
                                                 />
                                                 <h3 className="text-xs font-semibold truncate">{product.name}</h3>
                                                 <p className="text-sm font-bold">Bs {product.price}</p>
