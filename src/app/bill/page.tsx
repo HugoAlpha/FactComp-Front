@@ -461,6 +461,48 @@ const BillList = () => {
     }
   };
 
+  const handleRevertAnulation = async (bill: any) => {
+    if (!bill.cuf) {
+      Swal.fire('Error', 'No se encontró el CUF de la factura', 'error');
+      return;
+    }
+  
+    try {
+      const body = {
+        cuf: bill.cuf,
+        idPuntoVenta: bill.puntoVenta.id,
+        idSucursal: parseInt(localStorage.getItem('idSucursal') as string),
+      };
+  
+      const response = await fetch(`${PATH_URL_BACKEND}/factura/reversion-anular`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      });
+  
+      if (response.ok) {
+        Swal.fire(
+          'Reversión Exitosa!',
+          'La anulación de la factura ha sido revertida correctamente.',
+          'success'
+        );
+        fetchBills(estadoFilter);
+      } else {
+        Swal.fire(
+          'Error!',
+          'No se pudo revertir la anulación de la factura.',
+          'error'
+        );
+      }
+    } catch (error) {
+      console.error('Error al revertir la anulación:', error);
+      Swal.fire('Error', 'No se pudo conectar con el servidor.', 'error');
+    }
+  };
+  
+
   const handleSendContingencyPackages = () => {
     Swal.fire({
         title: '¿Está seguro de enviar los paquetes de contingencia?',
@@ -650,15 +692,27 @@ const BillList = () => {
                             </span>
                             </button>
 
-                            <button
-                              className="bg-red-200 hover:bg-red-300 p-1 md:p-2 rounded-r-lg flex items-center justify-center border border-red-300 relative group"
-                              onClick={() => handleAnularFactura(bill)}
-                            >
-                              <HiReceiptRefund className="text-sm md:text-lg text-black" />
-                              <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 hidden group-hover:flex items-center justify-center bg-gray-800 text-white text-xs rounded px-2 py-1">
+                            {bill.estado === 'ANULADO' ? (
+                              <button
+                                className="bg-blue-200 hover:bg-blue-300 p-1 md:p-2 rounded-r-lg flex items-center justify-center border border-blue-300 relative group"
+                                onClick={() => handleRevertAnulation(bill)}
+                              >
+                                <HiReceiptRefund className="text-sm md:text-lg text-black" />
+                                <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 hidden group-hover:flex items-center justify-center bg-gray-800 text-white text-xs rounded px-2 py-1">
+                                  Revertir Anulación
+                                </span>
+                              </button>
+                            ) : (
+                              <button
+                                className="bg-red-200 hover:bg-red-300 p-1 md:p-2 rounded-r-lg flex items-center justify-center border border-red-300 relative group"
+                                onClick={() => handleAnularFactura(bill)}
+                              >
+                                <HiReceiptRefund className="text-sm md:text-lg text-black" />
+                                <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 hidden group-hover:flex items-center justify-center bg-gray-800 text-white text-xs rounded px-2 py-1">
                                   Anular
-                              </span>
-                            </button>
+                                </span>
+                              </button>
+                            )}
                           </div>
                         </td>
                       </tr>
