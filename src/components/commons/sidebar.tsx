@@ -69,7 +69,8 @@ const Sidebar = () => {
             subItems: [
                 { name: 'CUIS', href: 'codecuis' },
                 { name: 'CUFD', href: 'codecufd' },
-                { name: 'Envio Paquetes', href: 'sendPackage' }
+                { name: 'Envio Paquetes', href: 'sendPackage' },
+                { name: 'Emisión masiva', href: 'sendBulkPackage' }
             ]
         },
         {
