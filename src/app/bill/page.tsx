@@ -27,7 +27,9 @@ interface FormattedBill {
   codigoPuntoVenta: number;
   cuf: string;
   formato: string;
+  reversion: boolean; 
 }
+
 
 const BillList = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -47,46 +49,45 @@ const BillList = () => {
 
   const fetchBills = async () => {
     try {
-      const estadoParam = isContingencyMode ? 'OFFLINE' : (estadoFilter === 'TODAS' ? '' : (estadoFilter === 'VALIDA' ? '1' : '0'));
-      const endpoint = estadoParam ? `${PATH_URL_BACKEND}/factura/estado?estado=${estadoParam}` : `${PATH_URL_BACKEND}/factura`;
+        const estadoParam = isContingencyMode ? 'OFFLINE' : (estadoFilter === 'TODAS' ? '' : (estadoFilter === 'VALIDA' ? '1' : '0'));
+        const endpoint = estadoParam ? `${PATH_URL_BACKEND}/factura/estado?estado=${estadoParam}` : `${PATH_URL_BACKEND}/factura`;
 
-      const response = await fetch(endpoint);
+        const response = await fetch(endpoint);
 
-      if (response.ok) {
-        const data = await response.json();
-        const idPOS = parseInt(localStorage.getItem('idPOS') || '0');
-        const codigoPOS = parseInt(localStorage.getItem('CodigoPOS') || '0');
-        const filteredData = data.filter((bill) =>
-          bill.codigoPuntoVenta === codigoPOS && bill.puntoVenta && bill.puntoVenta.id === idPOS
-        );
+        if (response.ok) {
+            const data = await response.json();
+            const idPOS = parseInt(localStorage.getItem('idPOS') || '0');
+            const codigoPOS = parseInt(localStorage.getItem('CodigoPOS') || '0');
 
+            const filteredData = data.filter((bill) =>
+                bill.codigoPuntoVenta === codigoPOS && bill.puntoVenta && bill.puntoVenta.id === idPOS
+            );
 
-        const formattedData = filteredData.map((bill) => ({
-          documentNumber: bill.numeroDocumento,
-          numeroFactura: bill.numeroFactura,
-          client: bill.nombreRazonSocial,
-          date: new Date(bill.fechaEmision),
-          total: bill.montoTotal.toFixed(2),
-          estado: bill.estado || '-',
-          codigoSucursal: bill.codigoSucursal,
-          codigoPuntoVenta: bill.codigoPuntoVenta,
-          cuf: bill.cuf,
-          puntoVenta: bill.puntoVenta,
-          id: bill.id,
-          formato: bill.formato
-        }));
-
-
-        const sortedData = formattedData.sort((a, b) => b.date - a.date);
-        setBills(sortedData);
-
-      } else {
-        console.error('Error fetching bills');
-      }
+            const formattedData = filteredData.map((bill) => ({
+                documentNumber: bill.numeroDocumento,
+                numeroFactura: bill.numeroFactura,
+                client: bill.nombreRazonSocial,
+                date: new Date(bill.fechaEmision),
+                total: bill.montoTotal.toFixed(2),
+                estado: bill.estado || '-',
+                codigoSucursal: bill.codigoSucursal,
+                codigoPuntoVenta: bill.codigoPuntoVenta,
+                cuf: bill.cuf,
+                puntoVenta: bill.puntoVenta,
+                id: bill.id,
+                formato: bill.formato,
+                reversion: !!bill.reversion, 
+            }));
+            const sortedData = formattedData.sort((a, b) => b.date - a.date);
+            setBills(sortedData);
+        } else {
+            console.error('Error fetching bills');
+        }
     } catch (error) {
-      console.error('Error fetching bills:', error);
+        console.error('Error fetching bills:', error);
     }
-  };
+};
+
 
 
   useEffect(() => {
@@ -392,115 +393,134 @@ const BillList = () => {
   };
 
   const handleAnularFactura = async (bill: any) => {
-
     if (bill.estado === 'ANULADO') {
-      Swal.fire('Información', 'Esta factura ya fue anulada.', 'info');
-      return;
+        Swal.fire('Información', 'Esta factura ya fue anulada.', 'info');
+        return;
     }
 
     if (!bill.cuf) {
-      Swal.fire('Error', 'No se encontró el CUF de la factura', 'error');
-      return;
+        Swal.fire('Error', 'No se encontró el CUF de la factura', 'error');
+        return;
     }
 
     const { value: motivo } = await Swal.fire({
-      title: 'Selecciona el motivo de anulación',
-      input: 'select',
-      inputOptions: motivosAnulacion.reduce((options: any, motivo: any) => {
-        options[motivo.codigoClasificador] = motivo.descripcion;
-        return options;
-      }, {}),
-      inputPlaceholder: 'Selecciona un motivo',
-      showCancelButton: true,
-      inputValidator: (value) => {
-        return new Promise((resolve) => {
-          if (value) {
-            resolve(null);
-          } else {
-            resolve('Debes seleccionar un motivo de anulación');
-          }
-        });
-      }
+        title: 'Selecciona el motivo de anulación',
+        input: 'select',
+        inputOptions: motivosAnulacion.reduce((options: any, motivo: any) => {
+            options[motivo.codigoClasificador] = motivo.descripcion;
+            return options;
+        }, {}),
+        inputPlaceholder: 'Selecciona un motivo',
+        showCancelButton: true,
+        inputValidator: (value) => {
+            return new Promise((resolve) => {
+                if (value) {
+                    resolve(null);
+                } else {
+                    resolve('Debes seleccionar un motivo de anulación');
+                }
+            });
+        }
     });
 
     if (motivo) {
-      try {
-        const body = {
-          cuf: bill.cuf,
-          anulacionMotivo: motivo,
-          idPuntoVenta: bill.puntoVenta.id,
-          idSucursal: parseInt(localStorage.getItem('idSucursal') as string)
-        };
+        try {
+            Swal.fire({
+                title: 'Anulando...',
+                html: 'Por favor, espere mientras se anula la factura.',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+            });
 
-        const response = await fetch(`${PATH_URL_BACKEND}/factura/anular`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(body),
-        });
+            const body = {
+                cuf: bill.cuf,
+                anulacionMotivo: motivo,
+                idPuntoVenta: bill.puntoVenta.id,
+                idSucursal: parseInt(localStorage.getItem('idSucursal') as string)
+            };
 
-        if (response.ok) {
-          Swal.fire(
-            'Anulada!',
-            'La factura ha sido anulada correctamente.',
-            'success'
-          );
-          fetchBills(estadoFilter);
-        } else {
-          Swal.fire(
-            'Error!',
-            'No se pudo anular la factura.',
-            'error'
-          );
+            const response = await fetch(`${PATH_URL_BACKEND}/factura/anular`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(body),
+            });
+
+            if (response.ok) {
+                Swal.fire(
+                    'Anulada!',
+                    'La factura ha sido anulada correctamente.',
+                    'success'
+                );
+                fetchBills(estadoFilter);
+            } else {
+                Swal.fire('Error!', 'No se pudo anular la factura.', 'error');
+            }
+        } catch (error) {
+            console.error('Error al anular factura:', error);
+            Swal.fire('Error', 'No se pudo conectar con el servidor.', 'error');
         }
-      } catch (error) {
-        console.error('Error al anular factura:', error);
-        Swal.fire('Error', 'No se pudo conectar con el servidor.', 'error');
-      }
     }
-  };
+};
 
-  const handleRevertAnulation = async (bill: any) => {
-    if (!bill.cuf) {
+const handleRevertAnulation = async (bill: any) => {
+  if (!bill.cuf) {
       Swal.fire('Error', 'No se encontró el CUF de la factura', 'error');
       return;
-    }
-  
-    try {
-      const body = {
-        cuf: bill.cuf,
-        idPuntoVenta: bill.puntoVenta.id,
-        idSucursal: parseInt(localStorage.getItem('idSucursal') as string),
-      };
-  
-      const response = await fetch(`${PATH_URL_BACKEND}/factura/reversion-anular`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
+  }
+
+  const result = await Swal.fire({
+      title: '¿Seguro que quiere revertir la anulación?',
+      text: 'Esta acción no se puede deshacer.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonText: 'Sí, revertir',
+      cancelButtonText: 'Cancelar',
+      reverseButtons: true,
+  });
+
+  if (!result.isConfirmed) {
+      return;
+  }
+
+  try {
+      Swal.fire({
+          title: 'Revirtiendo...',
+          html: 'Por favor, espere mientras se revierte la anulación.',
+          allowOutsideClick: false,
+          didOpen: () => Swal.showLoading()
       });
-  
+
+      const body = {
+          cuf: bill.cuf,
+          idPuntoVenta: bill.puntoVenta.id,
+          idSucursal: parseInt(localStorage.getItem('idSucursal') as string),
+      };
+
+      const response = await fetch(`${PATH_URL_BACKEND}/factura/reversion-anular`, {
+          method: 'POST',
+          headers: {
+              'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(body),
+      });
+
       if (response.ok) {
-        Swal.fire(
-          'Reversión Exitosa!',
-          'La anulación de la factura ha sido revertida correctamente.',
-          'success'
-        );
-        fetchBills(estadoFilter);
+          Swal.fire(
+              'Reversión Exitosa!',
+              'La anulación de la factura ha sido revertida correctamente.',
+              'success'
+          );
+          fetchBills(estadoFilter);
       } else {
-        Swal.fire(
-          'Error!',
-          'No se pudo revertir la anulación de la factura.',
-          'error'
-        );
+          Swal.fire('Error!', 'No se pudo revertir la anulación de la factura.', 'error');
       }
-    } catch (error) {
+  } catch (error) {
       console.error('Error al revertir la anulación:', error);
       Swal.fire('Error', 'No se pudo conectar con el servidor.', 'error');
-    }
-  };
+  }
+};
   
 
   const handleSendContingencyPackages = () => {
@@ -691,28 +711,31 @@ const BillList = () => {
                                 Ver en SIAT
                             </span>
                             </button>
-
-                            {bill.estado === 'ANULADO' ? (
-                              <button
-                                className="bg-blue-200 hover:bg-blue-300 p-1 md:p-2 rounded-r-lg flex items-center justify-center border border-blue-300 relative group"
-                                onClick={() => handleRevertAnulation(bill)}
-                              >
-                                <HiReceiptRefund className="text-sm md:text-lg text-black" />
-                                <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 hidden group-hover:flex items-center justify-center bg-gray-800 text-white text-xs rounded px-2 py-1">
-                                  Revertir Anulación
-                                </span>
-                              </button>
-                            ) : (
-                              <button
-                                className="bg-red-200 hover:bg-red-300 p-1 md:p-2 rounded-r-lg flex items-center justify-center border border-red-300 relative group"
-                                onClick={() => handleAnularFactura(bill)}
-                              >
-                                <HiReceiptRefund className="text-sm md:text-lg text-black" />
-                                <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 hidden group-hover:flex items-center justify-center bg-gray-800 text-white text-xs rounded px-2 py-1">
-                                  Anular
-                                </span>
-                              </button>
-                            )}
+                            {!bill.reversion && (
+                                <>
+                                  {bill.estado === 'ANULADO' ? (
+                                    <button
+                                      className="bg-blue-200 hover:bg-blue-300 p-1 md:p-2 rounded-r-lg flex items-center justify-center border border-blue-300 relative group"
+                                      onClick={() => handleRevertAnulation(bill)}
+                                    >
+                                      <HiReceiptRefund className="text-sm md:text-lg text-black" />
+                                      <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 hidden group-hover:flex items-center justify-center bg-gray-800 text-white text-xs rounded px-2 py-1">
+                                        Revertir Anulación
+                                      </span>
+                                    </button>
+                                  ) : (
+                                    <button
+                                      className="bg-red-200 hover:bg-red-300 p-1 md:p-2 rounded-r-lg flex items-center justify-center border border-red-300 relative group"
+                                      onClick={() => handleAnularFactura(bill)}
+                                    >
+                                      <HiReceiptRefund className="text-sm md:text-lg text-black" />
+                                      <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 hidden group-hover:flex items-center justify-center bg-gray-800 text-white text-xs rounded px-2 py-1">
+                                        Anular
+                                      </span>
+                                    </button>
+                                  )}
+                                </>
+                              )}
                           </div>
                         </td>
                       </tr>
