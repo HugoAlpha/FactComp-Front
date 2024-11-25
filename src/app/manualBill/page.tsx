@@ -101,15 +101,15 @@ const ManualBill = () => {
             fechaHoraEmision: `${fechaHoraEmision.getFullYear()}-${(fechaHoraEmision.getMonth() + 1)
                 .toString()
                 .padStart(2, "0")}-${fechaHoraEmision
-                .getDate()
-                .toString()
-                .padStart(2, "0")} ${fechaHoraEmision
-                .getHours()
-                .toString()
-                .padStart(2, "0")}:${fechaHoraEmision
-                .getMinutes()
-                .toString()
-                .padStart(2, "0")}:${fechaHoraEmision.getSeconds().toString().padStart(2, "0")}`,
+                    .getDate()
+                    .toString()
+                    .padStart(2, "0")} ${fechaHoraEmision
+                        .getHours()
+                        .toString()
+                        .padStart(2, "0")}:${fechaHoraEmision
+                            .getMinutes()
+                            .toString()
+                            .padStart(2, "0")}:${fechaHoraEmision.getSeconds().toString().padStart(2, "0")}`,
             cafc: true,
         };
 
@@ -139,7 +139,7 @@ const ManualBill = () => {
             for (let num = start; num <= end; num++) {
                 try {
                     const factura = { ...facturaBase, numeroFactura: num };
-                    await fetch(`${PATH_URL_BACKEND}/factura/emitir`, {
+                    await fetch(`${PATH_URL_BACKEND}/factura/emitir-computarizada`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(factura),
@@ -168,7 +168,7 @@ const ManualBill = () => {
         } else {
             const factura = { ...facturaBase, numeroFactura: parseInt(numeroFactura) };
             try {
-                await fetch(`${PATH_URL_BACKEND}/factura/emitir`, {
+                await fetch(`${PATH_URL_BACKEND}/factura/emitir-computarizada`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(factura),

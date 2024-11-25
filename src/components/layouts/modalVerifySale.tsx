@@ -19,7 +19,7 @@ interface ModalVerifySaleProps {
   client: Client | null;
   onSuccess: (data: { client: string; total: number; numeroFactura: number }) => void;
   globalDiscount?: number | null;
-  numeroDocumento?: string; 
+  numeroDocumento?: string;
 }
 
 interface Client {
@@ -27,7 +27,7 @@ interface Client {
   nombreRazonSocial: string;
   numeroDocumento: string;
   codigoCliente: string;
-  codigoTipoDocumentoIdentidad: number; 
+  codigoTipoDocumentoIdentidad: number;
 }
 
 
@@ -38,7 +38,7 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
   total,
   client,
   onSuccess,
-  globalDiscount, 
+  globalDiscount,
 }) => {
   const [paymentMethod, setPaymentMethod] = useState('1');
   const [paymentAmount, setPaymentAmount] = useState('');
@@ -73,7 +73,7 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
       selectedMethod?.descripcion.toLowerCase().includes('gift')
     );
   };
- 
+
   useEffect(() => {
     const fetchPaymentMethods = async () => {
       try {
@@ -91,64 +91,64 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
 
   const handleValidate = async () => {
     if (paymentMethod === '1' && Number(paymentAmount) < total) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'La cantidad pagada es insuficiente.',
-        });
-        return;
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'La cantidad pagada es insuficiente.',
+      });
+      return;
     }
 
     if (paymentMethod === '10') {
-        const totalPayment = parseFloat(cashAmount) + parseFloat(cardAmount);
-        if (totalPayment !== total) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'La suma del efectivo y la tarjeta debe ser igual al total.',
-            });
-            return;
-        }
+      const totalPayment = parseFloat(cashAmount) + parseFloat(cardAmount);
+      if (totalPayment !== total) {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'La suma del efectivo y la tarjeta debe ser igual al total.',
+        });
+        return;
+      }
     }
 
     try {
-        // Validar si el código de documento del cliente es 5
-        if (client?.codigoTipoDocumentoIdentidad === 5) {
-            const nitResponse = await fetch(
-                `${PATH_URL_BACKEND}/codigos/verificar-nit?nit=${client.numeroDocumento}`
-            );
-            const nitData = await nitResponse.json();
+      // Validar si el código de documento del cliente es 5
+      if (client?.codigoTipoDocumentoIdentidad === 5) {
+        const nitResponse = await fetch(
+          `${PATH_URL_BACKEND}/codigos/verificar-nit?nit=${client.numeroDocumento}`
+        );
+        const nitData = await nitResponse.json();
 
-            if (nitResponse.ok && nitData.mensajesList[0].descripcion === 'NIT ACTIVO') {
-                await processSale(false);
-            } else if (nitData.mensajesList[0].descripcion === 'NIT INEXISTENTE') {
-                const result = await Swal.fire({
-                    icon: 'warning',
-                    title: 'El NIT del cliente es inválido.',
-                    text: '¿Desea proceder con el pago de todas formas?',
-                    showCancelButton: true,
-                    confirmButtonText: 'Sí',
-                    cancelButtonText: 'No',
-                });
+        if (nitResponse.ok && nitData.mensajesList[0].descripcion === 'NIT ACTIVO') {
+          await processSale(false);
+        } else if (nitData.mensajesList[0].descripcion === 'NIT INEXISTENTE') {
+          const result = await Swal.fire({
+            icon: 'warning',
+            title: 'El NIT del cliente es inválido.',
+            text: '¿Desea proceder con el pago de todas formas?',
+            showCancelButton: true,
+            confirmButtonText: 'Sí',
+            cancelButtonText: 'No',
+          });
 
-                if (result.isConfirmed) {
-                    await processSale(true);
-                }
-            } else {
-                throw new Error('Error desconocido al verificar el NIT.');
-            }
+          if (result.isConfirmed) {
+            await processSale(true);
+          }
         } else {
-            await processSale(false);
+          throw new Error('Error desconocido al verificar el NIT.');
         }
+      } else {
+        await processSale(false);
+      }
     } catch (error) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: 'Hubo un problema al validar el NIT. Por favor, intente de nuevo.',
-        });
-        console.error(error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Hubo un problema al validar el NIT. Por favor, intente de nuevo.',
+      });
+      console.error(error);
     }
-};
+  };
 
   const processSale = async (nitInvalido: boolean) => {
     try {
@@ -165,18 +165,18 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
           clearInterval(timerInterval);
         },
       });
-  
+
       const contingenciaEstado = localStorage.getItem('contingenciaEstado');
       const numeroTarjeta = isCardPayment()
         ? `${cardFields.firstFour}00000000${cardFields.lastFour}`
         : null;
-  
+
       const body = {
         usuario: client?.codigoCliente || '',
         idPuntoVenta: parseInt(localStorage.getItem('idPOS') as string),
         idCliente: client?.id || '',
         idSucursal: parseInt(localStorage.getItem('idSucursal') as string),
-        nitInvalido, 
+        nitInvalido,
         codigoMetodoPago: paymentMethod,
         activo: contingenciaEstado === '1' ? false : true,
         numeroFactura: '',
@@ -191,9 +191,9 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
           montoDescuento: product.discount ? product.discount.toFixed(2) : '00.0',
         })),
       };
-  
+
       const response = await fetch(
-        `${PATH_URL_BACKEND}/factura/emitir`,
+        `${PATH_URL_BACKEND}/factura/emitir-computarizada`,
         {
           method: 'POST',
           headers: {
@@ -202,9 +202,9 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
           body: JSON.stringify(body),
         }
       );
-  
+
       Swal.close();
-  
+
       if (response.ok) {
         const data = await response.json();
         Swal.fire({
@@ -245,7 +245,7 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
       });
       console.error(error);
     }
-  };  
+  };
 
   if (!isOpen) return null;
 

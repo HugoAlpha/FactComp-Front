@@ -9,7 +9,7 @@ import { PATH_URL_BACKEND } from "@/utils/constants";
 import { FaTrash } from "react-icons/fa";
 import Footer from "@/components/commons/footer";
 
-const sendPackage = () =>{
+const sendPackage = () => {
     const [clientes, setClientes] = useState([]);
     const [metodosPago, setMetodosPago] = useState([]);
     const [productos, setProductos] = useState([]);
@@ -32,7 +32,7 @@ const sendPackage = () =>{
         if (typeof window !== "undefined") {
             setIdPuntoVenta(localStorage.getItem("idPOS"));
             setIdSucursal(localStorage.getItem("idSucursal"));
-            
+
         }
 
         fetch(`${PATH_URL_BACKEND}/api/clientes/`)
@@ -64,7 +64,7 @@ const sendPackage = () =>{
         setDetalle(updatedDetalle);
     };
 
-    
+
 
     const handleSubmit = async () => {
         if (detalle.length === 0) {
@@ -74,7 +74,7 @@ const sendPackage = () =>{
 
         const cliente = clientes.find(c => c.id === parseInt(selectedCliente));
         const metodoPago = metodosPago.find(m => m.codigoClasificador === selectedMetodoPago);
-    
+
         const factura = {
             usuario: cliente?.codigoCliente || "",
             idPuntoVenta: parseInt(idPuntoVenta),
@@ -90,7 +90,7 @@ const sendPackage = () =>{
             idSucursal: parseInt(idSucursal),
             numeroFactura: ''
         };
-    
+
         let timerInterval;
         Swal.fire({
             title: "Generando facturas...",
@@ -100,10 +100,10 @@ const sendPackage = () =>{
             didOpen: () => Swal.showLoading(),
             willClose: () => clearInterval(timerInterval),
         });
-    
+
         for (let i = 0; i < cantidadFacturas; i++) {
             try {
-                await fetch(`${PATH_URL_BACKEND}/factura/emitir`, {
+                await fetch(`${PATH_URL_BACKEND}/factura/emitir-computarizada`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(factura),
@@ -128,7 +128,7 @@ const sendPackage = () =>{
             timer: 3000,
             timerProgressBar: true,
             showConfirmButton: false,
-            
+
         });
         resetForm();
 
@@ -153,8 +153,8 @@ const sendPackage = () =>{
     const filteredMetodosPago = metodosPago.filter(metodo =>
         metodo.descripcion.toLowerCase().includes(searchMetodoPago.toLowerCase())
     );
-    return(
-    <div className="flex flex-col md:flex-row min-h-screen">
+    return (
+        <div className="flex flex-col md:flex-row min-h-screen">
             <Sidebar />
             <div className="flex flex-col w-full min-h-screen">
                 <Header />
@@ -200,7 +200,7 @@ const sendPackage = () =>{
                                     </ul>
                                 </div>
                             )}
-                        </div> 
+                        </div>
 
                         <div>
                             <label className="block text-gray-700 font-medium mb-2">Cantidad de Facturas</label>
