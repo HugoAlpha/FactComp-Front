@@ -24,9 +24,12 @@ const CUFDList = () => {
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [userRole, setUserRole] = useState<string | null>(null);
     const [isContingencyModalOpen, setIsContingencyModalOpen] = useState<boolean>(false);
+    
 
     useEffect(() => {
         const role = localStorage.getItem("role");
+        const idSucursal = localStorage.getItem("idSucursal");
+        const idPOS = localStorage.getItem("idPOS");
         setUserRole(role);
     }, []);
 
@@ -164,7 +167,9 @@ const CUFDList = () => {
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
-                    const response = await fetch(`${PATH_URL_BACKEND}/sincronizar/catalogos`, {
+                    const idPuntoVenta = localStorage.getItem('idPOS');
+                    const idSucursal = localStorage.getItem('idSucursal');
+                    const response = await fetch(`${PATH_URL_BACKEND}/sincronizar/catalogos/${idSucursal}/${idPuntoVenta}`, {
                         method: 'POST',
                     });
                     if (response.ok) {
@@ -192,7 +197,9 @@ const CUFDList = () => {
         }).then(async (result) => {
             if (result.isConfirmed) {
                 try {
-                    const response = await fetch(`${PATH_URL_BACKEND}/sincronizar/parametros`, {
+                    const idPuntoVenta = localStorage.getItem('idPOS');
+                    const idSucursal = localStorage.getItem('idSucursal');
+                    const response = await fetch(`${PATH_URL_BACKEND}/sincronizar/parametros/${idSucursal}/${idPuntoVenta}`, {
                         method: 'POST',
                     });
                     if (response.ok) {

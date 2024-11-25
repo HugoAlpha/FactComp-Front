@@ -68,7 +68,9 @@ const Sidebar = () => {
             icon: <MdVerified size={20} />,
             subItems: [
                 { name: 'CUIS', href: 'codecuis' },
-                { name: 'CUFD', href: 'codecufd' }
+                { name: 'CUFD', href: 'codecufd' },
+                { name: 'Envio Paquetes', href: 'sendPackage' },
+                { name: 'Emisión masiva', href: 'sendBulkPackage' }
             ]
         },
         {

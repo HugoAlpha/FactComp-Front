@@ -184,15 +184,16 @@ const KanbanView = () => {
           clearInterval(timerInterval);
         },
       });
-
-      const paramResponse = await fetch(`${PATH_URL_BACKEND}/sincronizar/parametros`, {
+      const idScursal1 = 1;
+      const idPuntoVenta1 = 1;
+      const paramResponse = await fetch(`${PATH_URL_BACKEND}/sincronizar/parametros/${idScursal1}/${idPuntoVenta1}`, {
         method: "POST",
       });
       if (!paramResponse.ok) {
         throw new Error("Error al sincronizar parámetros");
       }
 
-      const catalogResponse = await fetch(`${PATH_URL_BACKEND}/sincronizar/catalogos`, {
+      const catalogResponse = await fetch(`${PATH_URL_BACKEND}/sincronizar/catalogos/${idScursal1}/${idPuntoVenta1}`, {
         method: "POST",
       });
       if (!catalogResponse.ok) {

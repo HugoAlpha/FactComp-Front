@@ -26,6 +26,9 @@ const ManualBill = () => {
     const [idSucursal, setIdSucursal] = useState(null);
     const [rangoFechaInicio, setRangoFechaInicio] = useState(new Date());
     const [rangoFechaFin, setRangoFechaFin] = useState(new Date());
+    const [generateMultiple, setGenerateMultiple] = useState(false);
+    const [startInvoice, setStartInvoice] = useState("");
+    const [endInvoice, setEndInvoice] = useState("");
 
     useEffect(() => {
         if (typeof window !== "undefined") {
@@ -36,16 +39,16 @@ const ManualBill = () => {
         }
 
         fetch(`${PATH_URL_BACKEND}/api/clientes/`)
-            .then(response => response.json())
-            .then(data => setClientes(data));
+            .then((response) => response.json())
+            .then((data) => setClientes(data));
 
         fetch(`${PATH_URL_BACKEND}/parametro/metodo-pago`)
-            .then(response => response.json())
-            .then(data => setMetodosPago(data));
+            .then((response) => response.json())
+            .then((data) => setMetodosPago(data));
 
         fetch(`${PATH_URL_BACKEND}/item/obtener-items`)
-            .then(response => response.json())
-            .then(data => setProductos(data));
+            .then((response) => response.json())
+            .then((data) => setProductos(data));
     }, []);
 
     const handleAddProduct = () => {
@@ -76,93 +79,116 @@ const ManualBill = () => {
         return true;
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!validateFechaHoraEmision(fechaHoraEmision)) return;
-    
-        const cliente = clientes.find(c => c.id === parseInt(selectedCliente));
-        const metodoPago = metodosPago.find(m => m.codigoClasificador === selectedMetodoPago);
-    
-        const factura = {
+
+        const cliente = clientes.find((c) => c.id === parseInt(selectedCliente));
+        const metodoPago = metodosPago.find((m) => m.codigoClasificador === selectedMetodoPago);
+
+        const facturaBase = {
             usuario: cliente?.codigoCliente || "",
             idPuntoVenta: parseInt(idPuntoVenta),
             idCliente: parseInt(selectedCliente),
             nitInvalido: true,
             codigoMetodoPago: parseInt(metodoPago?.codigoClasificador || "0"),
             activo: false,
-            detalle: detalle.map(d => ({
+            detalle: detalle.map((d) => ({
                 idProducto: d.idProducto,
                 cantidad: parseFloat(d.cantidad),
                 montoDescuento: parseFloat(d.montoDescuento),
             })),
             idSucursal: parseInt(idSucursal),
-            numeroFactura: parseInt(numeroFactura),
-            fechaHoraEmision: `${fechaHoraEmision.getFullYear()}-${(fechaHoraEmision.getMonth() + 1).toString().padStart(2, "0")}-${fechaHoraEmision.getDate().toString().padStart(2, "0")} ${fechaHoraEmision.getHours().toString().padStart(2, "0")}:${fechaHoraEmision.getMinutes().toString().padStart(2, "0")}:${fechaHoraEmision.getSeconds().toString().padStart(2, "0")}`,
+            fechaHoraEmision: `${fechaHoraEmision.getFullYear()}-${(fechaHoraEmision.getMonth() + 1)
+                .toString()
+                .padStart(2, "0")}-${fechaHoraEmision
+                .getDate()
+                .toString()
+                .padStart(2, "0")} ${fechaHoraEmision
+                .getHours()
+                .toString()
+                .padStart(2, "0")}:${fechaHoraEmision
+                .getMinutes()
+                .toString()
+                .padStart(2, "0")}:${fechaHoraEmision.getSeconds().toString().padStart(2, "0")}`,
             cafc: true,
         };
-    
-        let timerInterval;
-    
-        Swal.fire({
-            title: "Se está generando la factura",
-            html: "Espere mientras procesamos su factura.",
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            didOpen: () => {
-                Swal.showLoading();
-            },
-            willClose: () => {
-                clearInterval(timerInterval);
-            },
-        });
-    
-        fetch(`${PATH_URL_BACKEND}/factura/emitir-computarizada`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(factura),
-        })
-            .then(response => response.json())
-            .then(data => {
+
+        if (generateMultiple && startInvoice && endInvoice) {
+            const start = parseInt(startInvoice);
+            const end = parseInt(endInvoice);
+
+            if (start > end) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "El número inicial debe ser menor o igual al número final.",
+                });
+                return;
+            }
+
+            Swal.fire({
+                title: "Generando facturas...",
+                html: "Progreso: <b>0%</b>",
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+            });
+
+            for (let num = start; num <= end; num++) {
+                try {
+                    const factura = { ...facturaBase, numeroFactura: num };
+                    await fetch(`${PATH_URL_BACKEND}/factura/emitir`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify(factura),
+                    });
+
+                    const progress = Math.round(((num - start + 1) / (end - start + 1)) * 100);
+                    Swal.update({
+                        html: `Progreso: <b>${progress}%</b> (Factura ${num} de ${end})`,
+                    });
+                } catch (error) {
+                    console.error(`Error al emitir la factura ${num}:`, error);
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: `No se pudo emitir la factura ${num}.`,
+                    });
+                    return;
+                }
+            }
+
+            Swal.fire({
+                icon: "success",
+                title: "Facturas generadas",
+                text: `Facturas generadas exitosamente del ${start} al ${end}.`,
+            });
+        } else {
+            const factura = { ...facturaBase, numeroFactura: parseInt(numeroFactura) };
+            try {
+                await fetch(`${PATH_URL_BACKEND}/factura/emitir`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(factura),
+                });
+
                 Swal.fire({
                     icon: "success",
                     title: "Factura emitida",
-                    text: `Factura emitida con éxito. Número de factura: ${data.numeroFactura}`,
-                    timer: 3000,
-                    timerProgressBar: true,
-                    showConfirmButton: false,
-                    didClose: () => {
-                        resetForm(); 
-                    },
+                    text: `Factura ${numeroFactura} emitida exitosamente.`,
                 });
-            })
-            .catch(error => {
-                console.error("Error al emitir factura:", error);
+            } catch (error) {
+                console.error("Error al emitir la factura:", error);
                 Swal.fire({
                     icon: "error",
                     title: "Error",
                     text: "No se pudo emitir la factura. Intente nuevamente.",
                 });
-            });
+            }
+        }
     };
-
-    const resetForm = () => {
-        setSelectedCliente("");
-        setSelectedMetodoPago("");
-        setNumeroFactura("");
-        setFechaHoraEmision(new Date());
-        setDetalle([]);
-        setDropdownClienteOpen(false);
-        setDropdownMetodoPagoOpen(false);
-        setSearchCliente("");
-        setSearchMetodoPago("");
-    };
-
-    const filteredClientes = clientes.filter(cliente =>
-        cliente.nombreRazonSocial.toLowerCase().includes(searchCliente.toLowerCase())
-    );
-
-    const filteredMetodosPago = metodosPago.filter(metodo =>
-        metodo.descripcion.toLowerCase().includes(searchMetodoPago.toLowerCase())
-    );
 
     return (
         <div className="flex flex-col md:flex-row min-h-screen">
@@ -170,97 +196,70 @@ const ManualBill = () => {
             <div className="flex flex-col w-full min-h-screen">
                 <Header />
                 <div className="flex-grow overflow-auto bg-gray-50 p-6">
-                    <h2 className="text-lg md:text-xl font-bold mb-6 text-gray-700">Emitir Factura Manual</h2>
+                    <h2 className="text-lg md:text-xl font-bold mb-6 text-gray-700">
+                        Emitir Factura Manual
+                    </h2>
 
                     <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
-                        <div className="relative">
+                        <div>
                             <label className="block text-gray-700 font-medium mb-2">Cliente</label>
-                            <button
-                                type="button"
-                                onClick={() => setDropdownClienteOpen(!dropdownClienteOpen)}
-                                className="w-full text-left p-2 border rounded"
+                            <select
+                                value={selectedCliente}
+                                onChange={(e) => setSelectedCliente(e.target.value)}
+                                className="w-full border p-2 rounded"
                             >
-                                {selectedCliente
-                                    ? clientes.find(c => c.id === parseInt(selectedCliente)).nombreRazonSocial
-                                    : "Seleccione un cliente"}
-                            </button>
-                            {dropdownClienteOpen && (
-                                <div className="absolute z-50 bg-white shadow-lg rounded mt-2 w-full">
-                                    <input
-                                        type="text"
-                                        value={searchCliente}
-                                        onChange={(e) => setSearchCliente(e.target.value)}
-                                        placeholder="Buscar cliente"
-                                        className="block w-full p-2 text-sm border-gray-300"
-                                    />
-                                    <ul className="max-h-48 overflow-y-auto bg-white border border-gray-300 rounded-b">
-                                        {filteredClientes.map((cliente) => (
-                                            <li key={cliente.id}>
-                                                <button
-                                                    type="button"
-                                                    className="block px-2 py-1 text-left w-full hover:bg-gray-100"
-                                                    onClick={() => {
-                                                        setSelectedCliente(cliente.id.toString());
-                                                        setDropdownClienteOpen(false);
-                                                    }}
-                                                >
-                                                    {cliente.nombreRazonSocial}
-                                                </button>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )}
+                                <option value="">Seleccione un cliente</option>
+                                {clientes.map((cliente) => (
+                                    <option key={cliente.id} value={cliente.id}>
+                                        {cliente.nombreRazonSocial}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
 
-                        <div className="relative">
+                        <div>
                             <label className="block text-gray-700 font-medium mb-2">Método de Pago</label>
-                            <button
-                                type="button"
-                                onClick={() => setDropdownMetodoPagoOpen(!dropdownMetodoPagoOpen)}
-                                className="w-full text-left p-2 border rounded"
+                            <select
+                                value={selectedMetodoPago}
+                                onChange={(e) => setSelectedMetodoPago(e.target.value)}
+                                className="w-full border p-2 rounded"
                             >
-                                {selectedMetodoPago
-                                    ? metodosPago.find(m => m.codigoClasificador === selectedMetodoPago).descripcion
-                                    : "Seleccione un método de pago"}
-                            </button>
-                            {dropdownMetodoPagoOpen && (
-                                <div className="absolute z-50 bg-white shadow-lg rounded mt-2 w-full">
-                                    <input
-                                        type="text"
-                                        value={searchMetodoPago}
-                                        onChange={(e) => setSearchMetodoPago(e.target.value)}
-                                        placeholder="Buscar método de pago"
-                                        className="block w-full p-2 text-sm border-gray-300"
-                                    />
-                                    <ul className="max-h-48 overflow-y-auto bg-white border border-gray-300 rounded-b">
-                                        {filteredMetodosPago.map((metodo) => (
-                                            <li key={metodo.id}>
-                                                <button
-                                                    type="button"
-                                                    className="block px-2 py-1 text-left w-full hover:bg-gray-100"
-                                                    onClick={() => {
-                                                        setSelectedMetodoPago(metodo.codigoClasificador);
-                                                        setDropdownMetodoPagoOpen(false);
-                                                    }}
-                                                >
-                                                    {metodo.descripcion}
-                                                </button>
-                                            </li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )}
+                                <option value="">Seleccione un método de pago</option>
+                                {metodosPago.map((metodo) => (
+                                    <option key={metodo.codigoClasificador} value={metodo.codigoClasificador}>
+                                        {metodo.descripcion}
+                                    </option>
+                                ))}
+                            </select>
                         </div>
 
                         <div>
                             <label className="block text-gray-700 font-medium mb-2">Número de Factura</label>
-                            <input
-                                type="number"
-                                className="w-full p-2 border rounded"
-                                value={numeroFactura}
-                                onChange={(e) => setNumeroFactura(e.target.value)}
-                            />
+                            {!generateMultiple ? (
+                                <input
+                                    type="number"
+                                    className="w-full border p-2 rounded"
+                                    value={numeroFactura}
+                                    onChange={(e) => setNumeroFactura(e.target.value)}
+                                />
+                            ) : (
+                                <div className="grid grid-cols-2 gap-4">
+                                    <input
+                                        type="number"
+                                        placeholder="Desde"
+                                        className="w-full border p-2 rounded"
+                                        value={startInvoice}
+                                        onChange={(e) => setStartInvoice(e.target.value)}
+                                    />
+                                    <input
+                                        type="number"
+                                        placeholder="Hasta"
+                                        className="w-full border p-2 rounded"
+                                        value={endInvoice}
+                                        onChange={(e) => setEndInvoice(e.target.value)}
+                                    />
+                                </div>
+                            )}
                         </div>
 
                         <div>
@@ -271,7 +270,19 @@ const ManualBill = () => {
                                 showTimeSelect
                                 timeFormat="HH:mm"
                                 dateFormat="yyyy-MM-dd HH:mm"
-                                className="w-full p-2 border rounded"
+                                className="w-full border p-2 rounded"
+                            />
+                        </div>
+
+                        <div className="flex row">
+                            <label className="block text-gray-700 font-medium mb-2">
+                                Generar más de una factura
+                            </label>
+                            <input
+                                type="checkbox"
+                                checked={generateMultiple}
+                                onChange={(e) => setGenerateMultiple(e.target.checked)}
+                                className="ml-2"
                             />
                         </div>
 
@@ -280,36 +291,36 @@ const ManualBill = () => {
                             {detalle.map((item, index) => (
                                 <div key={index} className="flex items-center space-x-4 mb-2">
                                     <select
-                                        className="p-2 border rounded w-full"
                                         value={item.idProducto}
                                         onChange={(e) =>
                                             handleProductChange(index, "idProducto", e.target.value)
                                         }
+                                        className="p-2 border rounded w-full"
                                     >
                                         <option value="">Seleccione un producto</option>
-                                        {productos.map(producto => (
+                                        {productos.map((producto) => (
                                             <option key={producto.id} value={producto.id}>
-                                                {producto.descripcion} - Bs {producto.precioUnitario}
+                                                {producto.descripcion}
                                             </option>
                                         ))}
                                     </select>
                                     <input
                                         type="number"
-                                        className="p-2 border rounded w-20"
                                         placeholder="Cantidad"
                                         value={item.cantidad}
                                         onChange={(e) =>
                                             handleProductChange(index, "cantidad", e.target.value)
                                         }
+                                        className="p-2 border rounded w-20"
                                     />
                                     <input
                                         type="number"
-                                        className="p-2 border rounded w-24"
                                         placeholder="Descuento"
                                         value={item.montoDescuento}
                                         onChange={(e) =>
                                             handleProductChange(index, "montoDescuento", e.target.value)
                                         }
+                                        className="p-2 border rounded w-24"
                                     />
                                     <button
                                         onClick={() => handleRemoveProduct(index)}
@@ -320,16 +331,16 @@ const ManualBill = () => {
                                 </div>
                             ))}
                             <button
-                                className="bg-firstColor hover:bg-thirdColor text-white px-4 py-2 rounded mt-2"
                                 onClick={handleAddProduct}
+                                className="bg-blue-500 hover:bg-blue-700 text-white px-4 py-2 rounded"
                             >
                                 Agregar Producto
                             </button>
                         </div>
 
                         <button
-                            className="w-full bg-green-500 text-white py-2 rounded mt-4"
                             onClick={handleSubmit}
+                            className="w-full bg-green-500 text-white py-2 rounded mt-4"
                         >
                             Emitir Factura
                         </button>
