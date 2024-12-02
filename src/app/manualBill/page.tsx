@@ -190,6 +190,14 @@ const ManualBill = () => {
         }
     };
 
+    const filteredClientes = clientes.filter(cliente =>
+        cliente.nombreRazonSocial.toLowerCase().includes(searchCliente.toLowerCase())
+    );
+
+    const filteredMetodosPago = metodosPago.filter(metodo =>
+        metodo.descripcion.toLowerCase().includes(searchMetodoPago.toLowerCase())
+    );
+
     return (
         <div className="flex flex-col md:flex-row min-h-screen">
             <Sidebar />
@@ -201,36 +209,84 @@ const ManualBill = () => {
                     </h2>
 
                     <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
-                        <div>
+                        <div className="relative">
                             <label className="block text-gray-700 font-medium mb-2">Cliente</label>
-                            <select
-                                value={selectedCliente}
-                                onChange={(e) => setSelectedCliente(e.target.value)}
-                                className="w-full border p-2 rounded"
+                            <button
+                                type="button"
+                                onClick={() => setDropdownClienteOpen(!dropdownClienteOpen)}
+                                className="w-full text-left p-2 border rounded"
                             >
-                                <option value="">Seleccione un cliente</option>
-                                {clientes.map((cliente) => (
-                                    <option key={cliente.id} value={cliente.id}>
-                                        {cliente.nombreRazonSocial}
-                                    </option>
-                                ))}
-                            </select>
+                                {selectedCliente
+                                    ? clientes.find(c => c.id === parseInt(selectedCliente)).nombreRazonSocial
+                                    : "Seleccione un cliente"}
+                            </button>
+                            {dropdownClienteOpen && (
+                                <div className="absolute z-50 bg-white shadow-lg rounded mt-2 w-full">
+                                    <input
+                                        type="text"
+                                        value={searchCliente}
+                                        onChange={(e) => setSearchCliente(e.target.value)}
+                                        placeholder="Buscar cliente"
+                                        className="block w-full p-2 text-sm border-gray-300"
+                                    />
+                                    <ul className="max-h-48 overflow-y-auto bg-white border border-gray-300 rounded-b">
+                                        {filteredClientes.map((cliente) => (
+                                            <li key={cliente.id}>
+                                                <button
+                                                    type="button"
+                                                    className="block px-2 py-1 text-left w-full hover:bg-gray-100"
+                                                    onClick={() => {
+                                                        setSelectedCliente(cliente.id.toString());
+                                                        setDropdownClienteOpen(false);
+                                                    }}
+                                                >
+                                                    {cliente.nombreRazonSocial}
+                                                </button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
                         </div>
 
-                        <div>
+                        <div className="relative">
                             <label className="block text-gray-700 font-medium mb-2">Método de Pago</label>
-                            <select
-                                value={selectedMetodoPago}
-                                onChange={(e) => setSelectedMetodoPago(e.target.value)}
-                                className="w-full border p-2 rounded"
+                            <button
+                                type="button"
+                                onClick={() => setDropdownMetodoPagoOpen(!dropdownMetodoPagoOpen)}
+                                className="w-full text-left p-2 border rounded"
                             >
-                                <option value="">Seleccione un método de pago</option>
-                                {metodosPago.map((metodo) => (
-                                    <option key={metodo.codigoClasificador} value={metodo.codigoClasificador}>
-                                        {metodo.descripcion}
-                                    </option>
-                                ))}
-                            </select>
+                                {selectedMetodoPago
+                                    ? metodosPago.find(m => m.codigoClasificador === selectedMetodoPago).descripcion
+                                    : "Seleccione un método de pago"}
+                            </button>
+                            {dropdownMetodoPagoOpen && (
+                                <div className="absolute z-50 bg-white shadow-lg rounded mt-2 w-full">
+                                    <input
+                                        type="text"
+                                        value={searchMetodoPago}
+                                        onChange={(e) => setSearchMetodoPago(e.target.value)}
+                                        placeholder="Buscar método de pago"
+                                        className="block w-full p-2 text-sm border-gray-300"
+                                    />
+                                    <ul className="max-h-48 overflow-y-auto bg-white border border-gray-300 rounded-b">
+                                        {filteredMetodosPago.map((metodo) => (
+                                            <li key={metodo.id}>
+                                                <button
+                                                    type="button"
+                                                    className="block px-2 py-1 text-left w-full hover:bg-gray-100"
+                                                    onClick={() => {
+                                                        setSelectedMetodoPago(metodo.codigoClasificador);
+                                                        setDropdownMetodoPagoOpen(false);
+                                                    }}
+                                                >
+                                                    {metodo.descripcion}
+                                                </button>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            )}
                         </div>
 
                         <div>
