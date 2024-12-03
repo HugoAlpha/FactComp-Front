@@ -194,8 +194,12 @@ const PuntoVenta: React.FC = () => {
                     } else {
                         throw new Error('No se pudo cerrar el punto de venta');
                     }
-                } catch (error) {
-                    Swal.fire('Error', error.message, 'error');
+                } catch (error: unknown) {
+                    if (error instanceof Error) {
+                        Swal.fire('Error', error.message, 'error');
+                    } else {
+                        Swal.fire('Error', 'Ha ocurrido un error desconocido', 'error');
+                    }
                 }
             }
         });

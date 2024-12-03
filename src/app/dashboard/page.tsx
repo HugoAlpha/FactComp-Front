@@ -49,10 +49,10 @@ interface FormattedClient {
     code: string;
 }
 
-interface SidebarProps {
-    isOpen: boolean;
-    toggleSidebar: () => void;
-}
+//interface SidebarProps {
+//    isOpen: boolean;
+//    toggleSidebar: () => void;
+//}
 
 interface Customer {
     id: number;
