@@ -22,7 +22,7 @@ interface MetodoPago {
 }
 
 interface DetalleProducto {
-    idProducto: string;
+    idProducto: number;
     cantidad: number;
     montoDescuento: number;
 }
@@ -54,7 +54,7 @@ const ManualBill = () => {
     const [startInvoice, setStartInvoice] = useState("");
     const [endInvoice, setEndInvoice] = useState("");
 
-    const [detalle, setDetalle] = useState<DetalleProducto[]>([]);
+    const [detalle, setDetalle] = useState<DetalleProducto[]>([]);  // Este debe ser el tipo correcto
 
 
     useEffect(() => {
@@ -82,7 +82,7 @@ const ManualBill = () => {
     }, []);
 
     const handleAddProduct = () => {
-        setDetalle([...detalle, { idProducto: "", cantidad: 1, montoDescuento: 0 }]);
+        setDetalle([...detalle, { idProducto: 0, cantidad: 1, montoDescuento: 0 }]);
     };
     
 
@@ -97,16 +97,18 @@ const ManualBill = () => {
         field: keyof DetalleProducto,
         value: string | number
     ) => {
-        const updatedDetalle = [...detalle];
-        
-        // Ensure the value type is correct for the field
-        if (typeof value === 'string' && (field === 'cantidad' || field === 'montoDescuento')) {
-            value = parseFloat(value); // Convert string to number if needed
+        const updatedDetalle: DetalleProducto[] = [...detalle];
+
+        if (field === 'idProducto') {
+            updatedDetalle[index][field] = typeof value === 'string' ? parseInt(value, 10) : value;
+        } else if (field === 'cantidad' || field === 'montoDescuento') {
+            updatedDetalle[index][field] = typeof value === 'string' ? parseFloat(value) : value;
         }
     
-        updatedDetalle[index][field] = value;
         setDetalle(updatedDetalle);
     };
+    
+    
     
     const validateFechaHoraEmision = (date: Date) => {
         if (date < rangoFechaInicio || date > rangoFechaFin) {
@@ -126,9 +128,11 @@ const ManualBill = () => {
         const cliente = clientes.find((c) => c.id === parseInt(selectedCliente));
         const metodoPago = metodosPago.find((m) => m.codigoClasificador === selectedMetodoPago);
     
+        const idPuntoVentaValue = idPuntoVenta ? parseInt(idPuntoVenta) : 0; 
+
         const facturaBase = {
             usuario: cliente?.codigoCliente || "",
-            idPuntoVenta: parseInt(idPuntoVenta),
+            idPuntoVenta: idPuntoVentaValue,
             idCliente: parseInt(selectedCliente),
             nitInvalido: true,
             codigoMetodoPago: parseInt(metodoPago?.codigoClasificador || "0"),
@@ -142,15 +146,15 @@ const ManualBill = () => {
             fechaHoraEmision: `${fechaHoraEmision.getFullYear()}-${(fechaHoraEmision.getMonth() + 1)
                 .toString()
                 .padStart(2, "0")}-${fechaHoraEmision
-                .getDate()
-                .toString()
-                .padStart(2, "0")} ${fechaHoraEmision
-                .getHours()
-                .toString()
-                .padStart(2, "0")}:${fechaHoraEmision
-                .getMinutes()
-                .toString()
-                .padStart(2, "0")}:${fechaHoraEmision.getSeconds().toString().padStart(2, "0")}`,
+                    .getDate()
+                    .toString()
+                    .padStart(2, "0")} ${fechaHoraEmision
+                        .getHours()
+                        .toString()
+                        .padStart(2, "0")}:${fechaHoraEmision
+                            .getMinutes()
+                            .toString()
+                            .padStart(2, "0")}:${fechaHoraEmision.getSeconds().toString().padStart(2, "0")}`,
             cafc: true,
         };
     
@@ -181,7 +185,7 @@ const ManualBill = () => {
             for (let num = start; num <= end; num++) {
                 try {
                     const factura = { ...facturaBase, numeroFactura: num };
-                    await fetch(`${PATH_URL_BACKEND}/factura/emitir`, {
+                    await fetch(`${PATH_URL_BACKEND}/factura/emitir-computarizada`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(factura),
@@ -210,7 +214,7 @@ const ManualBill = () => {
         } else {
             const factura = { ...facturaBase, numeroFactura: parseInt(numeroFactura) };
             try {
-                await fetch(`${PATH_URL_BACKEND}/factura/emitir`, {
+                await fetch(`${PATH_URL_BACKEND}/factura/emitir-computarizada`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(factura),

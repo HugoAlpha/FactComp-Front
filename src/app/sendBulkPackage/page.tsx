@@ -9,7 +9,7 @@ import { PATH_URL_BACKEND } from "@/utils/constants";
 import { FaTrash } from "react-icons/fa";
 import Footer from "@/components/commons/footer";
 
-const sendBulkPackage = () =>{
+const sendBulkPackage = () => {
     const [clientes, setClientes] = useState([]);
     const [metodosPago, setMetodosPago] = useState([]);
     const [productos, setProductos] = useState([]);
@@ -30,10 +30,10 @@ const sendBulkPackage = () =>{
 
 
     useEffect(() => {
-      if (typeof window !== "undefined") {
-        setIdPuntoVenta(localStorage.getItem("idPOS"));
-        setIdSucursal(localStorage.getItem("idSucursal"));
-      }
+        if (typeof window !== "undefined") {
+            setIdPuntoVenta(localStorage.getItem("idPOS"));
+            setIdSucursal(localStorage.getItem("idSucursal"));
+        }
 
         fetch(`${PATH_URL_BACKEND}/api/clientes/`)
             .then(response => response.json())
@@ -63,75 +63,75 @@ const sendBulkPackage = () =>{
         updatedDetalle[index][field] = value;
         setDetalle(updatedDetalle);
     };
-    
+
     const handleMassEmission = async () => {
-      const { value: idTemporal } = await Swal.fire({
-        title: "Seleccione el rango de emisión",
-        input: "select",
-        inputOptions: {
-          1: "Hoy",
-          2: "Semana",
-          3: "Mes",
-        },
-        inputPlaceholder: "Seleccione un rango",
-        showCancelButton: true,
-        confirmButtonText: "Enviar",
-        cancelButtonText: "Cancelar",
-        inputValidator: (value) => {
-          if (!value) {
-            return "Debe seleccionar un rango de emisión.";
-          }
-        },
-      });
-  
-      if (idTemporal) {
-        if (!idPuntoVenta || !idSucursal) {
-          Swal.fire("Error", "Faltan datos de Punto de Venta o Sucursal", "error");
-          return;
-        }
-  
-        Swal.fire({
-          title: "Emitiendo facturas...",
-          html: "Por favor, espere mientras se realiza la emisión masiva.",
-          allowOutsideClick: false,
-          didOpen: () => {
-            Swal.showLoading();
-          },
+        const { value: idTemporal } = await Swal.fire({
+            title: "Seleccione el rango de emisión",
+            input: "select",
+            inputOptions: {
+                1: "Hoy",
+                2: "Semana",
+                3: "Mes",
+            },
+            inputPlaceholder: "Seleccione un rango",
+            showCancelButton: true,
+            confirmButtonText: "Enviar",
+            cancelButtonText: "Cancelar",
+            inputValidator: (value) => {
+                if (!value) {
+                    return "Debe seleccionar un rango de emisión.";
+                }
+            },
         });
-  
-        try {
-          const response = await fetch(
-            `${PATH_URL_BACKEND}/factura/emitir-masiva/${idPuntoVenta}/${idSucursal}/${idTemporal}`,
-            {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
+
+        if (idTemporal) {
+            if (!idPuntoVenta || !idSucursal) {
+                Swal.fire("Error", "Faltan datos de Punto de Venta o Sucursal", "error");
+                return;
             }
-          );
-  
-          if (response.ok) {
-            Swal.fire(
-              "¡Éxito!",
-              "La emisión masiva se completó correctamente.",
-              "success"
-            );
-          } else {
-            Swal.fire(
-              "Error",
-              "Ocurrió un error al realizar la emisión masiva.",
-              "error"
-            );
-          }
-        } catch (error) {
-          console.error("Error al emitir masivamente:", error);
-          Swal.fire(
-            "Error",
-            "No se pudo conectar con el servidor. Inténtelo nuevamente.",
-            "error"
-          );
+
+            Swal.fire({
+                title: "Emitiendo facturas...",
+                html: "Por favor, espere mientras se realiza la emisión masiva.",
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+            });
+
+            try {
+                const response = await fetch(
+                    `${PATH_URL_BACKEND}/factura/emitir-masiva/${idPuntoVenta}/${idSucursal}/${idTemporal}`,
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                    }
+                );
+
+                if (response.ok) {
+                    Swal.fire(
+                        "¡Éxito!",
+                        "La emisión masiva se completó correctamente.",
+                        "success"
+                    );
+                } else {
+                    Swal.fire(
+                        "Error",
+                        "Ocurrió un error al realizar la emisión masiva.",
+                        "error"
+                    );
+                }
+            } catch (error) {
+                console.error("Error al emitir masivamente:", error);
+                Swal.fire(
+                    "Error",
+                    "No se pudo conectar con el servidor. Inténtelo nuevamente.",
+                    "error"
+                );
+            }
         }
-      }
     };
 
     const handleSubmit = async () => {
@@ -142,7 +142,7 @@ const sendBulkPackage = () =>{
 
         const cliente = clientes.find(c => c.id === parseInt(selectedCliente));
         const metodoPago = metodosPago.find(m => m.codigoClasificador === selectedMetodoPago);
-    
+
         const factura = {
             usuario: cliente?.codigoCliente,
             idPuntoVenta: parseInt(idPuntoVenta),
@@ -164,7 +164,7 @@ const sendBulkPackage = () =>{
             montoGiftCard: '',
             descuentoGlobal: null,
         };
-    
+
         let timerInterval;
         Swal.fire({
             title: "Generando facturas...",
@@ -174,10 +174,10 @@ const sendBulkPackage = () =>{
             didOpen: () => Swal.showLoading(),
             willClose: () => clearInterval(timerInterval),
         });
-    
+
         for (let i = 0; i < cantidadFacturas; i++) {
             try {
-                await fetch(`${PATH_URL_BACKEND}/factura/emitir`, {
+                await fetch(`${PATH_URL_BACKEND}/factura/emitir-computarizada`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(factura),
@@ -202,7 +202,7 @@ const sendBulkPackage = () =>{
             timer: 3000,
             timerProgressBar: true,
             showConfirmButton: false,
-            
+
         });
         resetForm();
 
@@ -227,8 +227,8 @@ const sendBulkPackage = () =>{
     const filteredMetodosPago = metodosPago.filter(metodo =>
         metodo.descripcion.toLowerCase().includes(searchMetodoPago.toLowerCase())
     );
-    return(
-    <div className="flex flex-col md:flex-row min-h-screen">
+    return (
+        <div className="flex flex-col md:flex-row min-h-screen">
             <Sidebar />
             <div className="flex flex-col w-full min-h-screen">
                 <Header />
@@ -236,12 +236,12 @@ const sendBulkPackage = () =>{
                     <h2 className="text-lg md:text-xl font-bold mb-6 text-gray-700">Envio de paquetes</h2>
 
                     <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
-                      <button
-                        className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg font-bold"
-                        onClick={handleMassEmission}
-                      >
-                        Emisión masiva
-                      </button>
+                        <button
+                            className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded-lg font-bold"
+                            onClick={handleMassEmission}
+                        >
+                            Emisión masiva
+                        </button>
                     </div>
 
                     <div className="bg-white p-6 rounded-lg shadow-md space-y-4">
@@ -283,7 +283,7 @@ const sendBulkPackage = () =>{
                                     </ul>
                                 </div>
                             )}
-                        </div> 
+                        </div>
 
                         <div>
                             <label className="block text-gray-700 font-medium mb-2">Cantidad de Facturas</label>

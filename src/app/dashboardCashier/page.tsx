@@ -11,6 +11,15 @@ import Swal from "sweetalert2";
 import ModalContingency from '@/components/layouts/modalContingency';
 import Footer from "@/components/commons/footer";
 
+
+interface Client {
+    id: number; 
+    name: string; 
+    document: string; 
+    code: string; 
+    image?: string; 
+}
+  
 const Dashboard = () => {
     const [isClientModalOpen, setIsClientModalOpen] = useState(false);
     const [selectedClient, setSelectedClient] = useState(null);

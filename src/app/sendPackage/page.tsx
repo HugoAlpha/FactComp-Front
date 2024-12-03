@@ -3,17 +3,54 @@ import React, { useEffect, useState } from "react";
 import Sidebar from "@/components/commons/sidebar";
 import Header from "@/components/commons/header";
 import Swal from "sweetalert2";
-import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { PATH_URL_BACKEND } from "@/utils/constants";
 import { FaTrash } from "react-icons/fa";
 import Footer from "@/components/commons/footer";
 
-const sendPackage = () =>{
-    const [clientes, setClientes] = useState([]);
-    const [metodosPago, setMetodosPago] = useState([]);
-    const [productos, setProductos] = useState([]);
-    const [detalle, setDetalle] = useState([]);
+
+interface Cliente {
+    id: number;
+    nombreRazonSocial: string;
+    codigoCliente: string;
+}
+
+interface MetodoPago {
+    codigoClasificador: string;
+    descripcion: string;
+}
+
+interface Producto {
+    id: number;
+    descripcion: string;
+    precioUnitario: number;
+}
+
+interface DetalleProducto {
+    idProducto: number;
+    cantidad: number;
+    montoDescuento: number;
+}
+
+interface Factura {
+    usuario: string;
+    idPuntoVenta: number;
+    idCliente: number;
+    nitInvalido: boolean;
+    codigoMetodoPago: number;
+    activo: boolean;
+    detalle: DetalleProducto[];
+    idSucursal: number;
+    numeroFactura: string;
+}
+
+
+const sendPackage = () => {
+    const [clientes, setClientes] = useState<Cliente[]>([]);
+    const [metodosPago, setMetodosPago] = useState<MetodoPago[]>([]);
+    const [productos, setProductos] = useState<Producto[]>([]);
+    const [detalle, setDetalle] = useState<DetalleProducto[]>([]);
+
     const [selectedCliente, setSelectedCliente] = useState("");
     const [selectedMetodoPago, setSelectedMetodoPago] = useState("");
     const [numeroFactura, setNumeroFactura] = useState("");
@@ -22,17 +59,23 @@ const sendPackage = () =>{
     const [dropdownMetodoPagoOpen, setDropdownMetodoPagoOpen] = useState(false);
     const [searchCliente, setSearchCliente] = useState("");
     const [searchMetodoPago, setSearchMetodoPago] = useState("");
-    const [idPuntoVenta, setIdPuntoVenta] = useState(null);
-    const [idSucursal, setIdSucursal] = useState(null);
-    const [rangoFechaInicio, setRangoFechaInicio] = useState(new Date());
-    const [rangoFechaFin, setRangoFechaFin] = useState(new Date());
+
+    const [idPuntoVenta, setIdPuntoVenta] = useState<number | null>(null);
+    const [idSucursal, setIdSucursal] = useState<number | null>(null);
+
+    //const [rangoFechaInicio, setRangoFechaInicio] = useState(new Date());
+    //const [rangoFechaFin, setRangoFechaFin] = useState(new Date());
     const [cantidadFacturas, setCantidadFacturas] = useState(1);
 
     useEffect(() => {
         if (typeof window !== "undefined") {
-            setIdPuntoVenta(localStorage.getItem("idPOS"));
-            setIdSucursal(localStorage.getItem("idSucursal"));
-            
+            const puntoVenta = localStorage.getItem("idPOS");
+            const sucursal = localStorage.getItem("idSucursal");
+
+            // Asegurarse de que el valor obtenido sea un número (y no null)
+            setIdPuntoVenta(puntoVenta ? parseInt(puntoVenta) : null); // o 0 si prefieres un valor por defecto
+            setIdSucursal(sucursal ? parseInt(sucursal) : null);
+
         }
 
         fetch(`${PATH_URL_BACKEND}/api/clientes/`)
@@ -49,22 +92,22 @@ const sendPackage = () =>{
     }, []);
 
     const handleAddProduct = () => {
-        setDetalle([...detalle, { idProducto: "", cantidad: 1, montoDescuento: 0 }]);
+        setDetalle([...detalle, { idProducto: 0, cantidad: 1, montoDescuento: 0 }]);
     };
 
-    const handleRemoveProduct = (index) => {
+    const handleRemoveProduct = (index: number) => {
         const updatedDetalle = [...detalle];
         updatedDetalle.splice(index, 1);
         setDetalle(updatedDetalle);
     };
 
-    const handleProductChange = (index, field, value) => {
+    const handleProductChange = (index: number, field: string, value: string) => {
         const updatedDetalle = [...detalle];
         updatedDetalle[index][field] = value;
         setDetalle(updatedDetalle);
     };
 
-    
+
 
     const handleSubmit = async () => {
         if (detalle.length === 0) {
@@ -74,10 +117,12 @@ const sendPackage = () =>{
 
         const cliente = clientes.find(c => c.id === parseInt(selectedCliente));
         const metodoPago = metodosPago.find(m => m.codigoClasificador === selectedMetodoPago);
-    
+
+        const idPuntoVentaValue = idPuntoVenta ? parseInt(idPuntoVenta) : 0; // Si es null, asigna 0 como valor predeterminado
+
         const factura = {
             usuario: cliente?.codigoCliente || "",
-            idPuntoVenta: parseInt(idPuntoVenta),
+            idPuntoVenta: idPuntoVentaValue,
             idCliente: parseInt(selectedCliente),
             nitInvalido: true,
             codigoMetodoPago: parseInt(metodoPago?.codigoClasificador || "1"),
@@ -90,7 +135,7 @@ const sendPackage = () =>{
             idSucursal: parseInt(idSucursal),
             numeroFactura: ''
         };
-    
+
         let timerInterval;
         Swal.fire({
             title: "Generando facturas...",
@@ -100,10 +145,10 @@ const sendPackage = () =>{
             didOpen: () => Swal.showLoading(),
             willClose: () => clearInterval(timerInterval),
         });
-    
+
         for (let i = 0; i < cantidadFacturas; i++) {
             try {
-                await fetch(`${PATH_URL_BACKEND}/factura/emitir`, {
+                await fetch(`${PATH_URL_BACKEND}/factura/emitir-computarizada`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(factura),
@@ -128,7 +173,7 @@ const sendPackage = () =>{
             timer: 3000,
             timerProgressBar: true,
             showConfirmButton: false,
-            
+
         });
         resetForm();
 
@@ -153,8 +198,9 @@ const sendPackage = () =>{
     const filteredMetodosPago = metodosPago.filter(metodo =>
         metodo.descripcion.toLowerCase().includes(searchMetodoPago.toLowerCase())
     );
-    return(
-    <div className="flex flex-col md:flex-row min-h-screen">
+
+    return (
+        <div className="flex flex-col md:flex-row min-h-screen">
             <Sidebar />
             <div className="flex flex-col w-full min-h-screen">
                 <Header />
@@ -200,7 +246,7 @@ const sendPackage = () =>{
                                     </ul>
                                 </div>
                             )}
-                        </div> 
+                        </div>
 
                         <div>
                             <label className="block text-gray-700 font-medium mb-2">Cantidad de Facturas</label>

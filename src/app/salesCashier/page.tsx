@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { FaUser, FaCreditCard, FaCartPlus, FaEdit, FaTable, FaList } from 'react-icons/fa';
+import {FaCreditCard, FaCartPlus, FaEdit, FaTable, FaList } from 'react-icons/fa';
 import { IoReturnDownBack } from "react-icons/io5";
 import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
@@ -24,7 +24,7 @@ const Sales = () => {
     const [saleDetails, setSaleDetails] = useState<SaleDetails | null>(null);
     const [globalDiscount, setGlobalDiscount] = useState('');
     const [discountApplied, setDiscountApplied] = useState(false);
-    const [globalDiscountApplied, setGlobalDiscountApplied] = useState(0);
+    const [globalDiscountApplied] = useState(0);
     const [globalDiscountHistory, setGlobalDiscountHistory] = useState<string[]>([]);
     const [originalTotal, setOriginalTotal] = useState(0);
     const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
@@ -33,8 +33,8 @@ const Sales = () => {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [productToEdit, setProductToEdit] = useState<Product | null>(null);
     const [clients, setClients] = useState([]);
-    const [clientSearchTerm, setClientSearchTerm] = useState('');
-    const [filteredClients, setFilteredClients] = useState([]);
+    const [clientSearchTerm] = useState('');
+    const [, setFilteredClients] = useState([]);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [isAllClientsModalOpen, setIsAllClientsModalOpen] = useState(false);
     const [appliedGlobalDiscount, setAppliedGlobalDiscount] = useState<number | null>(null);
