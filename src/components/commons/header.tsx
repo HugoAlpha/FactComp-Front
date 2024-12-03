@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { FaUser} from 'react-icons/fa';
+import { FaUser } from 'react-icons/fa';
 import { IoExitOutline } from 'react-icons/io5';
 import ModalContingency from '../layouts/modalContingency';
 import { PATH_URL_BACKEND } from '@/utils/constants';
@@ -46,7 +46,7 @@ const Header = () => {
     const [isOnline, setIsOnline] = useState(true);
     const [userName, setuserName] = useState<string>('Usuario');
     const [isUserModalOpen, setIsUserModalOpen] = useState(false);
-    
+
     const updateColors = (isContingency: boolean) => {
         const colors = isContingency ? contingencyColors : normalColors;
         Object.entries(colors).forEach(([key, value]) => {
@@ -158,7 +158,7 @@ const Header = () => {
             if (timer) clearInterval(timer);
         };
     }, [countdown, contingencia]);
-    
+
 
     const handleLogout = () => {
         Swal.fire({
@@ -207,74 +207,74 @@ const Header = () => {
     };
 
     useEffect(() => {
-    const handleCountdownFinish = async () => {
-      try {
-        const response = await fetch(`${PATH_URL_BACKEND}/contingencia/verificar-comunicacion`);
-        if (response.ok) {
-          console.log('Comunicación con impuestos reestablecida.');
-          if (localStorage.getItem('contingenciaEstado') === '1') {
-            Swal.fire({
-              title: 'Comunicación reestablecida',
-              text: 'La comunicación con impuestos ha vuelto. Se enviarán los paquetes automáticamente.',
-              icon: 'info',
-              confirmButtonText: 'Aceptar',
-            });
-            await sendContingencyPackages();
-          }
-        } else if (response.status === 500) {
-          console.error('Sigue sin haber comunicación con impuestos.');
+        const handleCountdownFinish = async () => {
+            try {
+                const response = await fetch(`${PATH_URL_BACKEND}/contingencia/verificar-comunicacion`);
+                if (response.ok) {
+                    console.log('Comunicación con impuestos reestablecida.');
+                    if (localStorage.getItem('contingenciaEstado') === '1') {
+                        Swal.fire({
+                            title: 'Comunicación reestablecida',
+                            text: 'La comunicación con impuestos ha vuelto. Se enviarán los paquetes automáticamente.',
+                            icon: 'info',
+                            confirmButtonText: 'Aceptar',
+                        });
+                        await sendContingencyPackages();
+                    }
+                } else if (response.status === 500) {
+                    console.error('Sigue sin haber comunicación con impuestos.');
+                }
+            } catch (error) {
+                console.error('Error al verificar comunicación tras finalizar el contador:', error);
+            }
+        };
+
+        let timer: NodeJS.Timeout | undefined;
+        if (countdown > 0) {
+            timer = setInterval(() => {
+                setCountdown((prev) => {
+                    const newCountdown = prev - 1000;
+                    if (newCountdown <= 0) {
+                        clearInterval(timer);
+                        handleCountdownFinish();
+                    }
+                    return newCountdown > 0 ? newCountdown : 0;
+                });
+            }, 1000);
         }
-      } catch (error) {
-        console.error('Error al verificar comunicación tras finalizar el contador:', error);
-      }
+        return () => clearInterval(timer);
+    }, [countdown]);
+
+    const sendContingencyPackages = async () => {
+        const idPuntoVenta = localStorage.getItem('idPOS');
+        const idSucursal = localStorage.getItem('idSucursal');
+        const idEvento = localStorage.getItem('idEvento');
+
+        try {
+            const response = await fetch(
+                `${PATH_URL_BACKEND}/factura/emitir-paquete/${idPuntoVenta}/${idSucursal}/${idEvento}`,
+                { method: 'POST' }
+            );
+
+            if (response.ok) {
+                console.log('Paquetes enviados con éxito. Saliendo del modo contingencia...');
+                localStorage.removeItem('contingenciaEstado');
+                localStorage.removeItem('horaActivacionContingencia');
+                localStorage.removeItem('fechaHoraContingencia');
+                localStorage.removeItem('idEvento');
+                setContingencia(false);
+            } else {
+                console.error('Error al enviar paquetes:', response.statusText);
+                Swal.fire({
+                    title: 'Error',
+                    text: 'No se pudo enviar los paquetes de contingencia automáticamente.',
+                    icon: 'error',
+                });
+            }
+        } catch (error) {
+            console.error('Error al enviar paquetes:', error);
+        }
     };
-
-    let timer: NodeJS.Timeout | undefined;
-    if (countdown > 0) {
-      timer = setInterval(() => {
-        setCountdown((prev) => {
-          const newCountdown = prev - 1000;
-          if (newCountdown <= 0) {
-            clearInterval(timer);
-            handleCountdownFinish();
-          }
-          return newCountdown > 0 ? newCountdown : 0;
-        });
-      }, 1000);
-    }
-    return () => clearInterval(timer);
-  }, [countdown]);
-
-  const sendContingencyPackages = async () => {
-    const idPuntoVenta = localStorage.getItem('idPOS');
-    const idSucursal = localStorage.getItem('idSucursal');
-    const idEvento = localStorage.getItem('idEvento');
-
-    try {
-      const response = await fetch(
-        `${PATH_URL_BACKEND}/factura/emitir-paquete/${idPuntoVenta}/${idSucursal}/${idEvento}`,
-        { method: 'POST' }
-      );
-
-      if (response.ok) {
-        console.log('Paquetes enviados con éxito. Saliendo del modo contingencia...');
-        localStorage.removeItem('contingenciaEstado');
-        localStorage.removeItem('horaActivacionContingencia');
-        localStorage.removeItem('fechaHoraContingencia');
-        localStorage.removeItem('idEvento');
-        setContingencia(false);
-      } else {
-        console.error('Error al enviar paquetes:', response.statusText);
-        Swal.fire({
-          title: 'Error',
-          text: 'No se pudo enviar los paquetes de contingencia automáticamente.',
-          icon: 'error',
-        });
-      }
-    } catch (error) {
-      console.error('Error al enviar paquetes:', error);
-    }
-  };
 
     const desactivarContingencia = async () => {
         const idEvento = localStorage.getItem('idEvento');
@@ -386,7 +386,7 @@ const Header = () => {
         const minutes = Math.floor((totalSeconds % 3600) / 60);
         const seconds = totalSeconds % 60;
         return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-      };
+    };
 
     const handleUserMenuToggle = () => {
         setShowUserMenu((prev) => !prev);
@@ -414,7 +414,7 @@ const Header = () => {
             setShowUserMenu(false);
             setShowSettingsMenu(false);
         }
-    };    
+    };
 
     useEffect(() => {
         document.addEventListener('click', handleOutsideClick);
@@ -430,28 +430,28 @@ const Header = () => {
 
     useEffect(() => {
         const checkServerCommunication = async () => {
-          try {
-            const response = await fetch(`${PATH_URL_BACKEND}/contingencia/verificar-comunicacion`);
-            if (response.ok) {
-              console.log('Comunicación con impuestos OK.');
-            } else if (response.status === 500) {
-              console.error('Error 500: Entrando en modo contingencia...');
-              activateContingency();
+            try {
+                const response = await fetch(`${PATH_URL_BACKEND}/contingencia/verificar-comunicacion`);
+                if (response.ok) {
+                    console.log('Comunicación con impuestos OK.');
+                } else if (response.status === 500) {
+                    console.error('Error 500: Entrando en modo contingencia...');
+                    activateContingency();
+                }
+            } catch (error) {
+                console.error('Error al verificar comunicación con impuestos:', error);
+                activateContingency();
             }
-          } catch (error) {
-            console.error('Error al verificar comunicación con impuestos:', error);
-            activateContingency();
-          }
         };
-    
+
         const activateContingency = () => {
-          setShowModal(true);
+            setShowModal(true);
         };
-    
+
         checkServerCommunication();
-        const intervalId = setInterval(checkServerCommunication, 10000); 
+        const intervalId = setInterval(checkServerCommunication, 10000);
         return () => clearInterval(intervalId);
-      }, []);
+    }, []);
 
     return (
         <header className="flex flex-col sm:flex-row justify-between items-center shadow-md p-4 bg-seventhColor">
@@ -459,7 +459,7 @@ const Header = () => {
                 <div className="flex flex-wrap items-center justify-center sm:justify-start space-x-4 sm:space-x-6">
                     <div className="relative text-center sm:text-left">
                         <span className="text-base sm:text-lg font-semibold text-principalColor whitespace-nowrap">
-                            Sistema de Facturación Electronica en Línea
+                            Sistema de Facturación Computarizada en Línea
                         </span>
                     </div>
                     <div className="flex items-center bg-fourthColor px-2 sm:px-3 py-1 rounded-lg space-x-2">
@@ -538,14 +538,14 @@ const Header = () => {
 
             {showModal && (
                 <ModalContingency
-                isOpen={showModal}
-                onClose={() => setShowModal(false)}
-                onConfirm={(eventoDescripcion) => {
-                    console.log('Modo contingencia activado:', eventoDescripcion);
-                    setContingencia(true);
-                    setCountdown(2 * 60 * 60 * 1000);
-                    setShowModal(false);
-                }}
+                    isOpen={showModal}
+                    onClose={() => setShowModal(false)}
+                    onConfirm={(eventoDescripcion) => {
+                        console.log('Modo contingencia activado:', eventoDescripcion);
+                        setContingencia(true);
+                        setCountdown(2 * 60 * 60 * 1000);
+                        setShowModal(false);
+                    }}
                 />
             )}
 
