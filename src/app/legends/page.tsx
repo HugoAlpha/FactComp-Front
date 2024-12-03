@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Header from "@/components/commons/header";
 import Sidebar from "@/components/commons/sidebar";
-import { FaEdit, FaSearch, FaTrashAlt } from "react-icons/fa";
+import { FaSearch } from "react-icons/fa";
 import Swal from "sweetalert2";
 import { PATH_URL_BACKEND } from "@/utils/constants";
 import Footer from "@/components/commons/footer";
@@ -31,13 +31,14 @@ const Legends: React.FC = () => {
                 } else {
                     Swal.fire('Error', 'Error al obtener las leyendas', 'error');
                 }
-            } catch (error) {
+            } catch {
                 Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
             }
         };
-
+    
         fetchLegends();
     }, []);
+    
 
     const checkServerCommunication = async () => {
         try {
@@ -122,18 +123,18 @@ const Legends: React.FC = () => {
     const getPageNumbers = () => {
         const pageNumbers = [];
         const maxVisiblePages = 4;
-
+    
         let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-
+        const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
         if (endPage - startPage + 1 < maxVisiblePages) {
             startPage = Math.max(1, endPage - maxVisiblePages + 1);
         }
-
+    
         for (let i = startPage; i <= endPage; i++) {
             pageNumbers.push(i);
         }
-
+    
         return pageNumbers;
     };
 

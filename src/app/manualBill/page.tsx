@@ -9,11 +9,34 @@ import { PATH_URL_BACKEND } from "@/utils/constants";
 import { FaTrash } from "react-icons/fa";
 import Footer from "@/components/commons/footer";
 
+interface Cliente {
+    id: number; 
+    codigoCliente: string;
+    nombreRazonSocial: string;
+}
+
+interface MetodoPago {
+    id: number;  
+    codigoClasificador: string;
+    descripcion: string;
+}
+
+interface DetalleProducto {
+    idProducto: number;
+    cantidad: number;
+    montoDescuento: number;
+}
+
+interface Producto {
+    id: string;
+    descripcion: string;
+}
+
+
 const ManualBill = () => {
-    const [clientes, setClientes] = useState([]);
-    const [metodosPago, setMetodosPago] = useState([]);
-    const [productos, setProductos] = useState([]);
-    const [detalle, setDetalle] = useState([]);
+    const [clientes, setClientes] = useState<Cliente[]>([]);
+    const [metodosPago, setMetodosPago] = useState<MetodoPago[]>([]);
+    const [productos, setProductos] = useState<Producto[]>([]);
     const [selectedCliente, setSelectedCliente] = useState("");
     const [selectedMetodoPago, setSelectedMetodoPago] = useState("");
     const [numeroFactura, setNumeroFactura] = useState("");
@@ -22,18 +45,25 @@ const ManualBill = () => {
     const [dropdownMetodoPagoOpen, setDropdownMetodoPagoOpen] = useState(false);
     const [searchCliente, setSearchCliente] = useState("");
     const [searchMetodoPago, setSearchMetodoPago] = useState("");
-    const [idPuntoVenta, setIdPuntoVenta] = useState(null);
-    const [idSucursal, setIdSucursal] = useState(null);
+    const [idPuntoVenta, setIdPuntoVenta] = useState<string | null>(null);
+    const [idSucursal, setIdSucursal] = useState<string | null>(null);
+
     const [rangoFechaInicio, setRangoFechaInicio] = useState(new Date());
     const [rangoFechaFin, setRangoFechaFin] = useState(new Date());
     const [generateMultiple, setGenerateMultiple] = useState(false);
     const [startInvoice, setStartInvoice] = useState("");
     const [endInvoice, setEndInvoice] = useState("");
 
+    const [detalle, setDetalle] = useState<DetalleProducto[]>([]);  // Este debe ser el tipo correcto
+
+
     useEffect(() => {
         if (typeof window !== "undefined") {
-            setIdPuntoVenta(localStorage.getItem("idPOS"));
-            setIdSucursal(localStorage.getItem("idSucursal"));
+            const idPuntoVentaValue = localStorage.getItem("idPOS");
+            setIdPuntoVenta(idPuntoVentaValue === null ? null : idPuntoVentaValue);
+
+            const idSucursalValue = localStorage.getItem("idSucursal");
+            setIdSucursal(idSucursalValue === null ? null : idSucursalValue);
             setRangoFechaInicio(new Date(localStorage.getItem("fechaHoraInicio") || ""));
             setRangoFechaFin(new Date(localStorage.getItem("fechaHoraFin") || ""));
         }
@@ -52,22 +82,35 @@ const ManualBill = () => {
     }, []);
 
     const handleAddProduct = () => {
-        setDetalle([...detalle, { idProducto: "", cantidad: 1, montoDescuento: 0 }]);
+        setDetalle([...detalle, { idProducto: 0, cantidad: 1, montoDescuento: 0 }]);
     };
+    
 
-    const handleRemoveProduct = (index) => {
+    const handleRemoveProduct = (index: number) => {
         const updatedDetalle = [...detalle];
         updatedDetalle.splice(index, 1);
         setDetalle(updatedDetalle);
     };
+    
+    const handleProductChange = (
+        index: number,
+        field: keyof DetalleProducto,
+        value: string | number
+    ) => {
+        const updatedDetalle: DetalleProducto[] = [...detalle];
 
-    const handleProductChange = (index, field, value) => {
-        const updatedDetalle = [...detalle];
-        updatedDetalle[index][field] = value;
+        if (field === 'idProducto') {
+            updatedDetalle[index][field] = typeof value === 'string' ? parseInt(value, 10) : value;
+        } else if (field === 'cantidad' || field === 'montoDescuento') {
+            updatedDetalle[index][field] = typeof value === 'string' ? parseFloat(value) : value;
+        }
+    
         setDetalle(updatedDetalle);
     };
-
-    const validateFechaHoraEmision = (date) => {
+    
+    
+    
+    const validateFechaHoraEmision = (date: Date) => {
         if (date < rangoFechaInicio || date > rangoFechaFin) {
             Swal.fire({
                 icon: "error",
@@ -81,23 +124,25 @@ const ManualBill = () => {
 
     const handleSubmit = async () => {
         if (!validateFechaHoraEmision(fechaHoraEmision)) return;
-
+    
         const cliente = clientes.find((c) => c.id === parseInt(selectedCliente));
         const metodoPago = metodosPago.find((m) => m.codigoClasificador === selectedMetodoPago);
+    
+        const idPuntoVentaValue = idPuntoVenta ? parseInt(idPuntoVenta) : 0; 
 
         const facturaBase = {
             usuario: cliente?.codigoCliente || "",
-            idPuntoVenta: parseInt(idPuntoVenta),
+            idPuntoVenta: idPuntoVentaValue,
             idCliente: parseInt(selectedCliente),
             nitInvalido: true,
             codigoMetodoPago: parseInt(metodoPago?.codigoClasificador || "0"),
             activo: false,
             detalle: detalle.map((d) => ({
                 idProducto: d.idProducto,
-                cantidad: parseFloat(d.cantidad),
-                montoDescuento: parseFloat(d.montoDescuento),
+                cantidad: d.cantidad.toString(), 
+                montoDescuento: d.montoDescuento.toString(), 
             })),
-            idSucursal: parseInt(idSucursal),
+            idSucursal: parseInt(idSucursal || "0"), 
             fechaHoraEmision: `${fechaHoraEmision.getFullYear()}-${(fechaHoraEmision.getMonth() + 1)
                 .toString()
                 .padStart(2, "0")}-${fechaHoraEmision
@@ -112,11 +157,12 @@ const ManualBill = () => {
                             .padStart(2, "0")}:${fechaHoraEmision.getSeconds().toString().padStart(2, "0")}`,
             cafc: true,
         };
-
+    
+        // Handle multiple invoices if generateMultiple is true
         if (generateMultiple && startInvoice && endInvoice) {
             const start = parseInt(startInvoice);
             const end = parseInt(endInvoice);
-
+    
             if (start > end) {
                 Swal.fire({
                     icon: "error",
@@ -125,7 +171,7 @@ const ManualBill = () => {
                 });
                 return;
             }
-
+    
             Swal.fire({
                 title: "Generando facturas...",
                 html: "Progreso: <b>0%</b>",
@@ -135,7 +181,7 @@ const ManualBill = () => {
                     Swal.showLoading();
                 },
             });
-
+    
             for (let num = start; num <= end; num++) {
                 try {
                     const factura = { ...facturaBase, numeroFactura: num };
@@ -144,7 +190,7 @@ const ManualBill = () => {
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(factura),
                     });
-
+    
                     const progress = Math.round(((num - start + 1) / (end - start + 1)) * 100);
                     Swal.update({
                         html: `Progreso: <b>${progress}%</b> (Factura ${num} de ${end})`,
@@ -159,7 +205,7 @@ const ManualBill = () => {
                     return;
                 }
             }
-
+    
             Swal.fire({
                 icon: "success",
                 title: "Facturas generadas",
@@ -173,7 +219,7 @@ const ManualBill = () => {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(factura),
                 });
-
+    
                 Swal.fire({
                     icon: "success",
                     title: "Factura emitida",
@@ -189,7 +235,7 @@ const ManualBill = () => {
             }
         }
     };
-
+    
     const filteredClientes = clientes.filter(cliente =>
         cliente.nombreRazonSocial.toLowerCase().includes(searchCliente.toLowerCase())
     );
@@ -217,8 +263,12 @@ const ManualBill = () => {
                                 className="w-full text-left p-2 border rounded"
                             >
                                 {selectedCliente
-                                    ? clientes.find(c => c.id === parseInt(selectedCliente)).nombreRazonSocial
+                                    ? (() => {
+                                        const cliente = clientes.find(c => c.id === parseInt(selectedCliente));
+                                        return cliente ? cliente.nombreRazonSocial : "Cliente no encontrado";
+                                    })()
                                     : "Seleccione un cliente"}
+
                             </button>
                             {dropdownClienteOpen && (
                                 <div className="absolute z-50 bg-white shadow-lg rounded mt-2 w-full">
@@ -257,8 +307,9 @@ const ManualBill = () => {
                                 className="w-full text-left p-2 border rounded"
                             >
                                 {selectedMetodoPago
-                                    ? metodosPago.find(m => m.codigoClasificador === selectedMetodoPago).descripcion
+                                    ? metodosPago.find(m => m.codigoClasificador === selectedMetodoPago)?.descripcion || "Método de pago no encontrado"
                                     : "Seleccione un método de pago"}
+
                             </button>
                             {dropdownMetodoPagoOpen && (
                                 <div className="absolute z-50 bg-white shadow-lg rounded mt-2 w-full">
@@ -321,13 +372,14 @@ const ManualBill = () => {
                         <div>
                             <label className="block text-gray-700 font-medium mb-2">Fecha y Hora de Emisión</label>
                             <DatePicker
-                                selected={fechaHoraEmision}
-                                onChange={(date) => setFechaHoraEmision(date)}
+                                selected={fechaHoraEmision || new Date()} 
+                                onChange={(date: Date | null) => setFechaHoraEmision(date || new Date())} 
                                 showTimeSelect
                                 timeFormat="HH:mm"
                                 dateFormat="yyyy-MM-dd HH:mm"
                                 className="w-full border p-2 rounded"
                             />
+
                         </div>
 
                         <div className="flex row">
@@ -360,6 +412,7 @@ const ManualBill = () => {
                                             </option>
                                         ))}
                                     </select>
+
                                     <input
                                         type="number"
                                         placeholder="Cantidad"

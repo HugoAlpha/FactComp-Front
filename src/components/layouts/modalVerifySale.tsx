@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import Swal from 'sweetalert2';
-import { FaMoneyBill, FaCreditCard, FaQrcode } from 'react-icons/fa';
 import { PATH_URL_BACKEND } from '@/utils/constants';
 
 interface Product {
@@ -52,7 +51,7 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
     lastFour: '',
   });
 
-  const handleCardFieldChange = (field, value) => {
+  const handleCardFieldChange = (field: 'firstFour' | 'lastFour', value: string) => {
     setCardFields((prev) => ({ ...prev, [field]: value.replace(/[^0-9]/g, '') }));
   };
 
@@ -68,11 +67,12 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
       (method) => method.codigoClasificador === paymentMethod
     );
     return (
-      selectedMethod?.descripcion.toLowerCase().includes('gift card') ||
-      selectedMethod?.descripcion.toLowerCase().includes('gift-card') ||
-      selectedMethod?.descripcion.toLowerCase().includes('gift')
+      selectedMethod?.descripcion.toLowerCase().includes("gift card") ||
+      selectedMethod?.descripcion.toLowerCase().includes("gift-card") ||
+      selectedMethod?.descripcion.toLowerCase().includes("gift")
     );
   };
+
 
   useEffect(() => {
     const fetchPaymentMethods = async () => {
@@ -81,15 +81,43 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
         if (response.ok) {
           const data = await response.json();
           setPaymentMethods(data);
+        } else {
+          throw new Error('No se pudo obtener la lista de métodos de pago.');
         }
       } catch (error) {
-        Swal.fire('Error', 'No se pudieron obtener los métodos de pago.', 'error');
+        Swal.fire('Error', 'No se pudieron obtener los métodos de pago. Intente nuevamente.', 'error');
       }
     };
+
     fetchPaymentMethods();
   }, []);
 
+  useEffect(() => {
+    if (!paymentMethods.length && isOpen) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Métodos de pago no disponibles',
+        text: 'Por favor, asegúrese de haber sincronizado correctamente los parámetros y catálogos.',
+      });
+    }
+  }, [paymentMethods, isOpen]);
+
   const handleValidate = async () => {
+    const selectedMethod = paymentMethods.find(
+      (method) => method.codigoClasificador === paymentMethod
+    );
+
+    if (selectedMethod?.codigoClasificador === "27") {
+      const giftAmount = parseFloat(giftCardAmount || "0");
+      if (giftAmount !== total) {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "El monto de la Gift Card debe cubrir el total a pagar. No se permite otro método de pago con GIFT-CARD.",
+        });
+        return;
+      }
+    }
     if (paymentMethod === '1' && Number(paymentAmount) < total) {
       Swal.fire({
         icon: 'error',
@@ -112,7 +140,7 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
     }
 
     try {
-      // Validar si el código de documento del cliente es 5
+
       if (client?.codigoTipoDocumentoIdentidad === 5) {
         const nitResponse = await fetch(
           `${PATH_URL_BACKEND}/codigos/verificar-nit?nit=${client.numeroDocumento}`
@@ -152,7 +180,7 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
 
   const processSale = async (nitInvalido: boolean) => {
     try {
-      let timerInterval;
+      let timerInterval: NodeJS.Timeout;
       Swal.fire({
         title: 'Se está generando la factura',
         html: 'Espere mientras procesamos su factura.',
@@ -193,7 +221,7 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
       };
 
       const response = await fetch(
-        `${PATH_URL_BACKEND}/factura/emitir-computarizada`,
+        `${PATH_URL_BACKEND}/factura/emitir`,
         {
           method: 'POST',
           headers: {

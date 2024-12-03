@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect ,useCallback} from 'react';
 import Sidebar from '@/components/commons/sidebar';
 import Header from '@/components/commons/header';
 import { FaPlus, FaSearch } from 'react-icons/fa';
@@ -24,16 +24,16 @@ const CUFDList = () => {
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [userRole, setUserRole] = useState<string | null>(null);
     const [isContingencyModalOpen, setIsContingencyModalOpen] = useState<boolean>(false);
-    
+
 
     useEffect(() => {
         const role = localStorage.getItem("role");
-        const idSucursal = localStorage.getItem("idSucursal");
-        const idPOS = localStorage.getItem("idPOS");
+        //const idSucursal = localStorage.getItem("idSucursal");
+        //const idPOS = localStorage.getItem("idPOS");
         setUserRole(role);
     }, []);
 
-    const fetchCUFDs = async () => {
+    const fetchCUFDs = useCallback(async () => {
         try {
             const idPuntoVenta = localStorage.getItem('idPOS');
             const response = await fetch(`${PATH_URL_BACKEND}/codigos/cufd/activo/${idPuntoVenta}`);
@@ -45,9 +45,9 @@ const CUFDList = () => {
         } catch (error) {
             console.error('Error fetching CUFDs:', error);
         }
-    };
+    }, []); 
 
-    const checkServerCommunication = async () => {
+    const checkServerCommunication = useCallback(async () => {
         try {
             const response = await fetch(`${PATH_URL_BACKEND}/contingencia/verificar-comunicacion`);
             if (!response.ok) {
@@ -99,12 +99,13 @@ const CUFDList = () => {
                 }
             });
         }
-    };
+    }, [fetchCUFDs]);
+    
 
     useEffect(() => {
         fetchCUFDs();
-        checkServerCommunication();
-    }, []);
+        checkServerCommunication();  
+    }, [fetchCUFDs, checkServerCommunication]);
 
     const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFilter(e.target.value);
@@ -219,18 +220,18 @@ const CUFDList = () => {
     const getPageNumbers = () => {
         const pageNumbers = [];
         const maxVisiblePages = 4;
-
+    
         let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-
+        const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1); 
+    
         if (endPage - startPage + 1 < maxVisiblePages) {
             startPage = Math.max(1, endPage - maxVisiblePages + 1);
         }
-
+    
         for (let i = startPage; i <= endPage; i++) {
             pageNumbers.push(i);
         }
-
+    
         return pageNumbers;
     };
 
@@ -266,6 +267,12 @@ const CUFDList = () => {
     const handleLastPage = () => {
         setCurrentPage(totalPages);
     };
+
+    const closeModal = () => {
+        setIsContingencyModalOpen(false);
+    };
+
+
 
     return (
         <div className="flex flex-col md:flex-row min-h-screen">
@@ -409,9 +416,11 @@ const CUFDList = () => {
                     </div>
                 </div>
             </div>
-            {isContingencyModalOpen && (
-                <ModalContingency isOpen={isContingencyModalOpen} onClose={closeModal} />
-            )}
+            <ModalContingency
+                isOpen={isContingencyModalOpen}
+                onClose={closeModal}
+                onConfirm={() => {}} 
+            />
         </div>
     );
 };

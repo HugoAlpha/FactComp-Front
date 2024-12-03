@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { FaUser, FaCog } from 'react-icons/fa';
+import { FaUser} from 'react-icons/fa';
 import { IoExitOutline } from 'react-icons/io5';
 import ModalContingency from '../layouts/modalContingency';
 import { PATH_URL_BACKEND } from '@/utils/constants';
@@ -41,22 +41,20 @@ const Header = () => {
     const [showUserMenu, setShowUserMenu] = useState(false);
     const [showSettingsMenu, setShowSettingsMenu] = useState(false);
 
-    const userMenuRef = useRef(null);
-    const settingsMenuRef = useRef(null);
+    const userMenuRef = useRef<HTMLDivElement>(null);
+    const settingsMenuRef = useRef<HTMLDivElement>(null);
     const [isOnline, setIsOnline] = useState(true);
-    const [userName, setuserName] = useState(0);
+    const [userName, setuserName] = useState<string>('Usuario');
     const [isUserModalOpen, setIsUserModalOpen] = useState(false);
-
-
-
-    const updateColors = (isContingency) => {
+    
+    const updateColors = (isContingency: boolean) => {
         const colors = isContingency ? contingencyColors : normalColors;
         Object.entries(colors).forEach(([key, value]) => {
             document.documentElement.style.setProperty(`--${key}`, value);
         });
     };
 
-    function calculateTimeLeft(activationTime) {
+    function calculateTimeLeft(activationTime: string | null): number {
         if (!activationTime) return 0;
         const now = new Date().getTime();
         const twoHours = 2 * 60 * 60 * 1000;
@@ -69,8 +67,7 @@ const Header = () => {
     };
 
     useEffect(() => {
-
-        const nameUser = localStorage.getItem('username');
+        const nameUser = localStorage.getItem('username') ?? 'Usuario';
         setuserName(nameUser);
         if (isOnline) {
             checkContingencyState();
@@ -144,10 +141,10 @@ const Header = () => {
 
 
     useEffect(() => {
-        let timer;
+        let timer: NodeJS.Timeout | undefined;
         if (countdown > 0 && contingencia) {
             timer = setInterval(() => {
-                setCountdown(prev => {
+                setCountdown((prev) => {
                     const newCount = prev - 1000;
                     if (newCount <= 0) {
                         clearContingencyState();
@@ -157,8 +154,11 @@ const Header = () => {
                 });
             }, 1000);
         }
-        return () => clearInterval(timer);
+        return () => {
+            if (timer) clearInterval(timer);
+        };
     }, [countdown, contingencia]);
+    
 
     const handleLogout = () => {
         Swal.fire({
@@ -205,6 +205,76 @@ const Header = () => {
             });
         }
     };
+
+    useEffect(() => {
+    const handleCountdownFinish = async () => {
+      try {
+        const response = await fetch(`${PATH_URL_BACKEND}/contingencia/verificar-comunicacion`);
+        if (response.ok) {
+          console.log('Comunicación con impuestos reestablecida.');
+          if (localStorage.getItem('contingenciaEstado') === '1') {
+            Swal.fire({
+              title: 'Comunicación reestablecida',
+              text: 'La comunicación con impuestos ha vuelto. Se enviarán los paquetes automáticamente.',
+              icon: 'info',
+              confirmButtonText: 'Aceptar',
+            });
+            await sendContingencyPackages();
+          }
+        } else if (response.status === 500) {
+          console.error('Sigue sin haber comunicación con impuestos.');
+        }
+      } catch (error) {
+        console.error('Error al verificar comunicación tras finalizar el contador:', error);
+      }
+    };
+
+    let timer: NodeJS.Timeout | undefined;
+    if (countdown > 0) {
+      timer = setInterval(() => {
+        setCountdown((prev) => {
+          const newCountdown = prev - 1000;
+          if (newCountdown <= 0) {
+            clearInterval(timer);
+            handleCountdownFinish();
+          }
+          return newCountdown > 0 ? newCountdown : 0;
+        });
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [countdown]);
+
+  const sendContingencyPackages = async () => {
+    const idPuntoVenta = localStorage.getItem('idPOS');
+    const idSucursal = localStorage.getItem('idSucursal');
+    const idEvento = localStorage.getItem('idEvento');
+
+    try {
+      const response = await fetch(
+        `${PATH_URL_BACKEND}/factura/emitir-paquete/${idPuntoVenta}/${idSucursal}/${idEvento}`,
+        { method: 'POST' }
+      );
+
+      if (response.ok) {
+        console.log('Paquetes enviados con éxito. Saliendo del modo contingencia...');
+        localStorage.removeItem('contingenciaEstado');
+        localStorage.removeItem('horaActivacionContingencia');
+        localStorage.removeItem('fechaHoraContingencia');
+        localStorage.removeItem('idEvento');
+        setContingencia(false);
+      } else {
+        console.error('Error al enviar paquetes:', response.statusText);
+        Swal.fire({
+          title: 'Error',
+          text: 'No se pudo enviar los paquetes de contingencia automáticamente.',
+          icon: 'error',
+        });
+      }
+    } catch (error) {
+      console.error('Error al enviar paquetes:', error);
+    }
+  };
 
     const desactivarContingencia = async () => {
         const idEvento = localStorage.getItem('idEvento');
@@ -254,7 +324,7 @@ const Header = () => {
     };
 
 
-    const confirmarContingencia = (eventoDescripcion) => {
+    const confirmarContingencia = (eventoDescripcion: string) => {
         const ahora = new Date();
         const timestamp = ahora.getTime();
         const fechaHoraFormateada = ahora.toLocaleString('es-ES', {
@@ -310,13 +380,13 @@ const Header = () => {
         };
     }, []);
 
-    const formatTime = (milliseconds) => {
+    const formatTime = (milliseconds: number): string => {
         const totalSeconds = Math.floor(milliseconds / 1000);
         const hours = Math.floor(totalSeconds / 3600);
         const minutes = Math.floor((totalSeconds % 3600) / 60);
         const seconds = totalSeconds % 60;
         return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
-    };
+      };
 
     const handleUserMenuToggle = () => {
         setShowUserMenu((prev) => !prev);
@@ -333,15 +403,18 @@ const Header = () => {
     };
 
 
-    const handleOutsideClick = (event) => {
+    const handleOutsideClick = (event: MouseEvent) => {
+        const target = event.target as Node;
         if (
-            userMenuRef.current && !userMenuRef.current.contains(event.target) &&
-            settingsMenuRef.current && !settingsMenuRef.current.contains(event.target)
+            userMenuRef.current &&
+            !userMenuRef.current.contains(target) &&
+            settingsMenuRef.current &&
+            !settingsMenuRef.current.contains(target)
         ) {
             setShowUserMenu(false);
             setShowSettingsMenu(false);
         }
-    };
+    };    
 
     useEffect(() => {
         document.addEventListener('click', handleOutsideClick);
@@ -355,30 +428,30 @@ const Header = () => {
         return storedContingencyState === '1';
     };
 
-    const checkServerCommunication = async () => {
-        if (checkContingencyState()) {
-            setIsOnline(false);
-            return;
-        }
-
-        try {
+    useEffect(() => {
+        const checkServerCommunication = async () => {
+          try {
             const response = await fetch(`${PATH_URL_BACKEND}/contingencia/verificar-comunicacion`);
             if (response.ok) {
-                setIsOnline(true);
+              console.log('Comunicación con impuestos OK.');
             } else if (response.status === 500) {
-                setIsOnline(false);
+              console.error('Error 500: Entrando en modo contingencia...');
+              activateContingency();
             }
-        } catch (error) {
-            console.error("Error al verificar comunicación:", error);
-            setIsOnline(false);
-        }
-    };
-
-    useEffect(() => {
+          } catch (error) {
+            console.error('Error al verificar comunicación con impuestos:', error);
+            activateContingency();
+          }
+        };
+    
+        const activateContingency = () => {
+          setShowModal(true);
+        };
+    
         checkServerCommunication();
-        const intervalId = setInterval(checkServerCommunication, 1000000);
+        const intervalId = setInterval(checkServerCommunication, 10000); 
         return () => clearInterval(intervalId);
-    }, []);
+      }, []);
 
     return (
         <header className="flex flex-col sm:flex-row justify-between items-center shadow-md p-4 bg-seventhColor">
@@ -465,9 +538,14 @@ const Header = () => {
 
             {showModal && (
                 <ModalContingency
-                    isOpen={showModal}
-                    onClose={() => setShowModal(false)}
-                    onConfirm={confirmarContingencia}
+                isOpen={showModal}
+                onClose={() => setShowModal(false)}
+                onConfirm={(eventoDescripcion) => {
+                    console.log('Modo contingencia activado:', eventoDescripcion);
+                    setContingencia(true);
+                    setCountdown(2 * 60 * 60 * 1000);
+                    setShowModal(false);
+                }}
                 />
             )}
 

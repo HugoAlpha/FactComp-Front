@@ -2,14 +2,18 @@
 import React, { useState, useEffect } from 'react';
 import Header from "@/components/commons/header";
 import Sidebar from "@/components/commons/sidebar";
-import { FaEdit, FaPlus, FaSearch, FaTrashAlt } from 'react-icons/fa';
+import { FaPlus, FaSearch, FaTrashAlt } from 'react-icons/fa';
 import ModalCreatePos from '@/components/layouts/modalCreatePos';
 import Swal from 'sweetalert2';
 import { PATH_URL_BACKEND } from '@/utils/constants';
 import Footer from '@/components/commons/footer';
 
 
+interface Sucursal {
+    nombre: string;
+}
 interface PuntoVenta {
+    sucursal?: Sucursal;
     id: number;
     nombrePuntoVenta: string;
     tipoPuntoVenta: string;
@@ -22,9 +26,9 @@ const PuntoVenta: React.FC = () => {
     const [filteredCustomers, setFilteredCustomers] = useState<PuntoVenta[]>([]);
     const [rowsPerPage, setRowsPerPage] = useState<number>(10);
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [selectedSucursal, setSelectedSucursal] = useState<string>('');
+    const [selectedSucursal] = useState<string>('');
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [puntoVentaDetail, setPuntoVentaDetail] = useState<PuntoVentaDetail | null>(null);
+    //const [puntoVentaDetail, setPuntoVentaDetail] = useState<PuntoVentaDetail | null>(null);
     const [tiposPuntoVenta, setTiposPuntoVenta] = useState<{ id: number; codigoClasificador: string; descripcion: string; }[]>([]);
 
     const checkServerCommunication = async () => {
@@ -107,14 +111,14 @@ const PuntoVenta: React.FC = () => {
         fetchTiposPuntoVenta();
     }, []);
 
-    const handleCreatePos = async (newPos) => {
+    const handleCreatePos = async (newPos: PuntoVenta) => {
         try {
             const response = await fetch(`${PATH_URL_BACKEND}/operaciones/punto-venta/registrar`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(newPos),
             });
-
+      
             if (response.ok) {
                 await fetchPuntoVentas();
                 const createdPos = await response.json();
@@ -124,8 +128,12 @@ const PuntoVenta: React.FC = () => {
             } else {
                 throw new Error('Error al registrar el punto de venta');
             }
-        } catch (error) {
-            Swal.fire('Error', error.message, 'error');
+        } catch(error: unknown) {
+            if (error instanceof Error) {
+                Swal.fire('Error', error.message, 'error');
+            } else {
+                Swal.fire('Error', 'Ocurrió un error desconocido', 'error');
+            }
         }
     };
 
@@ -158,9 +166,9 @@ const PuntoVenta: React.FC = () => {
         ? filteredCustomers.slice((currentPage - 1) * rowsPerPage, currentPage * rowsPerPage)
         : [];
 
-    const handleEditPuntoVenta = (id: number) => {
-        console.log(`Editar punto de venta con id: ${id}`);
-    };
+    //const handleEditPuntoVenta = (id: number) => {
+    //    console.log(`Editar punto de venta con id: ${id}`);
+    //};
 
     const handleDeletePuntoVenta = async (codigoPuntoVenta: string) => {
         Swal.fire({
@@ -186,8 +194,12 @@ const PuntoVenta: React.FC = () => {
                     } else {
                         throw new Error('No se pudo cerrar el punto de venta');
                     }
-                } catch (error) {
-                    Swal.fire('Error', error.message, 'error');
+                } catch (error: unknown) {
+                    if (error instanceof Error) {
+                        Swal.fire('Error', error.message, 'error');
+                    } else {
+                        Swal.fire('Error', 'Ha ocurrido un error desconocido', 'error');
+                    }
                 }
             }
         });
@@ -210,18 +222,18 @@ const PuntoVenta: React.FC = () => {
     const getPageNumbers = () => {
         const pageNumbers = [];
         const maxVisiblePages = 4;
-
+    
         let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-
+        const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
         if (endPage - startPage + 1 < maxVisiblePages) {
             startPage = Math.max(1, endPage - maxVisiblePages + 1);
         }
-
+    
         for (let i = startPage; i <= endPage; i++) {
             pageNumbers.push(i);
         }
-
+    
         return pageNumbers;
     };
 

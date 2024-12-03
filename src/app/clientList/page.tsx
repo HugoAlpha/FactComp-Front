@@ -21,11 +21,8 @@ interface Customer {
     nitInvalido?: number;
 }
 
-interface UserRole {
-    role: 'ROLE_ADMIN' | 'ROLE_USER';
-}
 
-const documentTypes = {
+const documentTypes: { [key: number]: string } = {
     1: "CI",
     2: "CEX",
     5: "NIT",
@@ -170,7 +167,7 @@ const ClientList = () => {
         });
     };
 
-    const handleAddOrEditCustomer = async (customer: Customer) => {
+    const handleAddOrEditCustomer = async () => {
         setIsModalOpen(false);
         setCurrentCustomer({
             id: 0,
@@ -184,6 +181,7 @@ const ClientList = () => {
         await fetchCustomers();
         setCurrentPage(1);
     };
+    
 
 
     const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -194,18 +192,18 @@ const ClientList = () => {
     const getPageNumbers = () => {
         const pageNumbers = [];
         const maxVisiblePages = 4;
-
+    
         let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-
+        const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1); // 'const' instead of 'let'
+    
         if (endPage - startPage + 1 < maxVisiblePages) {
             startPage = Math.max(1, endPage - maxVisiblePages + 1);
         }
-
+    
         for (let i = startPage; i <= endPage; i++) {
             pageNumbers.push(i);
         }
-
+    
         return pageNumbers;
     };
 
@@ -323,7 +321,10 @@ const ClientList = () => {
                                 isOpen={isModalOpen}
                                 onClose={() => setIsModalOpen(false)}
                                 onSave={handleAddOrEditCustomer}
-                                customer={currentCustomer}
+                                customer={{
+                                    ...currentCustomer,
+                                    complemento: currentCustomer.complemento || '', 
+                                }}
                             />
                         </div>
 
@@ -409,9 +410,11 @@ const ClientList = () => {
                 </div>
                 <Footer />
             </div>
-            {isContingencyModalOpen && (
-                <ModalContingency isOpen={isContingencyModalOpen} onClose={closeModal} />
-            )}
+            <ModalContingency
+                isOpen={isContingencyModalOpen}
+                onClose={closeModal}
+                onConfirm={() => {}} 
+            />
         </div>
     );
 }; 

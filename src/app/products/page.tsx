@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import { FaTrashAlt, FaEdit, FaPlus, FaSearch } from 'react-icons/fa';
+import {FaEdit, FaPlus, FaSearch } from 'react-icons/fa';
 import Sidebar from '@/components/commons/sidebar';
 import Header from '@/components/commons/header';
 import { PATH_URL_BACKEND, PATH_URL_IMAGES } from "@/utils/constants";
@@ -9,7 +9,18 @@ import Swal from 'sweetalert2';
 import CashierSidebar from '@/components/commons/cashierSidebar';
 import ModalContingency from '@/components/layouts/modalContingency';
 import Footer from '@/components/commons/footer';
+import Image from 'next/image';
 
+interface Image {
+    id: number;
+    itemId: number;
+}
+
+interface UnidadMedidaOption {
+    codigoClasificador: string;  
+    descripcion: string;
+    
+}
 interface Product {
     id: number;
     descripcion: string;
@@ -21,9 +32,8 @@ interface Product {
     unidadMedidaDescripcion?: string;
 }
 
-interface UserRole {
-    role: 'ROLE_ADMIN' | 'ROLE_USER';
-}
+
+
 
 const ProductList = () => {
     const [products, setProducts] = useState<Product[]>([]);
@@ -34,7 +44,7 @@ const ProductList = () => {
     const [userRole, setUserRole] = useState<string | null>(null);
     const [isContingencyModalOpen, setIsContingencyModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
-    const [productsWithUnitDescription, setProductsWithUnitDescription] = useState<Product[]>([]);
+    //const [productsWithUnitDescription, setProductsWithUnitDescription] = useState<Product[]>([]);
 
 
     useEffect(() => {
@@ -61,7 +71,7 @@ const ProductList = () => {
                 const unidadMedidaData: UnidadMedidaOption[] = await unidadMedidaResponse.json();
     
                 const updatedProducts = sortedProductsData.map(product => {
-                    const image = imagesData.find(img => img.itemId === product.id);
+                    const image = imagesData.find((img: Image) => img.itemId === product.id);
                     const unidadMedida = unidadMedidaData.find(um => String(um.codigoClasificador) === String(product.unidadMedida));
     
                     return {
@@ -161,33 +171,33 @@ const ProductList = () => {
         currentPage * rowsPerPage
     );
 
-    const handlePrevPage = () => {
-        if (currentPage > 1) {
-            setCurrentPage(currentPage - 1);
-        }
-    };
+    //const handlePrevPage = () => {
+    //    if (currentPage > 1) {
+    //        setCurrentPage(currentPage - 1);
+    //    }
+    //};
 
-    const handleNextPage = () => {
-        if (currentPage < totalPages) {
-            setCurrentPage(currentPage + 1);
-        }
-    };
+    //const handleNextPage = () => {
+    //    if (currentPage < totalPages) {
+    //        setCurrentPage(currentPage + 1);
+    //    }
+    //};
 
     const getPageNumbers = () => {
         const pageNumbers = [];
         const maxVisiblePages = 4;
-
+    
         let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-
+        const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
         if (endPage - startPage + 1 < maxVisiblePages) {
             startPage = Math.max(1, endPage - maxVisiblePages + 1);
         }
-
+    
         for (let i = startPage; i <= endPage; i++) {
             pageNumbers.push(i);
         }
-
+    
         return pageNumbers;
     };
 
@@ -228,7 +238,7 @@ const ProductList = () => {
             const unidadMedidaData: UnidadMedidaOption[] = await unidadMedidaResponse.json();
 
             const updatedProducts = productsData.map(product => {
-                const image = imagesData.find(img => img.itemId === product.id);
+                const image = imagesData.find((img: Image) => img.itemId === product.id);
                 const unidadMedida = unidadMedidaData.find(um => String(um.codigoClasificador) === String(product.unidadMedida));
 
                 return {
@@ -249,6 +259,7 @@ const ProductList = () => {
         setCurrentPage(1);
     };
 
+    /*
     const renderOperationButtons = (product: Product) => {
         return (
             <div className="flex">
@@ -268,7 +279,8 @@ const ProductList = () => {
             </div>
         );
     };
-
+    */
+    
     const handleFirstPage = () => {
         setCurrentPage(1);
     };
@@ -340,10 +352,12 @@ const ProductList = () => {
                                     {paginatedProducts.map((product) => (
                                         <tr key={product.id} className="border-b hover:bg-gray-50 text-black">
                                             <td className="px-4 py-4">
-                                                <img
-                                                    src={product.imageUrl}
+                                                <Image
+                                                    src={product.imageUrl || '/images/caja.png'}  
                                                     alt={product.descripcion}
-                                                    className="w-20 h-20 object-cover rounded-lg shadow-sm"
+                                                    width={80}  
+                                                    height={80} 
+                                                    className="object-cover rounded-lg shadow-sm"
                                                     onError={(e) => {
                                                         (e.target as HTMLImageElement).src = "/images/caja.png";
                                                     }}
@@ -432,9 +446,11 @@ const ProductList = () => {
                 />
                 <Footer />
             </div>
-            {isContingencyModalOpen && (
-                <ModalContingency isOpen={isContingencyModalOpen} onClose={closeModal} />
-            )}
+            <ModalContingency
+                isOpen={isContingencyModalOpen}
+                onClose={closeModal}
+                onConfirm={() => {}} 
+            />
         </div>
     );
 };
