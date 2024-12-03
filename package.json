@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev -p 3057",
-    "build": "next build --no-lint",
+    "build": "next build",
     "start": "next start -p 3057",
     "lint": "next lint"
   },
