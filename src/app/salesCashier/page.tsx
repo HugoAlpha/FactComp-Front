@@ -37,6 +37,7 @@ const Sales = () => {
     const [filteredClients, setFilteredClients] = useState([]);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [isAllClientsModalOpen, setIsAllClientsModalOpen] = useState(false);
+    const [appliedGlobalDiscount, setAppliedGlobalDiscount] = useState<number | null>(null);
     const [currentCustomer, setCurrentCustomer] = useState<Customer>({
         id: 0,
         nombreRazonSocial: '',
@@ -237,29 +238,30 @@ const Sales = () => {
             Swal.fire('Error', 'Ya se ha aplicado un descuento global.', 'error');
             return;
         }
-
+    
         const discountValue = parseFloat(globalDiscount);
         if (isNaN(discountValue) || discountValue <= 0) {
             Swal.fire('Error', 'Ingrese un descuento válido.', 'error');
             return;
         }
-
+    
         const newTotal = total - discountValue;
-
+    
         if (newTotal < 1) {
             Swal.fire('Error', 'El descuento global no puede hacer que el total sea menor que 1.', 'error');
             return;
         }
-
+    
         setOriginalTotal(total);
         setTotal(newTotal);
         setDiscountApplied(true);
-
+        setAppliedGlobalDiscount(discountValue); 
+    
         setGlobalDiscountHistory((prevHistory) => [
             ...prevHistory,
-            `Descuento aplicado: Bs ${discountValue.toFixed(2)}`
+            `Descuento aplicado: Bs ${discountValue.toFixed(2)}`,
         ]);
-
+    
         setGlobalDiscount('');
     };
 
@@ -349,52 +351,58 @@ const Sales = () => {
             Swal.fire('Error', 'No se pudo obtener el número de factura.', 'error');
             return;
         }
-
+    
         try {
             const response = await fetch(`${PATH_URL_BACKEND}/factura/${data.numeroFactura}`);
-
             if (response.ok) {
                 const facturaData = await response.json();
-
+    
                 const items = selectedProducts.map((product) => ({
                     descripcion: product.descripcion,
                     cantidad: product.quantity || 1,
                     precioUnitario: product.price,
                     total: product.totalPrice || product.price
                 }));
-
+    
                 setSaleDetails({
                     client: facturaData.nombreRazonSocial || data.client,
-                    total: facturaData.montoTotal || data.total,
+                    total: facturaData.montoTotal || (total - appliedGlobalDiscount!), 
                     paidAmount: 0,
                     change: 0,
                     orderNumber: facturaData.numeroFactura.toString(),
                 });
-
+    
+                const totalAfterDiscounts = selectedProducts.reduce(
+                    (acc, product) => acc + (product.totalPrice || 0),
+                    0
+                );
+                
                 setFacturaData({
                     ...facturaData,
                     items,
-                });
-
+                    montoTotal: totalAfterDiscounts - (appliedGlobalDiscount || 0),
+                });                
+    
                 setIsSaleSuccessful(true);
                 setIsModalOpen(false);
-
             } else {
                 console.error('Error al obtener los detalles de la factura');
                 Swal.fire('Error', 'No se pudo obtener los detalles de la factura.', 'error');
             }
-
         } catch (error) {
             console.error('Error al obtener la factura:', error);
             Swal.fire('Error', 'Ocurrió un error inesperado.', 'error');
         }
-    };
-
+    };    
 
     const handleNewOrder = () => {
         setSelectedProducts([]);
         setTotal(0);
         setIsSaleSuccessful(false);
+        setGlobalDiscount(''); 
+        setDiscountApplied(false); 
+        setGlobalDiscountHistory([]); 
+        setAppliedGlobalDiscount(null);
     };
 
     const handleGoToDashboard = () => {
@@ -446,7 +454,6 @@ const Sales = () => {
     
 
     const handleSaveCustomer = (savedCustomer: Customer) => {
-
         handleCloseClientModal();
     };
 
@@ -715,6 +722,9 @@ const Sales = () => {
                                                     src={product.img}
                                                     alt={product.name}
                                                     className="h-24 w-full object-contain mb-2 transition-all duration-300 hover:scale-110"
+                                                    onError={(e) => {
+                                                        (e.target as HTMLImageElement).src = "/images/caja.png";
+                                                    }}
                                                 />
                                                 <h3 className="text-xs font-semibold truncate">{product.name}</h3>
                                                 <p className="text-sm font-bold">Bs {product.price}</p>
@@ -780,12 +790,18 @@ const Sales = () => {
                             onClose={() => setIsModalOpen(false)}
                             products={formattedSelectedProducts}
                             total={total}
-                            client={currentCustomer}
-                            onSuccess={(data) => handleSaleSuccess({
-                                client: data.client,
-                                total: data.total,
-                                numeroFactura: data.numeroFactura
-                            })}
+                            client={{
+                                ...currentCustomer, 
+                                codigoTipoDocumentoIdentidad: currentCustomer.codigoTipoDocumentoIdentidad 
+                            }}
+                            globalDiscount={appliedGlobalDiscount} 
+                            onSuccess={(data) =>
+                                handleSaleSuccess({
+                                    client: data.client,
+                                    total: data.total,
+                                    numeroFactura: data.numeroFactura,
+                                })
+                            }
                         />
 
                         <CreateEditClientModal
@@ -809,7 +825,9 @@ const Sales = () => {
 
                             {/* Total y Opciones de recibo */}
                             <div className="bg-gray-100 p-4 rounded-lg mb-4 w-2/3 text-center">
-                                <p className="text-xl font-bold">Total: {Number(saleDetails?.total || 0).toFixed(2)} Bs.</p>
+                                <p className="text-xl font-bold">
+                                    Total: {Number(facturaData?.montoTotal || saleDetails?.total || 0).toFixed(2)} Bs.
+                                </p>
                             </div>
                             <div className="bg-gray-200 p-4 rounded-lg flex items-center justify-between mb-6 w-2/3">
                                 <span>{saleDetails?.client || 'Correo cliente'}</span>
