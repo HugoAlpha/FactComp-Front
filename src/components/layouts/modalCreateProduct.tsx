@@ -35,9 +35,9 @@ interface ModalCreateProductProps {
 const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose, onProductCreated, product, refreshProducts }) => {
     const [codigo, setCodigo] = useState('');
     const [nombreProducto, setNombreProducto] = useState('');
-    const [unidadMedida, setUnidadMedida] = useState<string>('');
+    const [, setUnidadMedida] = useState<string>('');
     const [precioUnitario, setPrecioUnitario] = useState('');
-    const [codigoProductoSin, setCodigoProductoSin] = useState('');
+    const [, setCodigoProductoSin] = useState('');
     const [productOptions, setProductOptions] = useState<ProductOption[]>([]);
     const [unidadMedidaOptions, setUnidadMedidaOptions] = useState<UnidadMedidaOption[]>([]);
     const [selectedOption, setSelectedOption] = useState<ProductOption | null>(null);
@@ -50,9 +50,10 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
     const [previousImageId, setPreviousImageId] = useState<number | null>(null);
     const maxLength = 100;
 
-    const handleDescriptionChange = (e) => {
-        setNombreProducto(e.target.value);
+    const handleDescriptionChange = (e: React.SyntheticEvent<HTMLInputElement>) => {
+        setNombreProducto(e.currentTarget.value);
     };
+    
     
     const [errors, setErrors] = useState({
         codigo: '',
@@ -142,7 +143,7 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
                 setSelectedUnidadMedida(null);
             }
         }
-    }, [isOpen, product, productOptions]);
+    }, [isOpen, product, productOptions, unidadMedidaOptions]);
 
     const uploadImage = async (itemId: number) => {
         if (!selectedImage) return;
@@ -167,14 +168,14 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
             } else {
                 Swal.fire("Error", "Error al actualizar la imagen", "error");
             }
-        } catch (error) {
+        } catch  {
             Swal.fire("Error", "No se pudo conectar con el servidor para actualizar la imagen", "error");
         }
     };
 
     const validateForm = () => {
         const newErrors = { codigo: '', nombreProducto: '', unidadMedida: '', precioUnitario: '', codigoProductoSin: '', image: '' };
-        const alphanumericPattern = /^[a-zA-Z0-9]+$/;
+        //const alphanumericPattern = /^[a-zA-Z0-9]+$/;
         const numericPattern = /^[0-9]+(\.[0-9]+)?$/;
 
         if (!codigo) {
@@ -311,7 +312,7 @@ const ModalCreateProduct: React.FC<ModalCreateProductProps> = ({ isOpen, onClose
             } else {
                 Swal.fire("Error", product ? "Error al actualizar el producto" : "Error al crear el producto", "error");
             }
-        } catch (error) {
+        } catch  {
             Swal.fire("Error", "No se pudo conectar con el servidor", "error");
         }
     };
