@@ -1,34 +1,35 @@
 "use client";
 import React, { useState, useEffect, useMemo } from 'react';
-import { FaSearch, FaEye, FaTimes, FaAngleRight, FaAngleLeft } from 'react-icons/fa';
+import { FaEye, FaTimes } from 'react-icons/fa';
 import { HiReceiptRefund } from "react-icons/hi2";
 import Sidebar from '@/components/commons/sidebar';
 import Header from '@/components/commons/header';
 import { PATH_URL_BACKEND } from '@/utils/constants';
 import Swal from 'sweetalert2';
-import ModalContingencyPackage from "@/components/layouts/modalContingencyPackage"
 import CashierSidebar from '@/components/commons/cashierSidebar';
 import ModalContingency from '@/components/layouts/modalContingency';
 import { TbCircleCheckFilled } from "react-icons/tb";
-import { IoQrCode } from "react-icons/io5";
 import Footer from '@/components/commons/footer';
 import { BsClipboardCheck } from 'react-icons/bs';
 import jsQR from 'jsqr';
 
 
-interface FormattedBill {
-  id: string;
-  documentNumber: string;
-  client: string;
-  date: string;
-  total: string;
-  estado: string;
-  codigoSucursal: number;
+interface Bill {
   codigoPuntoVenta: number;
+  puntoVenta: { id: number };
+  numeroDocumento: string;
+  numeroFactura: string;
+  nombreRazonSocial: string;
+  fechaEmision: string; 
+  montoTotal: number;
+  estado?: string;
+  codigoSucursal: number;
   cuf: string;
+  id: string;
   formato: string;
-  reversion: boolean; 
+  reversion?: boolean;
 }
+
 
 
 const BillList = () => {
@@ -41,29 +42,36 @@ const BillList = () => {
   const [motivosAnulacion, setMotivosAnulacion] = useState([]);
   const [fechaDesde, setFechaDesde] = useState<string | null>(null);
   const [fechaHasta, setFechaHasta] = useState<string | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isContingencyModalOpen, setIsContingencyModalOpen] = useState(false);
   const [isContingencyMode, setIsContingencyMode] = useState(false);
-  const [contingencyState, setContingencyState] = useState<string | null>(null);
   const [userRole, setUserRole] = useState<string | null>(null);
 
   const fetchBills = async () => {
     try {
-        const estadoParam = isContingencyMode ? 'OFFLINE' : (estadoFilter === 'TODAS' ? '' : (estadoFilter === 'VALIDA' ? '1' : '0'));
-        const endpoint = estadoParam ? `${PATH_URL_BACKEND}/factura/estado?estado=${estadoParam}` : `${PATH_URL_BACKEND}/factura`;
+        const estadoParam = isContingencyMode
+            ? 'OFFLINE'
+            : estadoFilter === 'TODAS'
+            ? ''
+            : estadoFilter === 'VALIDA'
+            ? '1'
+            : '0';
+
+        const endpoint = estadoParam
+            ? `${PATH_URL_BACKEND}/factura/estado?estado=${estadoParam}`
+            : `${PATH_URL_BACKEND}/factura`;
 
         const response = await fetch(endpoint);
 
         if (response.ok) {
-            const data = await response.json();
+            const data: Bill[] = await response.json();
             const idPOS = parseInt(localStorage.getItem('idPOS') || '0');
             const codigoPOS = parseInt(localStorage.getItem('CodigoPOS') || '0');
 
-            const filteredData = data.filter((bill) =>
+            const filteredData = data.filter((bill: Bill) =>
                 bill.codigoPuntoVenta === codigoPOS && bill.puntoVenta && bill.puntoVenta.id === idPOS
             );
 
-            const formattedData = filteredData.map((bill) => ({
+            const formattedData = filteredData.map((bill: Bill) => ({
                 documentNumber: bill.numeroDocumento,
                 numeroFactura: bill.numeroFactura,
                 client: bill.nombreRazonSocial,
@@ -76,9 +84,10 @@ const BillList = () => {
                 puntoVenta: bill.puntoVenta,
                 id: bill.id,
                 formato: bill.formato,
-                reversion: !!bill.reversion, 
+                reversion: !!bill.reversion,
             }));
-            const sortedData = formattedData.sort((a, b) => b.date - a.date);
+
+            const sortedData = formattedData.sort((a, b) => b.date.getTime() - a.date.getTime());
             setBills(sortedData);
         } else {
             console.error('Error fetching bills');
@@ -87,7 +96,6 @@ const BillList = () => {
         console.error('Error fetching bills:', error);
     }
 };
-
 
 
   useEffect(() => {

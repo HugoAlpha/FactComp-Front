@@ -19,7 +19,20 @@ interface Branch {
     razonSocial: string;
     empresaId: number;
     codigo: string;
+}
 
+interface RawBranchData {
+    id: number;
+    codigo: string;
+    nombre: string;
+    departamento: string;
+    municipio: string;
+    direccion: string;
+    telefono: string;
+    empresa: {
+        razonSocial: string;
+        id: number;
+    };
 }
 
 const Branches: React.FC = () => {
@@ -51,8 +64,8 @@ const Branches: React.FC = () => {
                 throw new Error(errorMessage);
             }
 
-            const data = await response.json();
-            const formattedData = data.map((branch: any) => ({
+            const data: RawBranchData[] = await response.json();
+            const formattedData: Branch[] = data.map((branch) => ({
                 id: branch.id,
                 codigo: branch.codigo,
                 nombre: branch.nombre,
@@ -66,8 +79,8 @@ const Branches: React.FC = () => {
 
             setBranches(formattedData);
             setFilteredBranches(formattedData);
-        } catch (error: any) {
-            console.error("Error al obtener las sucursales:", error.message);
+        } catch (error: unknown) {
+            console.error("Error al obtener las sucursales:", error instanceof Error ? error.message : 'Unknown error');
         }
     };
 
@@ -164,23 +177,24 @@ const Branches: React.FC = () => {
         setCurrentPage(totalPages);
       };
     
-      const handlePageChange = (page: number) => {
-        setCurrentPage(page);
-      };
+      // const handlePageChange = (page: number) => {
+        //     setCurrentPage(page);
+        // };
 
-    const getPageNumbers = () => {
-        const totalPages = Math.ceil(filteredBranches.length / rowsPerPage);
-        const pageNumbers = [];
+      const getPageNumbers = () => {
+        const pageCount = Math.ceil(filteredBranches.length / rowsPerPage);
         const maxVisiblePages = 4;
 
-        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+        const startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+        const endPage = Math.min(pageCount, startPage + maxVisiblePages - 1);
 
-        if (endPage - startPage + 1 < maxVisiblePages) {
-            startPage = Math.max(1, endPage - maxVisiblePages + 1);
-        }
+        const pageNumbers: number[] = [];
 
-        for (let i = startPage; i <= endPage; i++) {
+        const adjustedStartPage = endPage - startPage + 1 < maxVisiblePages 
+            ? Math.max(1, endPage - maxVisiblePages + 1) 
+            : startPage;
+
+        for (let i = adjustedStartPage; i <= endPage; i++) {
             pageNumbers.push(i);
         }
 
@@ -404,12 +418,12 @@ const Branches: React.FC = () => {
                                 Sig.
                             </button>
                             <button
-                             onClick={handleLastPage}
-                             className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                                onClick={handleLastPage}
+                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                             >
                             Último
                             </button>
-                         </div>
+                            </div>
                         </div>
 
                         <div className="flex space-x-1 justify-center mt-2">
@@ -432,6 +446,10 @@ const Branches: React.FC = () => {
                 <ModalContingency
                     isOpen={isContingencyModalOpen}
                     onClose={() => setIsContingencyModalOpen(false)}
+                    onConfirm={() => {
+                        setIsContingencyModalOpen(false);
+                        checkServerCommunication();
+                    }}
                 />
             )}
         </div>

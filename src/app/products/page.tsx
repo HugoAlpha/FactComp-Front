@@ -21,9 +21,7 @@ interface Product {
     unidadMedidaDescripcion?: string;
 }
 
-interface UserRole {
-    role: 'ROLE_ADMIN' | 'ROLE_USER';
-}
+
 
 const ProductList = () => {
     const [products, setProducts] = useState<Product[]>([]);
@@ -34,7 +32,7 @@ const ProductList = () => {
     const [userRole, setUserRole] = useState<string | null>(null);
     const [isContingencyModalOpen, setIsContingencyModalOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
-    const [productsWithUnitDescription, setProductsWithUnitDescription] = useState<Product[]>([]);
+    //const [productsWithUnitDescription, setProductsWithUnitDescription] = useState<Product[]>([]);
 
 
     useEffect(() => {
@@ -176,18 +174,18 @@ const ProductList = () => {
     const getPageNumbers = () => {
         const pageNumbers = [];
         const maxVisiblePages = 4;
-
+    
         let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-
+        const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
         if (endPage - startPage + 1 < maxVisiblePages) {
             startPage = Math.max(1, endPage - maxVisiblePages + 1);
         }
-
+    
         for (let i = startPage; i <= endPage; i++) {
             pageNumbers.push(i);
         }
-
+    
         return pageNumbers;
     };
 
@@ -432,9 +430,11 @@ const ProductList = () => {
                 />
                 <Footer />
             </div>
-            {isContingencyModalOpen && (
-                <ModalContingency isOpen={isContingencyModalOpen} onClose={closeModal} />
-            )}
+            <ModalContingency
+                isOpen={isContingencyModalOpen}
+                onClose={closeModal}
+                onConfirm={() => {}} 
+            />
         </div>
     );
 };

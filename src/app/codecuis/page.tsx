@@ -3,7 +3,7 @@
 import Header from '@/components/commons/header';
 import Sidebar from '@/components/commons/sidebar';
 import { useEffect, useState } from 'react';
-import { FaEdit, FaSearch, FaTrashAlt } from 'react-icons/fa';
+import { FaSearch } from 'react-icons/fa';
 import { PATH_URL_BACKEND } from '@/utils/constants';
 import CashierSidebar from '@/components/commons/cashierSidebar';
 
@@ -37,6 +37,7 @@ interface Code {
     fechaSolicitada: string;
     fechaVigencia: string;
     vigente: boolean;
+    puntoVenta?: PuntoVenta;
 }
 
 const CodeReceipt = () => {
@@ -45,44 +46,47 @@ const CodeReceipt = () => {
     const [filteredCodes, setFilteredCodes] = useState<Code[]>([]);
     const [filterStatus, setFilterStatus] = useState<string>("Todos");
     const [selectedSucursal, setSelectedSucursal] = useState<string>("Todos");
-    const [sucursales, setSucursales] = useState<string[]>([]);
+    const [sucursales] = useState<string[]>([]);
     const [daysToExpire, setDaysToExpire] = useState<number | null>(null);
     const [rowsPerPage, setRowsPerPage] = useState<number>(10);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [userRole, setUserRole] = useState<string | null>(null);
     const [isContingencyModalOpen, setIsContingencyModalOpen] = useState<boolean>(false);
 
-    const openContingencyModal = () => setIsContingencyModalOpen(true);
-    const closeContingencyModal = () => setIsContingencyModalOpen(false);
+    //const openContingencyModal = () => setIsContingencyModalOpen(true);
+    //const closeContingencyModal = () => setIsContingencyModalOpen(false);
 
     useEffect(() => {
         const role = localStorage.getItem("role");
         setUserRole(role);
     }, []);
 
-
+    
     const fetchCodes = async () => {
         try {
             const idPuntoVenta = localStorage.getItem('idPOS');
             const idSucursal = localStorage.getItem('idSucursal');
             const response = await fetch(`${PATH_URL_BACKEND}/codigos/cuis/activo/${idPuntoVenta}/${idSucursal}`);
+            
             if (response.ok) {
-                const data = await response.json();
-
-                const formattedData = Array.isArray(data) ? data.map((code: any) => ({
-                    id: code.id,
-                    codigo: code.codigo,
-                    fechaSolicitada: new Date(code.fechaSolicitada).toLocaleString(),
-                    fechaVigencia: new Date(code.fechaVigencia).toLocaleString(),
-                    vigente: code.vigente,
-                })) : [{
-                    id: data.id,
-                    codigo: data.codigo,
-                    fechaSolicitada: new Date(data.fechaSolicitada).toLocaleString(),
-                    fechaVigencia: new Date(data.fechaVigencia).toLocaleString(),
-                    vigente: data.vigente,
-                }];
-
+                const data: Code[] | Code = await response.json();  
+    
+                const formattedData = Array.isArray(data)
+                    ? data.map((code: Code) => ({  
+                        id: code.id,
+                        codigo: code.codigo,
+                        fechaSolicitada: new Date(code.fechaSolicitada).toLocaleString(),
+                        fechaVigencia: new Date(code.fechaVigencia).toLocaleString(),
+                        vigente: code.vigente,
+                    }))
+                    : [{
+                        id: data.id,
+                        codigo: data.codigo,
+                        fechaSolicitada: new Date(data.fechaSolicitada).toLocaleString(),
+                        fechaVigencia: new Date(data.fechaVigencia).toLocaleString(),
+                        vigente: data.vigente,
+                    }];
+    
                 formattedData.sort((a: Code, b: Code) => b.id - a.id);
                 setCodes(formattedData);
             } else {
@@ -92,8 +96,7 @@ const CodeReceipt = () => {
             console.error('Error fetching codes:', error);
         }
     };
-
-
+    
     useEffect(() => {
         fetchCodes();
     }, []);
@@ -181,7 +184,7 @@ const CodeReceipt = () => {
             });
         }
         if (selectedSucursal !== "Todos") {
-            filtered = filtered.filter(code => code.puntoVenta.sucursal.nombre === selectedSucursal);
+            filtered = filtered.filter(code => code.puntoVenta?.sucursal.nombre === selectedSucursal);
         }
         setFilteredCodes(filtered);
         setCurrentPage(1);
@@ -196,29 +199,29 @@ const CodeReceipt = () => {
     const getPageNumbers = () => {
         const pageNumbers = [];
         const maxVisiblePages = 4;
-
+    
         let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-
+        const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1); // 'const' instead of 'let'
+    
         if (endPage - startPage + 1 < maxVisiblePages) {
             startPage = Math.max(1, endPage - maxVisiblePages + 1);
         }
-
+    
         for (let i = startPage; i <= endPage; i++) {
             pageNumbers.push(i);
         }
-
+    
         return pageNumbers;
     };
 
-    const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setRowsPerPage(parseInt(e.target.value));
-        setCurrentPage(1);
-    };
+    //const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    //    setRowsPerPage(parseInt(e.target.value));
+    //    setCurrentPage(1);
+    //};
 
     const getStatus = (fechaVigencia: string, vigente: boolean) => {
-        const currentDate = new Date();
-        const expirationDate = new Date(fechaVigencia);
+        //const currentDate = new Date();
+        //const expirationDate = new Date(fechaVigencia);
 
         if (!vigente) {
             return (
@@ -241,6 +244,10 @@ const CodeReceipt = () => {
 
     const handleLastPage = () => {
         setCurrentPage(totalPages);
+    };
+
+    const closeModal = () => {
+        setIsContingencyModalOpen(false);
     };
 
     return (
@@ -406,9 +413,11 @@ const CodeReceipt = () => {
                 </div>
                 <Footer />
             </div>
-            {isContingencyModalOpen && (
-                <ModalContingency isOpen={isContingencyModalOpen} onClose={closeModal} />
-            )}
+            <ModalContingency
+                isOpen={isContingencyModalOpen}
+                onClose={closeModal}
+                onConfirm={() => {}} 
+            />
         </div>
     );
 };

@@ -61,20 +61,21 @@ const Activities: React.FC = () => {
     const getPageNumbers = () => {
         const pageNumbers = [];
         const maxVisiblePages = 4;
-
+    
         let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-
+        const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
         if (endPage - startPage + 1 < maxVisiblePages) {
             startPage = Math.max(1, endPage - maxVisiblePages + 1);
         }
-
+    
         for (let i = startPage; i <= endPage; i++) {
             pageNumbers.push(i);
         }
-
+    
         return pageNumbers;
     };
+    
 
     const handleRowsPerPageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         setRowsPerPage(parseInt(e.target.value));

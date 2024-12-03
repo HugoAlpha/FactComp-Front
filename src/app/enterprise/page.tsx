@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { FaEdit, FaPlus, FaTrashAlt } from 'react-icons/fa';
 import Sidebar from '@/components/commons/sidebar';
 import Header from '@/components/commons/header';
@@ -39,7 +39,7 @@ const EnterpriseList = () => {
         }
     };
 
-    const checkServerCommunication = async () => {
+    const checkServerCommunication = useCallback(async () => {
         try {
             const response = await fetch(`${PATH_URL_BACKEND}/contingencia/verificar-comunicacion`);
             if (!response.ok) {
@@ -91,11 +91,11 @@ const EnterpriseList = () => {
                 }
             });
         }
-    };
+    },[]);
 
     useEffect(() => {
         checkServerCommunication();
-    }, []);
+    }, [checkServerCommunication]);
 
     const createEnterprise = async (enterprise: Omit<Enterprise, 'id'>) => {
         try {
@@ -230,23 +230,23 @@ const EnterpriseList = () => {
     };
 
     const getPageNumbers = () => {
-        const totalPages = Math.ceil(enterprises.length / rowsPerPage);
         const pageNumbers = [];
         const maxVisiblePages = 4;
-
+    
         let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-
+        const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
         if (endPage - startPage + 1 < maxVisiblePages) {
             startPage = Math.max(1, endPage - maxVisiblePages + 1);
         }
-
+    
         for (let i = startPage; i <= endPage; i++) {
             pageNumbers.push(i);
         }
-
+    
         return pageNumbers;
     };
+
     const totalPages = Math.ceil(enterprises.length / rowsPerPage);
     const indexOfLastEnterprise = currentPage * rowsPerPage;
     const indexOfFirstEnterprise = indexOfLastEnterprise - rowsPerPage;

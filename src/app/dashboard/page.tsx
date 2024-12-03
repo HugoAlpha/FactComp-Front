@@ -11,27 +11,81 @@ import { PATH_URL_BACKEND } from "@/utils/constants";
 import Swal from "sweetalert2";
 import Footer from "@/components/commons/footer";
 
+interface Invoice {
+    id: number;
+    estado: string;
+    formato: string;
+    codigoMetodoPago: number;
+    montoTotal: number;
+    fechaEmision: string;
+    razonSocialEmisor: string;
+    puntoVenta: {
+        id: number;
+    };
+}
+
+interface FormattedInvoice {
+    id: number;
+    status: string;
+    statusColor: string;
+    method: string;
+    amount: string;
+    date: string;
+    company: string;
+}
+
+interface Client {
+    id: number;
+    nombreRazonSocial: string;
+    codigoTipoDocumentoIdentidad: number;
+    numeroDocumento: string;
+    codigoCliente?: string;
+}
+
+interface FormattedClient {
+    id: number;
+    name: string;
+    document: string;
+    code: string;
+}
+
+interface SidebarProps {
+    isOpen: boolean;
+    toggleSidebar: () => void;
+}
+
+interface Customer {
+    id: number;
+    nombreRazonSocial: string;
+    numeroDocumento: string;
+    complemento: string;
+    codigoTipoDocumentoIdentidad: number;
+    codigoCliente: string;
+    email: string;
+}
+
 const Dashboard = () => {
-    const [isClientModalOpen, setIsClientModalOpen] = useState(false);
-    const [selectedClient, setSelectedClient] = useState(null);
-    const [recentInvoices, setRecentInvoices] = useState([]);
-    const [recentClients, setRecentClients] = useState([]);
+    const [isClientModalOpen, setIsClientModalOpen] = useState<boolean>(false);
+    const [selectedClient, setSelectedClient] = useState<Customer | null>(null);
+    const [recentInvoices, setRecentInvoices] = useState<FormattedInvoice[]>([]);
+    const [recentClients, setRecentClients] = useState<FormattedClient[]>([]);
 
+    const [dailySales, setDailySales] = useState<number>(0);
+    const [monthlySales, setMonthlySales] = useState<number>(0);
+    const [totalOrders, setTotalOrders] = useState<number>(0);
+    const [totalClients, setTotalClients] = useState<number>(0);
+    const [isContingencyModalOpen, setIsContingencyModalOpen] = useState<boolean>(false);
+    const [isOpen, setIsOpen] = useState<boolean>(false);
 
-    const [dailySales, setDailySales] = useState(0);
-    const [monthlySales, setMonthlySales] = useState(0);
-    const [totalOrders, setTotalOrders] = useState(0);
-    const [totalClients, setTotalClients] = useState(0);
-    const [isContingencyModalOpen, setIsContingencyModalOpen] = useState(false);
-    const [isOpen, setIsOpen] = useState(false);
 
     const toggleSidebar = () => {
         setIsOpen(prevState => !prevState);
     };
 
-    const formatCurrency = (value) => {
-        return new Intl.NumberFormat('es-BO', { style: 'currency', currency: 'BOB', minimumFractionDigits: 2 }).format(value);
+    const formatCurrency = (value: string | number) => {
+        return new Intl.NumberFormat('es-BO', { style: 'currency', currency: 'BOB', minimumFractionDigits: 2 }).format(Number(value));     
     };
+    
 
     const handleOpenClientModal = () => {
         setSelectedClient(null);
@@ -42,11 +96,11 @@ const Dashboard = () => {
         setIsClientModalOpen(false);
     };
 
-    const handleSaveClient = (newClient) => {
+    const handleSaveClient = () => {
         handleCloseClientModal();
     };
 
-    const handleConfirm = (eventoDescripcion: string) => {
+    const handleConfirm = () => {
         setIsContingencyModalOpen(false);
     };
 
@@ -57,38 +111,41 @@ const Dashboard = () => {
                 const idSucursal = localStorage.getItem('idSucursal');
                 const fechaActual = new Date().toLocaleDateString('en-CA');
 
-                const dailySalesResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/ventas-diarias-monto`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        idPuntoVenta: parseInt(idPuntoVenta, 10),
-                        idSucursal: parseInt(idSucursal, 10),
-                        fecha: fechaActual,
-                    }),
-                });
-                const dailySalesData = await dailySalesResponse.json();
-                setDailySales(dailySalesData || 0);
+                if(idPuntoVenta && idSucursal){
+                    const dailySalesResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/ventas-diarias-monto`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            idPuntoVenta: parseInt(idPuntoVenta, 10),
+                            idSucursal: parseInt(idSucursal, 10),
+                            fecha: fechaActual,
+                        }),
+                    });
+                    const dailySalesData = await dailySalesResponse.json();
+                    setDailySales(dailySalesData || 0);
+    
+                    const primerDiaMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
+                    const ultimoDiaMes = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().split('T')[0];
+    
+                    const monthlySalesResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/ventas-mensuales-montos`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            idPuntoVenta: parseInt(idPuntoVenta, 10),
+                            idSucursal: parseInt(idSucursal, 10),
+                            fechaInicio: primerDiaMes,
+                            fechaFin: ultimoDiaMes,
+                        }),
+                    });
 
-                const primerDiaMes = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().split('T')[0];
-                const ultimoDiaMes = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).toISOString().split('T')[0];
-
-                const monthlySalesResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/ventas-mensuales-montos`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        idPuntoVenta: parseInt(idPuntoVenta, 10),
-                        idSucursal: parseInt(idSucursal, 10),
-                        fechaInicio: primerDiaMes,
-                        fechaFin: ultimoDiaMes,
-                    }),
-                });
-                const monthlySalesData = await monthlySalesResponse.json();
-                setMonthlySales(monthlySalesData || 0);
-
+                    const monthlySalesData = await monthlySalesResponse.json();
+                    setMonthlySales(monthlySalesData || 0);
+                }
+                
                 const idBranch = localStorage.getItem('idSucursal');
                 const idPOS = localStorage.getItem('idPOS');
                 const totalOrdersResponse = await fetch(`${PATH_URL_BACKEND}/dashboard/ventas-cantidad/${idPOS}/${idBranch}`);
@@ -101,13 +158,14 @@ const Dashboard = () => {
 
                 const response = await fetch(`${PATH_URL_BACKEND}/factura`);
                 if (response.ok) {
-                    const data = await response.json();
+                    const data: Invoice[] = await response.json();
+
                     const idPOS = localStorage.getItem('idPOS');
-                    const filteredData = data.filter(invoice => invoice.puntoVenta.id === Number(idPOS));
+                    const filteredData = data.filter((invoice) => invoice.puntoVenta.id === Number(idPOS));
                     const sortedData = filteredData.sort((a, b) => b.id - a.id);
                     const lastFourInvoices = sortedData.slice(0, 4);
 
-                    const formattedInvoices = lastFourInvoices.map(invoice => {
+                    const formattedInvoices: FormattedInvoice[] = lastFourInvoices.map((invoice) => {
                         let status, statusColor;
 
                         if (invoice.estado === "OFFLINE") {
@@ -142,9 +200,9 @@ const Dashboard = () => {
 
                 const clientsResponse = await fetch(`${PATH_URL_BACKEND}/api/clientes/`);
                 if (clientsResponse.ok) {
-                    const clientsData = await clientsResponse.json();
+                    const clientsData: Client[] = await clientsResponse.json();
                     const sortedClients = clientsData.sort((a, b) => b.id - a.id).slice(0, 4);
-                    const documentTypes = {
+                    const documentTypes: { [key: number]: string } = {
                         1: "CI",
                         2: "CEX",
                         5: "NIT",
@@ -152,7 +210,7 @@ const Dashboard = () => {
                         4: "OD"
                     };
 
-                    const formattedClients = sortedClients.map(client => ({
+                    const formattedClients: FormattedClient[] = sortedClients.map(client => ({
                         id: client.id,
                         name: client.nombreRazonSocial,
                         document: `${documentTypes[client.codigoTipoDocumentoIdentidad] || 'Documento Desconocido'} - ${client.numeroDocumento}`,
@@ -232,7 +290,7 @@ const Dashboard = () => {
 
     return (
         <div className="flex flex-col md:flex-row min-h-screen">
-            <Sidebar isOpen={isOpen} toggleSidebar={toggleSidebar} />
+            <Sidebar isOpen={isOpen} toggleSidebar={toggleSidebar} key="sidebar" />
             <div className="flex flex-col w-full min-h-screen">
                 <Header isOpen={isOpen} toggleSidebar={toggleSidebar} />
 
