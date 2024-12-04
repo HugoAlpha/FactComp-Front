@@ -103,9 +103,16 @@ const sendPackage = () => {
 
     const handleProductChange = (index: number, field: string, value: string) => {
         const updatedDetalle = [...detalle];
-        updatedDetalle[index][field] = value;
+
+        if (field === "montoDescuento") {
+            updatedDetalle[index][field] = parseFloat(value) || 0;
+        } else if (field === "cantidad") {
+            updatedDetalle[index][field] = parseFloat(value) || 1;
+        }
+
         setDetalle(updatedDetalle);
     };
+
 
 
 
@@ -335,4 +342,4 @@ const sendPackage = () => {
         </div>
     );
 }
-export default sendPackage;
+export default sendPackages;

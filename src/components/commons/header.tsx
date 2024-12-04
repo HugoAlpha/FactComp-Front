@@ -5,6 +5,8 @@ import ModalContingency from '../layouts/modalContingency';
 import { PATH_URL_BACKEND } from '@/utils/constants';
 import ModalUserInfo from '@/components/layouts/modalUserInfo';
 import Swal from 'sweetalert2';
+import { CiClock2 } from 'react-icons/ci';
+import ModalContingencyHistory from '../layouts/modalContingencyHistory';
 
 
 const normalColors = {
@@ -46,6 +48,10 @@ const Header = () => {
     const [isOnline, setIsOnline] = useState(true);
     const [userName, setuserName] = useState<string>('Usuario');
     const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const openModal = () => setIsModalOpen(true);
+    const closeModal = () => setIsModalOpen(false);
 
     const updateColors = (isContingency: boolean) => {
         const colors = isContingency ? contingencyColors : normalColors;
@@ -500,13 +506,28 @@ const Header = () => {
                         </div>
                     </label>
 
-                    <div className="relative" ref={userMenuRef}>
+                    <div className="group relative">
+                        <button
+                            onClick={openModal}
+                            className="bg-gray-200 p-2 rounded-full hover:bg-gray-300 transition duration-200"
+                        >
+                            <CiClock2 className="text-principalColor w-5 sm:w-6 h-5 sm:h-6" />
+                        </button>
+                        <span className="absolute top-full left-1/2 transform -translate-x-1/2 mt-1 hidden group-hover:flex items-center justify-center bg-gray-800 text-white text-xs rounded px-2 py-1">
+                            Historial
+                        </span>
+                    </div>
+
+                    <div className="group relative" ref={userMenuRef}>
                         <button
                             onClick={handleUserMenuToggle}
                             className="bg-gray-200 p-2 rounded-full hover:bg-gray-300 transition duration-200"
                         >
                             <FaUser className="text-principalColor text-lg sm:text-xl" />
                         </button>
+                        <span className="absolute top-full left-1/2 transform -translate-x-1/2 mt-1 hidden group-hover:flex items-center justify-center bg-gray-800 text-white text-xs rounded px-2 py-1">
+                            Perfil
+                        </span>
                         {showUserMenu && (
                             <div className="absolute right-0 mt-2 w-40 sm:w-48 bg-white rounded-lg shadow-lg z-50 divide-y divide-gray-100">
                                 <div className="px-3 sm:px-4 py-2 text-xs sm:text-sm text-gray-900">
@@ -515,7 +536,10 @@ const Header = () => {
                                 </div>
                                 <ul className="py-2 text-xs sm:text-sm text-gray-700">
                                     <li>
-                                        <button onClick={() => setIsUserModalOpen(true)} className="w-full px-3 sm:px-4 py-2 text-gray-700 hover:bg-gray-100 transition">
+                                        <button
+                                            onClick={() => setIsUserModalOpen(true)}
+                                            className="w-full px-3 sm:px-4 py-2 text-gray-700 hover:bg-gray-100 transition"
+                                        >
                                             Configuración
                                         </button>
                                         {isUserModalOpen && (
@@ -527,12 +551,18 @@ const Header = () => {
                         )}
                     </div>
 
-                    <button
-                        onClick={handleLogout}
-                        className="bg-gray-200 p-2 rounded-full hover:bg-gray-300 transition duration-200"
-                    >
-                        <IoExitOutline className="text-principalColor w-5 sm:w-6 h-5 sm:h-6" />
-                    </button>
+                    <div className="group relative">
+                        <button
+                            onClick={handleLogout}
+                            className="bg-gray-200 p-2 rounded-full hover:bg-gray-300 transition duration-200"
+                        >
+                            <IoExitOutline className="text-principalColor w-5 sm:w-6 h-5 sm:h-6" />
+                        </button>
+                        <span className="absolute top-full left-1/2 transform -translate-x-1/2 mt-1 hidden group-hover:flex items-center justify-center bg-gray-800 text-white text-xs rounded px-2 py-1">
+                            Cerrar sesión
+                        </span>
+                    </div>
+
                 </div>
             </div>
 
@@ -554,6 +584,12 @@ const Header = () => {
                     Tiempo restante: {formatTime(countdown)}
                 </div>
             )}
+
+            <ModalContingencyHistory
+                isOpen={isModalOpen}
+                onClose={closeModal}
+                onSelectClient={() => { }}
+            />
         </header>
     );
 

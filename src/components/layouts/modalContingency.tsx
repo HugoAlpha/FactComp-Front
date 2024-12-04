@@ -33,9 +33,14 @@ const ModalContingency: React.FC<ModalContingencyProps> = ({ isOpen, onClose, on
 
                 const sortedEventos = data.sort((a, b) => parseInt(a.codigoClasificador) - parseInt(b.codigoClasificador));
                 setEventos(sortedEventos);
-            } catch (err: any) {
-                console.error('Fetch error:', err);
-                setError('No se pudieron cargar los eventos. Intente nuevamente más tarde.');
+            } catch (err: unknown) {
+                if (err instanceof Error) {
+                    console.error('Fetch error:', err.message);
+                    setError('No se pudieron cargar los eventos. Intente nuevamente más tarde.');
+                } else {
+                    console.error('Unknown error:', err);
+                    setError('No se pudieron cargar los eventos. Intente nuevamente más tarde.');
+                }
             } finally {
                 setLoading(false);
             }
@@ -62,6 +67,10 @@ const ModalContingency: React.FC<ModalContingencyProps> = ({ isOpen, onClose, on
         const idPuntoVenta = localStorage.getItem('idPOS');
         const idSucursal = localStorage.getItem('idSucursal');
 
+        if (!idPuntoVenta || !idSucursal) {
+            throw new Error('No se encontró idPuntoVenta o idSucursal en localStorage');
+        }
+    
         const body = {
             idPuntoVenta: parseInt(idPuntoVenta, 10),
             idSucursal: parseInt(idSucursal, 10),
