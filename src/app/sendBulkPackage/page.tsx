@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import Sidebar from "@/components/commons/sidebar";
 import Header from "@/components/commons/header";
 import Swal from "sweetalert2";
-import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { PATH_URL_BACKEND } from "@/utils/constants";
 import { FaTrash } from "react-icons/fa";

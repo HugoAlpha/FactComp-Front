@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { FaUser, FaCog } from 'react-icons/fa';
+import { FaUser} from 'react-icons/fa';
 import { IoExitOutline } from 'react-icons/io5';
 import ModalContingency from '../layouts/modalContingency';
 import { PATH_URL_BACKEND } from '@/utils/constants';

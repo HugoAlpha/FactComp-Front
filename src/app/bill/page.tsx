@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { FaEye, FaTimes } from 'react-icons/fa';
 import { HiReceiptRefund } from "react-icons/hi2";
 import Sidebar from '@/components/commons/sidebar';
@@ -13,7 +13,11 @@ import Footer from '@/components/commons/footer';
 import { BsClipboardCheck } from 'react-icons/bs';
 import jsQR from 'jsqr';
 
-
+interface MotivoAnulacion {
+ 
+  codigoClasificador: string;
+  descripcion: string;
+}
 interface Bill {
   codigoPuntoVenta: number;
   puntoVenta: { id: number };
@@ -46,30 +50,26 @@ interface FormattedBill {
   reversion: boolean;
 }
 
+
 const BillList = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedBill, setSelectedBill] = useState<FormattedBill | null>(null);
+  const [selectedBill] = useState<FormattedBill | null>(null);
   const [bills, setBills] = useState<FormattedBill[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState<number>(10);
+  const [rowsPerPage] = useState<number>(10);
   const [estadoFilter, setEstadoFilter] = useState('TODAS');
-  const [motivosAnulacion, setMotivosAnulacion] = useState([]);
+  const [motivosAnulacion, setMotivosAnulacion] = useState<MotivoAnulacion[]>([]);
   const [fechaDesde, setFechaDesde] = useState<string | null>(null);
   const [fechaHasta, setFechaHasta] = useState<string | null>(null);
   const [isContingencyModalOpen, setIsContingencyModalOpen] = useState(false);
   const [isContingencyMode, setIsContingencyMode] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
-  const handleConfirmFunction = () => {
-    console.log('Función confirmada desde el modal');
-    setIsContingencyModalOpen(false); 
-};
 
-
-  const fetchBills = async (estadoFilterParam?: string) => {
+  const fetchBills = useCallback(async () => {
     try {
         const estadoParam = isContingencyMode
             ? 'OFFLINE'
-            : estadoFilterParam || estadoFilter === 'TODAS'
+            : estadoFilter === 'TODAS'
             ? ''
             : estadoFilter === 'VALIDA'
             ? '1'
@@ -90,20 +90,20 @@ const BillList = () => {
                 bill.codigoPuntoVenta === codigoPOS && bill.puntoVenta && bill.puntoVenta.id === idPOS
             );
 
-            const formattedData = filteredData.map((bill: Bill) => ({
-                documentNumber: bill.numeroDocumento,
-                numeroFactura: bill.numeroFactura,
-                client: bill.nombreRazonSocial,
-                date: new Date(bill.fechaEmision),
-                total: bill.montoTotal.toFixed(2),
-                estado: bill.estado || '-',
-                codigoSucursal: bill.codigoSucursal,
-                codigoPuntoVenta: bill.codigoPuntoVenta,
-                cuf: bill.cuf,
-                puntoVenta: bill.puntoVenta,
-                id: bill.id,
-                formato: bill.formato,
-                reversion: !!bill.reversion,
+            const formattedData: FormattedBill[] = filteredData.map((bill: Bill) => ({
+              documentNumber: bill.numeroDocumento,
+              numeroFactura: bill.numeroFactura,
+              client: bill.nombreRazonSocial,
+              date: new Date(bill.fechaEmision),
+              total: bill.montoTotal.toFixed(2),
+              estado: bill.estado || '-',
+              codigoSucursal: bill.codigoSucursal,
+              codigoPuntoVenta: bill.codigoPuntoVenta,
+              cuf: bill.cuf,
+              puntoVenta: bill.puntoVenta,
+              id: bill.id,
+              formato: bill.formato,
+              reversion: !!bill.reversion,
             }));
 
             const sortedData = formattedData.sort((a, b) => b.date.getTime() - a.date.getTime());
@@ -114,11 +114,12 @@ const BillList = () => {
     } catch (error) {
         console.error('Error fetching bills:', error);
     }
-};
+}, [isContingencyMode, estadoFilter]);
+
 
   useEffect(() => {
     fetchBills();
-  }, [isContingencyMode, estadoFilter]);
+  }, [fetchBills]);
 
   useEffect(() => {
     const handleContingencyChange = () => {
@@ -186,64 +187,58 @@ const BillList = () => {
     }
   };
 
-  const handleViewQR = async (cuf: string, numeroFactura: string): Promise<void> => {
+  const handleViewQR = async (cuf: string, numeroFactura: string) => {
     try {
-        const response = await fetch(`${PATH_URL_BACKEND}/images/view?cuf=${cuf}&numeroFactura=${numeroFactura}`, {
-            method: 'GET',
-        });
+      const response = await fetch(`${PATH_URL_BACKEND}/images/view?cuf=${cuf}&numeroFactura=${numeroFactura}`, {
+        method: 'GET',
+      });
 
-        if (response.ok) {
-            const blob = await response.blob();
-            const img = new Image();
-            img.src = URL.createObjectURL(blob);
+      if (response.ok) {
+        const blob = await response.blob();
+        const img = new Image();
+        img.src = URL.createObjectURL(blob);
 
-            img.onload = () => {
-                const canvas = document.createElement('canvas');
-                canvas.width = img.width;
-                canvas.height = img.height;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          const context = canvas.getContext('2d');
+          if (context) {
+            context.drawImage(img, 0, 0);
 
-                const context = canvas.getContext('2d');
-                if (context) {
-                    context.drawImage(img, 0, 0);
+            const imageData = context.getImageData(0, 0, img.width, img.height);
+            const qrCode = jsQR(imageData.data, imageData.width, imageData.height);
 
-                    const imageData = context.getImageData(0, 0, img.width, img.height);
-                    const qrCode = jsQR(imageData.data, imageData.width, imageData.height);
-
-                    if (qrCode) {
-                        window.open(qrCode.data, '_blank');
-                    } else {
-                        Swal.fire('Error', 'No se pudo leer el código QR.', 'error');
-                    }
-                } else {
-                    console.error('El contexto del canvas no se pudo obtener.');
-                    Swal.fire('Error', 'No se pudo procesar el QR debido a un error interno.', 'error');
-                }
-            };
-
-            img.onerror = () => {
-                console.error('Error al cargar la imagen para el QR.');
-                Swal.fire('Error', 'Ocurrió un problema al procesar la imagen del QR.', 'error');
-            };
-        } else {
-            Swal.fire('Error', 'No se pudo obtener el código QR desde el servidor.', 'error');
-        }
+            if (qrCode) {
+              window.open(qrCode.data, '_blank');
+            } else {
+              Swal.fire('Error', 'No se pudo leer el código QR.', 'error');
+            }
+          } else {
+            Swal.fire('Error', 'No se pudo obtener el contexto del canvas.', 'error');
+          }
+        };
+      } else {
+        Swal.fire('Error', 'No se pudo obtener el código QR.', 'error');
+      }
     } catch (error) {
-        console.error('Error fetching QR:', error);
-        Swal.fire('Error', 'Ocurrió un error al intentar obtener el código QR.', 'error');
+      console.error('Error fetching QR:', error);
+      Swal.fire('Error', 'Ocurrió un error al intentar obtener el código QR.', 'error');
     }
-};
+  };
+
+
+  useEffect(() => {
+      fetchBills();
+      const timer = setTimeout(() => {
+          checkServerCommunication();
+      }, 8000);
+      return () => clearTimeout(timer);
+  }, [estadoFilter , fetchBills]);
 
   useEffect(() => {
     fetchBills();
-    const timer = setTimeout(() => {
-        checkServerCommunication();
-    }, 8000);
-    return () => clearTimeout(timer);
-}, [estadoFilter]);
-
-  useEffect(() => {
-    fetchBills();
-  }, []);
+  }, [fetchBills]);
 
   useEffect(() => {
     const contingenciaEstado = localStorage.getItem('contingenciaEstado');
@@ -375,9 +370,9 @@ const BillList = () => {
     setCurrentPage(totalPages);
   };
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
+  //const handlePageChange = (page: number) => {
+    //setCurrentPage(page);
+  //};
 
   const getStatus = (estado: string) => {
     switch (estado) {
@@ -407,28 +402,29 @@ const BillList = () => {
       window.removeEventListener('contingencyActivated', handleContingencyChange);
       window.removeEventListener('contingencyDeactivated', handleContingencyChange);
     };
-  }, []);
+  }, [fetchBills]);
 
 
+  
   const getPageNumbers = (currentPage: number, totalPages: number) => {
     const pageNumbers = [];
     const maxVisiblePages = 4;
 
     let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
 
     if (endPage - startPage + 1 < maxVisiblePages) {
-      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        startPage = Math.max(1, endPage - maxVisiblePages + 1);
     }
 
     for (let i = startPage; i <= endPage; i++) {
-      pageNumbers.push(i);
+        pageNumbers.push(i);
     }
 
     return pageNumbers;
   };
 
-  const handleAnularFactura = async (bill: any) => {
+  const handleAnularFactura = async (bill: FormattedBill) => {
     if (bill.estado === 'ANULADO') {
         Swal.fire('Información', 'Esta factura ya fue anulada.', 'info');
         return;
@@ -442,7 +438,7 @@ const BillList = () => {
     const { value: motivo } = await Swal.fire({
         title: 'Selecciona el motivo de anulación',
         input: 'select',
-        inputOptions: motivosAnulacion.reduce((options: any, motivo: any) => {
+        inputOptions: motivosAnulacion.reduce((options: Record<string, string>, motivo: MotivoAnulacion) => {
             options[motivo.codigoClasificador] = motivo.descripcion;
             return options;
         }, {}),
@@ -489,7 +485,7 @@ const BillList = () => {
                     'La factura ha sido anulada correctamente.',
                     'success'
                 );
-                fetchBills(estadoFilter);
+                fetchBills();
             } else {
                 Swal.fire('Error!', 'No se pudo anular la factura.', 'error');
             }
@@ -500,7 +496,7 @@ const BillList = () => {
     }
 };
 
-const handleRevertAnulation = async (bill: any) => {
+const handleRevertAnulation = async (bill: FormattedBill) => {
   if (!bill.cuf) {
       Swal.fire('Error', 'No se encontró el CUF de la factura', 'error');
       return;
@@ -548,7 +544,7 @@ const handleRevertAnulation = async (bill: any) => {
               'La anulación de la factura ha sido revertida correctamente.',
               'success'
           );
-          fetchBills(estadoFilter);
+          fetchBills();
       } else {
           Swal.fire('Error!', 'No se pudo revertir la anulación de la factura.', 'error');
       }
@@ -600,7 +596,7 @@ const handleRevertAnulation = async (bill: any) => {
                 });
 
                 if (response.ok) {
-                    const data = await response.json();
+                    //const data = await response.json();
 
                     const deactivationEvent = new CustomEvent('contingencyDeactivated');
                     window.dispatchEvent(deactivationEvent);
@@ -633,6 +629,11 @@ const handleRevertAnulation = async (bill: any) => {
         }
     });
 };
+
+
+  const handleConfirm = () => {
+    setIsContingencyModalOpen(false); 
+  };
 
   return (
     <div className="flex min-h-screen">
@@ -828,11 +829,11 @@ const handleRevertAnulation = async (bill: any) => {
           </div>
         </div>
         {isContingencyModalOpen && (
-          <ModalContingency 
-          isOpen={isContingencyModalOpen} 
-          onClose={closeModal2} 
-          onConfirm={handleConfirmFunction}
-        />        
+          <ModalContingency
+            isOpen={isContingencyModalOpen}
+            onClose={closeModal2}
+            onConfirm={handleConfirm}  
+          />
         )}
         <Footer />
       </div>

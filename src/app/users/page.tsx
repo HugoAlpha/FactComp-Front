@@ -8,6 +8,20 @@ import ModalCreateUser from "../../components/layouts/modalCreateUser";
 import Swal from 'sweetalert2';
 import { PATH_URL_BACKEND, PATH_URL_SECURITY } from '@/utils/constants';
 import Footer from '@/components/commons/footer';
+interface User {
+    id: number;           
+    username: string;      
+    nombre: string;        
+    apellidos: string;     
+    email: string;        
+    id_empresa: number;   
+    rol: "ROLE_USER" | "ROLE_ADMIN" | "ROLE_CONTADOR";
+    celular?: string ;
+}
+interface Company {
+    id: number;
+    razonSocial: string;
+}
 
 const UserList = () => {
     const [users, setUsers] = useState<User[]>([]);
@@ -42,7 +56,7 @@ const UserList = () => {
             });
             const companiesData = await companyResponse.json();
 
-            usersData = usersData.sort((a, b) => b.id_user - a.id_user);
+            usersData = usersData.sort((a:User, b:User) => b.id - a.id);
     
             setUsers(usersData);
             setCompanies(companiesData);
@@ -91,7 +105,7 @@ const UserList = () => {
                     });
 
                     if (response.ok) {
-                        setUsers(prevUsers => prevUsers.filter(user => user.id_user !== userId));
+                        setUsers(prevUsers => prevUsers.filter(user => user.id !== userId));
                         Swal.fire('Eliminado', 'El usuario ha sido eliminado correctamente.', 'success');
                     } else {
                         Swal.fire('Error', 'No se pudo eliminar el usuario.', 'error');
@@ -190,20 +204,21 @@ const UserList = () => {
     const getPageNumbers = () => {
         const pageNumbers = [];
         const maxVisiblePages = 4;
-
+    
         let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-
+        const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+    
         if (endPage - startPage + 1 < maxVisiblePages) {
             startPage = Math.max(1, endPage - maxVisiblePages + 1);
         }
-
+    
         for (let i = startPage; i <= endPage; i++) {
             pageNumbers.push(i);
         }
-
+    
         return pageNumbers;
     };
+    
 
     const handleFirstPage = () => {
         setCurrentPage(1);
@@ -281,7 +296,7 @@ const UserList = () => {
                                 </thead>
                                 <tbody>
                                     {paginatedUsers.map((user) => (
-                                        <tr key={user.id_user} className="border-b hover:bg-gray-50 text-black">
+                                        <tr key={user.id} className="border-b hover:bg-gray-50 text-black">
                                             <td className="px-6 py-4">{user.username}</td>
                                             <td className="px-6 py-4">{user.nombre} {user.apellidos}</td>
                                             <td className="px-6 py-4">{user.email}</td>
@@ -292,7 +307,7 @@ const UserList = () => {
                                             <td className="px-6 py-4">
                                                 <div className="flex">
                                                     <button className="bg-red-200 hover:bg-red-300 p-2 rounded-l-lg flex items-center justify-center border border-red-300 relative group"
-                                                        onClick={() => handleDeleteUser(user.id_user)}>
+                                                        onClick={() => handleDeleteUser(user.id)}>
                                                         <FaTrashAlt className="text-black" />
                                                         <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 hidden group-hover:flex items-center justify-center bg-gray-800 text-white text-xs rounded px-2 py-1">
                                                             Borrar Usuario
