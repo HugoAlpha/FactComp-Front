@@ -350,7 +350,7 @@ const sendBulkPackage = () =>{
                             className="w-full bg-green-500 text-white py-2 rounded mt-4"
                             onClick={handleSubmit}
                         >
-                            Emitir Factura
+                            Registrar Facturas
                         </button>
                     </div>
                 </div>

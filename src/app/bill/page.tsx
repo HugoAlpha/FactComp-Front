@@ -30,7 +30,21 @@ interface Bill {
   reversion?: boolean;
 }
 
-
+interface FormattedBill {
+  documentNumber: string;
+  numeroFactura: string;
+  client: string;
+  date: Date;
+  total: string;
+  estado: string;
+  codigoSucursal: number;
+  codigoPuntoVenta: number;
+  cuf: string;
+  puntoVenta: { id: number };
+  id: string;
+  formato: string;
+  reversion: boolean;
+}
 
 const BillList = () => {
   const [searchQuery, setSearchQuery] = useState('');
@@ -45,12 +59,17 @@ const BillList = () => {
   const [isContingencyModalOpen, setIsContingencyModalOpen] = useState(false);
   const [isContingencyMode, setIsContingencyMode] = useState(false);
   const [userRole, setUserRole] = useState<string | null>(null);
+  const handleConfirmFunction = () => {
+    console.log('Función confirmada desde el modal');
+    setIsContingencyModalOpen(false); 
+};
 
-  const fetchBills = async () => {
+
+  const fetchBills = async (estadoFilterParam?: string) => {
     try {
         const estadoParam = isContingencyMode
             ? 'OFFLINE'
-            : estadoFilter === 'TODAS'
+            : estadoFilterParam || estadoFilter === 'TODAS'
             ? ''
             : estadoFilter === 'VALIDA'
             ? '1'
@@ -96,7 +115,6 @@ const BillList = () => {
         console.error('Error fetching bills:', error);
     }
 };
-
 
   useEffect(() => {
     fetchBills();
@@ -168,42 +186,52 @@ const BillList = () => {
     }
   };
 
-  const handleViewQR = async (cuf, numeroFactura) => {
+  const handleViewQR = async (cuf: string, numeroFactura: string): Promise<void> => {
     try {
-      const response = await fetch(`${PATH_URL_BACKEND}/images/view?cuf=${cuf}&numeroFactura=${numeroFactura}`, {
-        method: 'GET',
-      });
+        const response = await fetch(`${PATH_URL_BACKEND}/images/view?cuf=${cuf}&numeroFactura=${numeroFactura}`, {
+            method: 'GET',
+        });
 
-      if (response.ok) {
-        const blob = await response.blob();
-        const img = new Image();
-        img.src = URL.createObjectURL(blob);
+        if (response.ok) {
+            const blob = await response.blob();
+            const img = new Image();
+            img.src = URL.createObjectURL(blob);
 
-        img.onload = () => {
-          const canvas = document.createElement('canvas');
-          canvas.width = img.width;
-          canvas.height = img.height;
-          const context = canvas.getContext('2d');
-          context.drawImage(img, 0, 0);
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = img.width;
+                canvas.height = img.height;
 
-          const imageData = context.getImageData(0, 0, img.width, img.height);
-          const qrCode = jsQR(imageData.data, imageData.width, imageData.height);
+                const context = canvas.getContext('2d');
+                if (context) {
+                    context.drawImage(img, 0, 0);
 
-          if (qrCode) {
-            window.open(qrCode.data, '_blank');
-          } else {
-            Swal.fire('Error', 'No se pudo leer el código QR.', 'error');
-          }
-        };
-      } else {
-        Swal.fire('Error', 'No se pudo obtener el código QR.', 'error');
-      }
+                    const imageData = context.getImageData(0, 0, img.width, img.height);
+                    const qrCode = jsQR(imageData.data, imageData.width, imageData.height);
+
+                    if (qrCode) {
+                        window.open(qrCode.data, '_blank');
+                    } else {
+                        Swal.fire('Error', 'No se pudo leer el código QR.', 'error');
+                    }
+                } else {
+                    console.error('El contexto del canvas no se pudo obtener.');
+                    Swal.fire('Error', 'No se pudo procesar el QR debido a un error interno.', 'error');
+                }
+            };
+
+            img.onerror = () => {
+                console.error('Error al cargar la imagen para el QR.');
+                Swal.fire('Error', 'Ocurrió un problema al procesar la imagen del QR.', 'error');
+            };
+        } else {
+            Swal.fire('Error', 'No se pudo obtener el código QR desde el servidor.', 'error');
+        }
     } catch (error) {
-      console.error('Error fetching QR:', error);
-      Swal.fire('Error', 'Ocurrió un error al intentar obtener el código QR.', 'error');
+        console.error('Error fetching QR:', error);
+        Swal.fire('Error', 'Ocurrió un error al intentar obtener el código QR.', 'error');
     }
-  };
-
+};
 
   useEffect(() => {
     fetchBills();
@@ -800,7 +828,11 @@ const handleRevertAnulation = async (bill: any) => {
           </div>
         </div>
         {isContingencyModalOpen && (
-          <ModalContingency isOpen={isContingencyModalOpen} onClose={closeModal2} />
+          <ModalContingency 
+          isOpen={isContingencyModalOpen} 
+          onClose={closeModal2} 
+          onConfirm={handleConfirmFunction}
+        />        
         )}
         <Footer />
       </div>
