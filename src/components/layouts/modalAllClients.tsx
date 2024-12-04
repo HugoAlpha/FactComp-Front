@@ -8,7 +8,12 @@ interface Client {
     id: number;
     nombreRazonSocial: string;
     numeroDocumento: string;
+    complemento: string;
+    codigoTipoDocumentoIdentidad: number;
+    codigoCliente: string;
+    email: string;
 }
+
 
 interface ModalAllClientsProps {
     isOpen: boolean;
@@ -35,12 +40,12 @@ const ModalAllClients: React.FC<ModalAllClientsProps> = ({ isOpen, onClose, onSe
             const response = await fetch(`${PATH_URL_BACKEND}/api/clientes/`);
             if (response.ok) {
                 const data: Client[] = await response.json();
-                const sortedClients = data.sort((a, b) => b.id - a.id);
+                //const sortedClients = data.sort((a, b) => b.id - a.id);
                 setClients(data);
             } else {
                 Swal.fire('Error', 'Error al obtener la lista de clientes', 'error');
             }
-        } catch (error) {
+        } catch  {
             Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
         }
     };
@@ -55,7 +60,7 @@ const ModalAllClients: React.FC<ModalAllClientsProps> = ({ isOpen, onClose, onSe
         setIsClientModalOpen(true);
     };
 
-    const handleSaveClient = (savedClient: Client) => {
+    const handleSaveClient = () => {
         setIsClientModalOpen(false);
         fetchClients();
     };

@@ -43,7 +43,7 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
                 } else {
                     Swal.fire('Error', 'Error al obtener tipos de documentos de identidad', 'error');
                 }
-            } catch (error) {
+            } catch  {
                 Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
             }
         };
@@ -162,7 +162,7 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
     
                     return userConfirmation.isConfirmed;
                 }
-            } catch (error) {
+            } catch  {
                 Swal.fire('Error', 'No se pudo conectar para verificar el NIT', 'error');
                 return false;
             }
@@ -214,7 +214,7 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
                 } else {
                     Swal.fire('Error', 'Ocurrió un error al guardar el cliente', 'error');
                 }
-            } catch (error) {
+            } catch {
                 Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
             }
         } else {

@@ -16,7 +16,7 @@ interface User {
     email: string;        
     id_empresa: number;   
     rol: "ROLE_USER" | "ROLE_ADMIN" | "ROLE_CONTADOR";
-    celular?: string | number;
+    celular?: string ;
 }
 interface Company {
     id: number;

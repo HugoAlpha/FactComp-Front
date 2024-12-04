@@ -15,7 +15,7 @@ const ModalCreatePos: React.FC<ModalCreatePosProps> = ({ isOpen, onClose, onPosC
 
     const validateForm = () => {
         const newErrors = { nombre: '', selectedTipoPuntoVenta: '' };
-        const alphanumericPattern = /^[a-zA-Z0-9 ]*$/;
+        //const alphanumericPattern = /^[a-zA-Z0-9 ]*$/;
 
         if (!nombre) {
             newErrors.nombre = 'El nombre es requerido.';
