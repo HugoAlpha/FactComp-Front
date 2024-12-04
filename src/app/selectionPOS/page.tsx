@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { FaCashRegister, FaPlus } from "react-icons/fa6";
+import { FaCashRegister } from "react-icons/fa6";
 import HeaderPOS from "@/components/commons/headerPOS";
 import { PATH_URL_BACKEND } from "@/utils/constants";
 import ModalContingency from "@/components/layouts/modalContingency";
@@ -9,15 +9,33 @@ import Swal from "sweetalert2";
 import { FaList, FaTable } from "react-icons/fa";
 import Footer from "@/components/commons/footer";
 
-const KanbanView = () => {
-  const today = new Date().toLocaleDateString("es-ES", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-  });
 
-  const [salesPoints, setSalesPoints] = useState([]);
-  const [filteredSalesPoints, setFilteredSalesPoints] = useState([]);
+interface Sucursal {
+  id: number;
+  codigo: string;
+}
+
+interface SalesPoint {
+  id: number;
+  nombre: string;
+  codigo: string;
+  sucursal?: Sucursal;
+}
+
+interface NewPos {
+  name: string;
+  location: string;
+}
+
+const KanbanView = () => {
+  //const today = new Date().toLocaleDateString("es-ES", {
+  //  year: "numeric",
+  //  month: "2-digit",
+  //  day: "2-digit",
+  //});
+
+  const [salesPoints, setSalesPoints] = useState<SalesPoint[]>([]);
+  const [filteredSalesPoints, setFilteredSalesPoints] = useState<SalesPoint[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [role, setRole] = useState<string | null>(null);
   const [isContingencyModalOpen, setIsContingencyModalOpen] = useState(false);
@@ -61,7 +79,7 @@ const KanbanView = () => {
           timer: 1500
         });
       }
-    } catch (error) {
+    } catch {
       Swal.fire("Error", "Error en la conexión con el servidor", "error");
     }
   };
@@ -89,7 +107,7 @@ const KanbanView = () => {
       });
 
       fetchSalesPoints();
-    } catch (error) {
+    } catch {
       Swal.fire("Error", "No se pudo generar el CUIS", "error");
     }
   };
@@ -101,7 +119,7 @@ const KanbanView = () => {
         const data = await response.json();
         setTiposPuntoVenta(data);
       }
-    } catch (error) {
+    } catch {
       Swal.fire("Error", "No se pudo obtener los tipos de punto de venta", "error");
     }
   };
@@ -113,7 +131,7 @@ const KanbanView = () => {
     fetchTiposPuntoVenta();
   }, []);
 
-  const handleSearch = (e) => {
+  const handleSearch = (e: { target: { value: string; }; }) => {
     const term = e.target.value.toLowerCase();
     setSearchTerm(term);
     const filtered = salesPoints.filter((point) =>
@@ -122,13 +140,13 @@ const KanbanView = () => {
     setFilteredSalesPoints(filtered);
   };
 
-  const handleSelectSalesPoint = (id, codigo, sucursal) => {
-    localStorage.setItem("idPOS", id);
+  const handleSelectSalesPoint = (id: number, codigo: string, sucursal: Sucursal | undefined) => {
+    localStorage.setItem("idPOS", id.toString());
     localStorage.setItem("CodigoPOS", codigo);
 
     if (role === "ROLE_USER") {
       if (sucursal && sucursal.id !== undefined && sucursal.codigo !== undefined) {
-        localStorage.setItem("idSucursal", sucursal.id);
+        localStorage.setItem("idSucursal", sucursal.id.toString());
         localStorage.setItem("CodigoSucursal", sucursal.codigo);
       }
       window.location.href = "/dashboardCashier";
@@ -163,13 +181,13 @@ const KanbanView = () => {
           console.error("Error de comunicación con el servidor:", response.statusText);
         }
       }
-    } catch (error) {
+    } catch {
       Swal.fire("Error", "No se pudo conectar con el servidor", "error");
     }
   };
 
   const handleSyncCatalogsAndParameters = async () => {
-    let timerInterval;
+    let timerInterval: number;
 
     try {
       Swal.fire({
@@ -207,12 +225,12 @@ const KanbanView = () => {
         timer: 1000,
         showConfirmButton: false,
       });
-    } catch (error) {
+    } catch {
       Swal.fire("Error", "No se pudo sincronizar los catálogos y parámetros", "error");
     }
   };
 
-  const handleGenerateCuisForPOS = async (pointId) => {
+  const handleGenerateCuisForPOS = async (pointId: number | string) => {
     const branchId = parseInt(localStorage.getItem("idSucursal") || "0", 10);
   
     if (!branchId || !pointId) {
@@ -221,7 +239,7 @@ const KanbanView = () => {
     }
   
     try {
-      let timerInterval;
+      let timerInterval: number;
         Swal.fire({
         title: "Generando CUIS",
         html: "Espere mientras generamos el CUIS.",
@@ -255,7 +273,7 @@ const KanbanView = () => {
       });
   
       fetchSalesPoints();
-    } catch (error) {
+    } catch  {
       Swal.fire("Error", "No se pudo generar el CUIS", "error");
     }
   };
@@ -273,10 +291,11 @@ const KanbanView = () => {
   };
 
   const handleConfirm = (eventoDescripcion: string) => {
+    console.log(eventoDescripcion);
     setIsContingencyModalOpen(false);
   };
 
-  const handleCreatePos = async (newPos) => {
+  const handleCreatePos = async (newPos: NewPos) => {
     try {
       const response = await fetch(`${PATH_URL_BACKEND}/operaciones/punto-venta/registrar`, {
         method: "POST",
@@ -290,7 +309,7 @@ const KanbanView = () => {
       } else {
         Swal.fire("Error", "No se pudo crear el punto de venta", "error");
       }
-    } catch (error) {
+    } catch {
       Swal.fire("Error", "Error al registrar el punto de venta", "error");
     }
   };
