@@ -8,7 +8,6 @@ import { PATH_URL_BACKEND } from "@/utils/constants";
 import { FaTrash } from "react-icons/fa";
 import Footer from "@/components/commons/footer";
 
-
 interface Cliente {
     id: number;
     nombreRazonSocial: string;
@@ -103,16 +102,9 @@ const sendPackage = () => {
 
     const handleProductChange = (index: number, field: string, value: string) => {
         const updatedDetalle = [...detalle];
-
-        if (field === "montoDescuento") {
-            updatedDetalle[index][field] = parseFloat(value) || 0;
-        } else if (field === "cantidad") {
-            updatedDetalle[index][field] = parseFloat(value) || 1;
-        }
-
+        updatedDetalle[index][field] = value;
         setDetalle(updatedDetalle);
     };
-
 
 
 
@@ -342,4 +334,4 @@ const sendPackage = () => {
         </div>
     );
 }
-export default sendPackages;
+export default sendPackage;
