@@ -84,7 +84,7 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
         } else {
           throw new Error('No se pudo obtener la lista de métodos de pago.');
         }
-      } catch (error) {
+      } catch {
         Swal.fire('Error', 'No se pudieron obtener los métodos de pago. Intente nuevamente.', 'error');
       }
     };

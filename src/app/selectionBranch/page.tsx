@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import { FaBuilding, FaPlus } from "react-icons/fa";
+import { FaBuilding } from "react-icons/fa";
 import HeaderBranch from '@/components/commons/headerBranch';
 import { PATH_URL_BACKEND } from "@/utils/constants";
 import ModalContingency from '@/components/layouts/modalContingency';
@@ -8,7 +8,12 @@ import Swal from 'sweetalert2';
 import Footer from '@/components/commons/footer';
 import ModalCreateBranch from '@/components/layouts/modalCreateBranches';
 
+
+interface Empresa {
+    id: number;
+}
 interface Branch {
+    empresa?: Empresa;
     id: number;
     nombre: string;
     municipio: string;
@@ -16,11 +21,11 @@ interface Branch {
 }
 
 const SelectionBranch = () => {
-    const today = new Date().toLocaleDateString('es-ES', {
-        year: 'numeric',
-        month: '2-digit',
-        day: '2-digit'
-    });
+    //const today = new Date().toLocaleDateString('es-ES', {
+    //    year: 'numeric',
+    //    month: '2-digit',
+    //    day: '2-digit'
+    //});
 
     const [branches, setBranches] = useState<Branch[]>([]);
     const [filteredBranches, setFilteredBranches] = useState<Branch[]>([]);
@@ -43,13 +48,13 @@ const SelectionBranch = () => {
             const response = await fetch(`${PATH_URL_BACKEND}/sucursales`);
             if (response.ok) {
                 const data: Branch[] = await response.json();
-                const filteredBranches = data.filter(branch => branch.empresa.id === idEmpresa);
+                const filteredBranches = data.filter(branch => branch.empresa && branch.empresa.id === idEmpresa);
                 setBranches(filteredBranches);
                 setFilteredBranches(filteredBranches);
             } else {
                 Swal.fire('Error', 'No se pudo obtener la lista de sucursales', 'error');
             }
-        } catch (error) {
+        } catch  {
             Swal.fire('Error', 'Error en la conexión con el servidor', 'error');
         }
     };
@@ -58,7 +63,7 @@ const SelectionBranch = () => {
         fetchBranches();
     }, []);
 
-    const handleSearch = (e) => {
+    const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         const term = e.target.value.toLowerCase();
         setSearchTerm(term);
         const filtered = branches.filter(branch => branch.nombre.toLowerCase().includes(term));

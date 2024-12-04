@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import Sidebar from "@/components/commons/sidebar";
 import Header from "@/components/commons/header";
 import Swal from "sweetalert2";
-import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { PATH_URL_BACKEND } from "@/utils/constants";
 import { FaTrash } from "react-icons/fa";
@@ -350,7 +349,7 @@ const sendBulkPackage = () => {
                             className="w-full bg-green-500 text-white py-2 rounded mt-4"
                             onClick={handleSubmit}
                         >
-                            Emitir Factura
+                            Registrar Facturas
                         </button>
                     </div>
                 </div>
