@@ -3,8 +3,9 @@ const nextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  reactStrictMode: true,
   images: {
-    domains: ['http://190.181.63.219:5053/img'],
+    domains: ["190.181.63.219"],
   },
 };
 
