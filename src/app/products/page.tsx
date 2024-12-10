@@ -358,6 +358,7 @@ const ProductList = () => {
                                                     width={80}  
                                                     height={80} 
                                                     className="object-cover rounded-lg shadow-sm"
+                                                    unoptimized
                                                     onError={(e) => {
                                                         (e.target as HTMLImageElement).src = "/images/caja.png";
                                                     }}
