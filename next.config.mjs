@@ -4,7 +4,7 @@ const nextConfig = {
       ignoreBuildErrors: true,
     },
     images: {
-      domains: ['10.1.5.193'],
+      domains: ['190.181.63.219'],
     },
   };
   
