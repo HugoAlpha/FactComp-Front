@@ -132,7 +132,12 @@ const sendPackage = () => {
                 montoDescuento: parseFloat(d.montoDescuento),
             })),
             idSucursal: parseInt(idSucursal),
-            numeroFactura: ''
+            numeroFactura: '',
+            fechaHoraEmision: null,
+            cafc: false,
+            numeroTarjeta: null,
+            descuentoGlobal: null,
+            monGiftCard: null
         };
 
         let timerInterval;

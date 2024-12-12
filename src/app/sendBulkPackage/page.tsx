@@ -162,6 +162,7 @@ const sendBulkPackage = () => {
             numeroTarjeta: '',
             montoGiftCard: '',
             descuentoGlobal: null,
+            monGiftCard: null
         };
 
         let timerInterval;
