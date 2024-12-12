@@ -510,7 +510,7 @@ const Header = () => {
                 <div className="flex flex-wrap items-center justify-center sm:justify-start space-x-4 sm:space-x-6">
                     <div className="relative text-center sm:text-left">
                         <span className="text-base sm:text-lg font-semibold text-principalColor whitespace-nowrap">
-                            Sistema de Facturación Electronica en Línea
+                            Sistema de Facturación Computarizada en Línea
                         </span>
                     </div>
                     <div className="flex items-center bg-fourthColor px-2 sm:px-3 py-1 rounded-lg space-x-2">

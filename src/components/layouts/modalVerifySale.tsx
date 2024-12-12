@@ -221,7 +221,7 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
       };
 
       const response = await fetch(
-        `${PATH_URL_BACKEND}/factura/emitir`,
+        `${PATH_URL_BACKEND}/factura/emitir-computarizada`,
         {
           method: 'POST',
           headers: {
