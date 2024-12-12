@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import {FaEdit, FaPlus, FaSearch } from 'react-icons/fa';
+import { FaEdit, FaPlus, FaSearch } from 'react-icons/fa';
 import Sidebar from '@/components/commons/sidebar';
 import Header from '@/components/commons/header';
 import { PATH_URL_BACKEND, PATH_URL_IMAGES } from "@/utils/constants";
@@ -17,9 +17,9 @@ interface Image {
 }
 
 interface UnidadMedidaOption {
-    codigoClasificador: string;  
+    codigoClasificador: string;
     descripcion: string;
-    
+
 }
 interface Product {
     id: number;
@@ -63,17 +63,17 @@ const ProductList = () => {
                 const productResponse = await fetch(`${PATH_URL_BACKEND}/item/obtener-items`);
                 const productsData: Product[] = await productResponse.json();
                 const sortedProductsData = productsData.sort((a, b) => b.id - a.id);
-    
+
                 const imageResponse = await fetch(`${PATH_URL_IMAGES}/images`);
                 const imagesData = await imageResponse.json();
-    
+
                 const unidadMedidaResponse = await fetch(`${PATH_URL_BACKEND}/parametro/unidad-medida`);
                 const unidadMedidaData: UnidadMedidaOption[] = await unidadMedidaResponse.json();
-    
+
                 const updatedProducts = sortedProductsData.map(product => {
                     const image = imagesData.find((img: Image) => img.itemId === product.id);
                     const unidadMedida = unidadMedidaData.find(um => String(um.codigoClasificador) === String(product.unidadMedida));
-    
+
                     return {
                         ...product,
                         imageUrl: image ? `${PATH_URL_IMAGES}/images/${image.id}` : '/images/caja.png',
@@ -81,16 +81,16 @@ const ProductList = () => {
                         unidadMedidaDescripcion: unidadMedida ? unidadMedida.descripcion : 'No disponible'
                     };
                 });
-    
+
                 setProducts(updatedProducts);
             } catch (error) {
                 console.error('Error al obtener productos, imágenes o unidades de medida:', error);
             }
         };
-    
+
         fetchProductsAndImages();
     }, []);
-    
+
 
     const checkServerCommunication = async () => {
         try {
@@ -186,18 +186,18 @@ const ProductList = () => {
     const getPageNumbers = () => {
         const pageNumbers = [];
         const maxVisiblePages = 4;
-    
+
         let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
         const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
-    
+
         if (endPage - startPage + 1 < maxVisiblePages) {
             startPage = Math.max(1, endPage - maxVisiblePages + 1);
         }
-    
+
         for (let i = startPage; i <= endPage; i++) {
             pageNumbers.push(i);
         }
-    
+
         return pageNumbers;
     };
 
@@ -243,7 +243,7 @@ const ProductList = () => {
 
                 return {
                     ...product,
-                    imageUrl: image ? `${PATH_URL_IMAGES}/images/${image.id}` : '/images/caja.png',
+                    imageUrl: image ? `http://190.181.63.219:5053/img/images/${image.id}` : '/images/caja.png',
                     unidadMedidaDescripcion: unidadMedida ? unidadMedida.descripcion : 'No disponible'
                 };
             });
@@ -280,7 +280,7 @@ const ProductList = () => {
         );
     };
     */
-    
+
     const handleFirstPage = () => {
         setCurrentPage(1);
     };
@@ -353,10 +353,11 @@ const ProductList = () => {
                                         <tr key={product.id} className="border-b hover:bg-gray-50 text-black">
                                             <td className="px-4 py-4">
                                                 <Image
-                                                    src={product.imageUrl || '/images/caja.png'}  
+                                                    src={product.imageUrl || '/images/caja.png'}
                                                     alt={product.descripcion}
-                                                    width={80}  
-                                                    height={80} 
+                                                    width={80}
+                                                    height={80}
+                                                    unoptimized
                                                     className="object-cover rounded-lg shadow-sm"
                                                     unoptimized
                                                     onError={(e) => {
@@ -374,15 +375,15 @@ const ProductList = () => {
                                             <td className="px-6 py-4">{product.codigoProductoSin}</td>
                                             <td className="px-6 py-4">{product.unidadMedidaDescripcion}</td>
                                             <td className="px-6 py-4">
-                                            <button
-                                                className="bg-blue-200 hover:bg-blue-300 p-2 rounded-r-lg flex items-center justify-center border border-blue-300 relative group"
-                                                onClick={() => handleOpenModal(product)}
-                                            >
-                                                <FaEdit className="text-black" />
-                                                <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 hidden group-hover:flex items-center justify-center bg-gray-800 text-white text-xs rounded px-2 py-1">
-                                                    Editar Producto
-                                                </span>
-                                            </button>
+                                                <button
+                                                    className="bg-blue-200 hover:bg-blue-300 p-2 rounded-r-lg flex items-center justify-center border border-blue-300 relative group"
+                                                    onClick={() => handleOpenModal(product)}
+                                                >
+                                                    <FaEdit className="text-black" />
+                                                    <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 hidden group-hover:flex items-center justify-center bg-gray-800 text-white text-xs rounded px-2 py-1">
+                                                        Editar Producto
+                                                    </span>
+                                                </button>
                                             </td>
                                         </tr>
                                     ))}
@@ -450,7 +451,7 @@ const ProductList = () => {
             <ModalContingency
                 isOpen={isContingencyModalOpen}
                 onClose={closeModal}
-                onConfirm={() => {}} 
+                onConfirm={() => { }}
             />
         </div>
     );

@@ -10,13 +10,13 @@ import { FaTrash } from "react-icons/fa";
 import Footer from "@/components/commons/footer";
 
 interface Cliente {
-    id: number; 
+    id: number;
     codigoCliente: string;
     nombreRazonSocial: string;
 }
 
 interface MetodoPago {
-    id: number;  
+    id: number;
     codigoClasificador: string;
     descripcion: string;
 }
@@ -84,14 +84,14 @@ const ManualBill = () => {
     const handleAddProduct = () => {
         setDetalle([...detalle, { idProducto: 0, cantidad: 1, montoDescuento: 0 }]);
     };
-    
+
 
     const handleRemoveProduct = (index: number) => {
         const updatedDetalle = [...detalle];
         updatedDetalle.splice(index, 1);
         setDetalle(updatedDetalle);
     };
-    
+
     const handleProductChange = (
         index: number,
         field: keyof DetalleProducto,
@@ -104,12 +104,12 @@ const ManualBill = () => {
         } else if (field === 'cantidad' || field === 'montoDescuento') {
             updatedDetalle[index][field] = typeof value === 'string' ? parseFloat(value) : value;
         }
-    
+
         setDetalle(updatedDetalle);
     };
-    
-    
-    
+
+
+
     const validateFechaHoraEmision = (date: Date) => {
         if (date < rangoFechaInicio || date > rangoFechaFin) {
             Swal.fire({
@@ -124,11 +124,11 @@ const ManualBill = () => {
 
     const handleSubmit = async () => {
         if (!validateFechaHoraEmision(fechaHoraEmision)) return;
-    
+
         const cliente = clientes.find((c) => c.id === parseInt(selectedCliente));
         const metodoPago = metodosPago.find((m) => m.codigoClasificador === selectedMetodoPago);
-    
-        const idPuntoVentaValue = idPuntoVenta ? parseInt(idPuntoVenta) : 0; 
+
+        const idPuntoVentaValue = idPuntoVenta ? parseInt(idPuntoVenta) : 0;
 
         const facturaBase = {
             usuario: cliente?.codigoCliente || "",
@@ -139,30 +139,30 @@ const ManualBill = () => {
             activo: false,
             detalle: detalle.map((d) => ({
                 idProducto: d.idProducto,
-                cantidad: d.cantidad.toString(), 
-                montoDescuento: d.montoDescuento.toString(), 
+                cantidad: d.cantidad.toString(),
+                montoDescuento: d.montoDescuento.toString(),
             })),
-            idSucursal: parseInt(idSucursal || "0"), 
+            idSucursal: parseInt(idSucursal || "0"),
             fechaHoraEmision: `${fechaHoraEmision.getFullYear()}-${(fechaHoraEmision.getMonth() + 1)
                 .toString()
                 .padStart(2, "0")}-${fechaHoraEmision
-                .getDate()
-                .toString()
-                .padStart(2, "0")} ${fechaHoraEmision
-                .getHours()
-                .toString()
-                .padStart(2, "0")}:${fechaHoraEmision
-                .getMinutes()
-                .toString()
-                .padStart(2, "0")}:${fechaHoraEmision.getSeconds().toString().padStart(2, "0")}`,
+                    .getDate()
+                    .toString()
+                    .padStart(2, "0")} ${fechaHoraEmision
+                        .getHours()
+                        .toString()
+                        .padStart(2, "0")}:${fechaHoraEmision
+                            .getMinutes()
+                            .toString()
+                            .padStart(2, "0")}:${fechaHoraEmision.getSeconds().toString().padStart(2, "0")}`,
             cafc: true,
         };
-    
+
         // Handle multiple invoices if generateMultiple is true
         if (generateMultiple && startInvoice && endInvoice) {
             const start = parseInt(startInvoice);
             const end = parseInt(endInvoice);
-    
+
             if (start > end) {
                 Swal.fire({
                     icon: "error",
@@ -171,7 +171,7 @@ const ManualBill = () => {
                 });
                 return;
             }
-    
+
             Swal.fire({
                 title: "Generando facturas...",
                 html: "Progreso: <b>0%</b>",
@@ -181,7 +181,7 @@ const ManualBill = () => {
                     Swal.showLoading();
                 },
             });
-    
+
             for (let num = start; num <= end; num++) {
                 try {
                     const factura = { ...facturaBase, numeroFactura: num };
@@ -190,7 +190,7 @@ const ManualBill = () => {
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(factura),
                     });
-    
+
                     const progress = Math.round(((num - start + 1) / (end - start + 1)) * 100);
                     Swal.update({
                         html: `Progreso: <b>${progress}%</b> (Factura ${num} de ${end})`,
@@ -205,7 +205,7 @@ const ManualBill = () => {
                     return;
                 }
             }
-    
+
             Swal.fire({
                 icon: "success",
                 title: "Facturas generadas",
@@ -219,7 +219,7 @@ const ManualBill = () => {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(factura),
                 });
-    
+
                 Swal.fire({
                     icon: "success",
                     title: "Factura emitida",
@@ -235,7 +235,7 @@ const ManualBill = () => {
             }
         }
     };
-    
+
     const filteredClientes = clientes.filter(cliente =>
         cliente.nombreRazonSocial.toLowerCase().includes(searchCliente.toLowerCase())
     );
@@ -372,8 +372,8 @@ const ManualBill = () => {
                         <div>
                             <label className="block text-gray-700 font-medium mb-2">Fecha y Hora de Emisión</label>
                             <DatePicker
-                                selected={fechaHoraEmision || new Date()} 
-                                onChange={(date: Date | null) => setFechaHoraEmision(date || new Date())} 
+                                selected={fechaHoraEmision || new Date()}
+                                onChange={(date: Date | null) => setFechaHoraEmision(date || new Date())}
                                 showTimeSelect
                                 timeFormat="HH:mm"
                                 dateFormat="yyyy-MM-dd HH:mm"

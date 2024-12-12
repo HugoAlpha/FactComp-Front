@@ -8,7 +8,6 @@ import { PATH_URL_BACKEND } from "@/utils/constants";
 import { FaTrash } from "react-icons/fa";
 import Footer from "@/components/commons/footer";
 
-
 interface Cliente {
     id: number;
     nombreRazonSocial: string;
@@ -45,7 +44,7 @@ interface Factura {
 }
 
 
-const sendPackages = () => {
+const sendPackage = () => {
     const [clientes, setClientes] = useState<Cliente[]>([]);
     const [metodosPago, setMetodosPago] = useState<MetodoPago[]>([]);
     const [productos, setProductos] = useState<Producto[]>([]);
@@ -75,7 +74,7 @@ const sendPackages = () => {
             // Asegurarse de que el valor obtenido sea un número (y no null)
             setIdPuntoVenta(puntoVenta ? parseInt(puntoVenta) : null); // o 0 si prefieres un valor por defecto
             setIdSucursal(sucursal ? parseInt(sucursal) : null);
-            
+
         }
 
         fetch(`${PATH_URL_BACKEND}/api/clientes/`)
@@ -103,18 +102,11 @@ const sendPackages = () => {
 
     const handleProductChange = (index: number, field: string, value: string) => {
         const updatedDetalle = [...detalle];
-        
-        if (field === "montoDescuento") {
-            updatedDetalle[index][field] = parseFloat(value) || 0;  
-        } else if (field === "cantidad") {
-            updatedDetalle[index][field] = parseFloat(value) || 1;  
-        }
-    
+        updatedDetalle[index][field] = value;
         setDetalle(updatedDetalle);
     };
-    
 
-    
+
 
     const handleSubmit = async () => {
         if (detalle.length === 0) {
@@ -124,7 +116,7 @@ const sendPackages = () => {
 
         const cliente = clientes.find(c => c.id === parseInt(selectedCliente));
         const metodoPago = metodosPago.find(m => m.codigoClasificador === selectedMetodoPago);
-    
+
         const idPuntoVentaValue = idPuntoVenta ? parseInt(idPuntoVenta) : 0; // Si es null, asigna 0 como valor predeterminado
 
         const factura = {
@@ -142,7 +134,7 @@ const sendPackages = () => {
             idSucursal: parseInt(idSucursal),
             numeroFactura: ''
         };
-    
+
         let timerInterval;
         Swal.fire({
             title: "Generando facturas...",
@@ -152,7 +144,7 @@ const sendPackages = () => {
             didOpen: () => Swal.showLoading(),
             willClose: () => clearInterval(timerInterval),
         });
-    
+
         for (let i = 0; i < cantidadFacturas; i++) {
             try {
                 await fetch(`${PATH_URL_BACKEND}/factura/emitir`, {
@@ -180,7 +172,7 @@ const sendPackages = () => {
             timer: 3000,
             timerProgressBar: true,
             showConfirmButton: false,
-            
+
         });
         resetForm();
 
@@ -205,9 +197,9 @@ const sendPackages = () => {
     const filteredMetodosPago = metodosPago.filter(metodo =>
         metodo.descripcion.toLowerCase().includes(searchMetodoPago.toLowerCase())
     );
-    
-    return(
-    <div className="flex flex-col md:flex-row min-h-screen">
+
+    return (
+        <div className="flex flex-col md:flex-row min-h-screen">
             <Sidebar />
             <div className="flex flex-col w-full min-h-screen">
                 <Header />
@@ -253,7 +245,7 @@ const sendPackages = () => {
                                     </ul>
                                 </div>
                             )}
-                        </div> 
+                        </div>
 
                         <div>
                             <label className="block text-gray-700 font-medium mb-2">Cantidad de Facturas</label>
@@ -342,4 +334,4 @@ const sendPackages = () => {
         </div>
     );
 }
-export default sendPackages;
+export default sendPackage;
