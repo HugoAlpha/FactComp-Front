@@ -8,7 +8,6 @@ import Swal from 'sweetalert2';
 import { CiClock2 } from 'react-icons/ci';
 import ModalContingencyHistory from '../layouts/modalContingencyHistory';
 
-
 const normalColors = {
     principalColor: "#10314b",
     firstColor: "#5086A8",
@@ -64,7 +63,7 @@ const Header = () => {
         if (!activationTime) return 0;
         const now = new Date().getTime();
         const twoHours = 2 * 60 * 60 * 1000;
-        return Math.max(0, parseInt(activationTime) + twoHours - now);
+        return Math.max(0, parseInt(activationTime, 10) + twoHours - now);
     }
 
     const syncContingencyState = () => {
@@ -105,10 +104,13 @@ const Header = () => {
             console.log('Estado de contingencia: Desactivado');
         }
     };
+
     const clearContingencyState = () => {
         localStorage.removeItem('contingenciaEstado');
         localStorage.removeItem('horaActivacionContingencia');
         localStorage.removeItem('fechaHoraContingencia');
+        localStorage.removeItem('idEvento');
+        localStorage.removeItem('eventoDescripcion');
         setContingencia(false);
         setCountdown(0);
         updateColors(false);
@@ -145,7 +147,6 @@ const Header = () => {
         };
     }, []);
 
-
     useEffect(() => {
         let timer: NodeJS.Timeout | undefined;
         if (countdown > 0 && contingencia) {
@@ -164,7 +165,6 @@ const Header = () => {
             if (timer) clearInterval(timer);
         };
     }, [countdown, contingencia]);
-
 
     const handleLogout = () => {
         Swal.fire({
@@ -264,11 +264,7 @@ const Header = () => {
 
             if (response.ok) {
                 console.log('Paquetes enviados con éxito. Saliendo del modo contingencia...');
-                localStorage.removeItem('contingenciaEstado');
-                localStorage.removeItem('horaActivacionContingencia');
-                localStorage.removeItem('fechaHoraContingencia');
-                localStorage.removeItem('idEvento');
-                setContingencia(false);
+                clearContingencyState();
             } else {
                 console.error('Error al enviar paquetes:', response.statusText);
                 Swal.fire({
@@ -284,8 +280,23 @@ const Header = () => {
 
     const desactivarContingencia = async () => {
         const idEvento = localStorage.getItem('idEvento');
+        const idSucursal = localStorage.getItem('idSucursal'); 
+
         if (!idEvento) {
-            console.error('No se encontró idEvento en el localStorage');
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se encontró idEvento en el localStorage.',
+            });
+            return;
+        }
+
+        if (!idSucursal) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'No se encontró el ID de la sucursal en el localStorage.',
+            });
             return;
         }
 
@@ -299,9 +310,14 @@ const Header = () => {
         });
 
         try {
+            const token = localStorage.getItem('token');
             const response = await fetch(`${PATH_URL_BACKEND}/contingencia/registrar-fin-evento/${idEvento}`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    ...(token && { 'Authorization': `Bearer ${token}` }) 
+                },
+                body: JSON.stringify({ idSucursal }) 
             });
 
             if (response.ok) {
@@ -312,23 +328,32 @@ const Header = () => {
 
                 Swal.fire({
                     icon: 'success',
-                    title: 'Modo contingencia desactivado',
+                    title: 'Modo Contingencia Desactivado',
                     text: 'El modo de contingencia ha sido desactivado exitosamente.',
                     confirmButtonText: 'Aceptar',
                 });
             } else {
-                throw new Error('Error al registrar el fin del evento de contingencia');
+                // Manejo de errores específicos
+                const errorData = await response.json();
+                let errorMessage = 'Error al registrar el fin del evento de contingencia.';
+                if (response.status === 400) {
+                    errorMessage = errorData.message || 'Solicitud inválida.';
+                } else if (response.status === 404) {
+                    errorMessage = 'Sucursal inexistente o no encontrada.';
+                } else {
+                    errorMessage = errorData.message || errorMessage;
+                }
+                throw new Error(errorMessage);
             }
         } catch (error) {
             console.error('Error al desactivar contingencia:', error);
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
-                text: 'No se pudo desactivar el modo de contingencia. Intente nuevamente.',
+                text: error.message || 'No se pudo desactivar el modo de contingencia. Intente nuevamente.',
             });
         }
     };
-
 
     const confirmarContingencia = (eventoDescripcion: string) => {
         const ahora = new Date();
@@ -397,7 +422,6 @@ const Header = () => {
     const handleUserMenuToggle = () => {
         setShowUserMenu((prev) => !prev);
         if (showSettingsMenu) setShowSettingsMenu(false);
-
     };
     const handleUserMenuToggle2 = () => {
         setIsUserModalOpen(!isUserModalOpen);
@@ -407,7 +431,6 @@ const Header = () => {
         setShowSettingsMenu((prev) => !prev);
         if (showUserMenu) setShowUserMenu(false);
     };
-
 
     const handleOutsideClick = (event: MouseEvent) => {
         const target = event.target as Node;
@@ -436,16 +459,23 @@ const Header = () => {
 
     useEffect(() => {
         const checkServerCommunication = async () => {
+            if (checkContingencyState()) {
+                setIsOnline(false);
+                return;
+            }
             try {
                 const response = await fetch(`${PATH_URL_BACKEND}/contingencia/verificar-comunicacion`);
                 if (response.ok) {
+                    setIsOnline(true);
                     console.log('Comunicación con impuestos OK.');
                 } else if (response.status === 500) {
+                    setIsOnline(false);
                     console.error('Error 500: Entrando en modo contingencia...');
                     activateContingency();
                 }
             } catch (error) {
                 console.error('Error al verificar comunicación con impuestos:', error);
+                setIsOnline(false);
                 activateContingency();
             }
         };
@@ -455,7 +485,7 @@ const Header = () => {
         };
 
         checkServerCommunication();
-        const intervalId = setInterval(checkServerCommunication, 10000);
+        const intervalId = setInterval(checkServerCommunication, 10000); 
         return () => clearInterval(intervalId);
     }, []);
 
@@ -465,7 +495,7 @@ const Header = () => {
                 <div className="flex flex-wrap items-center justify-center sm:justify-start space-x-4 sm:space-x-6">
                     <div className="relative text-center sm:text-left">
                         <span className="text-base sm:text-lg font-semibold text-principalColor whitespace-nowrap">
-                            Sistema de Facturación Computarizada en Línea
+                            Sistema de Facturación Electronica en Línea
                         </span>
                     </div>
                     <div className="flex items-center bg-fourthColor px-2 sm:px-3 py-1 rounded-lg space-x-2">
@@ -474,12 +504,10 @@ const Header = () => {
                         </span>
                         <span className="relative flex h-3 w-3">
                             <span
-                                className={`animate-ping absolute inline-flex h-full w-full rounded-full ${isOnline ? "bg-green-400" : "bg-red-400"
-                                    } opacity-75`}
+                                className={`animate-ping absolute inline-flex h-full w-full rounded-full ${isOnline ? "bg-green-400" : "bg-red-400"} opacity-75`}
                             ></span>
                             <span
-                                className={`relative inline-flex rounded-full h-3 w-3 ${isOnline ? "bg-green-500" : "bg-red-500"
-                                    }`}
+                                className={`relative inline-flex rounded-full h-3 w-3 ${isOnline ? "bg-green-500" : "bg-red-500"}`}
                             ></span>
                         </span>
                     </div>
@@ -572,9 +600,7 @@ const Header = () => {
                     onClose={() => setShowModal(false)}
                     onConfirm={(eventoDescripcion) => {
                         console.log('Modo contingencia activado:', eventoDescripcion);
-                        setContingencia(true);
-                        setCountdown(2 * 60 * 60 * 1000);
-                        setShowModal(false);
+                        confirmarContingencia(eventoDescripcion); 
                     }}
                 />
             )}
