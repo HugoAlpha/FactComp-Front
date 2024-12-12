@@ -105,11 +105,26 @@ const Header = () => {
         }
     };
 
+    const clearContingencyState2 = () => {
+        localStorage.removeItem('contingenciaEstado');
+        localStorage.removeItem('idEvento');
+        localStorage.removeItem('horaActivacionContingencia');
+        localStorage.removeItem('fechaHoraContingencia');
+        localStorage.removeItem('eventoDescripcion');
+        setContingencia(false);
+        setCountdown(0);
+        updateColors(false);
+        console.log('Estado de contingencia: Desactivado');
+        syncContingencyState();
+
+        const event = new CustomEvent('contingencyDeactivated');
+        window.dispatchEvent(event);
+    };
+
     const clearContingencyState = () => {
         localStorage.removeItem('contingenciaEstado');
         localStorage.removeItem('horaActivacionContingencia');
         localStorage.removeItem('fechaHoraContingencia');
-        localStorage.removeItem('idEvento');
         localStorage.removeItem('eventoDescripcion');
         setContingencia(false);
         setCountdown(0);
@@ -264,7 +279,7 @@ const Header = () => {
 
             if (response.ok) {
                 console.log('Paquetes enviados con éxito. Saliendo del modo contingencia...');
-                clearContingencyState();
+                clearContingencyState2();
             } else {
                 console.error('Error al enviar paquetes:', response.statusText);
                 Swal.fire({
@@ -280,7 +295,7 @@ const Header = () => {
 
     const desactivarContingencia = async () => {
         const idEvento = localStorage.getItem('idEvento');
-        const idSucursal = localStorage.getItem('idSucursal'); 
+        const idSucursal = localStorage.getItem('idSucursal');
 
         if (!idEvento) {
             Swal.fire({
@@ -313,11 +328,11 @@ const Header = () => {
             const token = localStorage.getItem('token');
             const response = await fetch(`${PATH_URL_BACKEND}/contingencia/registrar-fin-evento/${idEvento}`, {
                 method: 'POST',
-                headers: { 
+                headers: {
                     'Content-Type': 'application/json',
-                    ...(token && { 'Authorization': `Bearer ${token}` }) 
+                    ...(token && { 'Authorization': `Bearer ${token}` })
                 },
-                body: JSON.stringify({ idSucursal }) 
+                body: JSON.stringify({ idSucursal })
             });
 
             if (response.ok) {
@@ -485,7 +500,7 @@ const Header = () => {
         };
 
         checkServerCommunication();
-        const intervalId = setInterval(checkServerCommunication, 10000); 
+        const intervalId = setInterval(checkServerCommunication, 10000);
         return () => clearInterval(intervalId);
     }, []);
 
@@ -600,7 +615,7 @@ const Header = () => {
                     onClose={() => setShowModal(false)}
                     onConfirm={(eventoDescripcion) => {
                         console.log('Modo contingencia activado:', eventoDescripcion);
-                        confirmarContingencia(eventoDescripcion); 
+                        confirmarContingencia(eventoDescripcion);
                     }}
                 />
             )}
