@@ -65,66 +65,13 @@ const ClientList = () => {
         fetchCustomers();
     }, []);
 
-    const checkServerCommunication = async () => {
-        try {
-            const response = await fetch(`${PATH_URL_BACKEND}/contingencia/verificar-comunicacion`);
-            if (!response.ok) {
-                if (response.status === 500) {
-                    Swal.fire({
-                        title: 'La comunicación con impuestos falló',
-                        text: '¿Desea entrar en modo de contingencia?',
-                        icon: 'error',
-                        showCancelButton: true,
-                        confirmButtonText: 'Aceptar',
-                        cancelButtonText: 'Cancelar',
-                        reverseButtons: true,
-                        customClass: {
-                            confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md',
-                            cancelButton: 'bg-blue-500 text-white px-4 py-2 rounded-md',
-                        }
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            setIsContingencyModalOpen(true);
-                        } else {
-                            console.log('Modo de contingencia cancelado.');
-                        }
-                    });
-                } else {
-                    console.error("Error de comunicación con el servidor:", response.statusText);
-                }
-            }
-        } catch (error) {
-            console.error("Error al conectar con el servidor:", error);
-            Swal.fire({
-                title: 'La comunicación con impuestos falló',
-                text: '¿Desea entrar en modo de contingencia?',
-                icon: 'error',
-                showCancelButton: true,
-                confirmButtonText: 'Aceptar',
-                cancelButtonText: 'Cancelar',
-                reverseButtons: true,
-                customClass: {
-                    confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md',
-                    cancelButton: 'bg-blue-500 text-white px-4 py-2 rounded-md',
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    setIsContingencyModalOpen(true);
-                } else {
-                    console.log('Modo de contingencia cancelado.');
-                }
-            });
-        }
-    };
-
     useEffect(() => {
         const role = localStorage.getItem("role");
         setUserRole(role);
     }, []);
 
-    useEffect(() => {
-        checkServerCommunication();
-    }, []);
+    
+    
     const closeModal = () => setIsContingencyModalOpen(false);
 
     const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {

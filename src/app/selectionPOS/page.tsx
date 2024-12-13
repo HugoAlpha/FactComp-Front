@@ -155,37 +155,7 @@ const KanbanView = () => {
     }
   };
 
-  const checkServerCommunication = async () => {
-    try {
-      const response = await fetch(`${PATH_URL_BACKEND}/contingencia/verificar-comunicacion`);
-      if (!response.ok) {
-        if (response.status === 500) {
-          Swal.fire({
-            title: "La comunicación con impuestos falló",
-            text: "¿Desea entrar en modo de contingencia?",
-            icon: "error",
-            showCancelButton: true,
-            confirmButtonText: "Aceptar",
-            cancelButtonText: "Cancelar",
-            reverseButtons: true,
-            customClass: {
-              confirmButton: "bg-red-500 text-white px-4 py-2 rounded-md",
-              cancelButton: "bg-blue-500 text-white px-4 py-2 rounded-md",
-            },
-          }).then((result) => {
-            if (result.isConfirmed) {
-              setIsContingencyModalOpen(true);
-            }
-          });
-        } else {
-          console.error("Error de comunicación con el servidor:", response.statusText);
-        }
-      }
-    } catch {
-      Swal.fire("Error", "No se pudo conectar con el servidor", "error");
-    }
-  };
-
+  
   const handleSyncCatalogsAndParameters = async () => {
     let timerInterval: number;
 
@@ -278,9 +248,7 @@ const KanbanView = () => {
     }
   };
 
-  useEffect(() => {
-    checkServerCommunication();
-  }, []);
+  
 
   const closeModal = () => {
     setIsContingencyModalOpen(false);

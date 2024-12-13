@@ -31,57 +31,7 @@ const PuntoVenta: React.FC = () => {
     //const [puntoVentaDetail, setPuntoVentaDetail] = useState<PuntoVentaDetail | null>(null);
     const [tiposPuntoVenta, setTiposPuntoVenta] = useState<{ id: number; codigoClasificador: string; descripcion: string; }[]>([]);
 
-    const checkServerCommunication = async () => {
-        try {
-            const response = await fetch(`${PATH_URL_BACKEND}/contingencia/verificar-comunicacion`);
-            if (!response.ok) {
-                if (response.status === 500) {
-                    Swal.fire({
-                        title: 'La comunicación con impuestos falló',
-                        text: '¿Desea entrar en modo de contingencia?',
-                        icon: 'error',
-                        showCancelButton: true,
-                        confirmButtonText: 'Aceptar',
-                        cancelButtonText: 'Cancelar',
-                        reverseButtons: true,
-                        customClass: {
-                            confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md',
-                            cancelButton: 'bg-blue-500 text-white px-4 py-2 rounded-md',
-                        }
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            console.log('Modo de contingencia aceptado.');
-                        } else {
-                            console.log('Modo de contingencia cancelado.');
-                        }
-                    });
-                } else {
-                    console.error("Error de comunicación con el servidor:", response.statusText);
-                }
-            }
-        } catch (error) {
-            console.error("Error al conectar con el servidor:", error);
-            Swal.fire({
-                title: 'La comunicación con impuestos falló',
-                text: '¿Desea entrar en modo de contingencia?',
-                icon: 'error',
-                showCancelButton: true,
-                confirmButtonText: 'Aceptar',
-                cancelButtonText: 'Cancelar',
-                reverseButtons: true,
-                customClass: {
-                    confirmButton: 'bg-red-500 text-white px-4 py-2 rounded-md',
-                    cancelButton: 'bg-blue-500 text-white px-4 py-2 rounded-md',
-                }
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    console.log('Modo de contingencia aceptado.');
-                } else {
-                    console.log('Modo de contingencia cancelado.');
-                }
-            });
-        }
-    };
+    
     const fetchPuntoVentas = async () => {
         try {
             const CodigoSucursal = localStorage.getItem('CodigoSucursal');
@@ -137,9 +87,6 @@ const PuntoVenta: React.FC = () => {
         }
     };
 
-    useEffect(() => {
-        checkServerCommunication();
-    }, []);
 
     useEffect(() => {
         let filtered = customers;
