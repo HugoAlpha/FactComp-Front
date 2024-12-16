@@ -113,17 +113,17 @@ const Branches: React.FC = () => {
 
     const handleFirstPage = () => {
         setCurrentPage(1);
-      };
-    
-      const handleLastPage = () => {
-        setCurrentPage(totalPages);
-      };
-    
-      // const handlePageChange = (page: number) => {
-        //     setCurrentPage(page);
-        // };
+    };
 
-      const getPageNumbers = () => {
+    const handleLastPage = () => {
+        setCurrentPage(totalPages);
+    };
+
+    // const handlePageChange = (page: number) => {
+    //     setCurrentPage(page);
+    // };
+
+    const getPageNumbers = () => {
         const pageCount = Math.ceil(filteredBranches.length / rowsPerPage);
         const maxVisiblePages = 4;
 
@@ -132,8 +132,8 @@ const Branches: React.FC = () => {
 
         const pageNumbers: number[] = [];
 
-        const adjustedStartPage = endPage - startPage + 1 < maxVisiblePages 
-            ? Math.max(1, endPage - maxVisiblePages + 1) 
+        const adjustedStartPage = endPage - startPage + 1 < maxVisiblePages
+            ? Math.max(1, endPage - maxVisiblePages + 1)
             : startPage;
 
         for (let i = adjustedStartPage; i <= endPage; i++) {
@@ -216,28 +216,28 @@ const Branches: React.FC = () => {
                 <div className="flex-grow overflow-auto bg-gray-50">
                     <div className="p-6">
                         <h2 className="text-xl font-semibold text-black">Lista de Sucursales</h2>
-                        
+
                         <div className="mb-4">
 
                         </div>
-                        
+
                         <div className="flex justify-between mb-4 items-center">
                             <div className="flex items-center">
                                 <label htmlFor="itemsPerPage" className="mr-2 text-sm">Elementos por página:</label>
                                 <select
-                                value={rowsPerPage}
-                                onChange={handleRowsPerPageChange}
-                                className="border rounded-lg px-3 py-2 text-sm w-20 h-10 focus:outline-none focus:ring-2 focus:ring-firstColor"
+                                    value={rowsPerPage}
+                                    onChange={handleRowsPerPageChange}
+                                    className="border rounded-lg px-3 py-2 text-sm w-20 h-10 focus:outline-none focus:ring-2 focus:ring-firstColor"
                                 >
-                                <option value={10}>10</option>
-                                <option value={20}>20</option>
-                                <option value={50}>50</option>
+                                    <option value={10}>10</option>
+                                    <option value={20}>20</option>
+                                    <option value={50}>50</option>
                                 </select>
                             </div>
 
                             <div className="flex items-center mb-4">
                                 <div className="flex items-center mr-3">
-                                <label className="text-black mr-4 whitespace-nowrap">Filtrar por Ciudad:</label> 
+                                    <label className="text-black mr-4 whitespace-nowrap">Filtrar por Ciudad:</label>
                                     <select
                                         value={selectedCity}
                                         onChange={(e) => setSelectedCity(e.target.value)}
@@ -258,19 +258,19 @@ const Branches: React.FC = () => {
                                         value={searchTerm}
                                         onChange={(e) => setSearchTerm(e.target.value)}
                                         placeholder="Buscar por nombre, ciudad, departamento o razón social"
-                                        className="border rounded-lg border-gray-300 focus:border-firstColor focus:ring-firstColor focus:outline-none px-4 py-2 text-sm w-full h-10 shadow-sm placeholder-gray-400 pr-10" 
+                                        className="border rounded-lg border-gray-300 focus:border-firstColor focus:ring-firstColor focus:outline-none px-4 py-2 text-sm w-full h-10 shadow-sm placeholder-gray-400 pr-10"
                                     />
-                                    <FaSearch className="absolute right-3 text-gray-500 text-xl pointer-events-none" /> 
+                                    <FaSearch className="absolute right-3 text-gray-500 text-xl pointer-events-none" />
                                 </div>
                             </div>
                             <div className="flex justify-end mb-4">
-                            <button
-                                onClick={() => handleOpenModal()}
-                                className="bg-principalColor text-white font-bold py-2 px-4 rounded-lg hover:bg-firstColor transition duration-200"
-                            >
-                                Agregar Sucursal <FaPlus className="inline-block ml-2" />
-                            </button>
-                        </div>
+                                <button
+                                    onClick={() => handleOpenModal()}
+                                    className="bg-principalColor text-white font-bold py-2 px-4 rounded-lg hover:bg-firstColor transition duration-200"
+                                >
+                                    Agregar Sucursal <FaPlus className="inline-block ml-2" />
+                                </button>
+                            </div>
                         </div>
 
 
@@ -328,43 +328,43 @@ const Branches: React.FC = () => {
 
                         <div className="flex flex-col items-center mt-6">
                             <div className="flex justify-center space-x-1 mb-2">
-                            <button
-                                onClick={handleFirstPage}
-                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-                            >
-                                Primero
-                            </button>
-                            <button
-                                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
-                                disabled={currentPage === 1}
-                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
-                            >
-                                Ant.
-                            </button>
-
-                            {getPageNumbers().map((page) => (
                                 <button
-                                    key={page}
-                                    onClick={() => setCurrentPage(page)}
-                                    className={`min-w-9 rounded-full border py-2 px-3.5 text-center text-sm transition-all shadow-sm ${page === currentPage ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-800 hover:text-white hover:border-slate-800'} focus:bg-slate-800 focus:text-white active:border-slate-800 active:bg-slate-800`}
+                                    onClick={handleFirstPage}
+                                    className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
                                 >
-                                    {page}
+                                    Primero
                                 </button>
-                            ))}
+                                <button
+                                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                                    disabled={currentPage === 1}
+                                    className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+                                >
+                                    Ant.
+                                </button>
 
-                            <button
-                                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
-                                disabled={currentPage === totalPages}
-                                className="min-w-9 rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
-                            >
-                                Sig.
-                            </button>
-                            <button
-                                onClick={handleLastPage}
-                                className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
-                            >
-                            Último
-                            </button>
+                                {getPageNumbers().map((page) => (
+                                    <button
+                                        key={page}
+                                        onClick={() => setCurrentPage(page)}
+                                        className={`min-w-9 rounded-full border py-2 px-3.5 text-center text-sm transition-all shadow-sm ${page === currentPage ? 'bg-slate-800 text-white' : 'text-slate-600 hover:bg-slate-800 hover:text-white hover:border-slate-800'} focus:bg-slate-800 focus:text-white active:border-slate-800 active:bg-slate-800`}
+                                    >
+                                        {page}
+                                    </button>
+                                ))}
+
+                                <button
+                                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+                                    disabled={currentPage === totalPages}
+                                    className="min-w-9 rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none ml-2"
+                                >
+                                    Sig.
+                                </button>
+                                <button
+                                    onClick={handleLastPage}
+                                    className="rounded-full border border-slate-300 py-2 px-3 text-center text-sm transition-all shadow-sm hover:shadow-lg text-slate-600 hover:text-white hover:bg-slate-800 hover:border-slate-800 disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none"
+                                >
+                                    Último
+                                </button>
                             </div>
                         </div>
 
@@ -384,16 +384,7 @@ const Branches: React.FC = () => {
                 onBranchCreated={handleBranchCreatedOrUpdated}
                 branchToEdit={selectedBranch}
             />
-            {isContingencyModalOpen && (
-                <ModalContingency
-                    isOpen={isContingencyModalOpen}
-                    onClose={() => setIsContingencyModalOpen(false)}
-                    onConfirm={() => {
-                        setIsContingencyModalOpen(false);
-                        ();
-                    }}
-                />
-            )}
+
         </div>
     );
 };
