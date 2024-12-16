@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect ,useCallback} from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Sidebar from '@/components/commons/sidebar';
 import Header from '@/components/commons/header';
 import { FaPlus, FaSearch } from 'react-icons/fa';
@@ -45,9 +45,9 @@ const CUFDList = () => {
         } catch (error) {
             console.error('Error fetching CUFDs:', error);
         }
-    }, []); 
+    }, []);
 
-    
+
     const handleFilterChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFilter(e.target.value);
         setCurrentPage(1);
@@ -161,18 +161,18 @@ const CUFDList = () => {
     const getPageNumbers = () => {
         const pageNumbers = [];
         const maxVisiblePages = 4;
-    
+
         let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
-        const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1); 
-    
+        const endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
         if (endPage - startPage + 1 < maxVisiblePages) {
             startPage = Math.max(1, endPage - maxVisiblePages + 1);
         }
-    
+
         for (let i = startPage; i <= endPage; i++) {
             pageNumbers.push(i);
         }
-    
+
         return pageNumbers;
     };
 
@@ -204,6 +204,10 @@ const CUFDList = () => {
     const handleFirstPage = () => {
         setCurrentPage(1);
     };
+
+    useEffect(() => {
+        fetchCUFDs();
+    }, [fetchCUFDs]);
 
     const handleLastPage = () => {
         setCurrentPage(totalPages);
@@ -360,7 +364,7 @@ const CUFDList = () => {
             <ModalContingency
                 isOpen={isContingencyModalOpen}
                 onClose={closeModal}
-                onConfirm={() => {}} 
+                onConfirm={() => { }}
             />
         </div>
     );

@@ -44,7 +44,6 @@ const Branches: React.FC = () => {
     const [selectedCity, setSelectedCity] = useState<string>('');
     const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
     const [selectedBranch, setSelectedBranch] = useState<Branch | null>(null);
-    const [isContingencyModalOpen, setIsContingencyModalOpen] = useState<boolean>(false);
 
     const handleOpenModal = (branch: Branch | null = null) => {
         setSelectedBranch(branch);
@@ -167,7 +166,9 @@ const Branches: React.FC = () => {
         }
     };
 
-
+    useEffect(() => {
+        fetchBranches();
+    }, []);
 
     const handleDeleteBranch = (id: number) => {
         Swal.fire({
@@ -384,7 +385,6 @@ const Branches: React.FC = () => {
                 onBranchCreated={handleBranchCreatedOrUpdated}
                 branchToEdit={selectedBranch}
             />
-
         </div>
     );
 };
