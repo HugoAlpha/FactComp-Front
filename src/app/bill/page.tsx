@@ -12,6 +12,7 @@ import { TbCircleCheckFilled } from "react-icons/tb";
 import Footer from '@/components/commons/footer';
 import { BsClipboardCheck } from 'react-icons/bs';
 import jsQR from 'jsqr';
+import { TbFileTypeXml } from "react-icons/tb";
 
 interface MotivoAnulacion {
 
@@ -688,6 +689,16 @@ const BillList = () => {
                               <FaEye className="text-sm md:text-lg text-black" />
                               <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 hidden group-hover:flex items-center justify-center bg-gray-800 text-white text-xs rounded px-2 py-1">
                                 Ver rollo
+                              </span>
+                            </button>
+
+                            <button
+                              className="bg-cyan-200 hover:bg-cyan-300 p-1 md:p-2 rounded-l-lg flex items-center justify-center border border-green-300 relative group"
+                              onClick={() => handleViewRollo(bill.id)}
+                            >
+                              <TbFileTypeXml className="text-sm md:text-lg text-black" />
+                              <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 hidden group-hover:flex items-center justify-center bg-gray-800 text-white text-xs rounded px-2 py-1">
+                                Ver XML
                               </span>
                             </button>
 
