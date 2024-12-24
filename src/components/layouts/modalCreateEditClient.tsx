@@ -86,7 +86,7 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
 
     const validateForm = () => {
         const newErrors: { [key: string]: string } = {};
-        const namePattern = /^[a-zA-Z\s]+$/;
+        const namePattern = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
         const alphanumericPattern = /^[a-zA-Z0-9]+$/;
         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 

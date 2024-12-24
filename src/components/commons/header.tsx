@@ -326,15 +326,6 @@ const Header = () => {
         const idSucursal = localStorage.getItem('idSucursal');
 
 
-        if (!idEvento || idSucursal) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'No se encontró el ID de la sucursal en el localStorage.',
-            });
-            return;
-        }
-
         Swal.fire({
             title: 'Desactivando modo contingencia...',
             html: 'Por favor, espere mientras se completa la operación.',
