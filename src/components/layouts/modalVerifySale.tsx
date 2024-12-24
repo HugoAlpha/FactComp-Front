@@ -238,7 +238,7 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
         Swal.fire({
           icon: 'success',
           title: 'Factura emitida con éxito',
-          text: `CUF: ${data.cuf}, Número de factura: ${data.numeroFactura}`,
+          text: `CUF: ${data.cuf}, Número de factura: ${data.numeroFactura}, Código: ${data.codigoEstado}`,
         }).then(() => {
           onSuccess({
             client: client?.nombreRazonSocial || '',
