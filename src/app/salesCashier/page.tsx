@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from 'react';
-import {FaCreditCard, FaCartPlus, FaEdit, FaTable, FaList } from 'react-icons/fa';
+import { FaUser, FaCreditCard, FaCartPlus, FaEdit, FaTable, FaList } from 'react-icons/fa';
 import { IoReturnDownBack } from "react-icons/io5";
 import Swal from 'sweetalert2';
 import 'sweetalert2/dist/sweetalert2.min.css';
@@ -13,7 +13,6 @@ import ModalCreateProduct from '@/components/layouts/modalCreateProduct';
 import { GoHomeFill } from "react-icons/go";
 import ModalAllClients from '@/components/layouts/modalAllClients';
 import { FaTrash } from "react-icons/fa6";
-import Image from 'next/image';
 
 const Sales = () => {
     const [selectedProducts, setSelectedProducts] = useState<Product[]>([]);
@@ -25,7 +24,7 @@ const Sales = () => {
     const [saleDetails, setSaleDetails] = useState<SaleDetails | null>(null);
     const [globalDiscount, setGlobalDiscount] = useState('');
     const [discountApplied, setDiscountApplied] = useState(false);
-    const [globalDiscountApplied] = useState(0);
+    const [globalDiscountApplied, setGlobalDiscountApplied] = useState(0);
     const [globalDiscountHistory, setGlobalDiscountHistory] = useState<string[]>([]);
     const [originalTotal, setOriginalTotal] = useState(0);
     const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
@@ -33,13 +32,13 @@ const Sales = () => {
     const [isClientModalOpen, setIsClientModalOpen] = useState(false);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [productToEdit, setProductToEdit] = useState<Product | null>(null);
-    const [clients, setClients] = useState<Client[]>([]);
-    const [clientSearchTerm] = useState('');
-    const [, setFilteredClients] = useState([]);
+    const [clients, setClients] = useState([]);
+    const [clientSearchTerm, setClientSearchTerm] = useState('');
+    const [filteredClients, setFilteredClients] = useState([]);
     const [dropdownOpen, setDropdownOpen] = useState(false);
     const [isAllClientsModalOpen, setIsAllClientsModalOpen] = useState(false);
     const [appliedGlobalDiscount, setAppliedGlobalDiscount] = useState<number | null>(null);
-    const [currentCustomer, setCurrentCustomer] = useState<Client>({
+    const [currentCustomer, setCurrentCustomer] = useState<Customer>({
         id: 0,
         nombreRazonSocial: '',
         numeroDocumento: '',
@@ -52,20 +51,13 @@ const Sales = () => {
 
     const hasZeroTotalProduct = selectedProducts.some(product => product.totalPrice === 0);
 
-    const tooltipMessage = currentCustomer.id === 0 && hasZeroTotalProduct
+    	const tooltipMessage = currentCustomer.id === 0 && hasZeroTotalProduct
         ? 'Debe seleccionar un cliente y corregir los precios de los productos con total 0'
         : currentCustomer.id === 0
         ? 'Debe seleccionar un cliente primero'
         : hasZeroTotalProduct
         ? 'Alguno de los precios de los productos seleccionados es 0, corrija y continúe con el pago'
         : '';
-
-
-        interface Client {
-            id: number;
-            nombreRazonSocial: string;
-            numeroDocumento: string;
-        }
 
     interface Product {
         id: number;
@@ -80,7 +72,6 @@ const Sales = () => {
         codigoProductoSin: number;
         codigo: string;
         unidadMedida: number;
-        unidadMedidaDescripcion: string;
     }
 
 
@@ -93,13 +84,6 @@ const Sales = () => {
         orderNumber: string;
     }
 
-    interface ItemFactura {
-        descripcion: string;
-        cantidad: number;
-        precioUnitario: number;
-        total: number;
-    }
-    
     interface FacturaData {
         numeroFactura: string;
         nitEmisor: string;
@@ -113,7 +97,6 @@ const Sales = () => {
         montoTotal: number;
         montoTotalSujetoIva: number;
         cuf: string;
-        items: ItemFactura[];
     }
 
     interface SaleData {
@@ -121,7 +104,6 @@ const Sales = () => {
         total: number;
         numeroFactura: number;
     }
-
 
     const fetchClients = async () => {
         try {
@@ -133,7 +115,7 @@ const Sales = () => {
             } else {
                 Swal.fire('Error', 'Error al obtener la lista de clientes', 'error');
             }
-        } catch  {
+        } catch (error) {
             Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
         }
     };
@@ -488,7 +470,7 @@ const Sales = () => {
         await fetchProducts();
     };
 
-    const formatCurrency = (value: number ) => {
+    const formatCurrency = (value) => {
         return new Intl.NumberFormat('es-BO', { style: 'currency', currency: 'BOB', minimumFractionDigits: 2 }).format(value);
     };
 
@@ -500,14 +482,14 @@ const Sales = () => {
         setIsAllClientsModalOpen(false);
     };
 
-    const handleClientSelectFromModal = (selectedClient: Client) => {
+    const handleClientSelectFromModal = (selectedClient) => {
         setCurrentCustomer(selectedClient);
         setIsAllClientsModalOpen(false);
     };
 
 
     return (
-        <div className="flex flex-col min-h-screen">
+        <div className="flex flex-col min-h-screen"> 
             <div className="flex-grow flex p-6 space-x-6 bg-white">
                 {!isSaleSuccessful ? (
                     <>
@@ -736,16 +718,14 @@ const Sales = () => {
                                                 onClick={() => addProduct(product)}
                                                 className="relative cursor-pointer bg-white border rounded-lg p-2 shadow hover:bg-gray-100"
                                             >
-                                                <Image
+                                                <img
                                                     src={product.img}
                                                     alt={product.name}
-                                                    width={100} 
-                                                    height={96} 
-                                                    className="object-contain mb-2 transition-all duration-300 hover:scale-110"
+                                                    className="h-24 w-full object-contain mb-2 transition-all duration-300 hover:scale-110"
                                                     onError={(e) => {
-                                                        (e.target as HTMLImageElement).src = "/images/caja.png"; 
+                                                        (e.target as HTMLImageElement).src = "/images/caja.png";
                                                     }}
-                                                    />
+                                                />
                                                 <h3 className="text-xs font-semibold truncate">{product.name}</h3>
                                                 <p className="text-sm font-bold">Bs {product.price}</p>
                                                 <button
@@ -864,14 +844,8 @@ const Sales = () => {
                             {facturaData && (
                                 <div className="w-full max-w-2xl mx-auto bg-white shadow-md rounded-lg p-6">
                                     <div className="text-center mb-4">
-                                    <Image
-                                        src="/images/LogoIdAlpha.png" 
-                                        alt="logo"
-                                        width={200} 
-                                        height={100} 
-                                        className="mx-auto mb-2" 
-                                        />
-                                    <p className="text-lg font-semibold">Orden #{facturaData.numeroFactura || '-'}</p>
+                                        <img src="/images/LogoIdAlpha.png" alt="logo" className="mx-auto mb-2" />
+                                        <p className="text-lg font-semibold">Orden #{facturaData.numeroFactura || '-'}</p>
                                     </div>
 
                                     <div className="grid grid-cols-2 gap-6 mb-6">

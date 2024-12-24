@@ -489,7 +489,7 @@ const Sales = () => {
 
 
     return (
-        <div className="flex flex-col min-h-screen">
+        <div className="flex flex-col min-h-screen"> 
             <div className="flex-grow flex p-6 space-x-6 bg-white">
                 {!isSaleSuccessful ? (
                     <>
