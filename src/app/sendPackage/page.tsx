@@ -152,7 +152,7 @@ const sendPackage = () => {
 
         for (let i = 0; i < cantidadFacturas; i++) {
             try {
-                await fetch(`${PATH_URL_BACKEND}/factura/emitir`, {
+                await fetch(`${PATH_URL_BACKEND}/factura/emitir-computarizada`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(factura),
