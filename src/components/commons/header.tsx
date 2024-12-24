@@ -162,23 +162,23 @@ const Header = () => {
         };
     }, []);
 
-    
+
     useEffect(() => {
         let timer: NodeJS.Timeout | null = null;
-    
+
         if (countdown > 0 && contingencia) {
             timer = setInterval(() => {
                 setCountdown((prevCountdown) => {
                     if (prevCountdown <= 1000) {
-                        clearInterval(timer!); 
-                        handleCountdownFinish(); 
-                        return 0; 
+                        clearInterval(timer!);
+                        handleCountdownFinish();
+                        return 0;
                     }
-                    return prevCountdown - 1000; 
+                    return prevCountdown - 1000;
                 });
             }, 1000);
         }
-    
+
         return () => {
             if (timer) clearInterval(timer);
         };
@@ -216,10 +216,10 @@ const Header = () => {
     const verifyCommunication = async (): Promise<boolean> => {
         try {
             const response = await fetch(`${PATH_URL_BACKEND}/contingencia/verificar-comunicacion`);
-            return response.ok; 
+            return response.ok;
         } catch (error) {
             console.error('Error al verificar comunicación:', error);
-            return false; 
+            return false;
         }
     };
 
@@ -228,9 +228,9 @@ const Header = () => {
             setShowModal(true);
         } else {
             try {
-                const isCom = await verifyCommunication(); 
+                const isCom = await verifyCommunication();
                 if (isCom) {
-                    await desactivarContingencia(); 
+                    await desactivarContingencia();
                 } else {
                     Swal.fire({
                         icon: 'error',
@@ -254,33 +254,33 @@ const Header = () => {
         }
     };
 
-    
-    const handleCountdownFinish = async () => {
-            try {
-                const response = await fetch(`${PATH_URL_BACKEND}/contingencia/verificar-comunicacion`);
-                if (!response.ok) {
-                    if (response.status === 500) {
-                        setCountdown(2 * 60 * 60 * 1000);
-                        //setCountdown(10 * 1000);
-                    } 
-                    return;
-                } 
 
-                if (localStorage.getItem('contingenciaEstado') === '1') {
-                    Swal.fire({
-                        title: 'Comunicación reestablecida',
-                        text: 'La comunicación con impuestos ha vuelto. Se enviarán los paquetes automáticamente.',
-                        icon: 'info',
-                        confirmButtonText: 'Aceptar',
-                    });
-                    await sendContingencyPackages(); 
+    const handleCountdownFinish = async () => {
+        try {
+            const response = await fetch(`${PATH_URL_BACKEND}/contingencia/verificar-comunicacion`);
+            if (!response.ok) {
+                if (response.status === 500) {
+                    setCountdown(2 * 60 * 60 * 1000);
+                    //setCountdown(10 * 1000);
                 }
-            } catch (error) {
-                setCountdown(2 * 60 * 60 * 1000);
-                //setCountdown(10 * 1000);
+                return;
             }
-        };
-    
+
+            if (localStorage.getItem('contingenciaEstado') === '1') {
+                Swal.fire({
+                    title: 'Comunicación reestablecida',
+                    text: 'La comunicación con impuestos ha vuelto. Se enviarán los paquetes automáticamente.',
+                    icon: 'info',
+                    confirmButtonText: 'Aceptar',
+                });
+                await sendContingencyPackages();
+            }
+        } catch (error) {
+            setCountdown(2 * 60 * 60 * 1000);
+            //setCountdown(10 * 1000);
+        }
+    };
+
 
     const sendContingencyPackages = async () => {
         const idPuntoVenta = localStorage.getItem('idPOS');
@@ -315,13 +315,13 @@ const Header = () => {
 
     const desactivarContingencia = async () => {
         const isCom = await verifyCommunication();
-    
+
         if (!isCom) {
             setCountdown(2 * 60 * 60 * 1000);
             //setCountdown(10 * 1000);
             return;
         }
-        
+
         const idEvento = localStorage.getItem('idEvento');
         const idSucursal = localStorage.getItem('idSucursal');
 
@@ -370,7 +370,7 @@ const Header = () => {
                     errorMessage = errorData.message || errorMessage;
                 }
                 throw new Error(errorMessage);
-                
+
             }
         } catch (error) {
             console.error('Error al desactivar contingencia:', error);
@@ -525,7 +525,7 @@ const Header = () => {
                 <div className="flex flex-wrap items-center justify-center sm:justify-start space-x-4 sm:space-x-6">
                     <div className="relative text-center sm:text-left">
                         <span className="text-base sm:text-lg font-semibold text-principalColor whitespace-nowrap">
-                            Sistema de Facturación Computarizada en Línea
+                            Sistema de Facturación Electrónica en Línea
                         </span>
                     </div>
                     <div className="flex items-center bg-fourthColor px-2 sm:px-3 py-1 rounded-lg space-x-2">
