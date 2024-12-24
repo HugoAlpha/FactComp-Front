@@ -40,16 +40,17 @@ const ModalCreateBranch: React.FC<ModalCreateBranchProps> = ({ isOpen, onClose, 
     const validateForm = () => {
         const newErrors = {
             codigo: codigo.length > 10 ? 'Máximo 10 caracteres' : !codigo ? 'El código es obligatorio' : '',
-            nombre: nombre.length > 30 ? 'Máximo 30 caracteres' : !alphanumericPattern.test(nombre) ? 'No se permiten caracteres especiales' : !nombre ? 'El nombre es obligatorio' : '',
+            nombre: nombre.length > 30 ? 'Máximo 30 caracteres' : !nombre ? 'El nombre es obligatorio' : '',
             departamento: !departamento ? 'El departamento es obligatorio' : '',
-            municipio: municipio && (!alphanumericPattern.test(municipio) || municipio.length > 30) ? 'No se permiten caracteres especiales y máximo 30 caracteres' : '',
-            direccion: direccion && (!alphanumericPattern.test(direccion) || direccion.length > 30) ? 'No se permiten caracteres especiales y máximo 30 caracteres' : '',
-            telefono: telefono.length > 10 || !numericPattern.test(telefono) ? 'Máximo 10 dígitos y solo números' : '',
-            empresa: !empresaId ? 'Debe seleccionar una empresa' : ''
+            municipio: municipio && municipio.length > 30 ? 'Máximo 30 caracteres' : '',
+            direccion: direccion && direccion.length > 30 ? 'Máximo 30 caracteres' : '',
+            telefono: telefono.length > 10 || !/^[0-9]*$/.test(telefono) ? 'Máximo 10 dígitos y solo números' : '',
+            empresa: !empresaId ? 'Debe seleccionar una empresa' : '',
         };
         setErrors(newErrors);
         return !Object.values(newErrors).some(error => error);
     };
+
 
     useEffect(() => {
         const fetchEmpresas = async () => {

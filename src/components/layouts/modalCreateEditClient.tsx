@@ -85,56 +85,49 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
     };
 
     const validateForm = () => {
-        const newErrors: { [key: string]: string } = {};
-        const namePattern = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
-        const alphanumericPattern = /^[a-zA-Z0-9]+$/;
-        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const newErrors: { [key: string]: string } = {};
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-        if (!formData.nombreRazonSocial) {
-            newErrors.nombreRazonSocial = 'Este campo es requerido.';
-        } else if (!namePattern.test(formData.nombreRazonSocial)) {
-            newErrors.nombreRazonSocial = 'No se permiten números ni caracteres especiales.';
-        } else if (formData.nombreRazonSocial.length > 30) {
-            newErrors.nombreRazonSocial = 'Número de caracteres permitido: 30.';
+    if (!formData.nombreRazonSocial) {
+        newErrors.nombreRazonSocial = 'Este campo es requerido.';
+    } else if (formData.nombreRazonSocial.length > 30) {
+        newErrors.nombreRazonSocial = 'Número de caracteres permitido: 30.';
+    }
+
+    if (!formData.email) {
+        newErrors.email = 'Este campo es requerido.';
+    } else if (!emailPattern.test(formData.email)) {
+        newErrors.email = 'El formato del correo electrónico es inválido.';
+    } else if (formData.email.length > 50) {
+        newErrors.email = 'Número de caracteres permitido: 50.';
+    }
+
+    if (!formData.numeroDocumento) {
+        newErrors.numeroDocumento = 'Este campo es requerido.';
+    } else if (formData.numeroDocumento.length > 20) {
+        newErrors.numeroDocumento = 'Número de caracteres permitido: 20.';
+    }
+
+    if (!formData.codigoTipoDocumentoIdentidad || formData.codigoTipoDocumentoIdentidad === 0) {
+        newErrors.codigoTipoDocumentoIdentidad = 'Debe seleccionar un tipo de documento.';
+    }
+
+    if (formData.complemento) {
+        if (formData.complemento.length > 15) {
+            newErrors.complemento = 'Número de caracteres permitido: 15.';
         }
+    }
 
-        if (!formData.email) {
-            newErrors.email = 'Este campo es requerido.';
-        } else if (!emailPattern.test(formData.email)) {
-            newErrors.email = 'El formato del correo electrónico es inválido.';
-        } else if (formData.email.length > 50) {
-            newErrors.email = 'Número de caracteres permitido: 50.';
-        }
+    if (!formData.codigoCliente) {
+        newErrors.codigoCliente = 'Este campo es requerido.';
+    } else if (formData.codigoCliente.length > 20) {
+        newErrors.codigoCliente = 'Número de caracteres permitido: 20.';
+    }
 
-        if (!formData.numeroDocumento) {
-            newErrors.numeroDocumento = 'Este campo es requerido.';
-        } else if (!alphanumericPattern.test(formData.numeroDocumento)) {
-            newErrors.numeroDocumento = 'No se permiten caracteres especiales.';
-        } else if (formData.numeroDocumento.length > 20) {
-            newErrors.numeroDocumento = 'Número de caracteres permitido: 20.';
-        }
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+};
 
-        if (!formData.codigoTipoDocumentoIdentidad || formData.codigoTipoDocumentoIdentidad === 0) {
-            newErrors.codigoTipoDocumentoIdentidad = 'Debe seleccionar un tipo de documento.';
-        }
-
-        if (formData.complemento) {
-            if (formData.complemento.length > 15) {
-                newErrors.complemento = 'Número de caracteres permitido: 15.';
-            }
-        }
-
-        if (!formData.codigoCliente) {
-            newErrors.codigoCliente = 'Este campo es requerido.';
-        } else if (!alphanumericPattern.test(formData.codigoCliente)) {
-            newErrors.codigoCliente = 'No se permiten caracteres especiales.';
-        } else if (formData.codigoCliente.length > 20) {
-            newErrors.codigoCliente = 'Número de caracteres permitido: 20.';
-        }
-
-        setErrors(newErrors);
-        return Object.keys(newErrors).length === 0;
-    };
 
     const validateNIT = async () => {
         if (formData.codigoTipoDocumentoIdentidad === 5) {
