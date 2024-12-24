@@ -43,7 +43,7 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
                 } else {
                     Swal.fire('Error', 'Error al obtener tipos de documentos de identidad', 'error');
                 }
-            } catch  {
+            } catch {
                 Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
             }
         };
@@ -67,14 +67,14 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
         const selectedType = e.target.value;
         setSelectedDocumentType(selectedType);
         setErrors((prevErrors) => ({ ...prevErrors, codigoTipoDocumentoIdentidad: '' }));
-    
+
         const selectedTypeObject = documentTypes.find((docType) => docType.codigoClasificador === selectedType);
-    
+
         if (selectedTypeObject) {
             setFormData((prevData) => ({
                 ...prevData,
                 codigoTipoDocumentoIdentidad: parseInt(selectedTypeObject.codigoClasificador),
-                complemento: selectedType === '5' ? '' : prevData.complemento, 
+                complemento: selectedType === '5' ? '' : prevData.complemento,
             }));
         } else {
             setFormData((prevData) => ({
@@ -89,12 +89,12 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
         const namePattern = /^[a-zA-Z\s]+$/;
         const alphanumericPattern = /^[a-zA-Z0-9]+$/;
         const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    
+
         if (!formData.nombreRazonSocial) {
             newErrors.nombreRazonSocial = 'Este campo es requerido.';
         } else if (!namePattern.test(formData.nombreRazonSocial)) {
             newErrors.nombreRazonSocial = 'No se permiten números ni caracteres especiales.';
-        } else if (formData.nombreRazonSocial.length > 30) { 
+        } else if (formData.nombreRazonSocial.length > 30) {
             newErrors.nombreRazonSocial = 'Número de caracteres permitido: 30.';
         }
 
@@ -102,87 +102,85 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
             newErrors.email = 'Este campo es requerido.';
         } else if (!emailPattern.test(formData.email)) {
             newErrors.email = 'El formato del correo electrónico es inválido.';
-        } else if (formData.email.length > 50) { 
+        } else if (formData.email.length > 50) {
             newErrors.email = 'Número de caracteres permitido: 50.';
         }
-    
+
         if (!formData.numeroDocumento) {
             newErrors.numeroDocumento = 'Este campo es requerido.';
         } else if (!alphanumericPattern.test(formData.numeroDocumento)) {
             newErrors.numeroDocumento = 'No se permiten caracteres especiales.';
-        } else if (formData.numeroDocumento.length > 20) { 
+        } else if (formData.numeroDocumento.length > 20) {
             newErrors.numeroDocumento = 'Número de caracteres permitido: 20.';
         }
-    
+
         if (!formData.codigoTipoDocumentoIdentidad || formData.codigoTipoDocumentoIdentidad === 0) {
             newErrors.codigoTipoDocumentoIdentidad = 'Debe seleccionar un tipo de documento.';
         }
-    
+
         if (formData.complemento) {
-            if (formData.complemento.length > 15) { 
+            if (formData.complemento.length > 15) {
                 newErrors.complemento = 'Número de caracteres permitido: 15.';
             }
         }
-    
+
         if (!formData.codigoCliente) {
             newErrors.codigoCliente = 'Este campo es requerido.';
         } else if (!alphanumericPattern.test(formData.codigoCliente)) {
             newErrors.codigoCliente = 'No se permiten caracteres especiales.';
-        } else if (formData.codigoCliente.length > 20) { 
+        } else if (formData.codigoCliente.length > 20) {
             newErrors.codigoCliente = 'Número de caracteres permitido: 20.';
         }
-    
+
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
-    
+
     const validateNIT = async () => {
         if (formData.codigoTipoDocumentoIdentidad === 5) {
             try {
                 const response = await fetch(`${PATH_URL_BACKEND}/codigos/verificar-nit?nit=${formData.numeroDocumento}`);
                 const result = await response.json();
-    
+
                 if (result.transaccion && result.mensajesList[0].codigo === 986) {
                     setFormData((prevData) => ({ ...prevData, nitInvalido: 1 }));
                     return true;
                 } else {
                     const userConfirmation = await Swal.fire({
                         title: 'NIT inválido',
-                        text: "El NIT ingresado no es válido. ¿Deseas proceder con la creación del cliente de todas formas?",
+                        text: `El NIT ingresado no es válido. ¿Deseas proceder con la creación del cliente de todas formas? Código: ${result.mensajesList[0].codigo}`,
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonText: 'Sí, continuar',
                         cancelButtonText: 'No, cancelar'
                     });
-    
+
                     setFormData((prevData) => ({
                         ...prevData,
                         nitInvalido: userConfirmation.isConfirmed ? 0 : 1,
                     }));
-    
+
                     return userConfirmation.isConfirmed;
                 }
-            } catch  {
+            } catch {
                 Swal.fire('Error', 'No se pudo conectar para verificar el NIT', 'error');
                 return false;
             }
         }
         return true;
     };
-    
-
 
     const handleSubmit = async () => {
         if (validateForm()) {
             const isNITValid = await validateNIT();
             if (!isNITValid) return;
-    
+
             try {
                 const body = {
                     ...formData,
                     nitInvalido: formData.nitInvalido !== undefined ? formData.nitInvalido : 1,
                 };
-    
+
                 let response;
                 if (customer.id) {
                     response = await fetch(`${PATH_URL_BACKEND}/api/clientes/${customer.id}`, {
@@ -201,7 +199,7 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
                         body: JSON.stringify(body),
                     });
                 }
-    
+
                 if (response.ok) {
                     const savedCustomer = await response.json();
                     onSave(savedCustomer);
