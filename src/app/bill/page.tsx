@@ -544,11 +544,11 @@ const BillList = () => {
             Swal.showLoading();
           }
         });
-
+  
         const idPuntoVenta = localStorage.getItem('idPOS');
         const idSucursal = localStorage.getItem('idSucursal');
         const idEvento = localStorage.getItem('idEvento');
-
+  
         if (!idPuntoVenta || !idSucursal || !idEvento) {
           Swal.fire({
             icon: 'error',
@@ -558,7 +558,7 @@ const BillList = () => {
           });
           return;
         }
-
+  
         try {
           const response = await fetch(`${PATH_URL_BACKEND}/factura/emitir-paquete/${idPuntoVenta}/${idSucursal}/${idEvento}`, {
             method: 'POST',
@@ -566,21 +566,44 @@ const BillList = () => {
               'Content-Type': 'application/json',
             }
           });
-
+  
           if (response.ok) {
-            //const data = await response.json();
-
+            try {
+              const cufdResponse = await fetch(`${PATH_URL_BACKEND}/codigos/obtener-cufd/${idPuntoVenta}/${idSucursal}`, {
+                method: 'POST',
+              });
+  
+              if (cufdResponse.ok) {
+                Swal.fire({
+                  title: 'CUFD obtenido exitosamente',
+                  text: 'El CUFD se actualizó correctamente tras el envío de paquetes.',
+                  icon: 'success',
+                  confirmButtonText: 'Aceptar'
+                });
+              } else {
+                throw new Error('No se pudo obtener el CUFD.');
+              }
+            } catch (cufdError) {
+              console.error('Error al obtener el CUFD:', cufdError);
+              Swal.fire({
+                icon: 'warning',
+                title: 'Paquetes enviados, pero ocurrió un problema',
+                text: 'Los paquetes se enviaron correctamente, pero no se pudo obtener el CUFD.',
+                confirmButtonText: 'Aceptar'
+              });
+            }
+  
             const deactivationEvent = new CustomEvent('contingencyDeactivated');
             window.dispatchEvent(deactivationEvent);
             setIsContingencyMode(false);
             clearContingencyState();
             fetchBills();
-
+  
             localStorage.removeItem('contingenciaEstado');
             localStorage.removeItem('horaActivacionContingencia');
             localStorage.removeItem('fechaHoraContingencia');
             localStorage.removeItem('idEvento');
-
+  
             Swal.fire({
               title: 'Paquetes enviados',
               text: 'El modo contingencia se ha desactivado, puede volver a emitir facturas.',
@@ -601,8 +624,7 @@ const BillList = () => {
         }
       }
     });
-  };
-
+  };  
 
   const handleConfirm = () => {
     setIsContingencyModalOpen(false);
@@ -678,7 +700,7 @@ const BillList = () => {
                 <table className="table-auto w-full">
                   <thead>
                     <tr className="bg-fourthColor text-left text-gray-700">
-                      <th className="px-4 py-2 md:px-6 md:py-4 font-bold">ID de factura</th>
+                      <th className="px-4 py-2 md:px-6 md:py-4 font-bold">Num. de factura</th>
                       <th className="px-4 py-2 md:px-6 md:py-4 font-bold">Cliente</th>
                       <th className="px-4 py-2 md:px-6 md:py-4 font-bold">Fecha</th>
                       <th className="px-4 py-2 md:px-6 md:py-4 font-bold">Total</th>
@@ -690,7 +712,7 @@ const BillList = () => {
                   <tbody>
                     {paginatedBills.map((bill) => (
                       <tr key={bill.id} className="border-b hover:bg-gray-50 text-black">
-                        <td className="px-4 py-2 md:px-6 md:py-4">{bill.id}</td>
+                        <td className="px-4 py-2 md:px-6 md:py-4">{bill.numeroFactura}</td>
                         <td className="px-4 py-2 md:px-6 md:py-4">{bill.client}</td>
                         <td className="px-4 py-2 md:px-6 md:py-4">
                           {bill.date.toLocaleDateString()} {bill.date.toLocaleTimeString()}

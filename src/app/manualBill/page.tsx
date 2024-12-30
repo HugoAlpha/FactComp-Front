@@ -30,6 +30,7 @@ interface DetalleProducto {
 interface Producto {
     id: string;
     descripcion: string;
+    precioUnitario: number;
 }
 
 
@@ -54,9 +55,36 @@ const ManualBill = () => {
     const [startInvoice, setStartInvoice] = useState("");
     const [endInvoice, setEndInvoice] = useState("");
 
-    const [detalle, setDetalle] = useState<DetalleProducto[]>([]);  // Este debe ser el tipo correcto
+    const [detalle, setDetalle] = useState<DetalleProducto[]>([]); 
+    const [cardFields, setCardFields] = useState({ firstFour: "", lastFour: "" });
+    const [giftCardAmount, setGiftCardAmount] = useState("");
+    const [globalDiscount, setGlobalDiscount] = useState<string>("");
+    const [discountApplied, setDiscountApplied] = useState(false);
+    const [originalTotal, setOriginalTotal] = useState(0);
+    const [total, setTotal] = useState(0);
 
+    const handleCardFieldChange = (field: "firstFour" | "lastFour", value: string) => {
+        setCardFields((prev) => ({ ...prev, [field]: value.replace(/[^0-9]/g, "") }));
+    };
 
+    const isCardPayment = () => {
+        const selectedMethod = metodosPago.find(
+            (method) => method.codigoClasificador === selectedMetodoPago
+        );
+        return selectedMethod?.descripcion.toLowerCase().includes('tarjeta');
+    };
+    
+    const isGiftCardPayment = () => {
+        const selectedMethod = metodosPago.find(
+            (method) => method.codigoClasificador === selectedMetodoPago
+        );
+        return (
+            selectedMethod?.descripcion.toLowerCase().includes('gift card') ||
+            selectedMethod?.descripcion.toLowerCase().includes('gift-card') ||
+            selectedMethod?.descripcion.toLowerCase().includes('gift')
+        );
+    };
+    
     useEffect(() => {
         if (typeof window !== "undefined") {
             const idPuntoVentaValue = localStorage.getItem("idPOS");
@@ -76,15 +104,26 @@ const ManualBill = () => {
             .then((response) => response.json())
             .then((data) => setMetodosPago(data));
 
-        fetch(`${PATH_URL_BACKEND}/item/obtener-items`)
+            fetch(`${PATH_URL_BACKEND}/item/obtener-items`)
             .then((response) => response.json())
-            .then((data) => setProductos(data));
-    }, []);
+            .then((data) =>
+                setProductos(
+                    data.map((prod: any) => ({
+                        id: String(prod.id),
+                        descripcion: prod.descripcion,
+                        precioUnitario: prod.precioUnitario,
+                    }))
+                )
+            );        
+        }, []);
+
+        useEffect(() => {
+            calculateTotal(detalle);
+        }, [detalle, discountApplied, globalDiscount]);
 
     const handleAddProduct = () => {
         setDetalle([...detalle, { idProducto: 0, cantidad: 1, montoDescuento: 0 }]);
     };
-
 
     const handleRemoveProduct = (index: number) => {
         const updatedDetalle = [...detalle];
@@ -98,17 +137,50 @@ const ManualBill = () => {
         value: string | number
     ) => {
         const updatedDetalle: DetalleProducto[] = [...detalle];
-
-        if (field === 'idProducto') {
-            updatedDetalle[index][field] = typeof value === 'string' ? parseInt(value, 10) : value;
-        } else if (field === 'cantidad' || field === 'montoDescuento') {
-            updatedDetalle[index][field] = typeof value === 'string' ? parseFloat(value) : value;
+    
+        if (field === "idProducto") {
+            updatedDetalle[index][field] = typeof value === "string" ? parseInt(value, 10) : value;
+        } else if (field === "cantidad" || field === "montoDescuento") {
+            updatedDetalle[index][field] = typeof value === "string" ? parseFloat(value) : value;
         }
-
+    
         setDetalle(updatedDetalle);
+    };    
+
+    const calculateTotal = (detalle: DetalleProducto[] = []) => {
+        const subtotal = detalle.reduce((acc, item) => {
+            const producto = productos.find((prod) => prod.id === String(item.idProducto));
+            if (producto && producto.precioUnitario) {
+                const precioTotal = producto.precioUnitario * item.cantidad - item.montoDescuento;
+                return acc + (precioTotal > 0 ? precioTotal : 0);
+            } else {
+                console.warn(`Producto con ID ${item.idProducto} no encontrado o sin precio.`);
+            }
+            return acc;
+        }, 0);
+    
+        const finalTotal = discountApplied
+            ? subtotal - parseFloat(globalDiscount || "0")
+            : subtotal;
+        setOriginalTotal(subtotal);
+        setTotal(finalTotal > 0 ? finalTotal : 0);
+    };          
+
+    const applyGlobalDiscount = () => {
+        const discountValue = parseFloat(globalDiscount);
+        if (isNaN(discountValue) || discountValue <= 0) {
+            Swal.fire("Error", "Ingrese un descuento válido.", "error");
+            return;
+        }
+        setDiscountApplied(true);
+        calculateTotal(detalle);
     };
 
-
+    const removeGlobalDiscount = () => {
+        setDiscountApplied(false);
+        setGlobalDiscount("");
+        calculateTotal(detalle);
+    };
 
     const validateFechaHoraEmision = (date: Date) => {
         if (date < rangoFechaInicio || date > rangoFechaFin) {
@@ -123,13 +195,65 @@ const ManualBill = () => {
     };
 
     const handleSubmit = async () => {
-        if (!validateFechaHoraEmision(fechaHoraEmision)) return;
+        // Validación: Asegurar que hay productos en el detalle
+        if (!detalle || detalle.length === 0) {
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: "No se pueden emitir facturas sin productos.",
+            });
+            return;
+        }
+    
+        const totalFactura = calculateTotal(detalle);
 
+        if (totalFactura <= 0) {
+            Swal.fire({
+                icon: "error",
+                title: "Error",
+                text: "El total de la factura debe ser mayor a 0.",
+            });
+            return;
+        }
+
+        if (isCardPayment()) {
+            if (!cardFields.firstFour || !cardFields.lastFour) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "Debe ingresar los primeros y últimos 4 dígitos de la tarjeta.",
+                });
+                return;
+            }
+        }
+    
+        // Validación de Gift Card (si aplica)
+        if (isGiftCardPayment()) {
+            const giftAmount = parseFloat(giftCardAmount);
+            if (!giftCardAmount || giftAmount <= 0) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "Debe ingresar un monto válido para la Gift Card.",
+                });
+                return;
+            }
+            if (giftAmount > totalFactura) {
+                Swal.fire({
+                    icon: "error",
+                    title: "Error",
+                    text: "El monto de la Gift Card no puede ser mayor al total de los productos.",
+                });
+                return;
+            }
+        }
+    
+        if (!validateFechaHoraEmision(fechaHoraEmision)) return;
+    
         const cliente = clientes.find((c) => c.id === parseInt(selectedCliente));
         const metodoPago = metodosPago.find((m) => m.codigoClasificador === selectedMetodoPago);
-
         const idPuntoVentaValue = idPuntoVenta ? parseInt(idPuntoVenta) : 0;
-
+    
         const facturaBase = {
             usuario: cliente?.codigoCliente || "",
             idPuntoVenta: idPuntoVentaValue,
@@ -140,29 +264,33 @@ const ManualBill = () => {
             detalle: detalle.map((d) => ({
                 idProducto: d.idProducto,
                 cantidad: d.cantidad.toString(),
-                montoDescuento: d.montoDescuento.toString(),
+                montoDescuento: d.montoDescuento.toString() || '00.0',
             })),
             idSucursal: parseInt(idSucursal || "0"),
             fechaHoraEmision: `${fechaHoraEmision.getFullYear()}-${(fechaHoraEmision.getMonth() + 1)
                 .toString()
                 .padStart(2, "0")}-${fechaHoraEmision
-                    .getDate()
-                    .toString()
-                    .padStart(2, "0")} ${fechaHoraEmision
-                        .getHours()
-                        .toString()
-                        .padStart(2, "0")}:${fechaHoraEmision
-                            .getMinutes()
-                            .toString()
-                            .padStart(2, "0")}:${fechaHoraEmision.getSeconds().toString().padStart(2, "0")}`,
+                .getDate()
+                .toString()
+                .padStart(2, "0")} ${fechaHoraEmision
+                .getHours()
+                .toString()
+                .padStart(2, "0")}:${fechaHoraEmision
+                .getMinutes()
+                .toString()
+                .padStart(2, "0")}:${fechaHoraEmision.getSeconds().toString().padStart(2, "0")}`,
             cafc: true,
+            numeroTarjeta: isCardPayment()
+                ? `${cardFields.firstFour}00000000${cardFields.lastFour}`
+                : null,
+            montoGiftCard: isGiftCardPayment() ? parseFloat(giftCardAmount) : null,
+            descuentoGlobal: discountApplied ? parseFloat(globalDiscount) : null,
         };
 
-        // Handle multiple invoices if generateMultiple is true
         if (generateMultiple && startInvoice && endInvoice) {
             const start = parseInt(startInvoice);
             const end = parseInt(endInvoice);
-
+    
             if (start > end) {
                 Swal.fire({
                     icon: "error",
@@ -171,7 +299,7 @@ const ManualBill = () => {
                 });
                 return;
             }
-
+    
             Swal.fire({
                 title: "Generando facturas...",
                 html: "Progreso: <b>0%</b>",
@@ -181,7 +309,7 @@ const ManualBill = () => {
                     Swal.showLoading();
                 },
             });
-
+    
             for (let num = start; num <= end; num++) {
                 try {
                     const factura = { ...facturaBase, numeroFactura: num };
@@ -190,7 +318,7 @@ const ManualBill = () => {
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(factura),
                     });
-
+    
                     const progress = Math.round(((num - start + 1) / (end - start + 1)) * 100);
                     Swal.update({
                         html: `Progreso: <b>${progress}%</b> (Factura ${num} de ${end})`,
@@ -205,7 +333,7 @@ const ManualBill = () => {
                     return;
                 }
             }
-
+    
             Swal.fire({
                 icon: "success",
                 title: "Facturas generadas",
@@ -219,7 +347,7 @@ const ManualBill = () => {
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(factura),
                 });
-
+    
                 Swal.fire({
                     icon: "success",
                     title: "Factura emitida",
@@ -234,7 +362,7 @@ const ManualBill = () => {
                 });
             }
         }
-    };
+    };    
 
     const filteredClientes = clientes.filter(cliente =>
         cliente.nombreRazonSocial.toLowerCase().includes(searchCliente.toLowerCase())
@@ -242,7 +370,7 @@ const ManualBill = () => {
 
     const filteredMetodosPago = metodosPago.filter(metodo =>
         metodo.descripcion.toLowerCase().includes(searchMetodoPago.toLowerCase())
-    );
+    );  
 
     return (
         <div className="flex flex-col md:flex-row min-h-screen">
@@ -301,16 +429,18 @@ const ManualBill = () => {
 
                         <div className="relative">
                             <label className="block text-gray-700 font-medium mb-2">Método de Pago</label>
+                            {/* Selección de Método de Pago */}
                             <button
                                 type="button"
                                 onClick={() => setDropdownMetodoPagoOpen(!dropdownMetodoPagoOpen)}
                                 className="w-full text-left p-2 border rounded"
                             >
                                 {selectedMetodoPago
-                                    ? metodosPago.find(m => m.codigoClasificador === selectedMetodoPago)?.descripcion || "Método de pago no encontrado"
+                                    ? metodosPago.find((m) => m.codigoClasificador === selectedMetodoPago)?.descripcion ||
+                                    "Método de pago no encontrado"
                                     : "Seleccione un método de pago"}
-
                             </button>
+                            {/* Dropdown */}
                             {dropdownMetodoPagoOpen && (
                                 <div className="absolute z-50 bg-white shadow-lg rounded mt-2 w-full">
                                     <input
@@ -339,6 +469,43 @@ const ManualBill = () => {
                                 </div>
                             )}
                         </div>
+
+
+                    {/* Campos adicionales para Tarjeta */}
+                        {isCardPayment() && (
+                            <div className="mb-4">
+                                <label className="block text-gray-700 font-medium mb-2">4 Primeros Números de la Tarjeta</label>
+                                <input
+                                    type="text"
+                                    maxLength={4}
+                                    value={cardFields.firstFour}
+                                    onChange={(e) => handleCardFieldChange("firstFour", e.target.value)}
+                                    className="w-full border p-2 rounded"
+                                />
+                                <label className="block text-gray-700 font-medium mb-2 mt-4">4 Últimos Números de la Tarjeta</label>
+                                <input
+                                    type="text"
+                                    maxLength={4}
+                                    value={cardFields.lastFour}
+                                    onChange={(e) => handleCardFieldChange("lastFour", e.target.value)}
+                                    className="w-full border p-2 rounded"
+                                />
+                            </div>
+                        )}
+
+                        {/* Campos adicionales para Gift Card */}
+                        {isGiftCardPayment() && (
+                            <div className="mb-4">
+                                <label className="block text-gray-700 font-medium mb-2">Monto de Gift Card</label>
+                                <input
+                                    type="number"
+                                    className="w-full border p-2 rounded"
+                                    value={giftCardAmount}
+                                    onChange={(e) => setGiftCardAmount(e.target.value.replace(/[^0-9.]/g, ""))}
+                                />
+                            </div>
+                        )}
+
 
                         <div>
                             <label className="block text-gray-700 font-medium mb-2">Número de Factura</label>
@@ -445,6 +612,36 @@ const ManualBill = () => {
                             >
                                 Agregar Producto
                             </button>
+                        </div>
+                        <div className="mt-4">
+                            <h3 className="text-lg font-bold">Descuento Global</h3>
+                            <input
+                                type="number"
+                                placeholder="Ingrese descuento global"
+                                value={globalDiscount}
+                                onChange={(e) => setGlobalDiscount(e.target.value)}
+                                disabled={discountApplied}
+                                className="p-2 border rounded w-full"
+                            />
+                            <button
+                                onClick={applyGlobalDiscount}
+                                className="bg-green-500 text-white px-4 py-2 mt-2 rounded"
+                                disabled={discountApplied}
+                            >
+                                Aplicar Descuento Global
+                            </button>
+                            {discountApplied && (
+                                <button
+                                    onClick={removeGlobalDiscount}
+                                    className="bg-red-500 text-white px-4 py-2 mt-2 rounded"
+                                >
+                                    Eliminar Descuento Global
+                                </button>
+                            )}
+                        </div>
+
+                        <div className="mt-4">
+                            <h3 className="text-lg font-bold">Total: {total.toFixed(2)} Bs</h3>
                         </div>
 
                         <button

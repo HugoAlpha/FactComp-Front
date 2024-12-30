@@ -59,9 +59,18 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
+    
+        if (name === 'numeroDocumento' && ['1', '5'].includes(selectedDocumentType)) {
+            const numericOnly = value.replace(/[^0-9]/g, ''); 
+            setFormData((prevData) => ({ ...prevData, [name]: numericOnly }));
+            setErrors((prevErrors) => ({ ...prevErrors, [name]: '' }));
+            return;
+        }
+    
         setFormData((prevData) => ({ ...prevData, [name]: value }));
         setErrors((prevErrors) => ({ ...prevErrors, [name]: '' }));
     };
+    
 
     const handleDocumentTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedType = e.target.value;
@@ -85,48 +94,53 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
     };
 
     const validateForm = () => {
-    const newErrors: { [key: string]: string } = {};
-    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-    if (!formData.nombreRazonSocial) {
-        newErrors.nombreRazonSocial = 'Este campo es requerido.';
-    } else if (formData.nombreRazonSocial.length > 30) {
-        newErrors.nombreRazonSocial = 'Número de caracteres permitido: 30.';
-    }
-
-    if (!formData.email) {
-        newErrors.email = 'Este campo es requerido.';
-    } else if (!emailPattern.test(formData.email)) {
-        newErrors.email = 'El formato del correo electrónico es inválido.';
-    } else if (formData.email.length > 50) {
-        newErrors.email = 'Número de caracteres permitido: 50.';
-    }
-
-    if (!formData.numeroDocumento) {
-        newErrors.numeroDocumento = 'Este campo es requerido.';
-    } else if (formData.numeroDocumento.length > 20) {
-        newErrors.numeroDocumento = 'Número de caracteres permitido: 20.';
-    }
-
-    if (!formData.codigoTipoDocumentoIdentidad || formData.codigoTipoDocumentoIdentidad === 0) {
-        newErrors.codigoTipoDocumentoIdentidad = 'Debe seleccionar un tipo de documento.';
-    }
-
-    if (formData.complemento) {
-        if (formData.complemento.length > 15) {
-            newErrors.complemento = 'Número de caracteres permitido: 15.';
+        const newErrors: { [key: string]: string } = {};
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    
+        if (!formData.nombreRazonSocial) {
+            newErrors.nombreRazonSocial = 'Este campo es requerido.';
+        } else if (formData.nombreRazonSocial.length > 30) {
+            newErrors.nombreRazonSocial = 'Número de caracteres permitido: 30.';
         }
-    }
-
-    if (!formData.codigoCliente) {
-        newErrors.codigoCliente = 'Este campo es requerido.';
-    } else if (formData.codigoCliente.length > 20) {
-        newErrors.codigoCliente = 'Número de caracteres permitido: 20.';
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-};
+    
+        if (!formData.email) {
+            newErrors.email = 'Este campo es requerido.';
+        } else if (!emailPattern.test(formData.email)) {
+            newErrors.email = 'El formato del correo electrónico es inválido.';
+        } else if (formData.email.length > 50) {
+            newErrors.email = 'Número de caracteres permitido: 50.';
+        }
+    
+        if (!formData.numeroDocumento) {
+            newErrors.numeroDocumento = 'Este campo es requerido.';
+        } else if (formData.numeroDocumento.length > 20) {
+            newErrors.numeroDocumento = 'Número de caracteres permitido: 20.';
+        } else if (['1', '5'].includes(selectedDocumentType)) {
+            if (!/^\d+$/.test(formData.numeroDocumento)) {
+                newErrors.numeroDocumento = 'Solo se permiten números para este tipo de documento.';
+            }
+        }
+    
+        if (!formData.codigoTipoDocumentoIdentidad || formData.codigoTipoDocumentoIdentidad === 0) {
+            newErrors.codigoTipoDocumentoIdentidad = 'Debe seleccionar un tipo de documento.';
+        }
+    
+        if (formData.complemento) {
+            if (formData.complemento.length > 15) {
+                newErrors.complemento = 'Número de caracteres permitido: 15.';
+            }
+        }
+    
+        if (!formData.codigoCliente) {
+            newErrors.codigoCliente = 'Este campo es requerido.';
+        } else if (formData.codigoCliente.length > 20) {
+            newErrors.codigoCliente = 'Número de caracteres permitido: 20.';
+        }
+    
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+    
 
 
     const validateNIT = async () => {
@@ -165,15 +179,23 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
 
     const handleSubmit = async () => {
         if (validateForm()) {
+            // Limpieza del campo numeroDocumento
+            if (['1', '5'].includes(selectedDocumentType)) {
+                setFormData((prevData) => ({
+                    ...prevData,
+                    numeroDocumento: prevData.numeroDocumento.replace(/[^0-9]/g, ''),
+                }));
+            }
+    
             const isNITValid = await validateNIT();
             if (!isNITValid) return;
-
+    
             try {
                 const body = {
                     ...formData,
                     nitInvalido: formData.nitInvalido !== undefined ? formData.nitInvalido : 1,
                 };
-
+    
                 let response;
                 if (customer.id) {
                     response = await fetch(`${PATH_URL_BACKEND}/api/clientes/${customer.id}`, {
@@ -192,7 +214,7 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
                         body: JSON.stringify(body),
                     });
                 }
-
+    
                 if (response.ok) {
                     const savedCustomer = await response.json();
                     onSave(savedCustomer);
@@ -211,7 +233,7 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
         } else {
             Swal.fire('Error', 'Por favor, complete los campos obligatorios correctamente.', 'error');
         }
-    };
+    };    
 
     if (!isOpen) return null;
 
