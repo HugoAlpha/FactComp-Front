@@ -211,7 +211,7 @@ const ModalVerifySale: React.FC<ModalVerifySaleProps> = ({
         fechaHoraEmision: '',
         cafc: false,
         numeroTarjeta,
-        montoGiftCard: isGiftCardPayment() ? parseFloat(giftCardAmount) : null,
+        monGiftCard: isGiftCardPayment() ? parseFloat(giftCardAmount) : null,
         descuentoGlobal: globalDiscount || null,
         detalle: products.map((product) => ({
           idProducto: product.id,

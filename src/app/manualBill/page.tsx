@@ -283,7 +283,7 @@ const ManualBill = () => {
             numeroTarjeta: isCardPayment()
                 ? `${cardFields.firstFour}00000000${cardFields.lastFour}`
                 : null,
-            montoGiftCard: isGiftCardPayment() ? parseFloat(giftCardAmount) : null,
+            monGiftCard: isGiftCardPayment() ? parseFloat(giftCardAmount) : null,
             descuentoGlobal: discountApplied ? parseFloat(globalDiscount) : null,
         };
 
