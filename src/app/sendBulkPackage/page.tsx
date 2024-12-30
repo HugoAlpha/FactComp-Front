@@ -160,7 +160,6 @@ const sendBulkPackage = () => {
             fechaHoraEmision: '',
             cafc: false,
             numeroTarjeta: '',
-            montoGiftCard: '',
             descuentoGlobal: null,
             monGiftCard: null
         };
