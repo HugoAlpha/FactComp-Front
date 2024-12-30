@@ -43,7 +43,7 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
                 } else {
                     Swal.fire('Error', 'Error al obtener tipos de documentos de identidad', 'error');
                 }
-            } catch  {
+            } catch {
                 Swal.fire('Error', 'No se pudo conectar con el servidor', 'error');
             }
         };
@@ -59,22 +59,31 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
+    
+        if (name === 'numeroDocumento' && ['1', '5'].includes(selectedDocumentType)) {
+            const numericOnly = value.replace(/[^0-9]/g, ''); 
+            setFormData((prevData) => ({ ...prevData, [name]: numericOnly }));
+            setErrors((prevErrors) => ({ ...prevErrors, [name]: '' }));
+            return;
+        }
+    
         setFormData((prevData) => ({ ...prevData, [name]: value }));
         setErrors((prevErrors) => ({ ...prevErrors, [name]: '' }));
     };
+    
 
     const handleDocumentTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
         const selectedType = e.target.value;
         setSelectedDocumentType(selectedType);
         setErrors((prevErrors) => ({ ...prevErrors, codigoTipoDocumentoIdentidad: '' }));
-    
+
         const selectedTypeObject = documentTypes.find((docType) => docType.codigoClasificador === selectedType);
-    
+
         if (selectedTypeObject) {
             setFormData((prevData) => ({
                 ...prevData,
                 codigoTipoDocumentoIdentidad: parseInt(selectedTypeObject.codigoClasificador),
-                complemento: selectedType === '5' ? '' : prevData.complemento, 
+                complemento: selectedType === '5' ? '' : prevData.complemento,
             }));
         } else {
             setFormData((prevData) => ({
@@ -106,6 +115,10 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
             newErrors.numeroDocumento = 'Este campo es requerido.';
         } else if (formData.numeroDocumento.length > 20) {
             newErrors.numeroDocumento = 'Número de caracteres permitido: 20.';
+        } else if (['1', '5'].includes(selectedDocumentType)) {
+            if (!/^\d+$/.test(formData.numeroDocumento)) {
+                newErrors.numeroDocumento = 'Solo se permiten números para este tipo de documento.';
+            }
         }
     
         if (!formData.codigoTipoDocumentoIdentidad || formData.codigoTipoDocumentoIdentidad === 0) {
@@ -128,45 +141,51 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
         return Object.keys(newErrors).length === 0;
     };
     
-    
+
+
     const validateNIT = async () => {
         if (formData.codigoTipoDocumentoIdentidad === 5) {
             try {
                 const response = await fetch(`${PATH_URL_BACKEND}/codigos/verificar-nit?nit=${formData.numeroDocumento}`);
                 const result = await response.json();
-    
+
                 if (result.transaccion && result.mensajesList[0].codigo === 986) {
                     setFormData((prevData) => ({ ...prevData, nitInvalido: 1 }));
                     return true;
                 } else {
                     const userConfirmation = await Swal.fire({
                         title: 'NIT inválido',
-                        text: "El NIT ingresado no es válido. ¿Deseas proceder con la creación del cliente de todas formas?",
+                        text: `El NIT ingresado no es válido. ¿Deseas proceder con la creación del cliente de todas formas? Código: ${result.mensajesList[0].codigo}`,
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonText: 'Sí, continuar',
                         cancelButtonText: 'No, cancelar'
                     });
-    
+
                     setFormData((prevData) => ({
                         ...prevData,
                         nitInvalido: userConfirmation.isConfirmed ? 0 : 1,
                     }));
-    
+
                     return userConfirmation.isConfirmed;
                 }
-            } catch  {
+            } catch {
                 Swal.fire('Error', 'No se pudo conectar para verificar el NIT', 'error');
                 return false;
             }
         }
         return true;
     };
-    
-
 
     const handleSubmit = async () => {
         if (validateForm()) {
+            if (['1', '5'].includes(selectedDocumentType)) {
+                setFormData((prevData) => ({
+                    ...prevData,
+                    numeroDocumento: prevData.numeroDocumento.replace(/[^0-9]/g, ''),
+                }));
+            }
+    
             const isNITValid = await validateNIT();
             if (!isNITValid) return;
     
@@ -213,7 +232,7 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
         } else {
             Swal.fire('Error', 'Por favor, complete los campos obligatorios correctamente.', 'error');
         }
-    };
+    };    
 
     if (!isOpen) return null;
 

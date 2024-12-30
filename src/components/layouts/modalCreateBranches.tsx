@@ -52,6 +52,7 @@ const ModalCreateBranch: React.FC<ModalCreateBranchProps> = ({ isOpen, onClose, 
     };
     
 
+
     useEffect(() => {
         const fetchEmpresas = async () => {
             try {

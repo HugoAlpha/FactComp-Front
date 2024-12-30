@@ -822,8 +822,6 @@ const Sales = () => {
                     <>
                         <div className="text-black w-full p-6 flex flex-col items-center">
                             <h2 className="text-3xl font-bold mb-6 text-center">Pago exitoso</h2>
-
-                            {/* Total y Opciones de recibo */}
                             <div className="bg-gray-100 p-4 rounded-lg mb-4 w-2/3 text-center">
                                 <p className="text-xl font-bold">
                                     Total: {Number(facturaData?.montoTotal || saleDetails?.total || 0).toFixed(2)} Bs.
