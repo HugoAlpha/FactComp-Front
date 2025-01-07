@@ -313,7 +313,7 @@ const ManualBill = () => {
             for (let num = start; num <= end; num++) {
                 try {
                     const factura = { ...facturaBase, numeroFactura: num };
-                    await fetch(`${PATH_URL_BACKEND}/factura/emitir-computarizada`, {
+                    await fetch(`${PATH_URL_BACKEND}/factura/emitir`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(factura),
@@ -342,7 +342,7 @@ const ManualBill = () => {
         } else {
             const factura = { ...facturaBase, numeroFactura: parseInt(numeroFactura) };
             try {
-                await fetch(`${PATH_URL_BACKEND}/factura/emitir-computarizada`, {
+                await fetch(`${PATH_URL_BACKEND}/factura/emitir`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(factura),
