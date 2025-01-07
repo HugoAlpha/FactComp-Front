@@ -76,14 +76,14 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
         const selectedType = e.target.value;
         setSelectedDocumentType(selectedType);
         setErrors((prevErrors) => ({ ...prevErrors, codigoTipoDocumentoIdentidad: '' }));
-
+    
         const selectedTypeObject = documentTypes.find((docType) => docType.codigoClasificador === selectedType);
-
+    
         if (selectedTypeObject) {
             setFormData((prevData) => ({
                 ...prevData,
                 codigoTipoDocumentoIdentidad: parseInt(selectedTypeObject.codigoClasificador),
-                complemento: selectedType === '5' ? '' : prevData.complemento,
+                complemento: ['3', '5'].includes(selectedType) ? '' : prevData.complemento, // Limpia para 3 y 5
             }));
         } else {
             setFormData((prevData) => ({
@@ -91,7 +91,7 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
                 codigoTipoDocumentoIdentidad: 0,
             }));
         }
-    };
+    };    
 
     const validateForm = () => {
         const newErrors: { [key: string]: string } = {};
@@ -179,7 +179,6 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
 
     const handleSubmit = async () => {
         if (validateForm()) {
-            // Limpieza del campo numeroDocumento
             if (['1', '5'].includes(selectedDocumentType)) {
                 setFormData((prevData) => ({
                     ...prevData,
@@ -316,15 +315,16 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
                         </div>
 
                         <div className="relative z-0 w-full mb-5 group">
-                            <input
-                                type="text"
-                                name="complemento"
-                                value={formData.complemento}
-                                onChange={handleInputChange}
-                                disabled={formData.codigoTipoDocumentoIdentidad === 5}
-                                className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
-                                placeholder=" "
-                            />
+                        <input
+                            type="text"
+                            name="complemento"
+                            value={formData.complemento}
+                            onChange={handleInputChange}
+                            disabled={['3', '5'].includes(formData.codigoTipoDocumentoIdentidad.toString())} 
+                            className="block py-2.5 px-0 w-full text-sm text-gray-900 bg-transparent border-0 border-b-2 border-gray-300 appearance-none focus:outline-none focus:ring-0 focus:border-blue-600 peer"
+                            placeholder=" "
+                        />
+
                             <label className="peer-focus:font-medium absolute text-sm text-gray-500 duration-300 transform -translate-y-6 scale-75 top-2 -z-10 origin-[0] peer-focus:left-0 peer-focus:text-blue-600 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 peer-focus:scale-75 peer-focus:-translate-y-6">
                                 Complemento
                             </label>

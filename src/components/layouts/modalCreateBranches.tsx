@@ -50,6 +50,7 @@ const ModalCreateBranch: React.FC<ModalCreateBranchProps> = ({ isOpen, onClose, 
         setErrors(newErrors);
         return !Object.values(newErrors).some(error => error);
     };
+    
 
 
     useEffect(() => {
