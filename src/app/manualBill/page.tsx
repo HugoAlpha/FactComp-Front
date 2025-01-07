@@ -287,11 +287,22 @@ const ManualBill = () => {
             descuentoGlobal: discountApplied ? parseFloat(globalDiscount) : null,
         };
     
+        Swal.fire({
+            title: "Procesando...",
+            html: "Por favor, espere mientras se emite la factura.",
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+                Swal.showLoading();
+            },
+        });
+    
         if (generateMultiple && startInvoice && endInvoice) {
             const start = parseInt(startInvoice);
             const end = parseInt(endInvoice);
     
             if (start > end) {
+                Swal.close();
                 Swal.fire({
                     icon: "error",
                     title: "Error",
@@ -299,16 +310,6 @@ const ManualBill = () => {
                 });
                 return;
             }
-    
-            Swal.fire({
-                title: "Generando facturas...",
-                html: "Progreso: <b>0%</b>",
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                didOpen: () => {
-                    Swal.showLoading();
-                },
-            });
     
             for (let num = start; num <= end; num++) {
                 try {
@@ -321,6 +322,7 @@ const ManualBill = () => {
     
                     if (!response.ok) {
                         const errorData = await response.json();
+                        Swal.close();
                         Swal.fire({
                             icon: "error",
                             title: `Error al emitir la factura ${num}`,
@@ -334,6 +336,7 @@ const ManualBill = () => {
                         html: `Progreso: <b>${progress}%</b> (Factura ${num} de ${end})`,
                     });
                 } catch (error) {
+                    Swal.close();
                     console.error(`Error al emitir la factura ${num}:`, error);
                     Swal.fire({
                         icon: "error",
@@ -344,6 +347,7 @@ const ManualBill = () => {
                 }
             }
     
+            Swal.close();
             Swal.fire({
                 icon: "success",
                 title: "Facturas generadas",
@@ -360,6 +364,7 @@ const ManualBill = () => {
     
                 if (!response.ok) {
                     const errorData = await response.json();
+                    Swal.close();
                     Swal.fire({
                         icon: "error",
                         title: "Error al emitir la factura",
@@ -368,12 +373,14 @@ const ManualBill = () => {
                     return;
                 }
     
+                Swal.close();
                 Swal.fire({
                     icon: "success",
                     title: "Factura emitida",
                     text: `Factura ${numeroFactura} emitida exitosamente.`,
                 });
             } catch (error) {
+                Swal.close();
                 console.error("Error al emitir la factura:", error);
                 Swal.fire({
                     icon: "error",
@@ -382,7 +389,7 @@ const ManualBill = () => {
                 });
             }
         }
-    };        
+    };            
 
     const filteredClientes = clientes.filter(cliente =>
         cliente.nombreRazonSocial.toLowerCase().includes(searchCliente.toLowerCase())
