@@ -34,16 +34,16 @@ const ModalContingency2: React.FC<ModalContingency2Props> = ({ isOpen, onClose, 
             });
             return;
         }
-
+    
         const formattedInicio = formatDateTime(fechaHoraInicio);
         const formattedFin = formatDateTime(fechaHoraFin);
-
+    
         localStorage.setItem('fechaHoraInicio', formattedInicio);
         localStorage.setItem('fechaHoraFin', formattedFin);
-
+    
         const idPuntoVenta = localStorage.getItem('idPOS');
         const idSucursal = localStorage.getItem('idSucursal');
-
+    
         const body = {
             idPuntoVenta: parseInt(idPuntoVenta || '0', 10),
             idSucursal: parseInt(idSucursal || '0', 10),
@@ -52,20 +52,31 @@ const ModalContingency2: React.FC<ModalContingency2Props> = ({ isOpen, onClose, 
             fechaHoraInicio: formattedInicio,
             fechaHoraFin: formattedFin,
         };
-
+    
         try {
+            Swal.fire({
+                title: 'Activando modo contingencia...',
+                html: 'Por favor, espere mientras se registra el evento.',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+            });
+    
             const response = await fetch(`${PATH_URL_BACKEND}/contingencia/registrar-inicio-fin-evento`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(body),
             });
-
+    
             const data = await response.json();
-
-
+    
+            Swal.close();
+    
             if (response.ok && data.codigo && data.idEvento && data.mensaje?.includes("Evento registrado con exito")) {
                 localStorage.setItem('idEvento', data.idEvento.toString());
-
+    
                 Swal.fire({
                     icon: 'success',
                     title: 'Modo contingencia Activado',
@@ -73,7 +84,7 @@ const ModalContingency2: React.FC<ModalContingency2Props> = ({ isOpen, onClose, 
                     confirmButtonText: 'Aceptar',
                 });
                 onClose();
-
+    
                 const event = new CustomEvent('contingencyActivated');
                 window.dispatchEvent(event);
             } else {
@@ -81,6 +92,7 @@ const ModalContingency2: React.FC<ModalContingency2Props> = ({ isOpen, onClose, 
             }
         } catch (error) {
             console.error('Error al registrar evento de contingencia:', error);
+            Swal.close(); 
             Swal.fire({
                 icon: 'error',
                 title: 'Error',
@@ -88,6 +100,7 @@ const ModalContingency2: React.FC<ModalContingency2Props> = ({ isOpen, onClose, 
             });
         }
     };
+    
 
     if (!isOpen) return null;
 
