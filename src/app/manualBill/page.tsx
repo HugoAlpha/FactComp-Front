@@ -206,7 +206,7 @@ const ManualBill = () => {
         }
     
         const totalFactura = calculateTotal(detalle);
-
+    
         if (totalFactura <= 0) {
             Swal.fire({
                 icon: "error",
@@ -215,7 +215,7 @@ const ManualBill = () => {
             });
             return;
         }
-
+    
         if (isCardPayment()) {
             if (!cardFields.firstFour || !cardFields.lastFour) {
                 Swal.fire({
@@ -264,7 +264,7 @@ const ManualBill = () => {
             detalle: detalle.map((d) => ({
                 idProducto: d.idProducto,
                 cantidad: d.cantidad.toString(),
-                montoDescuento: d.montoDescuento.toString() || '00.0',
+                montoDescuento: d.montoDescuento.toString() || "00.0",
             })),
             idSucursal: parseInt(idSucursal || "0"),
             fechaHoraEmision: `${fechaHoraEmision.getFullYear()}-${(fechaHoraEmision.getMonth() + 1)
@@ -286,7 +286,7 @@ const ManualBill = () => {
             monGiftCard: isGiftCardPayment() ? parseFloat(giftCardAmount) : null,
             descuentoGlobal: discountApplied ? parseFloat(globalDiscount) : null,
         };
-
+    
         if (generateMultiple && startInvoice && endInvoice) {
             const start = parseInt(startInvoice);
             const end = parseInt(endInvoice);
@@ -313,11 +313,21 @@ const ManualBill = () => {
             for (let num = start; num <= end; num++) {
                 try {
                     const factura = { ...facturaBase, numeroFactura: num };
-                    await fetch(`${PATH_URL_BACKEND}/factura/emitir-computarizada`, {
+                    const response = await fetch(`${PATH_URL_BACKEND}/factura/emitir-computarizada`, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify(factura),
                     });
+    
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        Swal.fire({
+                            icon: "error",
+                            title: `Error al emitir la factura ${num}`,
+                            text: errorData.message || "Error desconocido.",
+                        });
+                        return;
+                    }
     
                     const progress = Math.round(((num - start + 1) / (end - start + 1)) * 100);
                     Swal.update({
@@ -342,11 +352,21 @@ const ManualBill = () => {
         } else {
             const factura = { ...facturaBase, numeroFactura: parseInt(numeroFactura) };
             try {
-                await fetch(`${PATH_URL_BACKEND}/factura/emitir-computarizada`, {
+                const response = await fetch(`${PATH_URL_BACKEND}/factura/emitir-computarizada`, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(factura),
                 });
+    
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error al emitir la factura",
+                        text: errorData.message || "Error desconocido.",
+                    });
+                    return;
+                }
     
                 Swal.fire({
                     icon: "success",
@@ -362,7 +382,7 @@ const ManualBill = () => {
                 });
             }
         }
-    };    
+    };        
 
     const filteredClientes = clientes.filter(cliente =>
         cliente.nombreRazonSocial.toLowerCase().includes(searchCliente.toLowerCase())
