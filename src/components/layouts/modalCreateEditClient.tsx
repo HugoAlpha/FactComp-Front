@@ -99,8 +99,8 @@ const CreateEditClientModal: React.FC<CustomerModalProps> = ({ isOpen, onClose, 
     
         if (!formData.nombreRazonSocial) {
             newErrors.nombreRazonSocial = 'Este campo es requerido.';
-        } else if (formData.nombreRazonSocial.length > 30) {
-            newErrors.nombreRazonSocial = 'Número de caracteres permitido: 30.';
+        } else if (formData.nombreRazonSocial.length > 50) {
+            newErrors.nombreRazonSocial = 'Número de caracteres permitido: 50.';
         }
     
         if (!formData.email) {
