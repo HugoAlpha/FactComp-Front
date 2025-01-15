@@ -70,7 +70,7 @@ const Sidebar = () => {
                 { name: 'CUIS', href: 'codecuis' },
                 { name: 'CUFD', href: 'codecufd' },
                 { name: 'Historial de sincronización', href: 'synchronizationHistory' },
-                { name: 'Envio Paquetes', href: 'sendPackage' },
+                // { name: 'Envio Paquetes', href: 'sendPackage' },
                 { name: 'Emisión masiva', href: 'sendBulkPackage' }
             ]
         },

@@ -221,12 +221,12 @@ const EnterpriseList = () => {
                                 </select>
                             </div>
 
-                            <button
+                            {/* <button
                                 onClick={() => openModal()}
                                 className="bg-principalColor text-white py-2 px-4 rounded-lg hover:bg-firstColor text-lg"
                             >
                                 Agregar Empresa <FaPlus className="inline-block ml-2" />
-                            </button>
+                            </button> */}
                         </div>
 
 
@@ -248,7 +248,8 @@ const EnterpriseList = () => {
                                             <td className="px-6 py-4">{enterprise.razonSocial}</td>
                                             <td className="px-6 py-4">
                                                 <div className="flex">
-                                                    <button
+
+                                                    {/* <button
                                                         className="bg-red-200 hover:bg-red-300 p-2 rounded-l-lg flex items-center justify-center border border-red-300 relative group"
                                                         onClick={() => deleteEnterprise(enterprise.id)}
                                                     >
@@ -257,6 +258,7 @@ const EnterpriseList = () => {
                                                             Borrar Empresa
                                                         </span>
                                                     </button>
+                                                     */}
                                                     <button
                                                         className="bg-blue-200 hover:bg-blue-300 p-2 rounded-r-lg flex items-center justify-center border border-blue-300 relative group"
                                                         onClick={() => openModal(enterprise)}

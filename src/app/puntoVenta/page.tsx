@@ -268,7 +268,8 @@ const PuntoVenta: React.FC = () => {
                                             <td className="px-6 py-4">{customer.tipoPuntoVenta}</td>
                                             <td className="px-6 py-4">
                                                 <div className="flex">
-                                                    <button
+
+                                                    {/* <button
                                                         className="bg-red-200 hover:bg-red-300 p-2 rounded-l-lg flex items-center justify-center border border-red-300 relative group"
                                                         onClick={() => handleDeletePuntoVenta(customer.codigoPuntoVenta)}
                                                     >
@@ -276,7 +277,8 @@ const PuntoVenta: React.FC = () => {
                                                         <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-1 hidden group-hover:flex items-center justify-center bg-gray-800 text-white text-xs rounded px-2 py-1">
                                                             Cerrar punto
                                                         </span>
-                                                    </button>
+                                                    </button> */}
+
                                                 </div>
                                             </td>
                                         </tr>
