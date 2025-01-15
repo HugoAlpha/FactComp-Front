@@ -221,12 +221,12 @@ const EnterpriseList = () => {
                                 </select>
                             </div>
 
-                            <button
+                            {/* <button
                                 onClick={() => openModal()}
                                 className="bg-principalColor text-white py-2 px-4 rounded-lg hover:bg-firstColor text-lg"
                             >
                                 Agregar Empresa <FaPlus className="inline-block ml-2" />
-                            </button>
+                            </button> */}
                         </div>
 
 

@@ -257,7 +257,7 @@ const PuntoVenta: React.FC = () => {
                                         <th className="px-6 py-4 font-bold">Código</th>
                                         <th className="px-6 py-4 font-bold">Nombre del punto de venta</th>
                                         <th className="px-6 py-4 font-bold">Tipo de punto de venta</th>
-                                        <th className="px-6 py-4 font-bold">Operaciones</th>
+                                        {/* <th className="px-6 py-4 font-bold">Operaciones</th> */}
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -267,7 +267,8 @@ const PuntoVenta: React.FC = () => {
                                             <td className="px-6 py-4">{customer.nombrePuntoVenta}</td>
                                             <td className="px-6 py-4">{customer.tipoPuntoVenta}</td>
                                             <td className="px-6 py-4">
-                                                <div className="flex">
+
+                                                {/* <div className="flex">
                                                     <button
                                                         className="bg-red-200 hover:bg-red-300 p-2 rounded-l-lg flex items-center justify-center border border-red-300 relative group"
                                                         onClick={() => handleDeletePuntoVenta(customer.codigoPuntoVenta)}
@@ -278,6 +279,7 @@ const PuntoVenta: React.FC = () => {
                                                         </span>
                                                     </button>
                                                 </div>
+                                                 */}
                                             </td>
                                         </tr>
                                     ))}
