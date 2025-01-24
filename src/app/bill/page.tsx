@@ -289,12 +289,14 @@ const BillList = () => {
 
   const filteredBills = useMemo(() => {
     if (typeof window !== "undefined") {
-      const contingenciaEstado = localStorage.getItem('contingenciaEstado');
-
+      const contingenciaEstado = localStorage.getItem("contingenciaEstado");
+  
       return bills.filter((bill) => {
+        const numeroFactura = bill.numeroFactura ? bill.numeroFactura.toString() : "";
+  
         const matchesSearch =
-          bill.numeroFactura.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          bill.client.toLowerCase().includes(searchQuery.toLowerCase());
+          numeroFactura.includes(searchQuery) || 
+          bill.client.toLowerCase().includes(searchQuery.toLowerCase()); 
 
         const matchesEstado =
           estadoFilter === 'TODAS' ||
