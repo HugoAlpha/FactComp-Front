@@ -293,7 +293,7 @@ const BillList = () => {
 
       return bills.filter((bill) => {
         const matchesSearch =
-          bill.documentNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          bill.numeroFactura.toLowerCase().includes(searchQuery.toLowerCase()) ||
           bill.client.toLowerCase().includes(searchQuery.toLowerCase());
 
         const matchesEstado =
